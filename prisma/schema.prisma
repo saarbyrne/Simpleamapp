@@ -1,0 +1,409 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+// ============================================
+// ORGANIZATIONS & USERS
+// ============================================
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  sport     String? // e.g., "soccer", "basketball", null = multi-sport
+  logo      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users              User[]
+  persons            PersonOrganization[]
+  forms              Form[]
+  events             Event[]
+  notes              Note[]
+  files              File[]
+  formTemplates      FormTemplate[]
+  spreadsheets       Spreadsheet[]
+  canvasBoards       CanvasBoard[]
+  plans              Plan[]
+  subscriptions      Subscription[]
+  organizationRoles  OrganizationRole[]
+
+  @@map("organizations")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String
+  avatar         String?
+  authProvider   String    @default("email") // email, google, facebook, instagram
+  authProviderId String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  lastLoginAt    DateTime?
+
+  // Relations
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  personId String?
+  person   Person? @relation(fields: [personId], references: [id])
+
+  roles           UserRole[]
+  notes           Note[]
+  files           File[]
+  activities      Activity[]
+  formResponses   FormResponse[]
+  eventAttendance EventAttendance[]
+
+  @@map("users")
+}
+
+model Person {
+  id          String    @id @default(cuid())
+  firstName   String
+  lastName    String
+  dateOfBirth DateTime?
+  nationality String?
+  phone       String?
+  email       String?
+  photo       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  users         User[]
+  organizations PersonOrganization[]
+  notes         Note[]
+  files         File[]
+  activities    Activity[]
+
+  @@map("persons")
+}
+
+// Junction table for many-to-many Person <-> Organization
+model PersonOrganization {
+  id             String   @id @default(cuid())
+  personId       String
+  organizationId String
+  role           String   @default("player") // player, coach, medical_staff, admin
+  position       String? // Forward, Midfielder, etc.
+  jerseyNumber   Int?
+  status         String   @default("active") // active, injured, inactive
+  joinedAt       DateTime @default(now())
+  leftAt         DateTime?
+  tags           String[] // Captain, Starter, Young Talent, etc.
+
+  person       Person       @relation(fields: [personId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  formResponses   FormResponse[]
+  eventAttendance EventAttendance[]
+
+  @@unique([personId, organizationId])
+  @@map("person_organizations")
+}
+
+// ============================================
+// ROLES & PERMISSIONS
+// ============================================
+
+model OrganizationRole {
+  id             String   @id @default(cuid())
+  name           String // Admin, Coach, Medical Staff, Viewer
+  permissions    String[] // manage_players, view_medical_notes, create_forms, etc.
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userRoles UserRole[]
+
+  @@unique([name, organizationId])
+  @@map("organization_roles")
+}
+
+model UserRole {
+  id     String @id @default(cuid())
+  userId String
+  roleId String
+
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role OrganizationRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@map("user_roles")
+}
+
+// ============================================
+// FORMS
+// ============================================
+
+model FormTemplate {
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  category       String // wellness, medical, performance, custom
+  schema         Json // Form field definitions
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  isPublic       Boolean  @default(false) // Global templates
+  createdAt      DateTime @default(now())
+
+  forms Form[]
+
+  @@map("form_templates")
+}
+
+model Form {
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  schema         Json // Array of field definitions with conditional logic
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  templateId String?
+  template   FormTemplate? @relation(fields: [templateId], references: [id])
+
+  // Scheduling
+  scheduleType String   @default("one_time") // one_time, daily, weekly, monthly
+  scheduledAt  DateTime?
+  recurringRule Json? // cron-like rule for recurring forms
+
+  // Targeting
+  targetType String @default("all") // all, specific, group
+  targetIds  String[] // Person/Group IDs
+
+  // Status
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  responses FormResponse[]
+
+  @@map("forms")
+}
+
+model FormResponse {
+  id        String   @id @default(cuid())
+  formId    String
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  personOrgId String
+  personOrg   PersonOrganization @relation(fields: [personOrgId], references: [id], onDelete: Cascade)
+
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+
+  responses Json // Key-value pairs of field responses
+  submittedAt DateTime @default(now())
+
+  @@map("form_responses")
+}
+
+// ============================================
+// EVENTS & CALENDAR
+// ============================================
+
+model Event {
+  id             String   @id @default(cuid())
+  title          String
+  description    String?
+  type           String // training, match, medical, other
+  startTime      DateTime
+  endTime        DateTime
+  location       String?
+  isRecurring    Boolean  @default(false)
+  recurringRule  Json?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Linked form (e.g., post-training wellness form)
+  linkedFormId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attendance EventAttendance[]
+
+  @@map("events")
+}
+
+model EventAttendance {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  personOrgId String
+  personOrg   PersonOrganization @relation(fields: [personOrgId], references: [id], onDelete: Cascade)
+
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+
+  status      String   @default("invited") // invited, attending, absent, excused
+  notes       String?
+  recordedAt  DateTime @default(now())
+
+  @@unique([eventId, personOrgId])
+  @@map("event_attendance")
+}
+
+// ============================================
+// NOTES
+// ============================================
+
+model Note {
+  id             String   @id @default(cuid())
+  title          String?
+  content        Json // Tiptap JSON
+  privacyLevel   String   @default("public") // public, medical, coaching, private
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Linked entities
+  linkedPersonId String?
+  linkedPerson   Person? @relation(fields: [linkedPersonId], references: [id])
+
+  linkedEventId String?
+
+  tags      String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notes")
+}
+
+// ============================================
+// FILES
+// ============================================
+
+model File {
+  id             String   @id @default(cuid())
+  name           String
+  path           String // Supabase Storage path
+  size           Int
+  mimeType       String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  uploadedById String
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+
+  // Linked entities
+  linkedPersonId String?
+  linkedPerson   Person? @relation(fields: [linkedPersonId], references: [id])
+
+  tags      String[]
+  createdAt DateTime @default(now())
+
+  @@map("files")
+}
+
+// ============================================
+// SPREADSHEETS
+// ============================================
+
+model Spreadsheet {
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  schema         Json // Column definitions
+  data           Json // Row data
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("spreadsheets")
+}
+
+// ============================================
+// CANVAS
+// ============================================
+
+model CanvasBoard {
+  id             String   @id @default(cuid())
+  name           String
+  data           Json // Drawing data
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("canvas_boards")
+}
+
+// ============================================
+// PLANNER
+// ============================================
+
+model Plan {
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  startDate      DateTime
+  endDate        DateTime
+  data           Json // Planning data
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("plans")
+}
+
+// ============================================
+// SUBSCRIPTIONS & BILLING
+// ============================================
+
+model Subscription {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  plan           String // free, pro, enterprise
+  status         String // active, cancelled, past_due
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+
+  stripeCustomerId      String?
+  stripeSubscriptionId  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subscriptions")
+}
+
+// ============================================
+// ACTIVITY LOG
+// ============================================
+
+model Activity {
+  id        String   @id @default(cuid())
+  type      String // player_created, form_submitted, event_created, etc.
+  data      Json
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+
+  personId  String?
+  person    Person?  @relation(fields: [personId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("activities")
+}
