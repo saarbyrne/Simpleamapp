@@ -1,0 +1,25 @@
+meta:
+  reviewer: "AI PR Agent"
+  summary_prompt: |
+    Summarize the pull request changes in plain language for a non-engineer.
+    Highlight tests added or updated and any QA steps mentioned in the PR body.
+  review_prompt: |
+    Focus review on test coverage, accessibility, visual stability, and performance implications.
+    Flag missing updates to the Experience Charter, manual checklists, or AI playbook when relevant.
+    Suggest additional automated tests if coverage seems thin.
+
+settings:
+  enable_summary: true
+  enable_review: true
+  enable_followup: true
+  followup_reminder_hours: 12
+  max_review_comments: 10
+  summary_length: short
+
+triggers:
+  on_pull_request: true
+  on_review_requested: true
+
+notifications:
+  post_summary_as_comment: true
+  post_review_as_comment: true
