@@ -3,8 +3,6 @@
     "collect": {
       "numberOfRuns": 1,
       "url": ["http://localhost:3000/"],
-      "startServerCommand": "npm run build && npm run start:test",
-      "startServerReadyPattern": "started server on",
       "settings": {
         "preset": "desktop"
       }
