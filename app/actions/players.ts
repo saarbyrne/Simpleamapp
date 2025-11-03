@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
+import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
 
 interface CreatePlayerData {
   firstName: string
@@ -11,6 +12,7 @@ interface CreatePlayerData {
   nationality?: string
   phone?: string
   email?: string
+  photo?: string
   position?: string
   jerseyNumber?: number
   status?: 'active' | 'injured'
@@ -26,15 +28,7 @@ export async function createPlayer(data: CreatePlayerData) {
   }
 
   try {
-    // Get user's organization
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { organizationId: true }
-    })
-
-    if (!dbUser) {
-      return { error: 'User not found' }
-    }
+    const dbUser = await ensureUserWithOrganization(user)
 
     // Create person and link to organization
     const result = await prisma.$transaction(async (tx) => {
@@ -47,6 +41,7 @@ export async function createPlayer(data: CreatePlayerData) {
           nationality: data.nationality,
           phone: data.phone,
           email: data.email,
+          photo: data.photo,
         }
       })
 
@@ -100,14 +95,7 @@ export async function updatePlayer(
   }
 
   try {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { organizationId: true }
-    })
-
-    if (!dbUser) {
-      return { error: 'User not found' }
-    }
+    const dbUser = await ensureUserWithOrganization(user)
 
     const result = await prisma.$transaction(async (tx) => {
       // Update person
@@ -170,14 +158,7 @@ export async function deletePlayer(personId: string) {
   }
 
   try {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { organizationId: true }
-    })
-
-    if (!dbUser) {
-      return { error: 'User not found' }
-    }
+    const dbUser = await ensureUserWithOrganization(user)
 
     // Get player name before deletion
     const person = await prisma.person.findUnique({
@@ -221,14 +202,7 @@ export async function getPlayers() {
   }
 
   try {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { organizationId: true }
-    })
-
-    if (!dbUser) {
-      return { error: 'User not found', players: [] }
-    }
+    const dbUser = await ensureUserWithOrganization(user)
 
     const players = await prisma.person.findMany({
       where: {

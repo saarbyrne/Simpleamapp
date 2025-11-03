@@ -1,7 +1,8 @@
 import { getPlayers } from '@/app/actions/players'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { PlayersTable } from '@/components/players-table'
-import { AddPlayerDialog } from '@/components/players/add-player-dialog'
+import { PlayersTableClient } from '@/components/players/players-table-client'
+import { AddPlayerModal } from '@/components/players/add-player-modal'
+import { ImportPlayersCSV } from '@/components/players/import-players-csv'
 
 export default async function PlayersPage() {
   const { players } = await getPlayers()
@@ -9,14 +10,17 @@ export default async function PlayersPage() {
   // Transform database players to match table format
   const tableData = players.map((player) => {
     const org = player.organizations[0]
+    const firstName = player.firstName?.trim() || 'Unknown'
+    const lastName = player.lastName?.trim() || ''
+    const fullName = [firstName, lastName].filter(Boolean).join(' ')
     return {
       id: player.id,
-      name: `${player.firstName} ${player.lastName}`,
+      name: fullName,
       position: org?.position || 'N/A',
       status: (org?.status || 'active') as 'active' | 'injured',
       nationality: player.nationality || 'Unknown',
       tags: org?.tags || [],
-      avatar: player.photo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.firstName}`,
+      avatar: player.photo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firstName || 'player'}`,
     }
   })
 
@@ -31,11 +35,14 @@ export default async function PlayersPage() {
                 Manage your team roster and player information.
               </CardDescription>
             </div>
-            <AddPlayerDialog />
+            <div className="flex gap-2">
+              <ImportPlayersCSV />
+              <AddPlayerModal />
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          <PlayersTable data={tableData} />
+          <PlayersTableClient data={tableData} />
         </CardContent>
       </Card>
     </div>
