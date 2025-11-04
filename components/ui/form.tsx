@@ -15,6 +15,7 @@ import {
 
 import { cn } from "./utils";
 import { Label } from "./label";
+import { tokens } from "@/design-system/tokens";
 
 const Form = FormProvider;
 
@@ -73,14 +74,18 @@ const FormItemContext = React.createContext<FormItemContextValue>(
   {} as FormItemContextValue,
 );
 
-function FormItem({ className, ...props }: React.ComponentProps<"div">) {
+function FormItem({ className, style, ...props }: React.ComponentProps<"div">) {
   const id = React.useId();
 
   return (
     <FormItemContext.Provider value={{ id }}>
       <div
         data-slot="form-item"
-        className={cn("grid gap-2", className)}
+        className={cn("grid", className)}
+        style={{
+          gap: tokens.spacing.gap.sm,
+          ...style,
+        }}
         {...props}
       />
     </FormItemContext.Provider>
@@ -89,6 +94,7 @@ function FormItem({ className, ...props }: React.ComponentProps<"div">) {
 
 function FormLabel({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof LabelPrimitive.Root>) {
   const { error, formItemId } = useFormField();
@@ -99,6 +105,7 @@ function FormLabel({
       data-error={!!error}
       className={cn("data-[error=true]:text-destructive", className)}
       htmlFor={formItemId}
+      style={style}
       {...props}
     />
   );
@@ -123,20 +130,26 @@ function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
   );
 }
 
-function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
+function FormDescription({ className, style, ...props }: React.ComponentProps<"p">) {
   const { formDescriptionId } = useFormField();
 
   return (
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn("text-muted-foreground text-sm", className)}
+      className={cn(className)}
+      style={{
+        color: tokens.colors.text.secondary,
+        fontSize: tokens.typography.body.sm.fontSize,
+        lineHeight: tokens.typography.body.sm.lineHeight,
+        ...style,
+      }}
       {...props}
     />
   );
 }
 
-function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
+function FormMessage({ className, style, ...props }: React.ComponentProps<"p">) {
   const { error, formMessageId } = useFormField();
   const body = error ? String(error?.message ?? "") : props.children;
 
@@ -148,7 +161,12 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="form-message"
       id={formMessageId}
-      className={cn("text-destructive text-sm", className)}
+      className={cn("text-destructive", className)}
+      style={{
+        fontSize: tokens.typography.body.sm.fontSize,
+        lineHeight: tokens.typography.body.sm.lineHeight,
+        ...style,
+      }}
       {...props}
     >
       {body}

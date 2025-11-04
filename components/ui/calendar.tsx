@@ -6,17 +6,23 @@ import { DayPicker } from "react-day-picker";
 
 import { cn } from "./utils";
 import { buttonVariants } from "./button";
+import { tokens } from "@/design-system/tokens";
 
 function Calendar({
   className,
   classNames,
+  style,
   showOutsideDays = true,
   ...props
 }: React.ComponentProps<typeof DayPicker>) {
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn(className)}
+      style={{
+        padding: tokens.spacing.spacing.md,
+        ...style,
+      }}
       classNames={{
         months: "flex flex-col sm:flex-row gap-2",
         month: "flex flex-col gap-4",
