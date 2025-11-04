@@ -7,14 +7,16 @@ import {
 
 import { cn } from "./utils";
 import { Button, buttonVariants } from "./button";
+import { tokens } from "@/design-system/tokens";
 
-function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
+function Pagination({ className, style, ...props }: React.ComponentProps<"nav">) {
   return (
     <nav
       role="navigation"
       aria-label="pagination"
       data-slot="pagination"
       className={cn("mx-auto flex w-full justify-center", className)}
+      style={style}
       {...props}
     />
   );
@@ -22,19 +24,24 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
 
 function PaginationContent({
   className,
+  style,
   ...props
 }: React.ComponentProps<"ul">) {
   return (
     <ul
       data-slot="pagination-content"
-      className={cn("flex flex-row items-center gap-1", className)}
+      className={cn("flex flex-row items-center", className)}
+      style={{
+        gap: tokens.spacing.gap.xs,
+        ...style,
+      }}
       {...props}
     />
   );
 }
 
-function PaginationItem({ ...props }: React.ComponentProps<"li">) {
-  return <li data-slot="pagination-item" {...props} />;
+function PaginationItem({ style, ...props }: React.ComponentProps<"li">) {
+  return <li data-slot="pagination-item" style={style} {...props} />;
 }
 
 type PaginationLinkProps = {
@@ -44,6 +51,7 @@ type PaginationLinkProps = {
 
 function PaginationLink({
   className,
+  style,
   isActive,
   size = "icon",
   ...props
@@ -60,6 +68,7 @@ function PaginationLink({
         }),
         className,
       )}
+      style={style}
       {...props}
     />
   );
@@ -67,13 +76,18 @@ function PaginationLink({
 
 function PaginationPrevious({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof PaginationLink>) {
   return (
     <PaginationLink
       aria-label="Go to previous page"
       size="default"
-      className={cn("gap-1 px-2.5 sm:pl-2.5", className)}
+      className={cn("px-2.5 sm:pl-2.5", className)}
+      style={{
+        gap: tokens.spacing.gap.xs,
+        ...style,
+      }}
       {...props}
     >
       <ChevronLeftIcon />
@@ -84,13 +98,18 @@ function PaginationPrevious({
 
 function PaginationNext({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof PaginationLink>) {
   return (
     <PaginationLink
       aria-label="Go to next page"
       size="default"
-      className={cn("gap-1 px-2.5 sm:pr-2.5", className)}
+      className={cn("px-2.5 sm:pr-2.5", className)}
+      style={{
+        gap: tokens.spacing.gap.xs,
+        ...style,
+      }}
       {...props}
     >
       <span className="hidden sm:block">Next</span>
@@ -101,13 +120,19 @@ function PaginationNext({
 
 function PaginationEllipsis({
   className,
+  style,
   ...props
 }: React.ComponentProps<"span">) {
   return (
     <span
       aria-hidden
       data-slot="pagination-ellipsis"
-      className={cn("flex size-9 items-center justify-center", className)}
+      className={cn("flex items-center justify-center", className)}
+      style={{
+        width: tokens.spacing.spacing.xl,
+        height: tokens.spacing.spacing.xl,
+        ...style,
+      }}
       {...props}
     >
       <MoreHorizontalIcon className="size-4" />

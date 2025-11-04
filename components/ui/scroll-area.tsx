@@ -4,9 +4,11 @@ import * as React from "react";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 
 import { cn } from "./utils";
+import { tokens } from "@/design-system/tokens";
 
 function ScrollArea({
   className,
+  style,
   children,
   ...props
 }: React.ComponentProps<typeof ScrollAreaPrimitive.Root>) {
@@ -14,6 +16,7 @@ function ScrollArea({
     <ScrollAreaPrimitive.Root
       data-slot="scroll-area"
       className={cn("relative", className)}
+      style={style}
       {...props}
     >
       <ScrollAreaPrimitive.Viewport
@@ -30,6 +33,7 @@ function ScrollArea({
 
 function ScrollBar({
   className,
+  style,
   orientation = "vertical",
   ...props
 }: React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>) {
@@ -40,16 +44,25 @@ function ScrollBar({
       className={cn(
         "flex touch-none p-px transition-colors select-none",
         orientation === "vertical" &&
-          "h-full w-2.5 border-l border-l-transparent",
+          "h-full border-l border-l-transparent",
         orientation === "horizontal" &&
-          "h-2.5 flex-col border-t border-t-transparent",
+          "flex-col border-t border-t-transparent",
         className,
       )}
+      style={{
+        width: orientation === "vertical" ? tokens.spacing.spacing.md : undefined,
+        height: orientation === "horizontal" ? tokens.spacing.spacing.md : undefined,
+        ...style,
+      }}
       {...props}
     >
       <ScrollAreaPrimitive.ScrollAreaThumb
         data-slot="scroll-area-thumb"
-        className="bg-border relative flex-1 rounded-full"
+        className="relative flex-1"
+        style={{
+          backgroundColor: tokens.colors.border.default,
+          borderRadius: tokens.radius.radius.full,
+        }}
       />
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
   );
