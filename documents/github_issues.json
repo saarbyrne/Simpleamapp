@@ -1,0 +1,178 @@
+[
+  {
+    "title": "Align Mission & Market Positioning",
+    "body": "## Context\nDocument the mission narrative and disruption framing so marketing and product share the same north star.\n\n## Acceptance Criteria\n- Mission and redefine-athlete-management story captured for reuse.\n- Competitive differentiation vs Kitman Labs/Teamworks distilled into concise bullets.\n- Cost-leadership + AI leverage messaging ready for site/pitch.\n\n## Source\ndocuments/simpleam.app.md:1\n- documents/simpleam.app.md:11\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: foundations",
+      "area: messaging"
+    ]
+  },
+  {
+    "title": "Codify Product Principles & Naming Guardrails",
+    "body": "## Context\nTurn guiding principles (buy-vs-build, modularity, naming) into guardrails teams can reference.\n\n## Acceptance Criteria\n- Principles summarized with practical examples.\n- Checklist established for feature/design reviews.\n- Shared doc linked from design system hub.\n\n## Source\ndocuments/simpleam.app.md:25\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: foundations",
+      "area: product"
+    ]
+  },
+  {
+    "title": "Define Marketing Website Structure & Messaging",
+    "body": "## Context\nLay out website IA, hero messaging, and community CTA plan supporting the low-cost positioning.\n\n## Acceptance Criteria\n- Navigation covering About, Offerings, Community, Roadmap finalized.\n- Copy pillars reinforce 'Ryanair/Dollar Shave Club for sports software'.\n- Community channel CTA owners identified with next steps.\n\n## Source\ndocuments/simpleam.app.md:55\n- documents/simpleam.app.md:262\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: foundations",
+      "area: website"
+    ]
+  },
+  {
+    "title": "Design Authentication & Onboarding Flow",
+    "body": "## Context\nDetail signup, invite, org switching, and project structure expectations for implementation.\n\n## Acceptance Criteria\n- Flow diagrams for new org creation, invites, org switching signed off.\n- Decision on magic links vs password for players documented; SSO backlog captured.\n- Project structure section completed with apps/packages breakdown.\n\n## Source\ndocuments/simpleam.app.md:272\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: platform",
+      "area: auth"
+    ]
+  },
+  {
+    "title": "Specify Global Search Experience",
+    "body": "## Context\nDefine what entities are indexed, how filtering works, and UI states for global search.\n\n## Acceptance Criteria\n- Indexable entities list with metadata and security considerations.\n- Search UI states (empty/results/no results) wireframed.\n- Preferred search backend (Supabase pg_search vs external) chosen with notes.\n\n## Source\ndocuments/simpleam.app.md:334\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: platform",
+      "area: search"
+    ]
+  },
+  {
+    "title": "Architect Social Media & Notification Integrations",
+    "body": "## Context\nFinalize architecture for WhatsApp/Instagram/Telegram notifications plus consent handling.\n\n## Acceptance Criteria\n- Sequence diagrams for each channel reviewed with engineering.\n- Provider decisions (Meta vs BSP) documented with cost/effort tradeoffs.\n- Consent storage, rate limiting, and fallback rules captured with sample code snippets.\n\n## Source\ndocuments/simpleam.app.md:336\n- documents/simpleam.app.md:392\n- documents/simpleam.app.md:512\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: platform",
+      "area: notifications"
+    ]
+  },
+  {
+    "title": "Build Players Module",
+    "body": "## Context\nImplement squad list, player profiles, activity hub, and cross-org linking per spec.\n\n## Acceptance Criteria\n- Roster view with filters, search, bulk actions, and export live.\n- Tabbed player profile (Overview, Forms, Events, Performance, Notes, Files) wired to data.\n- Cross-organization player visibility enforced via RLS and tagging.\n- Responsive card layout for mobile delivered.\n\n## Source\ndocuments/simpleam.app.md:1180\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: product",
+      "area: players"
+    ]
+  },
+  {
+    "title": "Build Staff Module",
+    "body": "## Context\nShip staff directory, role and permission management, and cross-org membership controls.\n\n## Acceptance Criteria\n- Staff table with filters for roles and permissions released.\n- Profile view surfaces quick actions and activity log.\n- Permission matrix enforced through Supabase RLS helpers.\n\n## Source\ndocuments/simpleam.app.md:5176\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: product",
+      "area: staff"
+    ]
+  },
+  {
+    "title": "Build Forms Module",
+    "body": "## Context\nDeliver form builder, distribution workflows, magic links, tracking dashboard, and AI assist.\n\n## Acceptance Criteria\n- Drag-and-drop builder and JSON renderer built with React Hook Form + Zod.\n- Distribution engine supports one-time, scheduled, and event-triggered sends via BullMQ.\n- Magic link experience with Resend integration and expirations working end-to-end.\n- Completion dashboard with reminders and export implemented.\n- AI-generated template flow available for staff users.\n\n## Source\ndocuments/simpleam.app.md:5010\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: product",
+      "area: forms"
+    ]
+  },
+  {
+    "title": "Build Notes Module",
+    "body": "## Context\nLaunch rich-text notes with privacy modes, entity linking, search, and AI summarization.\n\n## Acceptance Criteria\n- Tiptap-based editor with public, role-gated, and private visibility live.\n- Notes surface in entity views, global list, and reports leveraging shared component.\n- Search/filter UI (author, visibility, entity, tag) implemented.\n- AI workflows for summarizing and creating notes functioning with permissions respected.\n\n## Source\ndocuments/simpleam.app.md:1767\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: product",
+      "area: notes"
+    ]
+  },
+  {
+    "title": "Build Spreadsheets Module",
+    "body": "## Context\nImplement spreadsheet workspace with templates, player links, and AI helpers.\n\n## Acceptance Criteria\n- Spreadsheet grid with versioning and player-linked rows working.\n- Template gallery seeded with performance and wellness sheets.\n- AI assist to generate and optimize tables available in UI.\n- Import/export flows integrated with reports and player profiles.\n\n## Source\ndocuments/simpleam.app.md:3677\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: product",
+      "area: spreadsheets"
+    ]
+  },
+  {
+    "title": "Build Reports Module",
+    "body": "## Context\nCreate configurable reports hooking into players, forms, notes, spreadsheets, and charts.\n\n## Acceptance Criteria\n- Report builder supports KPIs, filters, saved views, and sharing.\n- Recharts visualizations export to PDF/CSV.\n- Scheduled report delivery via background jobs operational.\n- AI-generated insight summaries included for each report.\n\n## Source\ndocuments/simpleam.app.md:3928\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: product",
+      "area: reports"
+    ]
+  },
+  {
+    "title": "Build Calendar & Event Module",
+    "body": "## Context\nShip scheduling system with multi-view calendar, event templates, attendance, and integrations.\n\n## Acceptance Criteria\n- Calendar supports month/week/list views with drag-and-drop editing.\n- Event detail links notes, files, forms, spreadsheets, and attendance.\n- Reminder and attendance tracking flows complete.\n- Mobile-first interactions plus ICS sync decision documented.\n\n## Source\ndocuments/simpleam.app.md:4680\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: product",
+      "area: calendar"
+    ]
+  },
+  {
+    "title": "Build Files & Media Library",
+    "body": "## Context\nStand up file storage with tagging, permissions, previews, and large-video strategy.\n\n## Acceptance Criteria\n- Folder/tag taxonomy with search and filters in place.\n- Media previews for core formats and plan for large video/CDN finalized.\n- Entity linking to players, events, reports live.\n- Upload quotas and cost controls enforced.\n\n## Source\ndocuments/simpleam.app.md:2160\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: product",
+      "area: files"
+    ]
+  },
+  {
+    "title": "Build Planner Module",
+    "body": "## Context\nDeliver planning workspace for training cycles, objectives, and cross-module linking.\n\n## Acceptance Criteria\n- Planner UI with drag/drop blocks, timeline, and templates shipped.\n- Connections to forms, notes, spreadsheets, and AI recommendations working.\n- Role-based editing and publishing workflows defined and enforced.\n\n## Source\ndocuments/simpleam.app.md:2933\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: product",
+      "area: planner"
+    ]
+  },
+  {
+    "title": "Build Drawing Canvas Module",
+    "body": "## Context\nImplement tactical whiteboard with templates, draggable assets, export, and AI assistance.\n\n## Acceptance Criteria\n- Canvas editor (Excalidraw/custom) with pitch templates live.\n- Player/object library and snapping tools working.\n- Export to PNG/PDF plus entity linking complete.\n- AI-generated play/pattern suggestions scoped and prototyped.\n\n## Source\ndocuments/simpleam.app.md:6592\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: product",
+      "area: canvas"
+    ]
+  },
+  {
+    "title": "Build AI Assistant & Tooling",
+    "body": "## Context\nStand up AI architecture, interface, tool plugins, cost controls, and privacy guardrails.\n\n## Acceptance Criteria\n- Service architecture documented with routing, providers, caching.\n- Assistant UI integrated into app shell with command palette entry.\n- Initial toolset (forms builder, notes summary, spreadsheet insights) wired and tested.\n- Cost tracking dashboards and rate limits operational.\n\n## Source\ndocuments/simpleam.app.md:8553\n- documents/simpleam.app.md:8933\n- documents/simpleam.app.md:9278\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: cross-cutting",
+      "area: ai"
+    ]
+  },
+  {
+    "title": "Launch Templates Hub",
+    "body": "## Context\nCreate templates marketplace for forms, spreadsheets, planners, and community contributions.\n\n## Acceptance Criteria\n- Hub navigation with categories and search shipped.\n- Submission/review workflow documented with moderation plan.\n- Starter templates highlighted for onboarding and AI suggestions.\n\n## Source\ndocuments/simpleam.app.md:9327\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: cross-cutting",
+      "area: templates"
+    ]
+  },
+  {
+    "title": "Implement System Settings & Org Administration",
+    "body": "## Context\nDeliver organization-level controls for branding, billing, permissions, integrations, and audit logs.\n\n## Acceptance Criteria\n- Settings IA covering org profile, billing, integrations, role management signed off.\n- Permission matrix + RLS alignment implemented.\n- Audit log MVP with notification preferences live.\n\n## Source\ndocuments/simpleam.app.md:10043\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: cross-cutting",
+      "area: settings"
+    ]
+  },
+  {
+    "title": "Implement User Profile & Preferences",
+    "body": "## Context\nBuild personal profile area for contact info, notifications, security, and personalization.\n\n## Acceptance Criteria\n- Profile editing for contact info/avatar/timezone working on web + mobile.\n- Notification channel preferences and social account linking live.\n- Security settings (password reset/MFA backlog) documented.\n\n## Source\ndocuments/simpleam.app.md:10637\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: cross-cutting",
+      "area: user"
+    ]
+  },
+  {
+    "title": "Resolve Outstanding Technical Decisions",
+    "body": "## Context\nAnswer open technical questions around database, RLS, realtime, file pipeline, and jobs.\n\n## Acceptance Criteria\n- Decision doc covering Supabase vs standalone Postgres and Prisma usage published.\n- Reusable RLS helpers defined for permission layers.\n- Realtime/collaboration requirements mapped to technical approach.\n- File storage/CDN pipeline and background job orchestration plan agreed.\n\n## Source\ndocuments/simpleam.app.md:140\n- documents/simpleam.app.md:154\n- documents/simpleam.app.md:160\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: strategy",
+      "area: architecture"
+    ]
+  },
+  {
+    "title": "Tackle Business & Go-To-Market Questions",
+    "body": "## Context\nClose pricing, MVP phasing, customer segmentation, and sales motion gaps to guide build focus.\n\n## Acceptance Criteria\n- Pricing tiers drafted with value fences vs incumbents.\n- MVP phases (launch/3-6m/6-12m) agreed with stakeholders.\n- Customer segments (pro, college, academy) documented with personas.\n- Sales funnel outline (self-serve vs direct) with next experiments captured.\n\n## Source\ndocuments/simpleam.app.md:172\n\n_Imported 2025-11-04T09:08:26.286180+00:00 by Codex_\n",
+    "labels": [
+      "area: strategy",
+      "area: gtm"
+    ]
+  }
+]

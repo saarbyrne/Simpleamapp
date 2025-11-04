@@ -1,0 +1,263 @@
+Id,Team,Title,Description,Status,Estimate,Priority,Project,Creator,Assignee,Labels,Cycle Number,Cycle Name,Cycle Start,Cycle End,Created,Updated,Started,Completed,Canceled,Archived
+1,SimpleAM,Align Mission & Market Positioning,"## Context
+Document the mission narrative and disruption framing so marketing and product share the same north star.
+
+## Acceptance Criteria
+- Mission and redefine-athlete-management story captured for reuse.
+- Competitive differentiation vs Kitman Labs/Teamworks distilled into concise bullets.
+- Cost-leadership + AI leverage messaging ready for site/pitch.
+
+## Source
+documents/simpleam.app.md:1
+- documents/simpleam.app.md:11
+",Backlog,,Medium,Platform,Codex Assistant,,"Area::Foundations, Area::Messaging",,,,,2025-11-04,2025-11-04,,,,
+2,SimpleAM,Codify Product Principles & Naming Guardrails,"## Context
+Turn guiding principles (buy-vs-build, modularity, naming) into guardrails teams can reference.
+
+## Acceptance Criteria
+- Principles summarized with practical examples.
+- Checklist established for feature/design reviews.
+- Shared doc linked from design system hub.
+
+## Source
+documents/simpleam.app.md:25
+",Backlog,,Medium,Platform,Codex Assistant,,"Area::Foundations, Area::Product",,,,,2025-11-04,2025-11-04,,,,
+3,SimpleAM,Define Marketing Website Structure & Messaging,"## Context
+Lay out website IA, hero messaging, and community CTA plan supporting the low-cost positioning.
+
+## Acceptance Criteria
+- Navigation covering About, Offerings, Community, Roadmap finalized.
+- Copy pillars reinforce 'Ryanair/Dollar Shave Club for sports software'.
+- Community channel CTA owners identified with next steps.
+
+## Source
+documents/simpleam.app.md:55
+- documents/simpleam.app.md:262
+",Backlog,,Medium,Platform,Codex Assistant,,"Area::Foundations, Area::Website",,,,,2025-11-04,2025-11-04,,,,
+4,SimpleAM,Design Authentication & Onboarding Flow,"## Context
+Detail signup, invite, org switching, and project structure expectations for implementation.
+
+## Acceptance Criteria
+- Flow diagrams for new org creation, invites, org switching signed off.
+- Decision on magic links vs password for players documented; SSO backlog captured.
+- Project structure section completed with apps/packages breakdown.
+
+## Source
+documents/simpleam.app.md:272
+",Backlog,,Medium,Platform,Codex Assistant,,"Area::Platform, Area::Auth",,,,,2025-11-04,2025-11-04,,,,
+5,SimpleAM,Specify Global Search Experience,"## Context
+Define what entities are indexed, how filtering works, and UI states for global search.
+
+## Acceptance Criteria
+- Indexable entities list with metadata and security considerations.
+- Search UI states (empty/results/no results) wireframed.
+- Preferred search backend (Supabase pg_search vs external) chosen with notes.
+
+## Source
+documents/simpleam.app.md:334
+",Backlog,,Medium,Platform,Codex Assistant,,"Area::Platform, Area::Search",,,,,2025-11-04,2025-11-04,,,,
+6,SimpleAM,Architect Social Media & Notification Integrations,"## Context
+Finalize architecture for WhatsApp/Instagram/Telegram notifications plus consent handling.
+
+## Acceptance Criteria
+- Sequence diagrams for each channel reviewed with engineering.
+- Provider decisions (Meta vs BSP) documented with cost/effort tradeoffs.
+- Consent storage, rate limiting, and fallback rules captured with sample code snippets.
+
+## Source
+documents/simpleam.app.md:336
+- documents/simpleam.app.md:392
+- documents/simpleam.app.md:512
+",Backlog,,Medium,Platform,Codex Assistant,,"Area::Platform, Area::Notifications",,,,,2025-11-04,2025-11-04,,,,
+7,SimpleAM,Build Players Module,"## Context
+Implement squad list, player profiles, activity hub, and cross-org linking per spec.
+
+## Acceptance Criteria
+- Roster view with filters, search, bulk actions, and export live.
+- Tabbed player profile (Overview, Forms, Events, Performance, Notes, Files) wired to data.
+- Cross-organization player visibility enforced via RLS and tagging.
+- Responsive card layout for mobile delivered.
+
+## Source
+documents/simpleam.app.md:1180
+",Backlog,,High,Platform,Codex Assistant,,"Area::Product, Area::Players",,,,,2025-11-04,2025-11-04,,,,
+8,SimpleAM,Build Staff Module,"## Context
+Ship staff directory, role and permission management, and cross-org membership controls.
+
+## Acceptance Criteria
+- Staff table with filters for roles and permissions released.
+- Profile view surfaces quick actions and activity log.
+- Permission matrix enforced through Supabase RLS helpers.
+
+## Source
+documents/simpleam.app.md:5176
+",Backlog,,High,Platform,Codex Assistant,,"Area::Product, Area::Staff",,,,,2025-11-04,2025-11-04,,,,
+9,SimpleAM,Build Forms Module,"## Context
+Deliver form builder, distribution workflows, magic links, tracking dashboard, and AI assist.
+
+## Acceptance Criteria
+- Drag-and-drop builder and JSON renderer built with React Hook Form + Zod.
+- Distribution engine supports one-time, scheduled, and event-triggered sends via BullMQ.
+- Magic link experience with Resend integration and expirations working end-to-end.
+- Completion dashboard with reminders and export implemented.
+- AI-generated template flow available for staff users.
+
+## Source
+documents/simpleam.app.md:5010
+",Backlog,,High,Platform,Codex Assistant,,"Area::Product, Area::Forms",,,,,2025-11-04,2025-11-04,,,,
+10,SimpleAM,Build Notes Module,"## Context
+Launch rich-text notes with privacy modes, entity linking, search, and AI summarization.
+
+## Acceptance Criteria
+- Tiptap-based editor with public, role-gated, and private visibility live.
+- Notes surface in entity views, global list, and reports leveraging shared component.
+- Search/filter UI (author, visibility, entity, tag) implemented.
+- AI workflows for summarizing and creating notes functioning with permissions respected.
+
+## Source
+documents/simpleam.app.md:1767
+",Backlog,,High,Platform,Codex Assistant,,"Area::Product, Area::Notes",,,,,2025-11-04,2025-11-04,,,,
+11,SimpleAM,Build Spreadsheets Module,"## Context
+Implement spreadsheet workspace with templates, player links, and AI helpers.
+
+## Acceptance Criteria
+- Spreadsheet grid with versioning and player-linked rows working.
+- Template gallery seeded with performance and wellness sheets.
+- AI assist to generate and optimize tables available in UI.
+- Import/export flows integrated with reports and player profiles.
+
+## Source
+documents/simpleam.app.md:3677
+",Backlog,,High,Platform,Codex Assistant,,"Area::Product, Area::Spreadsheets",,,,,2025-11-04,2025-11-04,,,,
+12,SimpleAM,Build Reports Module,"## Context
+Create configurable reports hooking into players, forms, notes, spreadsheets, and charts.
+
+## Acceptance Criteria
+- Report builder supports KPIs, filters, saved views, and sharing.
+- Recharts visualizations export to PDF/CSV.
+- Scheduled report delivery via background jobs operational.
+- AI-generated insight summaries included for each report.
+
+## Source
+documents/simpleam.app.md:3928
+",Backlog,,High,Platform,Codex Assistant,,"Area::Product, Area::Reports",,,,,2025-11-04,2025-11-04,,,,
+13,SimpleAM,Build Calendar & Event Module,"## Context
+Ship scheduling system with multi-view calendar, event templates, attendance, and integrations.
+
+## Acceptance Criteria
+- Calendar supports month/week/list views with drag-and-drop editing.
+- Event detail links notes, files, forms, spreadsheets, and attendance.
+- Reminder and attendance tracking flows complete.
+- Mobile-first interactions plus ICS sync decision documented.
+
+## Source
+documents/simpleam.app.md:4680
+",Backlog,,High,Platform,Codex Assistant,,"Area::Product, Area::Calendar",,,,,2025-11-04,2025-11-04,,,,
+14,SimpleAM,Build Files & Media Library,"## Context
+Stand up file storage with tagging, permissions, previews, and large-video strategy.
+
+## Acceptance Criteria
+- Folder/tag taxonomy with search and filters in place.
+- Media previews for core formats and plan for large video/CDN finalized.
+- Entity linking to players, events, reports live.
+- Upload quotas and cost controls enforced.
+
+## Source
+documents/simpleam.app.md:2160
+",Backlog,,High,Platform,Codex Assistant,,"Area::Product, Area::Files",,,,,2025-11-04,2025-11-04,,,,
+15,SimpleAM,Build Planner Module,"## Context
+Deliver planning workspace for training cycles, objectives, and cross-module linking.
+
+## Acceptance Criteria
+- Planner UI with drag/drop blocks, timeline, and templates shipped.
+- Connections to forms, notes, spreadsheets, and AI recommendations working.
+- Role-based editing and publishing workflows defined and enforced.
+
+## Source
+documents/simpleam.app.md:2933
+",Backlog,,High,Platform,Codex Assistant,,"Area::Product, Area::Planner",,,,,2025-11-04,2025-11-04,,,,
+16,SimpleAM,Build Drawing Canvas Module,"## Context
+Implement tactical whiteboard with templates, draggable assets, export, and AI assistance.
+
+## Acceptance Criteria
+- Canvas editor (Excalidraw/custom) with pitch templates live.
+- Player/object library and snapping tools working.
+- Export to PNG/PDF plus entity linking complete.
+- AI-generated play/pattern suggestions scoped and prototyped.
+
+## Source
+documents/simpleam.app.md:6592
+",Backlog,,High,Platform,Codex Assistant,,"Area::Product, Area::Canvas",,,,,2025-11-04,2025-11-04,,,,
+17,SimpleAM,Build AI Assistant & Tooling,"## Context
+Stand up AI architecture, interface, tool plugins, cost controls, and privacy guardrails.
+
+## Acceptance Criteria
+- Service architecture documented with routing, providers, caching.
+- Assistant UI integrated into app shell with command palette entry.
+- Initial toolset (forms builder, notes summary, spreadsheet insights) wired and tested.
+- Cost tracking dashboards and rate limits operational.
+
+## Source
+documents/simpleam.app.md:8553
+- documents/simpleam.app.md:8933
+- documents/simpleam.app.md:9278
+",Backlog,,High,Platform,Codex Assistant,,"Area::Cross-cutting, Area::AI",,,,,2025-11-04,2025-11-04,,,,
+18,SimpleAM,Launch Templates Hub,"## Context
+Create templates marketplace for forms, spreadsheets, planners, and community contributions.
+
+## Acceptance Criteria
+- Hub navigation with categories and search shipped.
+- Submission/review workflow documented with moderation plan.
+- Starter templates highlighted for onboarding and AI suggestions.
+
+## Source
+documents/simpleam.app.md:9327
+",Backlog,,Medium,Platform,Codex Assistant,,"Area::Cross-cutting, Area::Templates",,,,,2025-11-04,2025-11-04,,,,
+19,SimpleAM,Implement System Settings & Org Administration,"## Context
+Deliver organization-level controls for branding, billing, permissions, integrations, and audit logs.
+
+## Acceptance Criteria
+- Settings IA covering org profile, billing, integrations, role management signed off.
+- Permission matrix + RLS alignment implemented.
+- Audit log MVP with notification preferences live.
+
+## Source
+documents/simpleam.app.md:10043
+",Backlog,,High,Platform,Codex Assistant,,"Area::Cross-cutting, Area::Settings",,,,,2025-11-04,2025-11-04,,,,
+20,SimpleAM,Implement User Profile & Preferences,"## Context
+Build personal profile area for contact info, notifications, security, and personalization.
+
+## Acceptance Criteria
+- Profile editing for contact info/avatar/timezone working on web + mobile.
+- Notification channel preferences and social account linking live.
+- Security settings (password reset/MFA backlog) documented.
+
+## Source
+documents/simpleam.app.md:10637
+",Backlog,,High,Platform,Codex Assistant,,"Area::Cross-cutting, Area::User",,,,,2025-11-04,2025-11-04,,,,
+21,SimpleAM,Resolve Outstanding Technical Decisions,"## Context
+Answer open technical questions around database, RLS, realtime, file pipeline, and jobs.
+
+## Acceptance Criteria
+- Decision doc covering Supabase vs standalone Postgres and Prisma usage published.
+- Reusable RLS helpers defined for permission layers.
+- Realtime/collaboration requirements mapped to technical approach.
+- File storage/CDN pipeline and background job orchestration plan agreed.
+
+## Source
+documents/simpleam.app.md:140
+- documents/simpleam.app.md:154
+- documents/simpleam.app.md:160
+",Backlog,,Medium,Platform,Codex Assistant,,"Area::Strategy, Area::Architecture",,,,,2025-11-04,2025-11-04,,,,
+22,SimpleAM,Tackle Business & Go-To-Market Questions,"## Context
+Close pricing, MVP phasing, customer segmentation, and sales motion gaps to guide build focus.
+
+## Acceptance Criteria
+- Pricing tiers drafted with value fences vs incumbents.
+- MVP phases (launch/3-6m/6-12m) agreed with stakeholders.
+- Customer segments (pro, college, academy) documented with personas.
+- Sales funnel outline (self-serve vs direct) with next experiments captured.
+
+## Source
+documents/simpleam.app.md:172
+",Backlog,,Medium,Platform,Codex Assistant,,"Area::Strategy, Area::GTM",,,,,2025-11-04,2025-11-04,,,,
