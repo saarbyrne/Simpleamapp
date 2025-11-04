@@ -5,18 +5,27 @@ import * as MenubarPrimitive from "@radix-ui/react-menubar";
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
 
 import { cn } from "./utils";
+import { tokens } from "@/design-system/tokens";
 
 function Menubar({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Root>) {
   return (
     <MenubarPrimitive.Root
       data-slot="menubar"
       className={cn(
-        "bg-background flex h-9 items-center gap-1 rounded-md border p-1 shadow-xs",
+        "bg-background flex items-center border shadow-xs",
         className,
       )}
+      style={{
+        height: tokens.spacing.spacing.lg,
+        gap: tokens.spacing.gap.xs,
+        borderRadius: tokens.radius.radius.md,
+        padding: tokens.spacing.spacing.xs,
+        ...style,
+      }}
       {...props}
     />
   );
@@ -50,15 +59,26 @@ function MenubarRadioGroup({
 
 function MenubarTrigger({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Trigger>) {
   return (
     <MenubarPrimitive.Trigger
       data-slot="menubar-trigger"
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground flex items-center rounded-sm px-2 py-1 text-sm font-medium outline-hidden select-none",
+        "focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground flex items-center select-none outline-hidden",
         className,
       )}
+      style={{
+        borderRadius: tokens.radius.radius.sm,
+        paddingLeft: tokens.spacing.spacing.sm,
+        paddingRight: tokens.spacing.spacing.sm,
+        paddingTop: tokens.spacing.spacing.xs,
+        fontSize: tokens.typography.body.sm.fontSize,
+        lineHeight: tokens.typography.body.sm.lineHeight,
+        fontWeight: tokens.typography.fontWeight.medium,
+        ...style,
+      }}
       {...props}
     />
   );
@@ -66,6 +86,7 @@ function MenubarTrigger({
 
 function MenubarContent({
   className,
+  style,
   align = "start",
   alignOffset = -4,
   sideOffset = 8,
@@ -79,9 +100,16 @@ function MenubarContent({
         alignOffset={alignOffset}
         sideOffset={sideOffset}
         className={cn(
-          "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[12rem] origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-md border p-1 shadow-md",
+          "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-menubar-content-transform-origin) overflow-hidden border shadow-md",
           className,
         )}
+        style={{
+          zIndex: tokens.zIndex.popup.dropdown,
+          minWidth: "12rem",
+          borderRadius: tokens.radius.radius.md,
+          padding: tokens.spacing.spacing.xs,
+          ...style,
+        }}
         {...props}
       />
     </MenubarPortal>
@@ -90,6 +118,7 @@ function MenubarContent({
 
 function MenubarItem({
   className,
+  style,
   inset,
   variant = "default",
   ...props
@@ -103,9 +132,20 @@ function MenubarItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center select-none outline-hidden data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
+      style={{
+        gap: tokens.spacing.gap.sm,
+        borderRadius: tokens.radius.radius.sm,
+        paddingLeft: tokens.spacing.spacing.sm,
+        paddingRight: tokens.spacing.spacing.sm,
+        paddingTop: tokens.spacing.spacing.xs,
+        paddingBottom: tokens.spacing.spacing.xs,
+        fontSize: tokens.typography.body.sm.fontSize,
+        lineHeight: tokens.typography.body.sm.lineHeight,
+        ...style,
+      }}
       {...props}
     />
   );
@@ -113,6 +153,7 @@ function MenubarItem({
 
 function MenubarCheckboxItem({
   className,
+  style,
   children,
   checked,
   ...props
@@ -121,13 +162,27 @@ function MenubarCheckboxItem({
     <MenubarPrimitive.CheckboxItem
       data-slot="menubar-checkbox-item"
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-xs py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center select-none outline-hidden data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
+      style={{
+        gap: tokens.spacing.gap.sm,
+        borderRadius: tokens.radius.radius.xs,
+        paddingTop: tokens.spacing.spacing.xs,
+        paddingBottom: tokens.spacing.spacing.xs,
+        paddingRight: tokens.spacing.spacing.sm,
+        paddingLeft: tokens.spacing.spacing.lg,
+        fontSize: tokens.typography.body.sm.fontSize,
+        lineHeight: tokens.typography.body.sm.lineHeight,
+        ...style,
+      }}
       checked={checked}
       {...props}
     >
-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+      <span
+        className="pointer-events-none absolute flex size-3.5 items-center justify-center"
+        style={{ left: tokens.spacing.spacing.sm }}
+      >
         <MenubarPrimitive.ItemIndicator>
           <CheckIcon className="size-4" />
         </MenubarPrimitive.ItemIndicator>
@@ -139,6 +194,7 @@ function MenubarCheckboxItem({
 
 function MenubarRadioItem({
   className,
+  style,
   children,
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.RadioItem>) {
@@ -146,12 +202,26 @@ function MenubarRadioItem({
     <MenubarPrimitive.RadioItem
       data-slot="menubar-radio-item"
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-xs py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center select-none outline-hidden data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
+      style={{
+        gap: tokens.spacing.gap.sm,
+        borderRadius: tokens.radius.radius.xs,
+        paddingTop: tokens.spacing.spacing.xs,
+        paddingBottom: tokens.spacing.spacing.xs,
+        paddingRight: tokens.spacing.spacing.sm,
+        paddingLeft: tokens.spacing.spacing.lg,
+        fontSize: tokens.typography.body.sm.fontSize,
+        lineHeight: tokens.typography.body.sm.lineHeight,
+        ...style,
+      }}
       {...props}
     >
-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+      <span
+        className="pointer-events-none absolute flex size-3.5 items-center justify-center"
+        style={{ left: tokens.spacing.spacing.sm }}
+      >
         <MenubarPrimitive.ItemIndicator>
           <CircleIcon className="size-2 fill-current" />
         </MenubarPrimitive.ItemIndicator>
@@ -163,6 +233,7 @@ function MenubarRadioItem({
 
 function MenubarLabel({
   className,
+  style,
   inset,
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Label> & {
@@ -172,10 +243,17 @@ function MenubarLabel({
     <MenubarPrimitive.Label
       data-slot="menubar-label"
       data-inset={inset}
-      className={cn(
-        "px-2 py-1.5 text-sm font-medium data-[inset]:pl-8",
-        className,
-      )}
+      className={cn("data-[inset]:pl-8", className)}
+      style={{
+        paddingLeft: tokens.spacing.spacing.sm,
+        paddingRight: tokens.spacing.spacing.sm,
+        paddingTop: tokens.spacing.spacing.xs,
+        paddingBottom: tokens.spacing.spacing.xs,
+        fontSize: tokens.typography.body.sm.fontSize,
+        lineHeight: tokens.typography.body.sm.lineHeight,
+        fontWeight: tokens.typography.fontWeight.medium,
+        ...style,
+      }}
       {...props}
     />
   );
@@ -183,12 +261,19 @@ function MenubarLabel({
 
 function MenubarSeparator({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Separator>) {
   return (
     <MenubarPrimitive.Separator
       data-slot="menubar-separator"
-      className={cn("bg-border -mx-1 my-1 h-px", className)}
+      className={cn("bg-border -mx-1", className)}
+      style={{
+        height: "1px",
+        marginTop: tokens.spacing.spacing.xs,
+        marginBottom: tokens.spacing.spacing.xs,
+        ...style,
+      }}
       {...props}
     />
   );
@@ -196,15 +281,21 @@ function MenubarSeparator({
 
 function MenubarShortcut({
   className,
+  style,
   ...props
 }: React.ComponentProps<"span">) {
   return (
     <span
       data-slot="menubar-shortcut"
       className={cn(
-        "text-muted-foreground ml-auto text-xs tracking-widest",
+        "text-muted-foreground ml-auto tracking-widest",
         className,
       )}
+      style={{
+        fontSize: tokens.typography.body.xs.fontSize,
+        lineHeight: tokens.typography.body.xs.lineHeight,
+        ...style,
+      }}
       {...props}
     />
   );
@@ -218,6 +309,7 @@ function MenubarSub({
 
 function MenubarSubTrigger({
   className,
+  style,
   inset,
   children,
   ...props
@@ -229,9 +321,19 @@ function MenubarSubTrigger({
       data-slot="menubar-sub-trigger"
       data-inset={inset}
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none data-[inset]:pl-8",
+        "focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground flex cursor-default items-center select-none outline-none data-[inset]:pl-8",
         className,
       )}
+      style={{
+        borderRadius: tokens.radius.radius.sm,
+        paddingLeft: tokens.spacing.spacing.sm,
+        paddingRight: tokens.spacing.spacing.sm,
+        paddingTop: tokens.spacing.spacing.xs,
+        paddingBottom: tokens.spacing.spacing.xs,
+        fontSize: tokens.typography.body.sm.fontSize,
+        lineHeight: tokens.typography.body.sm.lineHeight,
+        ...style,
+      }}
       {...props}
     >
       {children}
@@ -242,15 +344,23 @@ function MenubarSubTrigger({
 
 function MenubarSubContent({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.SubContent>) {
   return (
     <MenubarPrimitive.SubContent
       data-slot="menubar-sub-content"
       className={cn(
-        "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-md border p-1 shadow-lg",
+        "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-menubar-content-transform-origin) overflow-hidden border shadow-lg",
         className,
       )}
+      style={{
+        zIndex: tokens.zIndex.popup.dropdown,
+        minWidth: "8rem",
+        borderRadius: tokens.radius.radius.md,
+        padding: tokens.spacing.spacing.xs,
+        ...style,
+      }}
       {...props}
     />
   );
