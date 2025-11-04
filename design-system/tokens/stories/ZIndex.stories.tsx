@@ -72,9 +72,9 @@ export const VisualDemo: StoryObj = {
   render: () => (
     <div className="relative h-96 bg-gray-100 overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center">
-        <div 
+        <div
           className="absolute w-64 h-64 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold"
-          style={{ zIndex: zIndex.base.base }}
+          style={{ zIndex: zIndex.base.default }}
         >
           Base (0)
         </div>
@@ -96,9 +96,9 @@ export const VisualDemo: StoryObj = {
         >
           Modal Backdrop (400)
         </div>
-        <div 
+        <div
           className="absolute w-32 h-32 bg-red-500 rounded-lg flex items-center justify-center text-white font-bold"
-          style={{ zIndex: zIndex.modal.dialogContent, left: '180px', top: '180px' }}
+          style={{ zIndex: zIndex.modal.content, left: '180px', top: '180px' }}
         >
           Dialog (450)
         </div>
