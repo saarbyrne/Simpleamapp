@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { cn } from "./utils";
 import { Button } from "./button";
+import { tokens } from "@/design-system/tokens";
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -132,7 +133,11 @@ function Carousel({
   );
 }
 
-function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
+function CarouselContent({
+  className,
+  style,
+  ...props
+}: React.ComponentProps<"div">) {
   const { carouselRef, orientation } = useCarousel();
 
   return (
@@ -144,16 +149,31 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
       <div
         className={cn(
           "flex",
-          orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
+          orientation === "horizontal" ? "" : "flex-col",
           className,
         )}
+        style={
+          orientation === "horizontal"
+            ? {
+                marginLeft: `-${tokens.spacing.spacing.md}`,
+                ...style,
+              }
+            : {
+                marginTop: `-${tokens.spacing.spacing.md}`,
+                ...style,
+              }
+        }
         {...props}
       />
     </div>
   );
 }
 
-function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
+function CarouselItem({
+  className,
+  style,
+  ...props
+}: React.ComponentProps<"div">) {
   const { orientation } = useCarousel();
 
   return (
@@ -161,11 +181,18 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
       role="group"
       aria-roledescription="slide"
       data-slot="carousel-item"
-      className={cn(
-        "min-w-0 shrink-0 grow-0 basis-full",
-        orientation === "horizontal" ? "pl-4" : "pt-4",
-        className,
-      )}
+      className={cn("min-w-0 shrink-0 grow-0 basis-full", className)}
+      style={
+        orientation === "horizontal"
+          ? {
+              paddingLeft: tokens.spacing.spacing.md,
+              ...style,
+            }
+          : {
+              paddingTop: tokens.spacing.spacing.md,
+              ...style,
+            }
+      }
       {...props}
     />
   );
@@ -173,6 +200,7 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
 
 function CarouselPrevious({
   className,
+  style,
   variant = "outline",
   size = "icon",
   ...props
@@ -185,12 +213,18 @@ function CarouselPrevious({
       variant={variant}
       size={size}
       className={cn(
-        "absolute size-8 rounded-full",
+        "absolute",
         orientation === "horizontal"
           ? "top-1/2 -left-12 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className,
       )}
+      style={{
+        width: tokens.spacing.spacing.lg,
+        height: tokens.spacing.spacing.lg,
+        borderRadius: tokens.radius.radius.full,
+        ...style,
+      }}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
@@ -203,6 +237,7 @@ function CarouselPrevious({
 
 function CarouselNext({
   className,
+  style,
   variant = "outline",
   size = "icon",
   ...props
@@ -215,12 +250,18 @@ function CarouselNext({
       variant={variant}
       size={size}
       className={cn(
-        "absolute size-8 rounded-full",
+        "absolute",
         orientation === "horizontal"
           ? "top-1/2 -right-12 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className,
       )}
+      style={{
+        width: tokens.spacing.spacing.lg,
+        height: tokens.spacing.spacing.lg,
+        borderRadius: tokens.radius.radius.full,
+        ...style,
+      }}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}

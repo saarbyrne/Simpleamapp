@@ -4,6 +4,7 @@ import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 
 import { cn } from "./utils";
+import { tokens } from "@/design-system/tokens";
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
@@ -37,6 +38,7 @@ function useChart() {
 function ChartContainer({
   id,
   className,
+  style,
   children,
   config,
   ...props
@@ -55,9 +57,14 @@ function ChartContainer({
         data-slot="chart"
         data-chart={chartId}
         className={cn(
-          "[&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border flex aspect-video justify-center text-xs [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
+          "[&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border flex aspect-video justify-center [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
           className,
         )}
+        style={{
+          fontSize: tokens.typography.body.xs.fontSize,
+          lineHeight: tokens.typography.body.xs.lineHeight,
+          ...style,
+        }}
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
@@ -108,6 +115,7 @@ function ChartTooltipContent({
   active,
   payload,
   className,
+  style,
   indicator = "dot",
   hideLabel = false,
   hideIndicator = false,
@@ -173,12 +181,24 @@ function ChartTooltipContent({
   return (
     <div
       className={cn(
-        "border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl",
+        "border-border/50 bg-background grid items-start shadow-xl",
         className,
       )}
+      style={{
+        minWidth: "8rem",
+        gap: tokens.spacing.gap.xs,
+        borderRadius: tokens.radius.radius.lg,
+        paddingLeft: tokens.spacing.spacing.md,
+        paddingRight: tokens.spacing.spacing.md,
+        paddingTop: tokens.spacing.spacing.xs,
+        paddingBottom: tokens.spacing.spacing.xs,
+        fontSize: tokens.typography.body.xs.fontSize,
+        lineHeight: tokens.typography.body.xs.lineHeight,
+        ...style,
+      }}
     >
       {!nestLabel ? tooltipLabel : null}
-      <div className="grid gap-1.5">
+      <div style={{ display: "grid", gap: tokens.spacing.gap.xs }}>
         {payload.map((item, index) => {
           const key = `${nameKey || item.name || item.dataKey || "value"}`;
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
@@ -188,9 +208,10 @@ function ChartTooltipContent({
             <div
               key={item.dataKey}
               className={cn(
-                "[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5",
+                "[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch [&>svg]:h-2.5 [&>svg]:w-2.5",
                 indicator === "dot" && "items-center",
               )}
+              style={{ gap: tokens.spacing.gap.sm }}
             >
               {formatter && item?.value !== undefined && item.name ? (
                 formatter(item.value, item.name, item, index, item.payload)
@@ -202,7 +223,7 @@ function ChartTooltipContent({
                     !hideIndicator && (
                       <div
                         className={cn(
-                          "shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg)",
+                          "shrink-0 border-(--color-border) bg-(--color-bg)",
                           {
                             "h-2.5 w-2.5": indicator === "dot",
                             "w-1": indicator === "line",
@@ -215,6 +236,7 @@ function ChartTooltipContent({
                           {
                             "--color-bg": indicatorColor,
                             "--color-border": indicatorColor,
+                            borderRadius: "2px",
                           } as React.CSSProperties
                         }
                       />
@@ -226,7 +248,7 @@ function ChartTooltipContent({
                       nestLabel ? "items-end" : "items-center",
                     )}
                   >
-                    <div className="grid gap-1.5">
+                    <div style={{ display: "grid", gap: tokens.spacing.gap.xs }}>
                       {nestLabel ? tooltipLabel : null}
                       <span className="text-muted-foreground">
                         {itemConfig?.label || item.name}
@@ -252,6 +274,7 @@ const ChartLegend = RechartsPrimitive.Legend;
 
 function ChartLegendContent({
   className,
+  style,
   hideIcon = false,
   payload,
   verticalAlign = "bottom",
@@ -270,10 +293,15 @@ function ChartLegendContent({
   return (
     <div
       className={cn(
-        "flex items-center justify-center gap-4",
-        verticalAlign === "top" ? "pb-3" : "pt-3",
+        "flex items-center justify-center",
         className,
       )}
+      style={{
+        gap: tokens.spacing.gap.md,
+        paddingBottom: verticalAlign === "top" ? undefined : tokens.spacing.spacing.sm,
+        paddingTop: verticalAlign === "top" ? tokens.spacing.spacing.sm : undefined,
+        ...style,
+      }}
     >
       {payload.map((item) => {
         const key = `${nameKey || item.dataKey || "value"}`;
@@ -283,15 +311,19 @@ function ChartLegendContent({
           <div
             key={item.value}
             className={cn(
-              "[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3",
+              "[&>svg]:text-muted-foreground flex items-center [&>svg]:h-3 [&>svg]:w-3",
             )}
+            style={{ gap: tokens.spacing.gap.xs }}
           >
             {itemConfig?.icon && !hideIcon ? (
               <itemConfig.icon />
             ) : (
               <div
-                className="h-2 w-2 shrink-0 rounded-[2px]"
+                className="shrink-0"
                 style={{
+                  height: tokens.spacing.spacing.sm,
+                  width: tokens.spacing.spacing.sm,
+                  borderRadius: "2px",
                   backgroundColor: item.color,
                 }}
               />

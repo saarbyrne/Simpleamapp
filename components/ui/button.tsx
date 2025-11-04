@@ -3,28 +3,25 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "./utils";
+import { tokens } from "@/design-system/tokens";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-        outline:
-          "border bg-background text-foreground hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "",
+        destructive: "",
+        outline: "border",
+        secondary: "",
+        ghost: "",
+        link: "underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9 rounded-md",
+        default: "has-[>svg]:px-3",
+        sm: "has-[>svg]:px-2.5",
+        lg: "has-[>svg]:px-4",
+        icon: "",
       },
     },
     defaultVariants: {
@@ -40,13 +37,82 @@ const Button = React.forwardRef<
     VariantProps<typeof buttonVariants> & {
       asChild?: boolean;
     }
->(({ className, variant, size, asChild = false, ...props }, ref) => {
+>(({ className, style, variant = "default", size = "default", asChild = false, ...props }, ref) => {
   const Comp = asChild ? Slot : "button";
+
+  // Variant styles using tokens
+  const variantStyles: Record<string, React.CSSProperties> = {
+    default: {
+      backgroundColor: tokens.colors.interactive.primary,
+      color: tokens.colors.text.inverse,
+    },
+    destructive: {
+      backgroundColor: tokens.colors.interactive.destructive,
+      color: tokens.colors.text.inverse,
+    },
+    outline: {
+      backgroundColor: tokens.colors.surface.base,
+      color: tokens.colors.text.primary,
+      borderColor: tokens.colors.border.default,
+    },
+    secondary: {
+      backgroundColor: tokens.colors.interactive.secondary,
+      color: tokens.colors.text.primary,
+    },
+    ghost: {
+      backgroundColor: 'transparent',
+      color: tokens.colors.text.primary,
+    },
+    link: {
+      backgroundColor: 'transparent',
+      color: tokens.colors.interactive.primary,
+    },
+  };
+
+  // Size styles using tokens
+  const sizeStyles: Record<string, React.CSSProperties> = {
+    default: {
+      height: tokens.spacing.spacing['2xl'],
+      paddingLeft: tokens.spacing.spacing.lg,
+      paddingRight: tokens.spacing.spacing.lg,
+      paddingTop: tokens.spacing.spacing.sm,
+      paddingBottom: tokens.spacing.spacing.sm,
+    },
+    sm: {
+      height: tokens.spacing.spacing.xl,
+      paddingLeft: tokens.spacing.component.inputPadding,
+      paddingRight: tokens.spacing.component.inputPadding,
+      gap: tokens.spacing.gap.xs,
+    },
+    lg: {
+      height: tokens.spacing.spacing['3xl'],
+      paddingLeft: tokens.spacing.spacing['2xl'],
+      paddingRight: tokens.spacing.spacing['2xl'],
+    },
+    icon: {
+      width: tokens.spacing.spacing['2xl'],
+      height: tokens.spacing.spacing['2xl'],
+      padding: 0,
+    },
+  };
+
+  const currentVariant = variant || "default";
+  const currentSize = size || "default";
 
   return (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      style={{
+        borderRadius: tokens.radius.component.button,
+        fontSize: tokens.typography.ui.button.fontSize,
+        fontWeight: tokens.typography.ui.button.fontWeight,
+        lineHeight: tokens.typography.ui.button.lineHeight,
+        gap: tokens.spacing.gap.sm,
+        ...variantStyles[currentVariant],
+        ...sizeStyles[currentSize],
+        ...style,
+      }}
       ref={ref}
       {...props}
     />

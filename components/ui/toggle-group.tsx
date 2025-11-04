@@ -6,6 +6,7 @@ import { type VariantProps } from "class-variance-authority";
 
 import { cn } from "./utils";
 import { toggleVariants } from "./toggle";
+import { tokens } from "@/design-system/tokens";
 
 const ToggleGroupContext = React.createContext<
   VariantProps<typeof toggleVariants>
@@ -16,6 +17,7 @@ const ToggleGroupContext = React.createContext<
 
 function ToggleGroup({
   className,
+  style,
   variant,
   size,
   children,
@@ -28,9 +30,13 @@ function ToggleGroup({
       data-variant={variant}
       data-size={size}
       className={cn(
-        "group/toggle-group flex w-fit items-center rounded-md data-[variant=outline]:shadow-xs",
+        "group/toggle-group flex w-fit items-center data-[variant=outline]:shadow-xs",
         className,
       )}
+      style={{
+        borderRadius: tokens.radius.radius.sm,
+        ...style,
+      }}
       {...props}
     >
       <ToggleGroupContext.Provider value={{ variant, size }}>
@@ -42,6 +48,7 @@ function ToggleGroup({
 
 function ToggleGroupItem({
   className,
+  style,
   children,
   variant,
   size,
@@ -63,6 +70,7 @@ function ToggleGroupItem({
         "min-w-0 flex-1 shrink-0 rounded-none shadow-none first:rounded-l-md last:rounded-r-md focus:z-10 focus-visible:z-10 data-[variant=outline]:border-l-0 data-[variant=outline]:first:border-l",
         className,
       )}
+      style={style}
       {...props}
     >
       {children}

@@ -5,15 +5,21 @@ import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { CircleIcon } from "lucide-react";
 
 import { cn } from "./utils";
+import { tokens } from "@/design-system/tokens";
 
 function RadioGroup({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof RadioGroupPrimitive.Root>) {
   return (
     <RadioGroupPrimitive.Root
       data-slot="radio-group"
-      className={cn("grid gap-3", className)}
+      className={cn("grid", className)}
+      style={{
+        gap: tokens.spacing.gap.md,
+        ...style,
+      }}
       {...props}
     />
   );
@@ -21,15 +27,25 @@ function RadioGroup({
 
 function RadioGroupItem({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof RadioGroupPrimitive.Item>) {
   return (
     <RadioGroupPrimitive.Item
       data-slot="radio-group-item"
       className={cn(
-        "border-input text-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 aspect-square size-4 shrink-0 rounded-full border shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+        "aspect-square shrink-0 rounded-full border transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
+      style={{
+        width: tokens.spacing.spacing.lg,
+        height: tokens.spacing.spacing.lg,
+        borderColor: tokens.colors.border.default,
+        backgroundColor: tokens.colors.surface.sunken,
+        color: tokens.colors.interactive.primary,
+        boxShadow: tokens.elevation.shadow.xs,
+        ...style,
+      }}
       {...props}
     >
       <RadioGroupPrimitive.Indicator

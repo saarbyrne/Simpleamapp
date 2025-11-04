@@ -5,9 +5,11 @@ import { GripVerticalIcon } from "lucide-react";
 import * as ResizablePrimitive from "react-resizable-panels";
 
 import { cn } from "./utils";
+import { tokens } from "@/design-system/tokens";
 
 function ResizablePanelGroup({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof ResizablePrimitive.PanelGroup>) {
   return (
@@ -17,20 +19,23 @@ function ResizablePanelGroup({
         "flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
         className,
       )}
+      style={style}
       {...props}
     />
   );
 }
 
 function ResizablePanel({
+  style,
   ...props
 }: React.ComponentProps<typeof ResizablePrimitive.Panel>) {
-  return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />;
+  return <ResizablePrimitive.Panel data-slot="resizable-panel" style={style} {...props} />;
 }
 
 function ResizableHandle({
   withHandle,
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
   withHandle?: boolean;
@@ -39,13 +44,25 @@ function ResizableHandle({
     <ResizablePrimitive.PanelResizeHandle
       data-slot="resizable-handle"
       className={cn(
-        "bg-border focus-visible:ring-ring relative flex w-px items-center justify-center after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:outline-hidden data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 [&[data-panel-group-direction=vertical]>div]:rotate-90",
+        "focus-visible:ring-ring relative flex w-px items-center justify-center after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:outline-hidden data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 [&[data-panel-group-direction=vertical]>div]:rotate-90",
         className,
       )}
+      style={{
+        backgroundColor: tokens.colors.border.default,
+        ...style,
+      }}
       {...props}
     >
       {withHandle && (
-        <div className="bg-border z-10 flex h-4 w-3 items-center justify-center rounded-xs border">
+        <div
+          className="z-10 flex items-center justify-center border"
+          style={{
+            backgroundColor: tokens.colors.border.default,
+            height: tokens.spacing.spacing.lg,
+            width: tokens.spacing.spacing.sm,
+            borderRadius: tokens.radius.radius.xs,
+          }}
+        >
           <GripVerticalIcon className="size-2.5" />
         </div>
       )}
