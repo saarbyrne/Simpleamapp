@@ -34,6 +34,11 @@ style={{
 ✅ Easy theming support  
 ✅ Maintainable at scale
 
+## Documentation
+
+- Added `components/ui/badge.stories.tsx` with full variant coverage in Storybook
+- Storybook configured via `@storybook/react-webpack5` with Babel + TypeScript pipeline so tokens resolve during docs builds
+
 ## Migration Pattern Established
 
 This approach works for all components and will be used for the remaining 56 components.

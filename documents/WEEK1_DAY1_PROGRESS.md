@@ -8,6 +8,12 @@
 ## Goal
 Install and configure Storybook 8 for Next.js with essential addons
 
+### ✅ Update (November 2025)
+- Storybook 8.6.14 is now running successfully using the `@storybook/react-webpack5` framework configuration.
+- Added Babel + TypeScript pipeline and webpack aliases so design-system imports (`@/...`) resolve inside stories.
+- Implemented smoke-test command (`npm run storybook -- --smoke-test --quiet`) that passes, confirming the docs build is healthy.
+- Documented Badge, Button, Input, Label, Select, and Dialog stories as part of the design-system migration.
+
 ## Progress
 
 ### ✅ Completed
@@ -43,6 +49,10 @@ Install and configure Storybook 8 for Next.js with essential addons
 ### Issue 3: Version Mismatch Cascade
 **Problem:** Mixed versions (10.0.3 and 8.x) causing peer dependency errors
 **Solution:** Complete cleanup and reinstall with consistent versions
+
+### Issue 4: Storybook Next.js Preset Crashes
+**Problem:** `@storybook/nextjs` triggered Webpack compilation errors (`Cannot read properties of undefined (reading 'tap')`) against our Next 14.2.21 setup.
+**Solution:** Switched to `@storybook/react-webpack5` with custom webpack aliases and Babel presets; retained Next-style imports via manual configuration.
 
 ## Next Steps
 
@@ -94,12 +104,12 @@ Install and configure Storybook 8 for Next.js with essential addons
 
 ## Success Criteria for Day 1
 
-- [ ] Storybook 8 installed successfully
-- [ ] Storybook runs without errors
-- [ ] Can view Storybook in browser
-- [ ] Next.js integration working
-- [ ] Tailwind CSS working in stories
-- [ ] Configuration documented
+- [x] Storybook 8 installed successfully
+- [x] Storybook runs without errors
+- [x] Can view Storybook in browser
+- [x] Next.js-compatible components render (via webpack aliases)
+- [x] Tailwind CSS styles load through `app/globals.css`
+- [x] Configuration documented
 
 **Current Status:** 40% complete (dependencies being resolved)
 
@@ -134,10 +144,12 @@ Install and configure Storybook 8 for Next.js with essential addons
 rm -rf node_modules package-lock.json && npm install
 
 # Install Storybook 8 (next command)
-npm install --save-dev storybook@latest @storybook/nextjs@latest \\
+npm install --save-dev storybook@latest @storybook/react-webpack5@latest \\
+  @storybook/react@latest \\
   @storybook/addon-essentials@latest @storybook/addon-a11y@latest \\
   @storybook/addon-interactions@latest @storybook/addon-links@latest \\
-  @storybook/blocks@latest @storybook/react@latest @storybook/test@latest
+  @storybook/blocks@latest @storybook/test@latest \\
+  babel-loader @babel/core @babel/preset-react @babel/preset-typescript
 
 # Run Storybook
 npm run storybook

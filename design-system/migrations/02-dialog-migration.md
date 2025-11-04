@@ -87,6 +87,12 @@ All spacing, shadows, radii, typography now from tokens
 5. **Extensibility** - Style prop allows custom overrides
 6. **Semantic** - Values describe purpose, not appearance
 
+## Documentation
+
+- Added Storybook coverage in `components/ui/dialog.stories.tsx` to demonstrate token-driven modal structure
+- Updated `design-system/tokens/stories/ZIndex.stories.tsx` to reflect modal layering corrections
+- Storybook now runs through the `@storybook/react-webpack5` builder with custom aliases so Dialog tokens resolve in isolation
+
 ## Files Changed
 
 - `components/ui/dialog.tsx` - Complete token migration
