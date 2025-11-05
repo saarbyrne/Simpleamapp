@@ -46,7 +46,7 @@ export default function GlobalError({
               Something went wrong!
             </h2>
             <p style={{ color: '#666' }}>
-              We've been notified and will look into it.
+              We&apos;ve been notified and will look into it.
             </p>
             {error.message && (
               <p style={{ fontSize: '14px', color: '#888' }}>
