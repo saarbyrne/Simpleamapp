@@ -6,18 +6,13 @@ import { AnalyticsProviders } from '@/lib/analytics/providers'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-  title: 'SimpleAM - Athlete Management Platform',
-  description: 'Low-cost, high-quality athlete management for sports teams',
-}
-
 // Include Sentry trace data in the metadata for request correlation.
 export function generateMetadata(): Metadata {
   return {
-    ...metadata,
+    title: 'SimpleAM - Athlete Management Platform',
+    description: 'Low-cost, high-quality athlete management for sports teams',
     other: {
       ...Sentry.getTraceData(),
-      ...(metadata.other ?? {}),
     },
   }
 }
