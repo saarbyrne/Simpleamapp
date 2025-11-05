@@ -23,11 +23,15 @@ function Command({
     <CommandPrimitive
       data-slot="command"
       className={cn(
-        "bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden",
+        "flex h-full w-full flex-col overflow-hidden",
         className,
       )}
       style={{
         borderRadius: tokens.radius.radius.md,
+        backgroundColor: tokens.colors.surface.elevated,
+        color: tokens.colors.text.primary,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       {...props}
@@ -147,11 +151,13 @@ function CommandGroup({
     <CommandPrimitive.Group
       data-slot="command-group"
       className={cn(
-        "text-foreground [&_[cmdk-group-heading]]:text-muted-foreground overflow-hidden [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium",
+        "overflow-hidden [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium",
         className,
       )}
       style={{
         padding: tokens.spacing.spacing.xs,
+        color: tokens.colors.text.primary,
+        ['--muted-foreground' as string]: tokens.colors.text.secondary,
         ...style,
       }}
       {...props}
@@ -167,9 +173,10 @@ function CommandSeparator({
   return (
     <CommandPrimitive.Separator
       data-slot="command-separator"
-      className={cn("bg-border -mx-1", className)}
+      className={cn("-mx-1", className)}
       style={{
-        height: "1px",
+        height: tokens.spacing.spacing['2xs'],
+        backgroundColor: tokens.colors.border.subtle,
         ...style,
       }}
       {...props}
@@ -198,6 +205,11 @@ function CommandItem({
         paddingBottom: tokens.spacing.spacing.xs,
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
+        backgroundColor: tokens.colors.surface.elevated,
+        color: tokens.colors.text.primary,
+        ['--muted-foreground' as string]: tokens.colors.text.secondary,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       {...props}

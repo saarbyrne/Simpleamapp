@@ -29,9 +29,12 @@ function Alert({
     default: {
       backgroundColor: tokens.colors.surface.elevated,
       color: tokens.colors.text.primary,
+      borderColor: tokens.colors.border.default,
     },
     destructive: {
       backgroundColor: tokens.colors.surface.elevated,
+      color: tokens.colors.feedback.error,
+      borderColor: tokens.colors.feedback.error,
     },
   };
 
@@ -44,7 +47,6 @@ function Alert({
       className={cn(alertVariants({ variant }), className)}
       style={{
         borderRadius: tokens.radius.component.card,
-        borderColor: tokens.colors.border.default,
         paddingLeft: tokens.spacing.spacing.xl,
         paddingRight: tokens.spacing.spacing.xl,
         paddingTop: tokens.spacing.spacing.md,

@@ -13,6 +13,8 @@ Install and configure Storybook 8 for Next.js with essential addons
 - Added Babel + TypeScript pipeline and webpack aliases so design-system imports (`@/...`) resolve inside stories.
 - Implemented smoke-test command (`npm run storybook -- --smoke-test --quiet`) that passes, confirming the docs build is healthy.
 - Documented Badge, Button, Input, Label, Select, and Dialog stories as part of the design-system migration.
+- Sidebar migrado con tokens y documentado en Storybook, eliminando los valores arbitrarios del layout principal.
+- Se añadieron historias para Alert, AlertDialog, Table, Popover, Tooltip, HoverCard, Sheet y Command; los overlays comparten el mismo set de tokens.
 
 ## Progress
 

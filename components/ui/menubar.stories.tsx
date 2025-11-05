@@ -1,0 +1,66 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import {
+  Menubar,
+  MenubarMenu,
+  MenubarTrigger,
+  MenubarContent,
+  MenubarItem,
+  MenubarSeparator,
+  MenubarLabel,
+  MenubarCheckboxItem,
+  MenubarRadioGroup,
+  MenubarRadioItem,
+} from './menubar';
+import { tokens } from '@/design-system/tokens';
+
+const meta: Meta<typeof Menubar> = {
+  title: 'Components/Menubar',
+  component: Menubar,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'centered',
+  },
+};
+
+export default meta;
+
+type Story = StoryObj<typeof Menubar>;
+
+export const Default: Story = {
+  render: () => (
+    <Menubar style={{ width: 'fit-content' }}>
+      <MenubarMenu>
+        <MenubarTrigger>Archivo</MenubarTrigger>
+        <MenubarContent>
+          <MenubarItem>Nuevo reporte</MenubarItem>
+          <MenubarItem>Importar plantillas</MenubarItem>
+          <MenubarSeparator />
+          <MenubarItem variant="destructive">Cerrar temporada</MenubarItem>
+        </MenubarContent>
+      </MenubarMenu>
+      <MenubarMenu>
+        <MenubarTrigger>Vista</MenubarTrigger>
+        <MenubarContent>
+          <MenubarLabel>Secciones visibles</MenubarLabel>
+          <MenubarCheckboxItem>Wellness diario</MenubarCheckboxItem>
+          <MenubarCheckboxItem checked>Planificaciones</MenubarCheckboxItem>
+          <MenubarCheckboxItem>Alertas médicas</MenubarCheckboxItem>
+          <MenubarSeparator />
+          <MenubarLabel>Densidad de datos</MenubarLabel>
+          <MenubarRadioGroup value="normal">
+            <MenubarRadioItem value="compact">Compacta</MenubarRadioItem>
+            <MenubarRadioItem value="normal">Equilibrada</MenubarRadioItem>
+            <MenubarRadioItem value="spacious">Amplia</MenubarRadioItem>
+          </MenubarRadioGroup>
+        </MenubarContent>
+      </MenubarMenu>
+      <MenubarMenu>
+        <MenubarTrigger>Ayuda</MenubarTrigger>
+        <MenubarContent>
+          <MenubarItem>Centro de soporte</MenubarItem>
+          <MenubarItem>Atajos de teclado</MenubarItem>
+        </MenubarContent>
+      </MenubarMenu>
+    </Menubar>
+  ),
+};

@@ -8,15 +8,16 @@ function Card({ className, style, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        "flex flex-col border",
+        "flex flex-col border transition-shadow hover:[box-shadow:var(--card-hover-shadow)]",
         className,
       )}
       style={{
         backgroundColor: tokens.colors.surface.elevated,
         color: tokens.colors.text.primary,
-        borderColor: tokens.colors.border.default,
+        borderColor: tokens.colors.border.subtle,
         borderRadius: tokens.radius.component.card,
         boxShadow: tokens.elevation.component.card,
+        ["--card-hover-shadow" as string]: tokens.elevation.component.cardHover,
         gap: tokens.spacing.gap.lg,
         ...style,
       }}
@@ -35,9 +36,9 @@ function CardHeader({ className, style, ...props }: React.ComponentProps<"div">)
       )}
       style={{
         gap: tokens.spacing.gap.sm,
-        paddingLeft: tokens.spacing.spacing['2xl'],
-        paddingRight: tokens.spacing.spacing['2xl'],
-        paddingTop: tokens.spacing.spacing['2xl'],
+        paddingLeft: tokens.spacing.component.cardPadding,
+        paddingRight: tokens.spacing.component.cardPadding,
+        paddingTop: tokens.spacing.component.cardPadding,
         ...style,
       }}
       {...props}
@@ -51,9 +52,9 @@ function CardTitle({ className, style, ...props }: React.ComponentProps<"div">) 
       data-slot="card-title"
       className={cn("leading-none", className)}
       style={{
-        fontSize: tokens.typography.heading.h4.fontSize,
-        fontWeight: tokens.typography.heading.h4.fontWeight,
-        lineHeight: tokens.typography.heading.h4.lineHeight,
+        fontSize: tokens.typography.heading.h5.fontSize,
+        fontWeight: tokens.typography.heading.h5.fontWeight,
+        lineHeight: tokens.typography.heading.h5.lineHeight,
         ...style,
       }}
       {...props}
@@ -97,8 +98,9 @@ function CardContent({ className, style, ...props }: React.ComponentProps<"div">
       data-slot="card-content"
       className={cn("[&:last-child]:pb-6", className)}
       style={{
-        paddingLeft: tokens.spacing.spacing['2xl'],
-        paddingRight: tokens.spacing.spacing['2xl'],
+        paddingLeft: tokens.spacing.component.cardPadding,
+        paddingRight: tokens.spacing.component.cardPadding,
+        paddingTop: tokens.spacing.component.cardPadding,
         ...style,
       }}
       {...props}
@@ -112,9 +114,10 @@ function CardFooter({ className, style, ...props }: React.ComponentProps<"div">)
       data-slot="card-footer"
       className={cn("flex items-center [.border-t]:pt-6", className)}
       style={{
-        paddingLeft: tokens.spacing.spacing['2xl'],
-        paddingRight: tokens.spacing.spacing['2xl'],
-        paddingBottom: tokens.spacing.spacing['2xl'],
+        paddingLeft: tokens.spacing.component.cardPadding,
+        paddingRight: tokens.spacing.component.cardPadding,
+        paddingBottom: tokens.spacing.component.cardPadding,
+        paddingTop: tokens.spacing.component.cardPaddingSm,
         ...style,
       }}
       {...props}

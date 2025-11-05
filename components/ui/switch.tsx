@@ -22,6 +22,9 @@ function Switch({
       style={{
         height: tokens.spacing.spacing.lg,
         width: tokens.spacing.spacing.xl,
+        borderColor: tokens.colors.border.subtle,
+        ["--primary" as string]: tokens.colors.interactive.primary,
+        ["--input" as string]: tokens.colors.surface.sunken,
         ...style,
       }}
       {...props}
@@ -36,6 +39,9 @@ function Switch({
           width: tokens.spacing.spacing.lg,
           height: tokens.spacing.spacing.lg,
           backgroundColor: tokens.colors.surface.elevated,
+          borderColor: tokens.colors.interactive.primary,
+          borderStyle: "solid",
+          borderWidth: tokens.spacing.spacing['2xs'],
         }}
       />
     </SwitchPrimitive.Root>

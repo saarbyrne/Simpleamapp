@@ -117,38 +117,104 @@ Components prioritized by:
 
 #### 4. Select Component
 **File:** `components/ui/select.tsx`
-**Status:** 🔴 ISSUES - Dropdown z-index and transparency
-**Impact:** HIGH - Dropdowns are common
-**Estimated Time:** 3-4 hours
+**Status:** ✅ MIGRATED & DOCUMENTED
+**Impact:** HIGH - Dropdowns son comunes
 
-**Current Issues:**
-- Z-index changed to `z-[50000]` (should use token)
-- Background changed to `bg-popover` (good, but needs token)
-- Hardcoded colors throughout
-
-**Migration Tasks:**
-- [ ] Use `zIndex.component.selectContent` for dropdown z-index
-- [ ] Use `colors.surface.elevated` for dropdown background
-- [ ] Use `colors.text.primary` for text
-- [ ] Use `colors.border.default` for borders
-- [ ] Use `spacing.component.inputPadding` for trigger padding
-- [ ] Use `typography.ui.input` for text styles
-- [ ] Use `borderRadius.component.select` for corners
-- [ ] Use `elevation.component.dropdown` for shadow
-- [ ] Use `motion.component.dropdown` for animations
-
-**Success Criteria:**
-- Dropdown appears above all content except modals/tooltips
-- Background is solid and readable
-- Animations are smooth
-- No transparency issues
-
-**Blocks:**
-- AddPlayerModal (uses Select for position, nationality, status)
+**Notas:** Trigger y contenido usan tokens (`surface.sunken`, `zIndex.component.selectContent`, `spacing.component.inputPadding`, etc.). Historia creada previamente.
 
 ---
 
-#### 5. Button Component
+#### 5. Dropdown Menu Component
+**File:** `components/ui/dropdown-menu.tsx`
+**Status:** ✅ MIGRATED & DOCUMENTED
+**Impact:** HIGH - Soporta patrones de selección
+
+**Notas:** Tokens aplicados a superficie, estados hover/focus mediante variables CSS, y Storybook listo (`components/ui/dropdown-menu.stories.tsx`). Ver `design-system/migrations/05-dropdown-menu-migration.md`.
+
+---
+
+#### 6. Context Menu Component
+**File:** `components/ui/context-menu.tsx`
+**Status:** ✅ MIGRATED & DOCUMENTED
+**Impact:** HIGH - Menú contextual para listas/tablas
+
+**Notas:** Coincide con DropdownMenu en superficies, border y z-index. Historia en `components/ui/context-menu.stories.tsx`. Detalles en `design-system/migrations/06-context-menu-migration.md`.
+
+---
+
+#### 7. Popover Component
+**File:** `components/ui/popover.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** MEDIA - Overlays ligeros
+
+**Notas:** Tokens ya aplicados; se añadió historia `components/ui/popover.stories.tsx`.
+
+---
+
+#### 8. Tooltip Component
+**File:** `components/ui/tooltip.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** MEDIA - Indicaciones rápidas
+
+**Notas:** Tokens existentes; historia `components/ui/tooltip.stories.tsx`.
+
+---
+
+#### 9. Hover Card Component
+**File:** `components/ui/hover-card.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** MEDIA - Previsualizaciones
+
+**Notas:** Tokens presentes; historia `components/ui/hover-card.stories.tsx`.
+
+---
+
+#### 10. Sheet Component
+**File:** `components/ui/sheet.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** ALTA - Drawer lateral
+
+**Notas:** Tokens aplicados previamente; historia `components/ui/sheet.stories.tsx`.
+
+---
+
+#### 11. Command Palette Component
+**File:** `components/ui/command.tsx`
+**Status:** ✅ MIGRATED & DOCUMENTED
+**Impact:** Alta - búsqueda y acceso rápido
+
+**Notas:** Tokens aplicados y historia `components/ui/command.stories.tsx`. Documentado en `design-system/migrations/07-command-migration.md`.
+
+---
+
+#### 12. Alert Component
+**File:** `components/ui/alert.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Media - mensajes de estado
+
+**Notas:** Historia `components/ui/alert.stories.tsx`; destructivo usa tokens de feedback.
+
+---
+
+#### 13. Alert Dialog Component
+**File:** `components/ui/alert-dialog.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Alta - confirmaciones críticas
+
+**Notas:** Historia `components/ui/alert-dialog.stories.tsx`; ya migrado al iniciar.
+
+---
+
+#### 14. Table Component
+**File:** `components/ui/table.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Media - listados
+
+**Notas:** Historia `components/ui/table.stories.tsx`; valores de tokens confirmados.
+
+---
+
+#### 15. Button Component
 **File:** `components/ui/button.tsx`
 **Status:** 🟢 STABLE - Well structured
 **Impact:** CRITICAL - Most used interactive element
@@ -190,52 +256,36 @@ Components prioritized by:
 
 #### 6. Card Component
 **File:** `components/ui/card.tsx`
-**Status:** 🟢 STABLE - Well structured
+**Status:** ✅ MIGRATED & DOCUMENTED
 **Impact:** MEDIUM - Layout component
 **Estimated Time:** 2-3 hours
 
 **Migration Tasks:**
-- [ ] Use `colors.surface.elevated` for background
-- [ ] Use `colors.border.subtle` for border
-- [ ] Use `spacing.component.cardPadding` for padding
-- [ ] Use `borderRadius.component.card` for corners
-- [ ] Use `elevation.component.card` for shadow
-- [ ] Use `elevation.component.cardHover` for hover state
-- [ ] Use `typography.heading.h5` for CardTitle
-- [ ] Use `typography.body.sm` for CardDescription
+- [x] Use `colors.surface.elevated` for background
+- [x] Use `colors.border.subtle` for border
+- [x] Use `spacing.component.cardPadding` for padding
+- [x] Use `borderRadius.component.card` for corners
+- [x] Use `elevation.component.card` para estado base y `cardHover` en el hover
+- [x] Use `typography.heading.h5` para CardTitle
+- [x] Use `typography.body.sm` para CardDescription
+- [x] Crear historias en Storybook (`components/ui/card.stories.tsx`)
 
-**Success Criteria:**
-- Consistent spacing across all card instances
-- Proper elevation hierarchy
-- Hover states work smoothly
+**Notas:** Migración registrada en `design-system/migrations/03-card-migration.md`. Próximo paso: abordar Sidebar.
 
 ---
 
 #### 7. Sidebar Component
 **File:** `components/ui/sidebar.tsx`
-**Status:** 🟡 PARTIALLY FIXED - Z-index updated
+**Status:** ✅ MIGRATED & DOCUMENTED
 **Impact:** CRITICAL - Main navigation
 **Estimated Time:** 4-5 hours
 
-**Current State:**
-- Z-index changed from `z-10` to `z-[40]` (needs token)
-- SidebarInset uses `z-[100]` (needs token)
-- Many hardcoded spacing values
-
-**Migration Tasks:**
-- [ ] Use `zIndex.component.sidebar` for sidebar z-index
-- [ ] Use `zIndex.component.sidebarInset` for content area
-- [ ] Use `colors.surface.sidebar` for background
-- [ ] Use `colors.surface.sidebarHover` for hover states
-- [ ] Use `colors.surface.sidebarActive` for active states
-- [ ] Use `spacing.component.listItemPadding` for menu items
-- [ ] Use `typography.ui.nav` for navigation text
-- [ ] Use `elevation.component.sidebar` for shadow
-
-**Success Criteria:**
-- Proper z-index hierarchy
-- Consistent spacing
-- Clear active/hover states
+**Notas:**
+- Variables CSS del sidebar alimentadas con tokens (`surface.sidebar`, `focus.ring`, etc.).
+- Z-index reemplazado por `tokens.zIndex.component.sidebar` y `sidebarInset`.
+- Espaciados, tipografías y alturas ahora enlazados al sistema.
+- Historia completa en `components/ui/sidebar.stories.tsx`.
+- Detalles en `design-system/migrations/04-sidebar-migration.md`.
 
 ---
 
@@ -503,3 +553,14 @@ Each migrated component must:
 
 **Status:** Phase 2 - Complete
 **Next:** Create proof of concept migration (Badge component)
+
+---
+
+### Componentes completados recientemente
+
+- **Tabs (`components/ui/tabs.tsx`)** – ✅ Documentado. Historia en `components/ui/tabs.stories.tsx`; tokens `--accent` configurados.
+- **Menubar (`components/ui/menubar.tsx`)** – ✅ Migrado & documentado. Coincide con Dropdown/ContextMenu. Historia en `components/ui/menubar.stories.tsx`.
+- **Navigation Menu (`components/ui/navigation-menu.tsx`)** – ✅ Migrado & documentado. Ver `design-system/migrations/08-navigation-components-migration.md` y `components/ui/navigation-menu.stories.tsx`.
+- **Slider (`components/ui/slider.tsx`)** – ✅ Documentado. Historia `components/ui/slider.stories.tsx`.
+- **Switch (`components/ui/switch.tsx`)** – ✅ Documentado. Historia `components/ui/switch.stories.tsx`.
+- **Progress (`components/ui/progress.tsx`)** – ✅ Documentado. Historia `components/ui/progress.stories.tsx`.

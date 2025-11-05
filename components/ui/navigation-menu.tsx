@@ -88,6 +88,9 @@ function NavigationMenuTrigger({
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
         fontWeight: tokens.typography.fontWeight.medium,
+        color: tokens.colors.text.primary,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       {...props}
@@ -117,6 +120,13 @@ function NavigationMenuContent({
       style={{
         padding: tokens.spacing.spacing.sm,
         paddingRight: tokens.spacing.spacing.md,
+        backgroundColor: tokens.colors.surface.elevated,
+        color: tokens.colors.text.primary,
+        borderColor: tokens.colors.border.default,
+        borderRadius: tokens.radius.component.dropdown,
+        boxShadow: tokens.elevation.component.dropdown,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       {...props}
@@ -141,12 +151,16 @@ function NavigationMenuViewport({
       <NavigationMenuPrimitive.Viewport
         data-slot="navigation-menu-viewport"
         className={cn(
-          "origin-top-center bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 relative h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden border shadow md:w-[var(--radix-navigation-menu-viewport-width)]",
+          "origin-top-center data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 relative h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden border shadow md:w-[var(--radix-navigation-menu-viewport-width)]",
           className,
         )}
         style={{
           marginTop: tokens.spacing.spacing.xs,
-          borderRadius: tokens.radius.radius.md,
+          backgroundColor: tokens.colors.surface.elevated,
+          color: tokens.colors.text.primary,
+          borderColor: tokens.colors.border.default,
+          borderRadius: tokens.radius.component.dropdown,
+          boxShadow: tokens.elevation.component.dropdown,
           ...style,
         }}
         {...props}
@@ -173,6 +187,9 @@ function NavigationMenuLink({
         padding: tokens.spacing.spacing.sm,
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
+        color: tokens.colors.text.primary,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       {...props}
@@ -197,13 +214,17 @@ function NavigationMenuIndicator({
         ...style,
       }}
       {...props}
-    >
-      <div
-        className="bg-border relative top-[60%] rotate-45 shadow-md"
+  >
+     <div
+        className="relative top-[60%] rotate-45 shadow-md"
         style={{
           height: tokens.spacing.spacing.sm,
           width: tokens.spacing.spacing.sm,
           borderTopLeftRadius: tokens.radius.radius.sm,
+          backgroundColor: tokens.colors.surface.elevated,
+          borderColor: tokens.colors.border.default,
+          borderStyle: "solid",
+          borderWidth: "1px",
         }}
       />
     </NavigationMenuPrimitive.Indicator>

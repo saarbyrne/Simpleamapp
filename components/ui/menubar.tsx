@@ -16,7 +16,7 @@ function Menubar({
     <MenubarPrimitive.Root
       data-slot="menubar"
       className={cn(
-        "bg-background flex items-center border shadow-xs",
+        "flex items-center border shadow-xs",
         className,
       )}
       style={{
@@ -24,6 +24,9 @@ function Menubar({
         gap: tokens.spacing.gap.xs,
         borderRadius: tokens.radius.radius.md,
         padding: tokens.spacing.spacing.xs,
+        backgroundColor: tokens.colors.surface.elevated,
+        borderColor: tokens.colors.border.default,
+        color: tokens.colors.text.primary,
         ...style,
       }}
       {...props}
@@ -77,6 +80,8 @@ function MenubarTrigger({
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
         fontWeight: tokens.typography.fontWeight.medium,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       {...props}
@@ -100,14 +105,22 @@ function MenubarContent({
         alignOffset={alignOffset}
         sideOffset={sideOffset}
         className={cn(
-          "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-menubar-content-transform-origin) overflow-hidden border shadow-md",
+          "data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-menubar-content-transform-origin) overflow-hidden border shadow-md",
           className,
         )}
         style={{
           zIndex: tokens.zIndex.popup.dropdown,
           minWidth: "12rem",
-          borderRadius: tokens.radius.radius.md,
+          backgroundColor: tokens.colors.surface.elevated,
+          color: tokens.colors.text.primary,
+          borderColor: tokens.colors.border.default,
+          borderRadius: tokens.radius.component.dropdown,
+          boxShadow: tokens.elevation.component.dropdown,
           padding: tokens.spacing.spacing.xs,
+          ["--accent" as string]: tokens.colors.interactive.secondary,
+          ["--accent-foreground" as string]: tokens.colors.text.primary,
+          ["--destructive" as string]: tokens.colors.feedback.error,
+          ["--destructive-foreground" as string]: tokens.colors.text.inverse,
           ...style,
         }}
         {...props}
@@ -144,6 +157,12 @@ function MenubarItem({
         paddingBottom: tokens.spacing.spacing.xs,
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
+        backgroundColor: tokens.colors.surface.elevated,
+        color: tokens.colors.text.primary,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
+        ["--destructive" as string]: tokens.colors.feedback.error,
+        ["--destructive-foreground" as string]: tokens.colors.text.inverse,
         ...style,
       }}
       {...props}
@@ -174,6 +193,10 @@ function MenubarCheckboxItem({
         paddingLeft: tokens.spacing.spacing.lg,
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
+        backgroundColor: tokens.colors.surface.elevated,
+        color: tokens.colors.text.primary,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       checked={checked}
@@ -214,6 +237,10 @@ function MenubarRadioItem({
         paddingLeft: tokens.spacing.spacing.lg,
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
+        backgroundColor: tokens.colors.surface.elevated,
+        color: tokens.colors.text.primary,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       {...props}
@@ -252,6 +279,7 @@ function MenubarLabel({
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
         fontWeight: tokens.typography.fontWeight.medium,
+        color: tokens.colors.text.secondary,
         ...style,
       }}
       {...props}
@@ -267,11 +295,12 @@ function MenubarSeparator({
   return (
     <MenubarPrimitive.Separator
       data-slot="menubar-separator"
-      className={cn("bg-border -mx-1", className)}
+      className={cn("-mx-1", className)}
       style={{
-        height: "1px",
+        height: tokens.spacing.spacing['2xs'],
         marginTop: tokens.spacing.spacing.xs,
         marginBottom: tokens.spacing.spacing.xs,
+        backgroundColor: tokens.colors.border.subtle,
         ...style,
       }}
       {...props}
@@ -294,6 +323,7 @@ function MenubarShortcut({
       style={{
         fontSize: tokens.typography.body.xs.fontSize,
         lineHeight: tokens.typography.body.xs.lineHeight,
+        color: tokens.colors.text.secondary,
         ...style,
       }}
       {...props}
@@ -332,6 +362,9 @@ function MenubarSubTrigger({
         paddingBottom: tokens.spacing.spacing.xs,
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
+        color: tokens.colors.text.primary,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       {...props}
@@ -351,14 +384,22 @@ function MenubarSubContent({
     <MenubarPrimitive.SubContent
       data-slot="menubar-sub-content"
       className={cn(
-        "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-menubar-content-transform-origin) overflow-hidden border shadow-lg",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-menubar-content-transform-origin) overflow-hidden border shadow-lg",
         className,
       )}
       style={{
         zIndex: tokens.zIndex.popup.dropdown,
         minWidth: "8rem",
-        borderRadius: tokens.radius.radius.md,
+        backgroundColor: tokens.colors.surface.elevated,
+        color: tokens.colors.text.primary,
+        borderColor: tokens.colors.border.default,
+        borderRadius: tokens.radius.component.dropdown,
+        boxShadow: tokens.elevation.component.dropdown,
         padding: tokens.spacing.spacing.xs,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
+        ["--destructive" as string]: tokens.colors.feedback.error,
+        ["--destructive-foreground" as string]: tokens.colors.text.inverse,
         ...style,
       }}
       {...props}

@@ -44,13 +44,17 @@ function DropdownMenuContent({
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         className={cn(
-          "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 max-h-(--radix-dropdown-menu-content-available-height) origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto border shadow-md",
+          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 max-h-(--radix-dropdown-menu-content-available-height) origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto border shadow-md",
           className,
         )}
         style={{
           zIndex: tokens.zIndex.popup.dropdown,
           minWidth: "8rem",
-          borderRadius: tokens.radius.radius.md,
+          backgroundColor: tokens.colors.surface.elevated,
+          color: tokens.colors.text.primary,
+          borderColor: tokens.colors.border.default,
+          borderRadius: tokens.radius.component.dropdown,
+          boxShadow: tokens.elevation.component.dropdown,
           padding: tokens.spacing.spacing.xs,
           ...style,
         }}
@@ -96,6 +100,14 @@ function DropdownMenuItem({
         paddingBottom: tokens.spacing.spacing.xs,
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
+        color: variant === "destructive"
+          ? tokens.colors.feedback.error
+          : tokens.colors.text.primary,
+        backgroundColor: tokens.colors.surface.elevated,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
+        ["--destructive" as string]: tokens.colors.feedback.error,
+        ["--destructive-foreground" as string]: tokens.colors.text.inverse,
         ...style,
       }}
       {...props}
@@ -126,6 +138,9 @@ function DropdownMenuCheckboxItem({
         paddingLeft: tokens.spacing.spacing.lg,
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
+        color: tokens.colors.text.primary,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       checked={checked}
@@ -177,6 +192,9 @@ function DropdownMenuRadioItem({
         paddingLeft: tokens.spacing.spacing.lg,
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
+        color: tokens.colors.text.primary,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       {...props}
@@ -230,11 +248,12 @@ function DropdownMenuSeparator({
   return (
     <DropdownMenuPrimitive.Separator
       data-slot="dropdown-menu-separator"
-      className={cn("bg-border -mx-1", className)}
+      className={cn("-mx-1", className)}
       style={{
-        height: "1px",
+        height: tokens.spacing.spacing['2xs'],
         marginTop: tokens.spacing.spacing.xs,
         marginBottom: tokens.spacing.spacing.xs,
+        backgroundColor: tokens.colors.border.subtle,
         ...style,
       }}
       {...props}
@@ -284,7 +303,7 @@ function DropdownMenuSubTrigger({
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground flex cursor-default items-center select-none outline-hidden data-[inset]:pl-8",
+        "flex cursor-default items-center select-none outline-hidden data-[inset]:pl-8",
         className,
       )}
       style={{
@@ -295,6 +314,9 @@ function DropdownMenuSubTrigger({
         paddingBottom: tokens.spacing.spacing.xs,
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
+        color: tokens.colors.text.primary,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       {...props}
@@ -314,14 +336,22 @@ function DropdownMenuSubContent({
     <DropdownMenuPrimitive.SubContent
       data-slot="dropdown-menu-sub-content"
       className={cn(
-        "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden border shadow-lg",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden border shadow-lg",
         className,
       )}
       style={{
         zIndex: tokens.zIndex.popup.dropdown,
         minWidth: "8rem",
-        borderRadius: tokens.radius.radius.md,
+        backgroundColor: tokens.colors.surface.elevated,
+        color: tokens.colors.text.primary,
+        borderColor: tokens.colors.border.default,
+        borderRadius: tokens.radius.component.dropdown,
+        boxShadow: tokens.elevation.component.dropdown,
         padding: tokens.spacing.spacing.xs,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
+        ["--destructive" as string]: tokens.colors.feedback.error,
+        ["--destructive-foreground" as string]: tokens.colors.text.inverse,
         ...style,
       }}
       {...props}

@@ -42,6 +42,8 @@ function TabsList({
         height: tokens.spacing.spacing.xl,
         borderRadius: tokens.radius.component.tabs,
         padding: tokens.spacing.spacing.xs,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
         ...style,
       }}
       {...props}
@@ -70,6 +72,9 @@ function TabsTrigger({
         paddingBottom: tokens.spacing.spacing.xs,
         fontSize: tokens.typography.ui.button.fontSize,
         fontWeight: tokens.typography.ui.button.fontWeight,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
+        ["--ring" as string]: tokens.focus.ring,
         ...style,
       }}
       {...props}

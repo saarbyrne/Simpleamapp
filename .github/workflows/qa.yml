@@ -10,6 +10,7 @@ on:
 env:
   NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
   NEXT_PUBLIC_SUPABASE_ANON_KEY: test-anon-key
+  SENTRY_AUTH_TOKEN: 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
 
 concurrency:
   group: qa-${{ github.workflow }}-${{ github.ref }}

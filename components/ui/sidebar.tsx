@@ -158,6 +158,7 @@ function Sidebar({
   collapsible = "offcanvas",
   className,
   children,
+  style,
   ...props
 }: React.ComponentProps<"div"> & {
   side?: "left" | "right";
@@ -230,7 +231,7 @@ function Sidebar({
       <div
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 z-[40] hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+          "fixed inset-y-0 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
             : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
@@ -240,6 +241,10 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
           className,
         )}
+        style={{
+          zIndex: tokens.zIndex.component.sidebar,
+          ...style,
+        }}
         {...props}
       >
         <div
@@ -286,7 +291,11 @@ function SidebarTrigger({
   );
 }
 
-function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
+function SidebarRail({
+  className,
+  style,
+  ...props
+}: React.ComponentProps<"button">) {
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -306,6 +315,10 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
         "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
         className,
       )}
+      style={{
+        zIndex: tokens.zIndex.component.sidebar + 10,
+        ...style,
+      }}
       {...props}
     />
   );
@@ -325,7 +338,7 @@ function SidebarInset({
         className,
       )}
       style={{
-        zIndex: 100,
+        zIndex: tokens.zIndex.component.sidebarInset,
         ...style,
       }}
       {...props}
