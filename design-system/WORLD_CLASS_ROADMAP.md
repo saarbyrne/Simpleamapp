@@ -98,17 +98,17 @@
 - Icon tokens (sizing, colors)
 - Icon usage guidelines
 
-#### Week 9: Figma Integration
-- Figma component library creation
-- Tokens Studio setup
-- Token sync pipeline (Figma → Code)
-- Design handoff documentation
-
-#### Week 10: Content & Contribution
+#### Week 9: Content & Contribution
 - Content style guide (voice, tone, writing)
 - Contribution guidelines
 - Component starter template
 - PR/review process documentation
+
+#### Week 10: Figma Integration
+- Figma component library creation
+- Tokens Studio setup
+- Token sync pipeline (Figma → Code)
+- Design handoff documentation
 
 ---
 
@@ -620,53 +620,7 @@
 
 ---
 
-#### Week 9: Figma Integration
-
-**Day 1: Figma Component Library**
-- [ ] Create Figma file structure
-- [ ] Build Badge component
-- [ ] Build Button component (from Week 11)
-- [ ] Build Input component (from Week 11)
-
-**Day 2: Tokens Studio Setup**
-- [ ] Install Tokens Studio plugin
-- [ ] Export design tokens to JSON
-- [ ] Import tokens to Figma
-- [ ] Configure token mapping
-
-**Day 3: Token Sync Pipeline**
-- [ ] Setup automatic token sync
-- [ ] Configure GitHub Action
-- [ ] Test sync process
-- [ ] Document workflow
-
-**Day 4: Design Specs**
-- [ ] Create component redlines
-- [ ] Add measurements
-- [ ] Add spacing guides
-- [ ] Add interaction states
-
-**Day 5: Handoff Documentation**
-- [ ] Designer handoff guide
-- [ ] Developer handoff guide
-- [ ] Using Figma components
-- [ ] Exporting assets
-
-**Day 6: Collaboration Workflow**
-- [ ] Design review process
-- [ ] Component proposal template
-- [ ] Figma → Code workflow
-- [ ] Add to documentation
-
-**Deliverables:**
-- ✅ Figma component library
-- ✅ Token sync pipeline
-- ✅ Handoff documentation
-- ✅ Design/dev workflow
-
----
-
-#### Week 10: Content & Contribution
+#### Week 9: Content & Contribution
 
 **Day 1: Content Style Guide**
 - [ ] Voice and tone principles
@@ -709,6 +663,52 @@
 - ✅ Contribution guidelines
 - ✅ Component starter template
 - ✅ PR/review process
+
+---
+
+#### Week 10: Figma Integration
+
+**Day 1: Figma Component Library**
+- [ ] Create Figma file structure
+- [ ] Build Badge component
+- [ ] Build Button component (from Week 11)
+- [ ] Build Input component (from Week 11)
+
+**Day 2: Tokens Studio Setup**
+- [ ] Install Tokens Studio plugin
+- [ ] Export design tokens to JSON
+- [ ] Import tokens to Figma
+- [ ] Configure token mapping
+
+**Day 3: Token Sync Pipeline**
+- [ ] Setup automatic token sync
+- [ ] Configure GitHub Action
+- [ ] Test sync process
+- [ ] Document workflow
+
+**Day 4: Design Specs**
+- [ ] Create component redlines
+- [ ] Add measurements
+- [ ] Add spacing guides
+- [ ] Add interaction states
+
+**Day 5: Handoff Documentation**
+- [ ] Designer handoff guide
+- [ ] Developer handoff guide
+- [ ] Using Figma components
+- [ ] Exporting assets
+
+**Day 6: Collaboration Workflow**
+- [ ] Design review process
+- [ ] Component proposal template
+- [ ] Figma → Code workflow
+- [ ] Add to documentation
+
+**Deliverables:**
+- ✅ Figma component library
+- ✅ Token sync pipeline
+- ✅ Handoff documentation
+- ✅ Design/dev workflow
 
 ---
 

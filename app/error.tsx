@@ -5,6 +5,7 @@ import { AlertCircle, RefreshCw, Home } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Icon } from "@/components/ui/icon"
 import * as Sentry from '@sentry/nextjs'
 
 export default function Error({
@@ -25,7 +26,7 @@ export default function Error({
       <Card className="max-w-md w-full">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-destructive" />
+            <Icon icon={AlertCircle} size="md" color="error" label="Error" />
             <CardTitle>Something went wrong</CardTitle>
           </div>
           <CardDescription>
@@ -42,12 +43,12 @@ export default function Error({
           )}
           <div className="flex flex-col gap-2">
             <Button onClick={reset} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
+              <Icon icon={RefreshCw} size="sm" decorative className="mr-2" />
               Try Again
             </Button>
             <Button variant="outline" asChild className="w-full">
               <Link href="/dashboard">
-                <Home className="mr-2 h-4 w-4" />
+                <Icon icon={Home} size="sm" decorative className="mr-2" />
                 Go to Dashboard
               </Link>
             </Button>

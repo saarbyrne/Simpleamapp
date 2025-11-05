@@ -17,6 +17,7 @@ import { Button } from './button';
 import { tokens } from '@/design-system/tokens';
 import { ClipboardCopyIcon, Share2Icon, PenSquareIcon } from 'lucide-react';
 import { useState } from 'react';
+import { Icon } from './icon';
 
 const meta: Meta<typeof ContextMenu> = {
   title: 'Components/Context Menu',
@@ -46,15 +47,15 @@ export const Default: Story = {
         <ContextMenuContent>
           <ContextMenuLabel>Acciones rápidas</ContextMenuLabel>
           <ContextMenuItem>
-            <PenSquareIcon className="mr-2 size-4" />
+            <Icon icon={PenSquareIcon} size="sm" decorative className="mr-2" />
             <span>Abrir perfil</span>
           </ContextMenuItem>
           <ContextMenuItem>
-            <ClipboardCopyIcon className="mr-2 size-4" />
+            <Icon icon={ClipboardCopyIcon} size="sm" decorative className="mr-2" />
             <span>Copiar link</span>
           </ContextMenuItem>
           <ContextMenuItem variant="destructive">
-            <Share2Icon className="mr-2 size-4" />
+            <Icon icon={Share2Icon} size="sm" decorative className="mr-2" />
             <span>Desactivar notificaciones</span>
           </ContextMenuItem>
           <ContextMenuSeparator />

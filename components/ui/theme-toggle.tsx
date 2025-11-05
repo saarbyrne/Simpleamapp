@@ -4,6 +4,7 @@ import * as React from 'react';
 import { MoonIcon, SunIcon } from 'lucide-react';
 import { useTheme } from '../theme-provider';
 import { Button } from './button';
+import { Icon } from './icon';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,8 +19,16 @@ export function ThemeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon">
-          <SunIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <MoonIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <Icon
+            icon={SunIcon}
+            decorative
+            className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+          />
+          <Icon
+            icon={MoonIcon}
+            decorative
+            className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+          />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
@@ -56,8 +65,18 @@ export function ThemeToggleSimple() {
       onClick={toggleTheme}
       aria-label={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
     >
-      <SunIcon className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <MoonIcon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <Icon
+        icon={SunIcon}
+        size="md"
+        decorative
+        className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+      />
+      <Icon
+        icon={MoonIcon}
+        size="md"
+        decorative
+        className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+      />
     </Button>
   );
 }

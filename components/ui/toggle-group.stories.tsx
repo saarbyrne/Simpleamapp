@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ToggleGroup, ToggleGroupItem } from './toggle-group';
 import { AlignCenterIcon, AlignLeftIcon, AlignRightIcon, BoldIcon, ItalicIcon, UnderlineIcon } from 'lucide-react';
+import { Icon } from './icon';
 
 const meta: Meta<typeof ToggleGroup> = {
   title: 'Components/ToggleGroup',
@@ -29,13 +30,13 @@ export const Single: Story = {
   render: (args) => (
     <ToggleGroup {...args}>
       <ToggleGroupItem value="left" aria-label="Left aligned">
-        <AlignLeftIcon className="h-4 w-4" />
+        <Icon icon={AlignLeftIcon} size="sm" decorative />
       </ToggleGroupItem>
       <ToggleGroupItem value="center" aria-label="Center aligned">
-        <AlignCenterIcon className="h-4 w-4" />
+        <Icon icon={AlignCenterIcon} size="sm" decorative />
       </ToggleGroupItem>
       <ToggleGroupItem value="right" aria-label="Right aligned">
-        <AlignRightIcon className="h-4 w-4" />
+        <Icon icon={AlignRightIcon} size="sm" decorative />
       </ToggleGroupItem>
     </ToggleGroup>
   ),
@@ -49,13 +50,13 @@ export const Multiple: Story = {
   render: (args) => (
     <ToggleGroup {...args}>
       <ToggleGroupItem value="bold" aria-label="Bold">
-        <BoldIcon className="h-4 w-4" />
+        <Icon icon={BoldIcon} size="sm" decorative />
       </ToggleGroupItem>
       <ToggleGroupItem value="italic" aria-label="Italic">
-        <ItalicIcon className="h-4 w-4" />
+        <Icon icon={ItalicIcon} size="sm" decorative />
       </ToggleGroupItem>
       <ToggleGroupItem value="underline" aria-label="Underline">
-        <UnderlineIcon className="h-4 w-4" />
+        <Icon icon={UnderlineIcon} size="sm" decorative />
       </ToggleGroupItem>
     </ToggleGroup>
   ),
@@ -70,13 +71,13 @@ export const Outline: Story = {
   render: (args) => (
     <ToggleGroup {...args}>
       <ToggleGroupItem value="left" aria-label="Left aligned">
-        <AlignLeftIcon className="h-4 w-4" />
+        <Icon icon={AlignLeftIcon} size="sm" decorative />
       </ToggleGroupItem>
       <ToggleGroupItem value="center" aria-label="Center aligned">
-        <AlignCenterIcon className="h-4 w-4" />
+        <Icon icon={AlignCenterIcon} size="sm" decorative />
       </ToggleGroupItem>
       <ToggleGroupItem value="right" aria-label="Right aligned">
-        <AlignRightIcon className="h-4 w-4" />
+        <Icon icon={AlignRightIcon} size="sm" decorative />
       </ToggleGroupItem>
     </ToggleGroup>
   ),
@@ -105,13 +106,13 @@ export const Small: Story = {
   render: (args) => (
     <ToggleGroup {...args}>
       <ToggleGroupItem value="left" aria-label="Left aligned">
-        <AlignLeftIcon className="h-3 w-3" />
+        <Icon icon={AlignLeftIcon} size="xs" decorative />
       </ToggleGroupItem>
       <ToggleGroupItem value="center" aria-label="Center aligned">
-        <AlignCenterIcon className="h-3 w-3" />
+        <Icon icon={AlignCenterIcon} size="xs" decorative />
       </ToggleGroupItem>
       <ToggleGroupItem value="right" aria-label="Right aligned">
-        <AlignRightIcon className="h-3 w-3" />
+        <Icon icon={AlignRightIcon} size="xs" decorative />
       </ToggleGroupItem>
     </ToggleGroup>
   ),
@@ -126,13 +127,13 @@ export const Large: Story = {
   render: (args) => (
     <ToggleGroup {...args}>
       <ToggleGroupItem value="left" aria-label="Left aligned">
-        <AlignLeftIcon className="h-5 w-5" />
+        <Icon icon={AlignLeftIcon} size="md" decorative />
       </ToggleGroupItem>
       <ToggleGroupItem value="center" aria-label="Center aligned">
-        <AlignCenterIcon className="h-5 w-5" />
+        <Icon icon={AlignCenterIcon} size="md" decorative />
       </ToggleGroupItem>
       <ToggleGroupItem value="right" aria-label="Right aligned">
-        <AlignRightIcon className="h-5 w-5" />
+        <Icon icon={AlignRightIcon} size="md" decorative />
       </ToggleGroupItem>
     </ToggleGroup>
   ),
@@ -147,13 +148,13 @@ export const Disabled: Story = {
   render: (args) => (
     <ToggleGroup {...args}>
       <ToggleGroupItem value="left" aria-label="Left aligned">
-        <AlignLeftIcon className="h-4 w-4" />
+        <Icon icon={AlignLeftIcon} size="sm" decorative />
       </ToggleGroupItem>
       <ToggleGroupItem value="center" aria-label="Center aligned">
-        <AlignCenterIcon className="h-4 w-4" />
+        <Icon icon={AlignCenterIcon} size="sm" decorative />
       </ToggleGroupItem>
       <ToggleGroupItem value="right" aria-label="Right aligned">
-        <AlignRightIcon className="h-4 w-4" />
+        <Icon icon={AlignRightIcon} size="sm" decorative />
       </ToggleGroupItem>
     </ToggleGroup>
   ),

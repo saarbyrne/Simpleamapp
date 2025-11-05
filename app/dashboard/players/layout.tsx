@@ -37,6 +37,8 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { Icon } from "@/components/ui/icon"
 
 type PageId =
   | "players"
@@ -104,7 +106,7 @@ function AppSidebar({ currentPage }: { currentPage: PageId }) {
                     asChild
                   >
                     <a href={item.href}>
-                      <item.icon />
+                      <Icon icon={item.icon} size="md" decorative />
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>
@@ -146,7 +148,7 @@ export default function PlayersLayout({
     <SidebarProvider>
       <AppSidebar currentPage="players" />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-[rgb(255,255,255)]">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
@@ -156,6 +158,9 @@ export default function PlayersLayout({
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </header>
         {children}
       </SidebarInset>

@@ -3,6 +3,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from './tooltip';
 import { Button } from './button';
 import { InfoIcon } from 'lucide-react';
 import { tokens } from '@/design-system/tokens';
+import { Icon } from './icon';
 
 const meta: Meta<typeof Tooltip> = {
   title: 'Components/Tooltip',
@@ -22,7 +23,7 @@ export const Default: Story = {
     <Tooltip>
       <TooltipTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Ver ayuda">
-          <InfoIcon className="size-4" />
+          <Icon icon={InfoIcon} size="sm" decorative />
         </Button>
       </TooltipTrigger>
       <TooltipContent>

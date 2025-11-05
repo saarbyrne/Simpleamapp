@@ -32,6 +32,7 @@ import {
   SettingsIcon,
   UsersIcon,
 } from 'lucide-react';
+import { Icon } from './icon';
 
 const meta: Meta<typeof SidebarProvider> = {
   title: 'Components/Sidebar',
@@ -99,19 +100,19 @@ const ExampleLayout = () => (
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton isActive>
-                  <HomeIcon className="mr-2" />
+                  <Icon icon={HomeIcon} size="md" decorative className="mr-2" />
                   <span>Inicio</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <UsersIcon className="mr-2" />
+                  <Icon icon={UsersIcon} size="md" decorative className="mr-2" />
                   <span>Plantilla</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <CalendarIcon className="mr-2" />
+                  <Icon icon={CalendarIcon} size="md" decorative className="mr-2" />
                   <span>Calendario</span>
                 </SidebarMenuButton>
                 <SidebarMenuBadge>3</SidebarMenuBadge>
@@ -126,22 +127,22 @@ const ExampleLayout = () => (
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <LayersIcon className="mr-2" />
+                  <Icon icon={LayersIcon} size="md" decorative className="mr-2" />
                   <span>Formularios</span>
                 </SidebarMenuButton>
                 <SidebarMenuAction showOnHover>
-                  <PlusIcon className="size-4" />
+                  <Icon icon={PlusIcon} size="sm" decorative />
                 </SidebarMenuAction>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <BellIcon className="mr-2" />
+                  <Icon icon={BellIcon} size="md" decorative className="mr-2" />
                   <span>Alertas</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton tooltip="Ver planes individuales">
-                  <SettingsIcon className="mr-2" />
+                  <Icon icon={SettingsIcon} size="md" decorative className="mr-2" />
                   <span>Configuración</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>

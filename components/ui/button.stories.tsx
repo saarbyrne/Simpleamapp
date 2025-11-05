@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ArrowRightIcon } from 'lucide-react';
 import { Button } from './button';
+import { Icon } from './icon';
 
 const meta: Meta<typeof Button> = {
   title: 'Components/Button',
@@ -65,7 +66,7 @@ export const WithIcon: Story = {
     children: (
       <>
         Continue
-        <ArrowRightIcon className="size-4" aria-hidden />
+        <Icon icon={ArrowRightIcon} size="sm" decorative className="ml-2" />
       </>
     ),
   },
@@ -78,7 +79,7 @@ export const Sizes: Story = {
       <Button size="default">Default</Button>
       <Button size="lg">Large</Button>
       <Button size="icon" aria-label="Icon button">
-        <ArrowRightIcon className="size-4" aria-hidden />
+        <Icon icon={ArrowRightIcon} size="sm" decorative />
       </Button>
     </div>
   ),
