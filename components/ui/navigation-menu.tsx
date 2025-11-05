@@ -91,6 +91,7 @@ function NavigationMenuTrigger({
         color: tokens.colors.text.primary,
         ["--accent" as string]: tokens.colors.interactive.secondary,
         ["--accent-foreground" as string]: tokens.colors.text.primary,
+        ["--ring" as string]: tokens.focus.ring,
         ...style,
       }}
       {...props}
@@ -190,6 +191,7 @@ function NavigationMenuLink({
         color: tokens.colors.text.primary,
         ["--accent" as string]: tokens.colors.interactive.secondary,
         ["--accent-foreground" as string]: tokens.colors.text.primary,
+        ["--ring" as string]: tokens.focus.ring,
         ...style,
       }}
       {...props}

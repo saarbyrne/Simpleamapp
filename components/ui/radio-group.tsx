@@ -44,6 +44,7 @@ function RadioGroupItem({
         backgroundColor: tokens.colors.surface.sunken,
         color: tokens.colors.interactive.primary,
         boxShadow: tokens.elevation.shadow.xs,
+        ["--primary" as string]: tokens.colors.interactive.primary,
         ...style,
       }}
       {...props}

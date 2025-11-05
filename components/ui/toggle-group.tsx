@@ -35,6 +35,12 @@ function ToggleGroup({
       )}
       style={{
         borderRadius: tokens.radius.radius.sm,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
+        ["--muted" as string]: tokens.colors.surface.sunken,
+        ["--muted-foreground" as string]: tokens.colors.text.secondary,
+        ["--destructive" as string]: tokens.colors.feedback.error,
+        ["--destructive-foreground" as string]: tokens.colors.text.inverse,
         ...style,
       }}
       {...props}

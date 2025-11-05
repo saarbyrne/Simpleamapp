@@ -27,6 +27,8 @@ function Checkbox({
         borderColor: tokens.colors.border.default,
         backgroundColor: tokens.colors.surface.sunken,
         boxShadow: tokens.elevation.shadow.xs,
+        ["--primary" as string]: tokens.colors.interactive.primary,
+        ["--primary-foreground" as string]: tokens.colors.text.inverse,
         ...style,
       }}
       {...props}

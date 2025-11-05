@@ -1,8 +1,15 @@
 # Component Audit - Phase 2
 
-**Date:** January 2025
-**Status:** In Progress
-**Purpose:** Inventory all components and prepare for token migration
+**Updated:** 20 May 2024  
+**Status:** Phase 3 – Advanced navigation & visualization components migrated  
+**Purpose:** Inventory all components and track token migration rollout
+
+## Progress Snapshot
+
+- ✅ Calendar, Chart, Carousel, Collapsible, Breadcrumb, Avatar, and Input OTP now consume the design token system with Storybook coverage.
+- ✅ Stories in `components/ui/*` provide usage examples for every migrated component batch.
+- ⚠️ Next focus: dark mode token inversion and range-state QA for Calendar.
+- 📄 Reference migration note: `design-system/migrations/10-advanced-navigation-and-visualization.md`.
 
 ## Executive Summary
 

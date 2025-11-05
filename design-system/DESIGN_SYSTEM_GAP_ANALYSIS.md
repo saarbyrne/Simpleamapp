@@ -1,9 +1,14 @@
 # Design System - Gap Analysis
 ## Building the Best Design System in the World
 
-**Date:** January 2025
-**Goal:** World-class design system that rivals or exceeds industry leaders
-**Current Status:** Strong foundation, significant gaps remain
+**Updated:** 20 May 2024  
+**Goal:** World-class design system that rivals or exceeds industry leaders  
+**Current Status:** Tokens + advanced component batch are live; documentation and dark mode remain top priorities
+
+### Progress Snapshot
+- ✅ Advanced navigation & visualization components migrated to tokens with Storybook coverage (see Migration #10).
+- ✅ Lint + Storybook smoke tests green after each migration wave.
+- ⚠️ Outstanding: dark theme parity for Calendar/Chart and doc site build-out.
 
 ---
 

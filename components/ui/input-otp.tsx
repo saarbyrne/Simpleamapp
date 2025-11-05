@@ -24,6 +24,11 @@ function InputOTP({
       )}
       style={{
         gap: tokens.spacing.gap.sm,
+        ["--ring" as string]: tokens.focus.ring,
+        ["--ring-offset" as string]: tokens.focus.ringOffset,
+        ["--destructive" as string]: tokens.feedback.error,
+        ["--destructive-foreground" as string]: tokens.colors.text.inverse,
+        ["--input" as string]: tokens.colors.surface.sunken,
         ...style,
       }}
       className={cn("disabled:cursor-not-allowed", className)}
@@ -72,6 +77,7 @@ function InputOTPSlot({
         width: tokens.spacing.spacing.xl,
         fontSize: tokens.typography.body.sm.fontSize,
         lineHeight: tokens.typography.body.sm.lineHeight,
+        boxShadow: isActive ? tokens.elevation.shadow.sm : undefined,
         ...style,
       }}
       {...props}

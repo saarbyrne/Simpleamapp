@@ -212,17 +212,23 @@ function CarouselPrevious({
       data-slot="carousel-previous"
       variant={variant}
       size={size}
-      className={cn(
-        "absolute",
-        orientation === "horizontal"
-          ? "top-1/2 -left-12 -translate-y-1/2"
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
-        className,
-      )}
+      className={cn("absolute", className)}
       style={{
         width: tokens.spacing.spacing.lg,
         height: tokens.spacing.spacing.lg,
         borderRadius: tokens.radius.radius.full,
+        top:
+          orientation === "horizontal"
+            ? "50%"
+            : `calc(-1 * ${tokens.spacing.spacing['5xl']})`,
+        left:
+          orientation === "horizontal"
+            ? `calc(-1 * ${tokens.spacing.spacing['5xl']})`
+            : "50%",
+        transform:
+          orientation === "horizontal"
+            ? "translateY(-50%)"
+            : "translateX(-50%) rotate(90deg)",
         ...style,
       }}
       disabled={!canScrollPrev}
@@ -249,17 +255,25 @@ function CarouselNext({
       data-slot="carousel-next"
       variant={variant}
       size={size}
-      className={cn(
-        "absolute",
-        orientation === "horizontal"
-          ? "top-1/2 -right-12 -translate-y-1/2"
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
-        className,
-      )}
+      className={cn("absolute", className)}
       style={{
         width: tokens.spacing.spacing.lg,
         height: tokens.spacing.spacing.lg,
         borderRadius: tokens.radius.radius.full,
+        top: orientation === "horizontal" ? "50%" : undefined,
+        bottom:
+          orientation === "horizontal"
+            ? undefined
+            : `calc(-1 * ${tokens.spacing.spacing['5xl']})`,
+        right:
+          orientation === "horizontal"
+            ? `calc(-1 * ${tokens.spacing.spacing['5xl']})`
+            : undefined,
+        left: orientation === "horizontal" ? undefined : "50%",
+        transform:
+          orientation === "horizontal"
+            ? "translateY(-50%)"
+            : "translateX(-50%) rotate(90deg)",
         ...style,
       }}
       disabled={!canScrollNext}

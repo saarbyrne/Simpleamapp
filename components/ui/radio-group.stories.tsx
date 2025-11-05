@@ -1,0 +1,47 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { RadioGroup, RadioGroupItem } from './radio-group';
+import { tokens } from '@/design-system/tokens';
+import { useState } from 'react';
+
+const meta: Meta<typeof RadioGroup> = {
+  title: 'Components/Radio Group',
+  component: RadioGroup,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'centered',
+  },
+};
+
+export default meta;
+
+type Story = StoryObj<typeof RadioGroup>;
+
+export const Default: Story = {
+  render: () => {
+    const [value, setValue] = useState('available');
+
+    return (
+      <RadioGroup value={value} onValueChange={setValue}>
+        {[
+          { value: 'available', label: 'Disponible' },
+          { value: 'limited', label: 'Precaución' },
+          { value: 'unavailable', label: 'No disponible' },
+        ].map((option) => (
+          <label
+            key={option.value}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: tokens.spacing.gap.sm,
+              fontSize: tokens.typography.body.sm.fontSize,
+              color: tokens.colors.text.primary,
+            }}
+          >
+            <RadioGroupItem value={option.value} />
+            {option.label}
+          </label>
+        ))}
+      </RadioGroup>
+    );
+  },
+};

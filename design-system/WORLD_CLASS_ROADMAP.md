@@ -1,9 +1,15 @@
 # World-Class Design System - Complete Roadmap
 
-**Goal:** Build the best design system in the world
-**Scope:** Complete all 12 critical gaps + component migration
-**Timeline:** 18-24 weeks (4.5-6 months)
+**Updated:** 20 May 2024  
+**Goal:** Build the best design system in the world  
+**Scope:** Complete all 12 critical gaps + component migration  
+**Timeline:** 18-24 weeks (4.5-6 months)  
 **Approach:** Systematic, no shortcuts, world-class quality
+
+### Progress Snapshot
+- ✅ Phase 3 migration wave shipped: Calendar, Chart, Carousel, Breadcrumb, Collapsible, Avatar, Input OTP.
+- ✅ Storybook smoke test + lint automation in place for every batch.
+- ⚠️ Upcoming focus: dark mode implementation + design guidelines (Phase 4 deliverables).
 
 ---
 

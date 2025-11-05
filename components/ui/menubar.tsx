@@ -27,6 +27,7 @@ function Menubar({
         backgroundColor: tokens.colors.surface.elevated,
         borderColor: tokens.colors.border.default,
         color: tokens.colors.text.primary,
+        ["--ring" as string]: tokens.focus.ring,
         ...style,
       }}
       {...props}

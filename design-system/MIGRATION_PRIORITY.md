@@ -1,8 +1,10 @@
 # Component Migration Priority List
 
-**Phase:** 3 - Core Component Rebuild
-**Goal:** Migrate components from Tailwind classes to design token system
-**Timeline:** 6-8 weeks total
+**Updated:** 20 May 2024  
+**Phase:** 3 - Core Component Rebuild  
+**Goal:** Migrate components from Tailwind classes to design token system  
+**Timeline:** 6-8 weeks total  
+**Current Status:** Advanced navigation & visualization components shipped; dark mode + docs up next
 
 ## Priority Matrix
 
@@ -13,6 +15,14 @@ Components prioritized by:
 4. **Dependencies** - Do other components depend on it?
 
 ## Week 1: Critical Foundation (22-28 hours)
+
+## Week 3 Progress Snapshot (In-Flight)
+
+- ✅ Migrated `Calendar`, `Chart`, and `Carousel` to the token system with updated styles and Storybook coverage (`components/ui/{calendar,chart,carousel}.tsx` + `.stories.tsx`).
+- ✅ Completed token alignment and stories for `Breadcrumb`, `Avatar`, `Collapsible`, and `Input OTP`, covering remaining navigation and authentication primitives.
+- 📘 Added story-driven usage examples to reinforce documentation-first workflow (see `components/ui/*.{stories.tsx}` for new files).
+- ⚠️ Outstanding: final dark mode audit for `Chart` CSS variable mapping and integration testing for calendar range selection.
+- 🗂️ Migration write-up: `design-system/migrations/10-advanced-navigation-and-visualization.md` (new) captures decisions, token mappings, and next follow-ups.
 
 ### 🔴 P0: Critical - Blocks Everything
 
@@ -211,6 +221,150 @@ Components prioritized by:
 **Impact:** Media - listados
 
 **Notas:** Historia `components/ui/table.stories.tsx`; valores de tokens confirmados.
+
+---
+
+#### 15. Tabs Component
+**File:** `components/ui/tabs.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Media - navegación por secciones
+
+**Notas:** Historia `components/ui/tabs.stories.tsx`; triggers usan tokens `--accent`.
+
+---
+
+#### 16. Menubar Component
+**File:** `components/ui/menubar.tsx`
+**Status:** ✅ MIGRATED & DOCUMENTED
+**Impact:** Media - navegación contextual
+
+**Notas:** Historias en `components/ui/menubar.stories.tsx`; superficie/bordes desde tokens. Documentado en `design-system/migrations/08-navigation-components-migration.md`.
+
+---
+
+#### 17. Navigation Menu Component
+**File:** `components/ui/navigation-menu.tsx`
+**Status:** ✅ MIGRATED & DOCUMENTADO
+**Impact:** Alta - navegación avanzada
+
+**Notas:** Viewport y links con tokens; historia `components/ui/navigation-menu.stories.tsx`.
+
+---
+
+#### 18. Slider Component
+**File:** `components/ui/slider.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Media - control continuo
+
+**Notas:** Historia `components/ui/slider.stories.tsx`; raíces exponen `--accent`.
+
+---
+
+#### 19. Switch Component
+**File:** `components/ui/switch.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Media - toggles
+
+**Notas:** Historia `components/ui/switch.stories.tsx`; `--primary`/`--input` desde tokens.
+
+---
+
+#### 20. Progress Component
+**File:** `components/ui/progress.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Baja - feedback visual
+
+**Notas:** Historia `components/ui/progress.stories.tsx`.
+
+---
+
+#### 21. Checkbox Component
+**File:** `components/ui/checkbox.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Media - formularios
+
+**Notas:** Historia `components/ui/checkbox.stories.tsx`; se exponen `--primary`.
+
+---
+
+#### 22. Radio Group Component
+**File:** `components/ui/radio-group.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Media - formularios
+
+**Notas:** Historia `components/ui/radio-group.stories.tsx`.
+
+---
+
+#### 23. Toggle Component
+**File:** `components/ui/toggle.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Media - acciones rápidas
+
+**Notas:** Historia `components/ui/toggle.stories.tsx` (incluye grupo multiple).
+
+---
+
+#### 24. Accordion Component
+**File:** `components/ui/accordion.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Baja - paneles desplegables
+
+**Notas:** Historia `components/ui/accordion.stories.tsx`.
+
+---
+
+#### 25. Pagination Component
+**File:** `components/ui/pagination.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Media - navegación de listados
+
+**Notas:** Historia `components/ui/pagination.stories.tsx`.
+
+---
+
+#### 26. Skeleton Component
+**File:** `components/ui/skeleton.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Baja - placeholders
+
+**Notas:** Historia `components/ui/skeleton.stories.tsx`.
+
+---
+
+#### 27. Scroll Area Component
+**File:** `components/ui/scroll-area.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Baja - contenedores
+
+**Notas:** Historia `components/ui/scroll-area.stories.tsx`.
+
+---
+
+#### 28. Resizable Component
+**File:** `components/ui/resizable.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Media - paneles dinámicos
+
+**Notas:** Historia `components/ui/resizable.stories.tsx`.
+
+---
+
+#### 29. Drawer Component
+**File:** `components/ui/drawer.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Media - panel lateral adicional
+
+**Notas:** Historia `components/ui/drawer.stories.tsx`.
+
+---
+
+#### 30. Toaster Component
+**File:** `components/ui/sonner.tsx`
+**Status:** ✅ DOCUMENTADO
+**Impact:** Media - notificaciones
+
+**Notas:** Historia `components/ui/sonner.stories.tsx`.
 
 ---
 

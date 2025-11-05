@@ -57,12 +57,24 @@ function ChartContainer({
         data-slot="chart"
         data-chart={chartId}
         className={cn(
-          "[&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border flex aspect-video justify-center [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
+          "flex aspect-video justify-center [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-(--chart-cursor) [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-(--chart-dot-stroke) [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-(--chart-dot-stroke) [&_.recharts-surface]:outline-hidden",
           className,
         )}
         style={{
           fontSize: tokens.typography.body.xs.fontSize,
           lineHeight: tokens.typography.body.xs.lineHeight,
+          display: "flex",
+          justifyContent: "center",
+          backgroundColor: tokens.colors.surface.base,
+          borderRadius: tokens.radius.radius.lg,
+          padding: tokens.spacing.spacing.md,
+          ["--muted" as string]: tokens.colors.surface.sunken,
+          ["--muted-foreground" as string]: tokens.colors.text.secondary,
+          ["--border" as string]: tokens.colors.border.subtle,
+          ["--foreground" as string]: tokens.colors.text.primary,
+          ["--background" as string]: tokens.colors.surface.base,
+          ["--chart-cursor" as string]: tokens.colors.border.default,
+          ["--chart-dot-stroke" as string]: tokens.colors.surface.base,
           ...style,
         }}
         {...props}
@@ -180,10 +192,7 @@ function ChartTooltipContent({
 
   return (
     <div
-      className={cn(
-        "border-border/50 bg-background grid items-start shadow-xl",
-        className,
-      )}
+      className={cn("grid items-start", className)}
       style={{
         minWidth: "8rem",
         gap: tokens.spacing.gap.xs,
@@ -194,6 +203,9 @@ function ChartTooltipContent({
         paddingBottom: tokens.spacing.spacing.xs,
         fontSize: tokens.typography.body.xs.fontSize,
         lineHeight: tokens.typography.body.xs.lineHeight,
+        backgroundColor: tokens.colors.surface.overlay,
+        boxShadow: tokens.elevation.shadow.lg,
+        border: `1px solid ${tokens.colors.border.subtle}`,
         ...style,
       }}
     >
@@ -208,10 +220,10 @@ function ChartTooltipContent({
             <div
               key={item.dataKey}
               className={cn(
-                "[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch [&>svg]:h-2.5 [&>svg]:w-2.5",
+                "flex w-full flex-wrap items-stretch",
                 indicator === "dot" && "items-center",
               )}
-              style={{ gap: tokens.spacing.gap.sm }}
+              style={{ gap: tokens.spacing.gap.sm, color: tokens.colors.text.primary }}
             >
               {formatter && item?.value !== undefined && item.name ? (
                 formatter(item.value, item.name, item, index, item.payload)
@@ -222,23 +234,28 @@ function ChartTooltipContent({
                   ) : (
                     !hideIndicator && (
                       <div
-                        className={cn(
-                          "shrink-0 border-(--color-border) bg-(--color-bg)",
-                          {
-                            "h-2.5 w-2.5": indicator === "dot",
-                            "w-1": indicator === "line",
-                            "w-0 border-[1.5px] border-dashed bg-transparent":
-                              indicator === "dashed",
-                            "my-0.5": nestLabel && indicator === "dashed",
-                          },
-                        )}
-                        style={
-                          {
-                            "--color-bg": indicatorColor,
-                            "--color-border": indicatorColor,
-                            borderRadius: "2px",
-                          } as React.CSSProperties
-                        }
+                        style={{
+                          flexShrink: 0,
+                          height:
+                            indicator === "dot"
+                              ? tokens.spacing.spacing['2xs']
+                              : indicator === "line"
+                                ? tokens.spacing.spacing['3xs']
+                                : undefined,
+                          width:
+                            indicator === "dot"
+                              ? tokens.spacing.spacing['2xs']
+                              : indicator === "line"
+                                ? tokens.spacing.spacing['3xs']
+                                : 0,
+                          borderRadius: "2px",
+                          backgroundColor:
+                            indicator === "dashed" ? "transparent" : indicatorColor,
+                          borderStyle: indicator === "dashed" ? "dashed" : "solid",
+                          borderColor: indicatorColor,
+                          borderWidth: indicator === "dashed" ? 1.5 : 1,
+                          marginTop: nestLabel && indicator === "dashed" ? "2px" : undefined,
+                        }}
                       />
                     )
                   )}
@@ -250,12 +267,21 @@ function ChartTooltipContent({
                   >
                     <div style={{ display: "grid", gap: tokens.spacing.gap.xs }}>
                       {nestLabel ? tooltipLabel : null}
-                      <span className="text-muted-foreground">
+                      <span
+                        style={{ color: tokens.colors.text.secondary }}
+                      >
                         {itemConfig?.label || item.name}
                       </span>
                     </div>
                     {item.value && (
-                      <span className="text-foreground font-mono font-medium tabular-nums">
+                      <span
+                        style={{
+                          color: tokens.colors.text.primary,
+                          fontFamily: tokens.typography.fontFamily.mono,
+                          fontWeight: tokens.typography.fontWeight.medium,
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
                         {item.value.toLocaleString()}
                       </span>
                     )}
@@ -292,10 +318,7 @@ function ChartLegendContent({
 
   return (
     <div
-      className={cn(
-        "flex items-center justify-center",
-        className,
-      )}
+      className={cn("flex items-center justify-center", className)}
       style={{
         gap: tokens.spacing.gap.md,
         paddingBottom: verticalAlign === "top" ? undefined : tokens.spacing.spacing.sm,
@@ -310,17 +333,18 @@ function ChartLegendContent({
         return (
           <div
             key={item.value}
-            className={cn(
-              "[&>svg]:text-muted-foreground flex items-center [&>svg]:h-3 [&>svg]:w-3",
-            )}
-            style={{ gap: tokens.spacing.gap.xs }}
+            className="flex items-center"
+            style={{
+              gap: tokens.spacing.gap.xs,
+              color: tokens.colors.text.secondary,
+            }}
           >
             {itemConfig?.icon && !hideIcon ? (
               <itemConfig.icon />
             ) : (
               <div
-                className="shrink-0"
                 style={{
+                  flexShrink: 0,
                   height: tokens.spacing.spacing.sm,
                   width: tokens.spacing.spacing.sm,
                   borderRadius: "2px",

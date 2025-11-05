@@ -67,6 +67,13 @@ function Toggle({
       style={{
         borderRadius: tokens.radius.radius.sm,
         gap: tokens.spacing.gap.sm,
+        ["--accent" as string]: tokens.colors.interactive.secondary,
+        ["--accent-foreground" as string]: tokens.colors.text.primary,
+        ["--muted" as string]: tokens.colors.surface.sunken,
+        ["--muted-foreground" as string]: tokens.colors.text.secondary,
+        ["--destructive" as string]: tokens.colors.feedback.error,
+        ["--destructive-foreground" as string]: tokens.colors.text.inverse,
+        ["--ring" as string]: tokens.focus.ring,
         ...sizeStyles[currentSize],
         ...style,
       }}

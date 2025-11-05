@@ -15,6 +15,7 @@ Install and configure Storybook 8 for Next.js with essential addons
 - Documented Badge, Button, Input, Label, Select, and Dialog stories as part of the design-system migration.
 - Sidebar migrado con tokens y documentado en Storybook, eliminando los valores arbitrarios del layout principal.
 - Se añadieron historias para Alert, AlertDialog, Table, Popover, Tooltip, HoverCard, Sheet y Command; los overlays comparten el mismo set de tokens.
+- Navegación avanzada (Tabs, Menubar, NavigationMenu) y controles (Checkbox, Radio, Toggle, Slider, Switch, Progress, Pagination, Drawer, etc.) tienen historias en Storybook y tokens alineados.
 
 ## Progress
 

@@ -49,6 +49,7 @@ function ResizableHandle({
       )}
       style={{
         backgroundColor: tokens.colors.border.default,
+        ["--ring" as string]: tokens.focus.ring,
         ...style,
       }}
       {...props}
