@@ -27,6 +27,7 @@ export * as zIndexTokens from './z-index';
 export * as elevationTokens from './elevation';
 export * as radiusTokens from './radius';
 export * as motionTokens from './motion';
+export * as iconSystem from './icons';
 
 // Individual token imports for unified object
 import { colors, primitives, surface, text, border, interactive, feedback, focus, darkMode } from './colors';
@@ -36,6 +37,7 @@ import { zIndex } from './z-index';
 import { elevation } from './elevation';
 import { borderRadius } from './radius';
 import { motion } from './motion';
+import { iconTokens } from './icons';
 
 /**
  * Unified Token Object
@@ -56,6 +58,7 @@ export const tokens = {
   elevation,
   radius: borderRadius,
   motion,
+  icons: iconTokens,
 } as const;
 
 export type Tokens = typeof tokens;
