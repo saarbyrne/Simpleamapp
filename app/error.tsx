@@ -5,6 +5,7 @@ import { AlertCircle, RefreshCw, Home } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import * as Sentry from '@sentry/nextjs'
 
 export default function Error({
   error,
@@ -14,8 +15,9 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
+    // Log the error to Sentry error tracking
     console.error('Application error:', error)
+    Sentry.captureException(error)
   }, [error])
 
   return (
