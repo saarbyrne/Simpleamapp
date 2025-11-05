@@ -261,8 +261,9 @@ export const focus = {
 } as const;
 
 /**
- * DARK MODE SEMANTIC TOKENS (Future)
- * These will be swapped in when dark mode is active
+ * DARK MODE SEMANTIC TOKENS
+ * These are swapped in when dark mode is active
+ * Designed for WCAG AA contrast compliance on dark backgrounds
  */
 export const darkMode = {
   surface: {
@@ -294,7 +295,54 @@ export const darkMode = {
     strong: primitives.gray[600],
     subtle: primitives.gray[800],
   },
-  // interactive and feedback remain similar in dark mode
+  interactive: {
+    // Primary actions - slightly lighter in dark mode for contrast
+    primary: primitives.blue[500],
+    primaryHover: primitives.blue[400],
+    primaryActive: primitives.blue[600],
+    primaryDisabled: primitives.gray[700],
+
+    // Secondary actions - lighter grays for visibility
+    secondary: primitives.gray[800],
+    secondaryHover: primitives.gray[700],
+    secondaryActive: primitives.gray[600],
+    secondaryDisabled: primitives.gray[900],
+
+    // Destructive actions - lighter red for better visibility
+    destructive: primitives.red[500],
+    destructiveHover: primitives.red[400],
+    destructiveActive: primitives.red[600],
+
+    // Ghost actions - subtle hover states
+    ghost: primitives.transparent,
+    ghostHover: primitives.gray[800],
+    ghostActive: primitives.gray[700],
+  },
+  feedback: {
+    // Success states - adjusted for dark backgrounds
+    success: primitives.green[500],
+    successLight: primitives.green[950],
+    successBorder: primitives.green[700],
+
+    // Error states - adjusted for dark backgrounds
+    error: primitives.red[500],
+    errorLight: primitives.red[950],
+    errorBorder: primitives.red[700],
+
+    // Warning states - adjusted for dark backgrounds
+    warning: primitives.amber[500],
+    warningLight: primitives.amber[950],
+    warningBorder: primitives.amber[700],
+
+    // Info states - adjusted for dark backgrounds
+    info: primitives.sky[500],
+    infoLight: primitives.sky[950],
+    infoBorder: primitives.sky[700],
+  },
+  focus: {
+    ring: primitives.blue[500],
+    ringOffset: primitives.gray[950],
+  },
 } as const;
 
 /**
