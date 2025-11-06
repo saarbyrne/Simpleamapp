@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ArrowRightIcon, PlusIcon, Trash2Icon, DownloadIcon, CheckIcon, XIcon } from 'lucide-react';
-import { Button, ButtonGroup } from './button';
-import { tokens } from '@/design-system/tokens';
+import { Button } from './button';
 
 /**
  * Button Component Stories
@@ -137,7 +136,7 @@ export const Link: Story = {
  */
 export const SizeVariants: Story = {
   render: () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.md, alignItems: 'flex-start' }}>
+    <div className="flex flex-col gap-4 items-start">
       <Button size="sm">Small</Button>
       <Button size="default">Default</Button>
       <Button size="lg">Large</Button>
@@ -170,7 +169,7 @@ export const Loading: Story = {
  */
 export const LoadingVariants: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: tokens.spacing.gap.md, flexWrap: 'wrap' }}>
+    <div className="flex gap-4 flex-wrap">
       <Button loading>Default</Button>
       <Button variant="secondary" loading>Secondary</Button>
       <Button variant="destructive" loading>Destructive</Button>
@@ -188,7 +187,7 @@ export const LoadingVariants: Story = {
  */
 export const LoadingSizes: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: tokens.spacing.gap.md, alignItems: 'center' }}>
+    <div className="flex gap-4 items-center">
       <Button size="sm" loading>Small</Button>
       <Button loading>Default</Button>
       <Button size="lg" loading>Large</Button>
@@ -236,7 +235,7 @@ export const WithRightIcon: Story = {
  */
 export const IconExamples: Story = {
   render: () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.md, alignItems: 'flex-start' }}>
+    <div className="flex flex-col gap-4 items-start">
       <Button leftIcon={<PlusIcon size={16} />}>
         Add Item
       </Button>
@@ -282,7 +281,7 @@ export const Disabled: Story = {
  */
 export const DisabledVariants: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: tokens.spacing.gap.md, flexWrap: 'wrap' }}>
+    <div className="flex gap-4 flex-wrap">
       <Button disabled>Default</Button>
       <Button variant="secondary" disabled>Secondary</Button>
       <Button variant="destructive" disabled>Destructive</Button>
@@ -340,64 +339,6 @@ export const FullWidthForm: Story = {
 };
 
 // ============================================================================
-// Button Groups
-// ============================================================================
-
-/**
- * Horizontal button group
- */
-export const ButtonGroupHorizontal: Story = {
-  render: () => (
-    <ButtonGroup>
-      <Button variant="outline">Left</Button>
-      <Button variant="outline">Middle</Button>
-      <Button variant="outline">Right</Button>
-    </ButtonGroup>
-  ),
-  parameters: {
-    controls: { disable: true },
-  },
-};
-
-/**
- * Vertical button group
- */
-export const ButtonGroupVertical: Story = {
-  render: () => (
-    <ButtonGroup vertical>
-      <Button variant="outline">Top</Button>
-      <Button variant="outline">Middle</Button>
-      <Button variant="outline">Bottom</Button>
-    </ButtonGroup>
-  ),
-  parameters: {
-    controls: { disable: true },
-  },
-};
-
-/**
- * Button group with icons
- */
-export const ButtonGroupWithIcons: Story = {
-  render: () => (
-    <ButtonGroup>
-      <Button variant="outline" size="icon" aria-label="Accept">
-        <CheckIcon size={16} />
-      </Button>
-      <Button variant="outline" size="icon" aria-label="Reject">
-        <XIcon size={16} />
-      </Button>
-      <Button variant="outline" size="icon" aria-label="Delete">
-        <Trash2Icon size={16} />
-      </Button>
-    </ButtonGroup>
-  ),
-  parameters: {
-    controls: { disable: true },
-  },
-};
-
-// ============================================================================
 // Complex Examples
 // ============================================================================
 
@@ -406,7 +347,7 @@ export const ButtonGroupWithIcons: Story = {
  */
 export const AllVariants: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: tokens.spacing.gap.md, flexWrap: 'wrap' }}>
+    <div className="flex gap-4 flex-wrap">
       <Button>Default</Button>
       <Button variant="secondary">Secondary</Button>
       <Button variant="destructive">Destructive</Button>
@@ -443,7 +384,7 @@ export const Showcase: Story = {
         }}>
           Primary Actions
         </h3>
-        <div style={{ display: 'flex', gap: tokens.spacing.gap.md, flexWrap: 'wrap' }}>
+        <div className="flex gap-4 flex-wrap">
           <Button leftIcon={<PlusIcon size={16} />}>
             Create New
           </Button>
@@ -465,7 +406,7 @@ export const Showcase: Story = {
         }}>
           Destructive Actions
         </h3>
-        <div style={{ display: 'flex', gap: tokens.spacing.gap.md, flexWrap: 'wrap' }}>
+        <div className="flex gap-4 flex-wrap">
           <Button variant="destructive" leftIcon={<Trash2Icon size={16} />}>
             Delete
           </Button>
@@ -487,7 +428,7 @@ export const Showcase: Story = {
         }}>
           Loading States
         </h3>
-        <div style={{ display: 'flex', gap: tokens.spacing.gap.md, flexWrap: 'wrap' }}>
+        <div className="flex gap-4 flex-wrap">
           <Button loading>Saving...</Button>
           <Button variant="secondary" loading>Processing</Button>
           <Button variant="outline" loading>Loading</Button>

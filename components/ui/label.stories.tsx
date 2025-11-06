@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Label, LabelDescription, LabelError } from './label';
+import { Label } from './label';
 import { Input } from './input';
-import { tokens } from '@/design-system/tokens';
 
 /**
  * Label Component Stories
@@ -94,7 +93,7 @@ export const WithDescription: Story = {
   render: () => (
     <div style={{ width: '320px', display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
       <Label htmlFor="email">Email Address</Label>
-      <LabelDescription>We'll use this to send team updates and notifications.</LabelDescription>
+      <p className="text-sm text-muted-foreground">We'll use this to send team updates and notifications.</p>
       <Input id="email" type="email" placeholder="player@example.com" />
     </div>
   ),
@@ -180,7 +179,7 @@ export const WithError: Story = {
     <div style={{ width: '320px', display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
       <Label htmlFor="username" required>Username</Label>
       <Input id="username" variant="error" defaultValue="ab" />
-      <LabelError>Username must be at least 3 characters.</LabelError>
+      <p className="text-sm text-destructive">Username must be at least 3 characters.</p>
     </div>
   ),
   parameters: {
@@ -196,8 +195,8 @@ export const MultipleErrors: Story = {
     <div style={{ width: '320px', display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
       <Label htmlFor="password" required>Password</Label>
       <Input id="password" type="password" variant="error" defaultValue="12" />
-      <LabelError>Password is too short.</LabelError>
-      <LabelError>Password must contain at least one letter.</LabelError>
+      <p className="text-sm text-destructive">Password is too short.</p>
+      <p className="text-sm text-destructive">Password must contain at least one letter.</p>
     </div>
   ),
   parameters: {
@@ -235,9 +234,9 @@ export const CompleteFormField: Story = {
   render: () => (
     <div style={{ width: '400px', display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
       <Label htmlFor="bio" required>Biography</Label>
-      <LabelDescription>
+      <p className="text-sm text-muted-foreground">
         Tell us about your athletic background and achievements. This will be shown on your profile.
-      </LabelDescription>
+      </p>
       <textarea
         id="bio"
         rows={4}
@@ -291,7 +290,7 @@ export const FormExample: Story = {
       {/* Field with description */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
         <Label htmlFor="form-email" required>Email Address</Label>
-        <LabelDescription>We'll use this for important team communications.</LabelDescription>
+        <p className="text-sm text-muted-foreground">We'll use this for important team communications.</p>
         <Input id="form-email" type="email" placeholder="player@example.com" />
       </div>
 
@@ -299,7 +298,7 @@ export const FormExample: Story = {
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
         <Label htmlFor="form-phone" required>Phone Number</Label>
         <Input id="form-phone" variant="error" defaultValue="555" />
-        <LabelError>Please enter a valid phone number.</LabelError>
+        <p className="text-sm text-destructive">Please enter a valid phone number.</p>
       </div>
 
       {/* Disabled field */}
@@ -327,14 +326,14 @@ export const AllHelperComponents: Story = {
       {/* Success state */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
         <Label htmlFor="success-field" required>Validated Field</Label>
-        <LabelDescription>This field has been successfully validated.</LabelDescription>
+        <p className="text-sm text-muted-foreground">This field has been successfully validated.</p>
         <Input id="success-field" variant="success" defaultValue="Valid input" />
       </div>
 
       {/* Warning state */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
         <Label htmlFor="warning-field" optional>Optional Field</Label>
-        <LabelDescription>Providing this information helps us serve you better.</LabelDescription>
+        <p className="text-sm text-muted-foreground">Providing this information helps us serve you better.</p>
         <Input id="warning-field" variant="warning" defaultValue="Uncommon format" />
       </div>
     </div>
@@ -352,13 +351,13 @@ export const SizeCombinations: Story = {
     <div style={{ width: '400px', display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xl }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
         <Label htmlFor="small-combo" size="sm" required>Small Field</Label>
-        <LabelDescription size="sm">Smaller description text.</LabelDescription>
+        <p className="text-xs text-muted-foreground">Smaller description text.</p>
         <Input id="small-combo" size="sm" placeholder="Small input" />
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
         <Label htmlFor="large-combo" size="lg" required>Large Field</Label>
-        <LabelDescription size="lg">Larger description text for better readability.</LabelDescription>
+        <p className="text-base text-muted-foreground">Larger description text for better readability.</p>
         <Input id="large-combo" size="lg" placeholder="Large input" />
       </div>
     </div>

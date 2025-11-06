@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -56,11 +55,9 @@ export const WithAction: Story = {
           to balance intensity and recovery.
         </p>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex gap-2">
         <Button variant="secondary">View schedule</Button>
-        <CardAction>
-          <Button>Update plan</Button>
-        </CardAction>
+        <Button>Update plan</Button>
       </CardFooter>
     </Card>
   ),

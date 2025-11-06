@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { ThemeToggle, ThemeToggleSimple } from './theme-toggle';
+import { ThemeToggle } from './theme-toggle';
 import { ThemeProvider } from '../theme-provider';
 
 const meta: Meta<typeof ThemeToggle> = {
@@ -35,23 +35,6 @@ export const Default: Story = {
         <p className="text-sm text-muted-foreground">
           Click the button above to switch between light, dark, and system themes.
           The current theme will be saved to localStorage.
-        </p>
-      </div>
-    </div>
-  ),
-};
-
-export const SimpleToggle: Story = {
-  render: () => (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        <p className="text-sm font-medium">Simple Theme Toggle</p>
-        <ThemeToggleSimple />
-      </div>
-      <div className="rounded-lg border p-6">
-        <p className="text-sm text-muted-foreground">
-          This is a simple toggle that switches between light and dark mode only
-          (no system option).
         </p>
       </div>
     </div>

@@ -7,7 +7,6 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogBody,
   DialogTitle,
   DialogTrigger,
 } from './dialog';
@@ -20,14 +19,11 @@ import { Label } from './label';
  * A modal dialog that interrupts the user with important content and expects a response.
  *
  * ## Features
- * - **Size Variants**: sm, md, lg, xl, fullscreen
- * - **Animation Variants**: fade, scale, slide-up, slide-down
- * - **Scrollable Content**: Built-in support via DialogBody
- * - **Loading States**: Show loading spinner while fetching data
- * - **Optional Close Button**: Hide/show X button
- * - **Full Keyboard Support**: Esc to close, Tab to trap focus
- * - **Complete Token Integration**: All styling from design system
- * - **WCAG 2.1 AA Compliant**: Proper ARIA labels and focus management
+ * - **Modal Overlay**: Interrupts user with important content
+ * - **Keyboard Support**: Esc to close, Tab trap focus
+ * - **Accessible**: Built on Radix UI with proper ARIA labels
+ * - **Customizable**: Style with Tailwind classes
+ * - **Composable**: Header, content, footer components
  *
  * ## Usage
  * ```tsx
@@ -35,14 +31,14 @@ import { Label } from './label';
  *   <DialogTrigger asChild>
  *     <Button>Open Dialog</Button>
  *   </DialogTrigger>
- *   <DialogContent size="md" animation="scale">
+ *   <DialogContent>
  *     <DialogHeader>
  *       <DialogTitle>Title</DialogTitle>
  *       <DialogDescription>Description</DialogDescription>
  *     </DialogHeader>
- *     <DialogBody scrollable>
- *       {/* Content *\/}
- *     </DialogBody>
+ *     <div className="py-4">
+ *       Content goes here
+ *     </div>
  *     <DialogFooter>
  *       <Button variant="outline">Cancel</Button>
  *       <Button>Confirm</Button>
@@ -157,7 +153,7 @@ function SizeLargeDemo() {
             This is a large dialog with more space for complex content.
           </DialogDescription>
         </DialogHeader>
-        <DialogBody>
+        <div className="py-4">
           <p>Large dialogs are useful for forms with many fields or detailed information.</p>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -169,7 +165,7 @@ function SizeLargeDemo() {
               <Input id="last-name" placeholder="Smith" />
             </div>
           </div>
-        </DialogBody>
+        </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
           <Button onClick={() => setOpen(false)}>Save</Button>
@@ -198,7 +194,7 @@ function SizeExtraLargeDemo() {
             This is an extra large dialog for complex layouts or data tables.
           </DialogDescription>
         </DialogHeader>
-        <DialogBody>
+        <div className="py-4">
           <p>Extra large dialogs can accommodate complex multi-column layouts, charts, or tables.</p>
           <div className="grid grid-cols-3 gap-4">
             <div>
@@ -214,7 +210,7 @@ function SizeExtraLargeDemo() {
               <Input placeholder="Data" />
             </div>
           </div>
-        </DialogBody>
+        </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
           <Button onClick={() => setOpen(false)}>Save</Button>
@@ -243,7 +239,7 @@ function FullscreenDemo() {
             This dialog takes up the entire viewport, useful for immersive experiences.
           </DialogDescription>
         </DialogHeader>
-        <DialogBody scrollable>
+        <div className="py-4 max-h-[300px] overflow-y-auto">
           <p>Fullscreen dialogs are great for:</p>
           <ul className="list-disc pl-6 space-y-2">
             <li>Multi-step wizards</li>
@@ -257,7 +253,7 @@ function FullscreenDemo() {
               incididunt ut labore et dolore magna aliqua.
             </p>
           ))}
-        </DialogBody>
+        </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
           <Button onClick={() => setOpen(false)}>Done</Button>
@@ -403,7 +399,7 @@ function ScrollableContentDemo() {
           </DialogDescription>
         </DialogHeader>
 
-        <DialogBody scrollable>
+        <div className="py-4 max-h-[300px] overflow-y-auto">
           <div className="space-y-4">
             <p className="font-semibold">1. Introduction</p>
             <p>
@@ -434,7 +430,7 @@ function ScrollableContentDemo() {
               </div>
             ))}
           </div>
-        </DialogBody>
+        </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Decline</Button>
@@ -479,7 +475,7 @@ function LoadingStateDemo() {
           </DialogDescription>
         </DialogHeader>
 
-        <DialogBody>
+        <div className="py-4">
           <div className="space-y-4">
             <div>
               <Label>Name</Label>
@@ -494,7 +490,7 @@ function LoadingStateDemo() {
               <Input value="23" readOnly />
             </div>
           </div>
-        </DialogBody>
+        </div>
 
         <DialogFooter>
           <Button onClick={() => setOpen(false)}>Close</Button>
@@ -572,7 +568,7 @@ function ComplexFormDemo() {
           </DialogDescription>
         </DialogHeader>
 
-        <DialogBody scrollable>
+        <div className="py-4 max-h-[300px] overflow-y-auto">
           <form className="space-y-6">
             <div className="space-y-4">
               <h3 className="font-semibold">Personal Information</h3>
@@ -628,7 +624,7 @@ function ComplexFormDemo() {
               </div>
             </div>
           </form>
-        </DialogBody>
+        </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
