@@ -21,10 +21,10 @@ export const Default: Story = {
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={60}>
           <div
+            className="bg-muted"
             style={{
               height: '100%',
               padding: tokens.spacing.spacing.md,
-              backgroundColor: tokens.colors.surface.sunken,
               borderRadius: tokens.radius.radius.sm,
             }}
           >
@@ -34,15 +34,14 @@ export const Default: Story = {
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={40}>
           <div
+            className="bg-card border"
             style={{
               height: '100%',
               padding: tokens.spacing.spacing.md,
-              backgroundColor: tokens.colors.surface.elevated,
               borderRadius: tokens.radius.radius.sm,
-              border: `1px solid ${tokens.colors.border.default}`,
             }}
           >
-            Notas rápidas
+            Quick notes
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
