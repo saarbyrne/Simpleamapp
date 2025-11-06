@@ -62,12 +62,12 @@ const PatternCard = ({
   pattern: string
   children: React.ReactNode
 }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle>{title}</CardTitle>
-      <CardDescription className="font-mono text-xs">{pattern}</CardDescription>
+  <Card className="border-2">
+    <CardHeader className="pb-4">
+      <CardTitle className="text-lg">{title}</CardTitle>
+      <CardDescription className="font-mono text-sm mt-2">{pattern}</CardDescription>
     </CardHeader>
-    <CardContent>{children}</CardContent>
+    <CardContent className="pt-4">{children}</CardContent>
   </Card>
 )
 
@@ -77,15 +77,15 @@ const PatternCard = ({
  */
 export const ButtonLabels: Story = {
   render: () => (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Button Labels</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-3xl font-bold mb-3">Button Labels</h2>
+        <p className="text-lg text-muted-foreground">
           Use <strong>verb + noun</strong> pattern. Be specific about what happens.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <PatternCard title="Primary Actions" pattern="[Verb] + [noun]">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -165,15 +165,15 @@ export const ButtonLabels: Story = {
  */
 export const ErrorMessages: Story = {
   render: () => (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Error Messages</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-3xl font-bold mb-3">Error Messages</h2>
+        <p className="text-lg text-muted-foreground">
           Pattern: <strong>[What's wrong] + [How to fix it]</strong>
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-6">
         <PatternCard title="Required Fields" pattern="[Field] is required. [Action]">
           <div className="space-y-4">
             <div>
@@ -256,42 +256,42 @@ export const ErrorMessages: Story = {
  */
 export const SuccessMessages: Story = {
   render: () => (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Success Messages</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-3xl font-bold mb-3">Success Messages</h2>
+        <p className="text-lg text-muted-foreground">
           Pattern: <strong>[What succeeded] + [Next action (optional)]</strong>
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-6">
         <PatternCard title="Simple Confirmations" pattern="[Object] [action] successfully">
-          <div className="space-y-3">
-            <Alert className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
-              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <AlertTitle className="text-green-900 dark:text-green-100">
+          <div className="space-y-4">
+            <Alert className="border-2 border-green-600 dark:border-green-500">
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <AlertTitle className="text-base">
                 Player saved successfully
               </AlertTitle>
             </Alert>
-            <Alert className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
-              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <AlertTitle className="text-green-900 dark:text-green-100">
+            <Alert className="border-2 border-green-600 dark:border-green-500">
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <AlertTitle className="text-base">
                 Changes saved
               </AlertTitle>
             </Alert>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground mt-2">
               ✅ Brief, clear, past tense
             </div>
           </div>
         </PatternCard>
 
         <PatternCard title="With Next Actions" pattern="[Success]. [Suggested next step]">
-          <Alert className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
-            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-            <AlertTitle className="text-green-900 dark:text-green-100">
+          <Alert className="border-2 border-green-600 dark:border-green-500">
+            <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <AlertTitle className="text-base">
               Player added successfully
             </AlertTitle>
-            <AlertDescription className="text-green-700 dark:text-green-300">
+            <AlertDescription>
               View player profile or add another player
             </AlertDescription>
           </Alert>
@@ -301,12 +301,12 @@ export const SuccessMessages: Story = {
         </PatternCard>
 
         <PatternCard title="Progressive Actions" pattern="[Step indicator]. [What's next]">
-          <Alert className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
-            <InfoIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <AlertTitle className="text-blue-900 dark:text-blue-100">
+          <Alert className="border-2 border-blue-600 dark:border-blue-500">
+            <InfoIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <AlertTitle className="text-base">
               Step 1 of 3 complete
             </AlertTitle>
-            <AlertDescription className="text-blue-700 dark:text-blue-300">
+            <AlertDescription>
               Continue to payment details
             </AlertDescription>
           </Alert>
@@ -324,15 +324,15 @@ export const SuccessMessages: Story = {
  */
 export const WarningMessages: Story = {
   render: () => (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Warning Messages</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-3xl font-bold mb-3">Warning Messages</h2>
+        <p className="text-lg text-muted-foreground">
           Pattern: <strong>[What will happen] + [How to prevent it (optional)]</strong>
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-6">
         <PatternCard title="Unsaved Changes" pattern="[Consequence]. [How to save]">
           <Alert>
             <AlertTriangle className="h-4 w-4" />
@@ -377,15 +377,15 @@ export const WarningMessages: Story = {
  */
 export const ConfirmationDialogs: Story = {
   render: () => (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Confirmation Dialogs</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-3xl font-bold mb-3">Confirmation Dialogs</h2>
+        <p className="text-lg text-muted-foreground">
           Pattern: <strong>Question + Consequence + Actions</strong>
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <PatternCard title="Delete Confirmation" pattern="[Question] + [Permanent impact]">
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -443,15 +443,15 @@ export const ConfirmationDialogs: Story = {
  */
 export const EmptyStates: Story = {
   render: () => (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Empty States</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-3xl font-bold mb-3">Empty States</h2>
+        <p className="text-lg text-muted-foreground">
           Pattern: <strong>[Current state] + [Action to take] + [Why it matters (optional)]</strong>
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-6">
         <PatternCard title="No Data Yet" pattern="No [items] yet. [Action to get started]">
           <div className="text-center py-12 border rounded-lg">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-muted mb-4">
@@ -504,15 +504,15 @@ export const EmptyStates: Story = {
  */
 export const FormFields: Story = {
   render: () => (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Form Fields</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-3xl font-bold mb-3">Form Fields</h2>
+        <p className="text-lg text-muted-foreground">
           Use sentence case labels, provide context before input, and show format in placeholders
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <PatternCard title="Required Field" pattern="Label + asterisk + helper text">
           <div className="space-y-2">
             <Label htmlFor="email-req">
@@ -576,63 +576,63 @@ export const FormFields: Story = {
  */
 export const ToneMatrix: Story = {
   render: () => (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Tone Matrix</h2>
-        <p className="text-muted-foreground">How our tone adapts to different contexts</p>
+        <h2 className="text-3xl font-bold mb-3">Tone Matrix</h2>
+        <p className="text-lg text-muted-foreground">How our tone adapts to different contexts</p>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-3 font-semibold">Context</th>
-              <th className="text-left p-3 font-semibold">Example</th>
-              <th className="text-left p-3 font-semibold">Tone</th>
+        <table className="w-full border-collapse border-2 rounded-lg">
+          <thead className="bg-muted/50">
+            <tr className="border-b-2">
+              <th className="text-left p-4 font-semibold">Context</th>
+              <th className="text-left p-4 font-semibold">Example</th>
+              <th className="text-left p-4 font-semibold">Tone</th>
             </tr>
           </thead>
           <tbody>
             <tr className="border-b">
-              <td className="p-3">Documentation</td>
-              <td className="p-3 font-mono text-sm">
+              <td className="p-4 font-medium">Documentation</td>
+              <td className="p-4 font-mono text-sm">
                 Import the component from `@/components/ui/button`
               </td>
-              <td className="p-3 text-sm text-muted-foreground">Clear, direct</td>
+              <td className="p-4 text-sm text-muted-foreground">Clear, direct</td>
             </tr>
             <tr className="border-b">
-              <td className="p-3">Error</td>
-              <td className="p-3 text-sm">Email is required. Enter your email address.</td>
-              <td className="p-3 text-sm text-muted-foreground">Calm, specific</td>
+              <td className="p-4">Error</td>
+              <td className="p-4 text-sm">Email is required. Enter your email address.</td>
+              <td className="p-4 text-sm text-muted-foreground">Calm, specific</td>
             </tr>
             <tr className="border-b">
-              <td className="p-3">Success</td>
-              <td className="p-3 text-sm">Player saved successfully</td>
-              <td className="p-3 text-sm text-muted-foreground">Brief, positive</td>
+              <td className="p-4">Success</td>
+              <td className="p-4 text-sm">Player saved successfully</td>
+              <td className="p-4 text-sm text-muted-foreground">Brief, positive</td>
             </tr>
             <tr className="border-b">
-              <td className="p-3">Warning</td>
-              <td className="p-3 text-sm">Unsaved changes will be lost</td>
-              <td className="p-3 text-sm text-muted-foreground">Honest, direct</td>
+              <td className="p-4">Warning</td>
+              <td className="p-4 text-sm">Unsaved changes will be lost</td>
+              <td className="p-4 text-sm text-muted-foreground">Honest, direct</td>
             </tr>
             <tr className="border-b">
-              <td className="p-3">Empty state</td>
-              <td className="p-3 text-sm">No players yet. Add your first player.</td>
-              <td className="p-3 text-sm text-muted-foreground">Encouraging</td>
+              <td className="p-4">Empty state</td>
+              <td className="p-4 text-sm">No players yet. Add your first player.</td>
+              <td className="p-4 text-sm text-muted-foreground">Encouraging</td>
             </tr>
             <tr className="border-b">
-              <td className="p-3">Loading</td>
-              <td className="p-3 text-sm">Loading players...</td>
-              <td className="p-3 text-sm text-muted-foreground">Informative</td>
+              <td className="p-4">Loading</td>
+              <td className="p-4 text-sm">Loading players...</td>
+              <td className="p-4 text-sm text-muted-foreground">Informative</td>
             </tr>
             <tr className="border-b">
-              <td className="p-3">Tooltip</td>
-              <td className="p-3 text-sm">Filter by position</td>
-              <td className="p-3 text-sm text-muted-foreground">Concise</td>
+              <td className="p-4">Tooltip</td>
+              <td className="p-4 text-sm">Filter by position</td>
+              <td className="p-4 text-sm text-muted-foreground">Concise</td>
             </tr>
             <tr>
-              <td className="p-3">Help text</td>
-              <td className="p-3 text-sm">Choose the player's primary position</td>
-              <td className="p-3 text-sm text-muted-foreground">Supportive</td>
+              <td className="p-4">Help text</td>
+              <td className="p-4 text-sm">Choose the player's primary position</td>
+              <td className="p-4 text-sm text-muted-foreground">Supportive</td>
             </tr>
           </tbody>
         </table>

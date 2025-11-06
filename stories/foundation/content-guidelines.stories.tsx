@@ -70,35 +70,35 @@ const Example = ({
   title: string
   description?: string
 }) => (
-  <div className="space-y-3">
+  <div className="space-y-4">
     <div>
-      <h4 className="font-semibold text-sm mb-1">{title}</h4>
+      <h4 className="font-semibold text-base mb-2">{title}</h4>
       {description && (
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <p className="text-sm text-muted-foreground">{description}</p>
       )}
     </div>
-    <div className="space-y-2">
-      <div className="p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
-        <div className="flex items-start gap-2">
-          <Icon icon={CheckIcon} size="sm" color="success" decorative className="mt-0.5" />
-          <div className="flex-1">
-            <div className="text-xs text-green-700 dark:text-green-300 font-semibold mb-1">
+    <div className="space-y-4">
+      <div className="p-6 bg-background border-2 border-green-600 dark:border-green-500 rounded-lg">
+        <div className="flex items-start gap-3">
+          <Icon icon={CheckIcon} size="md" color="success" decorative className="mt-0.5 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-semibold mb-2 text-green-700 dark:text-green-400">
               Good
             </div>
-            <div className="text-sm text-green-900 dark:text-green-100">
+            <div className="text-base">
               {good}
             </div>
           </div>
         </div>
       </div>
-      <div className="p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
-        <div className="flex items-start gap-2">
-          <Icon icon={XIcon} size="sm" color="error" decorative className="mt-0.5" />
-          <div className="flex-1">
-            <div className="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">
+      <div className="p-6 bg-background border-2 border-red-600 dark:border-red-500 rounded-lg">
+        <div className="flex items-start gap-3">
+          <Icon icon={XIcon} size="md" color="error" decorative className="mt-0.5 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-semibold mb-2 text-red-700 dark:text-red-400">
               Avoid
             </div>
-            <div className="text-sm text-red-900 dark:text-red-100">{bad}</div>
+            <div className="text-base">{bad}</div>
           </div>
         </div>
       </div>
@@ -111,10 +111,10 @@ const Example = ({
  */
 export const WritingPrinciples: Story = {
   render: () => (
-    <div className="space-y-8">
+    <div className="max-w-4xl mx-auto space-y-10 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Writing Principles</h2>
-        <p className="text-muted-foreground mb-6">
+        <h2 className="text-3xl font-bold mb-3">Writing Principles</h2>
+        <p className="text-lg text-muted-foreground">
           Follow these principles for clear, user-focused content
         </p>
       </div>
@@ -162,10 +162,10 @@ export const WritingPrinciples: Story = {
  */
 export const Capitalization: Story = {
   render: () => (
-    <div className="space-y-8">
+    <div className="max-w-4xl mx-auto space-y-10 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Capitalization</h2>
-        <p className="text-muted-foreground mb-6">
+        <h2 className="text-3xl font-bold mb-3">Capitalization</h2>
+        <p className="text-lg text-muted-foreground">
           Use sentence case for all UI text (following IBM Carbon standard)
         </p>
       </div>
@@ -195,9 +195,9 @@ export const Capitalization: Story = {
           bad="Email Address"
         />
 
-        <div className="p-4 border rounded-lg">
-          <h3 className="font-semibold mb-3">Exceptions (Use Title Case)</h3>
-          <ul className="space-y-2 text-sm">
+        <div className="p-6 border-2 rounded-lg bg-muted/30">
+          <h3 className="font-semibold text-base mb-4">Exceptions (Use Title Case)</h3>
+          <ul className="space-y-3 text-base">
             <li className="flex items-start gap-2">
               <span className="text-muted-foreground">•</span>
               <span>
@@ -228,18 +228,18 @@ export const Capitalization: Story = {
  */
 export const MicrocopyPatterns: Story = {
   render: () => (
-    <div className="space-y-8">
+    <div className="max-w-5xl mx-auto space-y-10 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Microcopy Patterns</h2>
-        <p className="text-muted-foreground mb-6">
+        <h2 className="text-3xl font-bold mb-3">Microcopy Patterns</h2>
+        <p className="text-lg text-muted-foreground">
           Standardized text for common UI elements
         </p>
       </div>
 
       {/* Button Labels */}
-      <div className="space-y-3">
-        <h3 className="font-semibold">Button Labels (verb + noun)</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-4">
+        <h3 className="font-semibold text-xl">Button Labels (verb + noun)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Example title="Primary Actions" good="Save changes" bad="Save" />
           <Example title="Destructive Actions" good="Delete player" bad="Delete" />
           <Example title="Secondary Actions" good="Go back" bad="Back" />
@@ -252,9 +252,9 @@ export const MicrocopyPatterns: Story = {
       </div>
 
       {/* Error Messages */}
-      <div className="space-y-3">
-        <h3 className="font-semibold">Error Messages (problem + solution)</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-4">
+        <h3 className="font-semibold text-xl">Error Messages (problem + solution)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Example
             title="Required Fields"
             good="Email is required. Enter your email address."
@@ -287,9 +287,9 @@ export const MicrocopyPatterns: Story = {
       </div>
 
       {/* Success Messages */}
-      <div className="space-y-3">
-        <h3 className="font-semibold">Success Messages (confirmation + next action)</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-4">
+        <h3 className="font-semibold text-xl">Success Messages (confirmation + next action)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Example
             title="Simple Confirmation"
             good="Player saved successfully"
@@ -310,9 +310,9 @@ export const MicrocopyPatterns: Story = {
       </div>
 
       {/* Empty States */}
-      <div className="space-y-3">
-        <h3 className="font-semibold">Empty States (state + action)</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-4">
+        <h3 className="font-semibold text-xl">Empty States (state + action)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Example
             title="No Data Yet"
             good={
@@ -346,10 +346,10 @@ export const MicrocopyPatterns: Story = {
  */
 export const InclusiveLanguage: Story = {
   render: () => (
-    <div className="space-y-8">
+    <div className="max-w-4xl mx-auto space-y-10 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Inclusive Language</h2>
-        <p className="text-muted-foreground mb-6">
+        <h2 className="text-3xl font-bold mb-3">Inclusive Language</h2>
+        <p className="text-lg text-muted-foreground">
           Use gender-neutral, culturally sensitive language
         </p>
       </div>
@@ -390,10 +390,10 @@ export const InclusiveLanguage: Story = {
  */
 export const AccessibilityGuidelines: Story = {
   render: () => (
-    <div className="space-y-8">
+    <div className="max-w-4xl mx-auto space-y-10 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Content Accessibility</h2>
-        <p className="text-muted-foreground mb-6">
+        <h2 className="text-3xl font-bold mb-3">Content Accessibility</h2>
+        <p className="text-lg text-muted-foreground">
           Ensure content is accessible to all users
         </p>
       </div>
@@ -473,89 +473,89 @@ export const AccessibilityGuidelines: Story = {
  */
 export const QuickReference: Story = {
   render: () => (
-    <div className="space-y-8">
+    <div className="max-w-5xl mx-auto space-y-10 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Quick Reference</h2>
-        <p className="text-muted-foreground mb-6">
+        <h2 className="text-3xl font-bold mb-3">Quick Reference</h2>
+        <p className="text-lg text-muted-foreground">
           Common do's and don'ts at a glance
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-3">
-          <h3 className="font-semibold text-green-700 dark:text-green-400">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-4">
+          <h3 className="font-semibold text-xl text-green-700 dark:text-green-400">
             ✅ Do
           </h3>
-          <ul className="space-y-2 text-sm">
-            <li className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-950 rounded">
+          <ul className="space-y-3 text-base">
+            <li className="flex items-start gap-3 p-4 border-2 border-green-600 dark:border-green-500 rounded-lg bg-background">
               <span className="text-green-600">•</span>
               <span>Use active voice</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-green-600 dark:border-green-500 rounded-lg bg-background">
               <span className="text-green-600">•</span>
               <span>Address users as "you"</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-green-600 dark:border-green-500 rounded-lg bg-background">
               <span className="text-green-600">•</span>
               <span>Keep sentences under 25 words</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-green-600 dark:border-green-500 rounded-lg bg-background">
               <span className="text-green-600">•</span>
               <span>Use contractions naturally</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-green-600 dark:border-green-500 rounded-lg bg-background">
               <span className="text-green-600">•</span>
               <span>Use sentence case for UI text</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-green-600 dark:border-green-500 rounded-lg bg-background">
               <span className="text-green-600">•</span>
               <span>Use the Oxford comma</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-green-600 dark:border-green-500 rounded-lg bg-background">
               <span className="text-green-600">•</span>
               <span>Provide code examples</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-green-600 dark:border-green-500 rounded-lg bg-background">
               <span className="text-green-600">•</span>
               <span>Use inclusive language</span>
             </li>
           </ul>
         </div>
 
-        <div className="space-y-3">
-          <h3 className="font-semibold text-red-700 dark:text-red-400">
+        <div className="space-y-4">
+          <h3 className="font-semibold text-xl text-red-700 dark:text-red-400">
             ❌ Don't
           </h3>
-          <ul className="space-y-2 text-sm">
-            <li className="flex items-start gap-2 p-2 bg-red-50 dark:bg-red-950 rounded">
+          <ul className="space-y-3 text-base">
+            <li className="flex items-start gap-3 p-4 border-2 border-red-600 dark:border-red-500 rounded-lg bg-background">
               <span className="text-red-600">•</span>
               <span>Use passive voice unnecessarily</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-red-50 dark:bg-red-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-red-600 dark:border-red-500 rounded-lg bg-background">
               <span className="text-red-600">•</span>
               <span>Use jargon without explanation</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-red-50 dark:bg-red-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-red-600 dark:border-red-500 rounded-lg bg-background">
               <span className="text-red-600">•</span>
               <span>Write long, complex sentences</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-red-50 dark:bg-red-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-red-600 dark:border-red-500 rounded-lg bg-background">
               <span className="text-red-600">•</span>
               <span>Use title case for UI text</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-red-50 dark:bg-red-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-red-600 dark:border-red-500 rounded-lg bg-background">
               <span className="text-red-600">•</span>
               <span>Use exclamation points in errors</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-red-50 dark:bg-red-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-red-600 dark:border-red-500 rounded-lg bg-background">
               <span className="text-red-600">•</span>
               <span>Say "click here" or "read more"</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-red-50 dark:bg-red-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-red-600 dark:border-red-500 rounded-lg bg-background">
               <span className="text-red-600">•</span>
               <span>Use gendered pronouns</span>
             </li>
-            <li className="flex items-start gap-2 p-2 bg-red-50 dark:bg-red-950 rounded">
+            <li className="flex items-start gap-3 p-4 border-2 border-red-600 dark:border-red-500 rounded-lg bg-background">
               <span className="text-red-600">•</span>
               <span>Use vague words like "easy"</span>
             </li>
@@ -571,18 +571,18 @@ export const QuickReference: Story = {
  */
 export const RealWorldExamples: Story = {
   render: () => (
-    <div className="space-y-8">
+    <div className="max-w-4xl mx-auto space-y-10 p-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Real-World Examples</h2>
-        <p className="text-muted-foreground mb-6">
+        <h2 className="text-3xl font-bold mb-3">Real-World Examples</h2>
+        <p className="text-lg text-muted-foreground">
           See how guidelines apply in actual UI
         </p>
       </div>
 
       {/* Error message */}
-      <div className="space-y-3">
-        <h3 className="font-semibold">Error Message in Form</h3>
-        <div className="p-6 border rounded-lg space-y-4">
+      <div className="space-y-4">
+        <h3 className="font-semibold text-xl">Error Message in Form</h3>
+        <div className="p-8 border-2 rounded-lg space-y-4 bg-muted/30">
           <div>
             <label className="block text-sm font-medium mb-2">
               Email address <span className="text-destructive">*</span>
@@ -601,22 +601,22 @@ export const RealWorldExamples: Story = {
       </div>
 
       {/* Success message */}
-      <div className="space-y-3">
-        <h3 className="font-semibold">Success Message</h3>
-        <div className="p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
-          <p className="font-medium text-green-900 dark:text-green-100">
+      <div className="space-y-4">
+        <h3 className="font-semibold text-xl">Success Message</h3>
+        <div className="p-6 bg-background border-2 border-green-600 dark:border-green-500 rounded-lg">
+          <p className="font-semibold text-base mb-2">
             Player saved successfully
           </p>
-          <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+          <p className="text-sm text-muted-foreground">
             View player profile or add another player
           </p>
         </div>
       </div>
 
       {/* Empty state */}
-      <div className="space-y-3">
-        <h3 className="font-semibold">Empty State</h3>
-        <div className="p-12 border rounded-lg text-center">
+      <div className="space-y-4">
+        <h3 className="font-semibold text-xl">Empty State</h3>
+        <div className="p-12 border-2 rounded-lg text-center bg-muted/30">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-muted rounded-full mb-4">
             <Icon icon={CheckIcon} size="xl" decorative />
           </div>
@@ -631,9 +631,9 @@ export const RealWorldExamples: Story = {
       </div>
 
       {/* Confirmation dialog */}
-      <div className="space-y-3">
-        <h3 className="font-semibold">Confirmation Dialog</h3>
-        <div className="p-6 border rounded-lg space-y-4">
+      <div className="space-y-4">
+        <h3 className="font-semibold text-xl">Confirmation Dialog</h3>
+        <div className="p-8 border-2 rounded-lg space-y-4 bg-muted/30">
           <div>
             <h4 className="font-semibold text-lg">Delete player?</h4>
             <p className="text-sm text-muted-foreground mt-2">
