@@ -6,25 +6,42 @@ import { Icon } from '@/components/ui/icon'
  * # Content Guidelines
  *
  * Our content style guide ensures consistent, clear, and accessible writing
- * across the entire design system.
+ * across the entire design system. Inspired by IBM Carbon and GOV.UK Design System.
  *
- * ## Principles
+ * ## Our Voice
  *
  * - **Clear** – Simple, direct language anyone can understand
- * - **Helpful** – Anticipate user needs and provide guidance
+ * - **Helpful** – Anticipate user needs and provide practical guidance
  * - **Professional** – Knowledgeable without being condescending
- * - **Human** – Write like talking to a colleague
- * - **Confident** – Certain recommendations, open to feedback
+ * - **Human** – Write like we're talking to a colleague, not a machine
+ * - **Confident** – Certain about our recommendations, open to feedback
  *
- * ## Voice & Tone
+ * ## Tone Variations
  *
  * Our voice stays consistent, but tone adapts to context:
- * - **Instructional** – Direct, clear, supportive
- * - **Reference** – Concise, precise, factual
+ * - **Instructional** (Docs) – Direct, clear, supportive
+ * - **Reference** (API) – Concise, precise, factual
  * - **Error messages** – Calm, specific, solution-oriented
  * - **Success messages** – Brief, positive, actionable
+ * - **Empty states** – Encouraging, action-oriented
  *
- * For complete guidelines, see [Content Style Guide](https://github.com/your-repo/design-system/CONTENT_STYLE_GUIDE.md)
+ * ## Key Principles
+ *
+ * 1. **Use active voice** – Makes it clear who does what
+ * 2. **Keep it short** – Target 25 words or fewer per sentence
+ * 3. **Address users as "you"** – Direct and personal
+ * 4. **Be specific** – Avoid vague words like "easy" or "simple"
+ * 5. **Front-load important info** – Put key details first
+ * 6. **Use sentence case** – For all UI text (following IBM Carbon)
+ * 7. **Use Oxford comma** – In all lists
+ * 8. **Use contractions** – Sound natural and conversational
+ * 9. **Use inclusive language** – Gender-neutral, accessible
+ * 10. **Show, don't tell** – Provide code examples
+ *
+ * ## Resources
+ *
+ * - [Full Content Style Guide](/design-system/CONTENT_STYLE_GUIDE.md)
+ * - [Microcopy Patterns](/design-system/MICROCOPY_PATTERNS.md)
  */
 const meta: Meta = {
   title: 'Foundation/Content Guidelines',
