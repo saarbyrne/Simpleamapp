@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ArrowRightIcon, PlusIcon, Trash2Icon, DownloadIcon, CheckIcon, XIcon } from 'lucide-react';
 import { Button } from './button';
+import { tokens } from '@/design-system/tokens';
 
 /**
  * Button Component Stories

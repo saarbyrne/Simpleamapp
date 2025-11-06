@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Label } from './label';
 import { Input } from './input';
+import { tokens } from '@/design-system/tokens';
 
 /**
  * Label Component Stories
