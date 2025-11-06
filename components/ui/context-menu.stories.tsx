@@ -42,13 +42,13 @@ export const Default: Story = {
     return (
       <ContextMenu>
         <ContextMenuTrigger asChild>
-          <Button variant="secondary">Jugador: Jordan Smith</Button>
+          <Button variant="secondary">Player: Jordan Smith</Button>
         </ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuLabel>Acciones rápidas</ContextMenuLabel>
           <ContextMenuItem>
             <Icon icon={PenSquareIcon} size="sm" decorative className="mr-2" />
-            <span>Abrir perfil</span>
+            <span>Open profile</span>
           </ContextMenuItem>
           <ContextMenuItem>
             <Icon icon={ClipboardCopyIcon} size="sm" decorative className="mr-2" />
@@ -83,7 +83,7 @@ export const Default: Story = {
                   Seguimiento médico
                 </ContextMenuRadioItem>
                 <ContextMenuRadioItem value="training">
-                  Carga de entrenamiento
+                  Training load
                 </ContextMenuRadioItem>
               </ContextMenuRadioGroup>
             </ContextMenuSubContent>

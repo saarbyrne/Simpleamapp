@@ -28,7 +28,7 @@ export const Default: Story = {
               borderRadius: tokens.radius.radius.sm,
             }}
           >
-            Sesión actual
+            Current session
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />

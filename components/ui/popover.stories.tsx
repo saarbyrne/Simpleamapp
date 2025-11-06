@@ -43,7 +43,7 @@ export const Default: Story = {
                 color: tokens.colors.text.primary,
               }}
             >
-              Objetivo del equipo
+              Team objective
             </h4>
             <p
               style={{
@@ -59,7 +59,7 @@ export const Default: Story = {
               onChange={(event) => setObjective(event.target.value)}
               placeholder="Ej. Mejorar la comunicación defensiva"
             />
-            <Button disabled={!objective}>Guardar objetivo</Button>
+            <Button disabled={!objective}>Save objective</Button>
           </div>
         </PopoverContent>
       </Popover>

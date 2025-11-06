@@ -35,14 +35,14 @@ export const Default: Story = {
           <MenubarItem>Nuevo reporte</MenubarItem>
           <MenubarItem>Importar plantillas</MenubarItem>
           <MenubarSeparator />
-          <MenubarItem variant="destructive">Cerrar temporada</MenubarItem>
+          <MenubarItem variant="destructive">Close season</MenubarItem>
         </MenubarContent>
       </MenubarMenu>
       <MenubarMenu>
         <MenubarTrigger>Vista</MenubarTrigger>
         <MenubarContent>
           <MenubarLabel>Secciones visibles</MenubarLabel>
-          <MenubarCheckboxItem>Wellness diario</MenubarCheckboxItem>
+          <MenubarCheckboxItem>Daily wellness</MenubarCheckboxItem>
           <MenubarCheckboxItem checked>Planificaciones</MenubarCheckboxItem>
           <MenubarCheckboxItem>Alertas médicas</MenubarCheckboxItem>
           <MenubarSeparator />

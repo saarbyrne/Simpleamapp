@@ -50,7 +50,7 @@ export const Default: Story = {
           </CommandGroup>
           <CommandSeparator />
           <CommandGroup heading="Acciones rápidas">
-            <CommandItem>Crear evaluación de wellness</CommandItem>
+            <CommandItem>Create wellness evaluation</CommandItem>
             <CommandItem>Invitar nuevo staff</CommandItem>
             <CommandItem>Exportar reporte semanal</CommandItem>
           </CommandGroup>

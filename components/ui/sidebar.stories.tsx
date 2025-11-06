@@ -91,7 +91,7 @@ const ExampleLayout = () => (
             </span>
           </div>
         </div>
-        <SidebarInput placeholder="Buscar jugadores..." />
+        <SidebarInput placeholder="Search players..." />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -196,8 +196,8 @@ const ExampleLayout = () => (
             maxWidth: '42rem',
           }}
         >
-          Utiliza la barra lateral para navegar por la información crítica del equipo: wellness
-          diario, cargas de entrenamiento, documentación médica y reportes personalizados.
+          Use the sidebar to navigate critical team information: wellness
+          daily, training loads, medical documentation and custom reports.
         </p>
       </div>
     </SidebarInset>

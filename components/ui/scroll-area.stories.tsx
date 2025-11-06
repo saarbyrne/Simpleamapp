@@ -42,7 +42,7 @@ export const Default: Story = {
               color: tokens.colors.text.primary,
             }}
           >
-            Registro #{index + 1}: resumen de la sesión de entrenamiento y notas para el staff.
+            Registro #{index + 1}: training session summary and notes for the staff.
           </div>
         ))}
       </div>

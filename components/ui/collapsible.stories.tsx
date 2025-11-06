@@ -72,7 +72,7 @@ export const TrainingNotes: Story = {
               }}
             >
               Limitar cambios de dirección en los últimos dos bloques y priorizar activaciones de
-              core profundo. Reforzar chequeo con fisio post sesión.
+              deep core. Reinforce check with physio after session.
             </p>
           </CollapsibleContent>
         </div>

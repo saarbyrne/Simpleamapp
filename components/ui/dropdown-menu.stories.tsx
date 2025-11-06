@@ -52,7 +52,7 @@ export const Default: Story = {
             <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem variant="destructive">
-            <span>Archivar jugador</span>
+            <span>Archive player</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuCheckboxItem
@@ -73,10 +73,10 @@ export const Default: Story = {
                 onValueChange={(value) => setMode(value as typeof mode)}
               >
                 <DropdownMenuRadioItem value="team">
-                  Equipo completo
+                  Full team
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="player">
-                  Perfil individual
+                  Individual profile
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="medical">
                   Seguimiento médico

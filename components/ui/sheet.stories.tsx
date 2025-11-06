@@ -35,13 +35,13 @@ export const Default: Story = {
     return (
       <Sheet>
         <SheetTrigger asChild>
-          <Button>Actualizar información del jugador</Button>
+          <Button>Update player information</Button>
         </SheetTrigger>
         <SheetContent side="right">
           <SheetHeader>
             <SheetTitle>Ficha médica</SheetTitle>
             <SheetDescription>
-              Añade observaciones rápidas para el equipo médico. El jugador podrá ver las
+              Add quick observations for the medical team. The player will be able to see the
               recomendaciones públicas.
             </SheetDescription>
           </SheetHeader>
@@ -88,7 +88,7 @@ export const Default: Story = {
             </label>
           </div>
           <SheetFooter>
-            <Button variant="secondary">Guardar como borrador</Button>
+            <Button variant="secondary">Save as draft</Button>
             <Button disabled={!notes.trim()}>Publicar para el staff</Button>
           </SheetFooter>
         </SheetContent>

@@ -27,7 +27,7 @@ export const Default: Story = {
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <NavigationMenuTrigger>Equipo</NavigationMenuTrigger>
+          <NavigationMenuTrigger>Team</NavigationMenuTrigger>
           <NavigationMenuContent>
             <NavigationMenuLink asChild>
               <div
@@ -61,7 +61,7 @@ export const Default: Story = {
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuTrigger>Planificación</NavigationMenuTrigger>
+          <NavigationMenuTrigger>Planning</NavigationMenuTrigger>
           <NavigationMenuContent>
             <NavigationMenuLink asChild>
               <div
@@ -87,7 +87,7 @@ export const Default: Story = {
                     color: tokens.colors.text.secondary,
                   }}
                 >
-                  • Carga por sesión
+                  • Load per session
                 </span>
                 <span
                   style={{

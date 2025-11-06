@@ -21,7 +21,7 @@ export const Default: Story = {
       {[{
         title: 'Plan de recuperación',
         content:
-          'Sesión de movilidad + crioterapia. Evaluar respuesta antes del entrenamiento de mañana.',
+          'Mobility session + cryotherapy. Evaluate response before tomorrow's training.',
       },
       {
         title: 'Recomendaciones nutricionales',

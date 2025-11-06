@@ -29,14 +29,14 @@ export const Default: Story = {
       <CardHeader>
         <CardTitle>Weekly wellness summary</CardTitle>
         <CardDescription>
-          Track readiness, workload y tendencia de lesiones a lo largo de la semana.
+          Track readiness, workload and injury trends throughout the week.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-2 text-sm text-[color:var(--ds-text-secondary,#52525b)]">
-          <p>• 78% de los jugadores completaron el cuestionario de bienestar.</p>
-          <p>• Dos alertas tempranas de fatiga en el grupo de defensas.</p>
-          <p>• Recomendación: reducir la carga en la sesión del jueves.</p>
+          <p>• 78% of players completed the wellness questionnaire.</p>
+          <p>• Two early fatigue alerts in the defender group.</p>
+          <p>• Recommendation: reduce load in Thursday's session.</p>
         </div>
       </CardContent>
     </Card>
@@ -47,8 +47,8 @@ export const WithAction: Story = {
   render: () => (
     <Card>
       <CardHeader>
-        <CardTitle>Plan de entrenamiento</CardTitle>
-        <CardDescription>Revisa y ajusta la planificación de la próxima semana.</CardDescription>
+        <CardTitle>Training plan</CardTitle>
+        <CardDescription>Review and adjust next week's schedule.</CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-[color:var(--ds-text-secondary,#52525b)]">
@@ -57,9 +57,9 @@ export const WithAction: Story = {
         </p>
       </CardContent>
       <CardFooter>
-        <Button variant="secondary">Ver agenda</Button>
+        <Button variant="secondary">View schedule</Button>
         <CardAction>
-          <Button>Actualizar plan</Button>
+          <Button>Update plan</Button>
         </CardAction>
       </CardFooter>
     </Card>
@@ -74,15 +74,15 @@ export const MediaLayout: Story = {
       </CardContent>
       <CardContent className="md:w-2/3 md:border-l md:[&:last-child]:pb-0">
         <CardHeader className="md:px-0 md:pt-0">
-          <CardTitle>Reporte de video</CardTitle>
+          <CardTitle>Video report</CardTitle>
           <CardDescription>
-            Clips listos para compartir con el staff técnico y los jugadores clave.
+            Clips ready to share with technical staff and key players.
           </CardDescription>
         </CardHeader>
         <div className="space-y-2 text-sm text-[color:var(--ds-text-secondary,#52525b)]">
-          <p>• Acciones destacadas del último partido.</p>
-          <p>• Segmentos tácticos para trabajar en cancha.</p>
-          <p>• Clips específicos para sesiones individuales.</p>
+          <p>• Highlights from the last match.</p>
+          <p>• Tactical segments for field work.</p>
+          <p>• Specific clips for individual sessions.</p>
         </div>
       </CardContent>
     </Card>

@@ -60,7 +60,7 @@ export const Default: Story = {
             color: tokens.colors.text.secondary,
           }}
         >
-          82% del equipo completó el formulario de bienestar esta mañana.
+          82% of the team completed the wellness form this morning.
         </p>
       </TabsContent>
       <TabsContent value="load">

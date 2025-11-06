@@ -46,7 +46,7 @@ export const Default: Story = {
             color: tokens.colors.text.secondary,
           }}
         >
-          {value[0]}% para la sesión de hoy
+          {value[0]}% for today's session
         </span>
       </div>
     );

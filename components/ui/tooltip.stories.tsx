@@ -22,7 +22,7 @@ export const Default: Story = {
   render: () => (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Ver ayuda">
+        <Button variant="ghost" size="icon" aria-label="View help">
           <Icon icon={InfoIcon} size="sm" decorative />
         </Button>
       </TooltipTrigger>
@@ -33,7 +33,7 @@ export const Default: Story = {
             lineHeight: tokens.typography.body.xs.lineHeight,
           }}
         >
-          Consulta el manual de wellness antes de cerrar la evaluación diaria.
+          Check the wellness manual before closing the daily evaluation.
         </span>
       </TooltipContent>
     </Tooltip>
