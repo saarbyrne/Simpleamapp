@@ -32,7 +32,7 @@ export const Default: Story = {
           color: tokens.colors.text.secondary,
         }}
       >
-        Informe médico completado
+        Medical report completed
       </span>
       <Progress value={72} />
       <span
@@ -42,7 +42,7 @@ export const Default: Story = {
           color: tokens.colors.text.secondary,
         }}
       >
-        72% de los formularios han sido completados esta semana.
+        72% of forms have been completed this week.
       </span>
     </div>
   ),

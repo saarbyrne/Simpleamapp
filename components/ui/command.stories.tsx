@@ -36,23 +36,23 @@ export const Default: Story = {
           <CommandEmpty>No encontramos resultados.</CommandEmpty>
           <CommandGroup heading="Navegación principal">
             <CommandItem>
-              Abrir dashboard
+              Open dashboard
               <CommandShortcut>⌘ D</CommandShortcut>
             </CommandItem>
             <CommandItem>
-              Plantilla
+              Squad
               <CommandShortcut>⌘ P</CommandShortcut>
             </CommandItem>
             <CommandItem>
-              Calendario de cargas
+              Load calendar
               <CommandShortcut>⌘ C</CommandShortcut>
             </CommandItem>
           </CommandGroup>
           <CommandSeparator />
           <CommandGroup heading="Acciones rápidas">
             <CommandItem>Create wellness evaluation</CommandItem>
-            <CommandItem>Invitar nuevo staff</CommandItem>
-            <CommandItem>Exportar reporte semanal</CommandItem>
+            <CommandItem>Invite new staff</CommandItem>
+            <CommandItem>Export weekly report</CommandItem>
           </CommandGroup>
         </CommandList>
       </CommandDialog>

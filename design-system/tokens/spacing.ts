@@ -78,15 +78,20 @@ export const spacing = {
  * Used within components (padding, gaps between child elements)
  */
 export const component = {
-  // Button padding, input padding
+  // Button padding
+  buttonPadding: `${spacing.sm} ${spacing.lg}`, // Vertical horizontal
+  buttonPaddingLg: `${spacing.md} ${spacing['2xl']}`,
+  buttonPaddingSm: `${spacing.xs} ${spacing.md}`,
+
+  // Input padding
   inputPadding: spacing.md,
   inputPaddingLg: spacing.lg,
   inputPaddingSm: spacing.sm,
 
-  // Card padding
-  cardPadding: spacing.xl,
-  cardPaddingLg: spacing['2xl'],
-  cardPaddingSm: spacing.lg,
+  // Card padding - updated to match shadcn (24px)
+  cardPadding: spacing['2xl'], // 24px to match shadcn p-6
+  cardPaddingLg: spacing['3xl'],
+  cardPaddingSm: spacing.xl,
 
   // Modal padding
   modalPadding: spacing['2xl'],

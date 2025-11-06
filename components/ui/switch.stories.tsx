@@ -30,7 +30,7 @@ export const Default: Story = {
           color: tokens.colors.text.primary,
         }}
       >
-        Notificar cambios al staff
+        Notify staff of changes
         <Switch checked={checked} onCheckedChange={setChecked} />
       </label>
     );

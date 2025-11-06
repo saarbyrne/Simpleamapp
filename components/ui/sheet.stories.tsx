@@ -83,13 +83,13 @@ export const Default: Story = {
                 rows={4}
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
-                placeholder="Indica carga sugerida, recomendaciones de recuperación u otros comentarios relevantes."
+                placeholder="Indicate suggested load, recovery recommendations or other relevant comments."
               />
             </label>
           </div>
           <SheetFooter>
             <Button variant="secondary">Save as draft</Button>
-            <Button disabled={!notes.trim()}>Publicar para el staff</Button>
+            <Button disabled={!notes.trim()}>Publish for staff</Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>

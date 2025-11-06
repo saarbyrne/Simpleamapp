@@ -48,7 +48,7 @@ export const PerformanceJourney: Story = {
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href="#">Planes</BreadcrumbLink>
+          <BreadcrumbLink href="#">Plans</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>

@@ -40,7 +40,7 @@ function TabsList({
         backgroundColor: tokens.colors.surface.sunken,
         color: tokens.colors.text.secondary,
         height: tokens.spacing.spacing.xl,
-        borderRadius: tokens.radius.component.tabs,
+        borderRadius: tokens.radius.component.tab,
         padding: tokens.spacing.spacing.xs,
         ["--accent" as string]: tokens.colors.interactive.secondary,
         ["--accent-foreground" as string]: tokens.colors.text.primary,
@@ -65,7 +65,7 @@ function TabsTrigger({
       )}
       style={{
         gap: tokens.spacing.gap.sm,
-        borderRadius: tokens.radius.component.tabs,
+        borderRadius: tokens.radius.component.tab,
         paddingLeft: tokens.spacing.spacing.sm,
         paddingRight: tokens.spacing.spacing.sm,
         paddingTop: tokens.spacing.spacing.xs,

@@ -52,8 +52,8 @@ export const WithAction: Story = {
       </CardHeader>
       <CardContent>
         <p className="text-sm text-[color:var(--ds-text-secondary,#52525b)]">
-          La carga total se mantiene dentro del rango objetivo. Revisa los microciclos del martes y
-          jueves para equilibrar intensidad y recuperación.
+          Total load remains within target range. Review Tuesday and Thursday microcycles
+          to balance intensity and recovery.
         </p>
       </CardContent>
       <CardFooter>

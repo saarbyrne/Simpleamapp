@@ -36,11 +36,11 @@ export const Default: Story = {
           <AlertDialogTitle>Delete wellness form?</AlertDialogTitle>
           <AlertDialogDescription>
             Associated data will be permanently lost and players will no longer see it in their
-            app. Esta acción no se puede deshacer.
+            app. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction>Delete</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

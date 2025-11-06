@@ -26,7 +26,7 @@ export const Default: Story = {
           })
         }
       >
-        Mostrar notificación
+        Show notification
       </Button>
       <Toaster position="top-right" richColors closeButton />
     </>

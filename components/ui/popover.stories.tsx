@@ -25,7 +25,7 @@ export const Default: Story = {
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="secondary">Agregar objetivo semanal</Button>
+          <Button variant="secondary">Add weekly objective</Button>
         </PopoverTrigger>
         <PopoverContent>
           <div
@@ -52,7 +52,7 @@ export const Default: Story = {
                 color: tokens.colors.text.secondary,
               }}
             >
-              Define un punto clave para la semana. Esto se mostrará en el dashboard del staff.
+              Define a key point for the week. This will be shown on the staff dashboard.
             </p>
             <Input
               value={objective}

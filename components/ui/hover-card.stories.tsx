@@ -59,7 +59,7 @@ export const Default: Story = {
                 color: tokens.colors.text.secondary,
               }}
             >
-              Defensa central • Plan individual activo
+              Center back • Individual plan active
             </p>
           </div>
           <div
@@ -72,9 +72,9 @@ export const Default: Story = {
               color: tokens.colors.text.secondary,
             }}
           >
-            <span>• Carga aguda: equilibrada</span>
-            <span>• Última alerta: 12 días</span>
-            <span>• Próximo control médico: jueves</span>
+            <span>• Acute load: balanced</span>
+            <span>• Last alert: 12 days ago</span>
+            <span>• Next medical check: Thursday</span>
           </div>
         </div>
       </HoverCardContent>

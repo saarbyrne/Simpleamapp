@@ -107,7 +107,7 @@ const ExampleLayout = () => (
               <SidebarMenuItem>
                 <SidebarMenuButton>
                   <Icon icon={UsersIcon} size="md" decorative className="mr-2" />
-                  <span>Plantilla</span>
+                  <span>Squad</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -137,25 +137,25 @@ const ExampleLayout = () => (
               <SidebarMenuItem>
                 <SidebarMenuButton>
                   <Icon icon={BellIcon} size="md" decorative className="mr-2" />
-                  <span>Alertas</span>
+                  <span>Alerts</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Ver planes individuales">
+                <SidebarMenuButton tooltip="View individual plans">
                   <Icon icon={SettingsIcon} size="md" decorative className="mr-2" />
-                  <span>Configuración</span>
+                  <span>Settings</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuSub>
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton isActive>
-                      <span>Recuperación</span>
+                      <span>Recovery</span>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton>
-                      <span>Carga aguda</span>
+                      <span>Acute load</span>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>
@@ -165,8 +165,8 @@ const ExampleLayout = () => (
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <Button variant="secondary">Invitar staff</Button>
-        <Button>Nuevo reporte</Button>
+        <Button variant="secondary">Invite staff</Button>
+        <Button>New report</Button>
       </SidebarFooter>
     </Sidebar>
     <SidebarInset>

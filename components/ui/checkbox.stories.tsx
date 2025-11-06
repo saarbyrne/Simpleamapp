@@ -30,7 +30,7 @@ export const Default: Story = {
           color: tokens.colors.text.primary,
         }}
       >
-        Incluir en informe semanal
+        Include in weekly report
         <Checkbox checked={checked} onCheckedChange={setChecked} />
       </label>
     );

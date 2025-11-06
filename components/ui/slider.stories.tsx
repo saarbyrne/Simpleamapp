@@ -36,7 +36,7 @@ export const Default: Story = {
             color: tokens.colors.text.primary,
           }}
         >
-          Intensidad objetivo
+          Target intensity
         </label>
         <Slider value={value} onValueChange={setValue} min={0} max={100} />
         <span

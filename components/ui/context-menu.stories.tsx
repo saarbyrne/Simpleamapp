@@ -65,7 +65,7 @@ export const Default: Story = {
               setShowNotifications(Boolean(checked))
             }
           >
-            Alertas de bienestar
+            Wellness alerts
           </ContextMenuCheckboxItem>
           <ContextMenuSub>
             <ContextMenuSubTrigger>
@@ -80,7 +80,7 @@ export const Default: Story = {
                   Resumen general
                 </ContextMenuRadioItem>
                 <ContextMenuRadioItem value="medical">
-                  Seguimiento médico
+                  Medical follow-up
                 </ContextMenuRadioItem>
                 <ContextMenuRadioItem value="training">
                   Training load

@@ -27,22 +27,22 @@ const sessions = [
   {
     title: 'Fase preventiva',
     focus: 'Movilidad + Core',
-    duration: '15 minutos',
+    duration: '15 minutes',
   },
   {
     title: 'Bloque principal',
     focus: 'Fuerza excéntrica',
-    duration: '30 minutos',
+    duration: '30 minutes',
   },
   {
     title: 'Potencia',
     focus: 'Pliometría horizontal',
-    duration: '20 minutos',
+    duration: '20 minutes',
   },
   {
     title: 'Regenerativo',
     focus: 'Trabajo respiratorio',
-    duration: '10 minutos',
+    duration: '10 minutes',
   },
 ];
 
@@ -87,8 +87,8 @@ export const TrainingBlocks: Story = {
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious aria-label="Bloque anterior" />
-      <CarouselNext aria-label="Bloque siguiente" />
+      <CarouselPrevious aria-label="Previous block" />
+      <CarouselNext aria-label="Next block" />
     </Carousel>
   ),
 };

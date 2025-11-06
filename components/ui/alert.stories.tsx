@@ -32,8 +32,8 @@ export const Destructive: Story = {
     <Alert variant="destructive">
       <AlertTitle>Medical warning</AlertTitle>
       <AlertDescription>
-        Alex Martínez fue marcado como “no disponible” por el staff médico. Evita incluirlo en las
-        sesiones de alta carga hasta nuevo aviso.
+        Alex Martínez was marked as "unavailable" by the medical staff. Avoid including him in
+        high-load sessions until further notice.
       </AlertDescription>
     </Alert>
   ),

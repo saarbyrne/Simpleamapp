@@ -54,11 +54,11 @@ export const TrainingNotes: Story = {
                 margin: 0,
               }}
             >
-              Indicaciones del staff médico
+              Medical staff instructions
             </h4>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm">
-                {open ? 'Ocultar' : 'Mostrar'}
+                {open ? 'Hide' : 'Show'}
               </Button>
             </CollapsibleTrigger>
           </div>

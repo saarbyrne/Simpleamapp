@@ -45,7 +45,7 @@ export const Default: Story = {
                     color: tokens.colors.text.primary,
                   }}
                 >
-                  Plantilla principal
+                  Main squad
                 </h4>
                 <p
                   style={{
@@ -54,7 +54,7 @@ export const Default: Story = {
                     color: tokens.colors.text.secondary,
                   }}
                 >
-                  Gestiona disponibilidad, cargas históricas y documentación médica de forma rápida.
+                  Manage availability, historical loads and medical documentation quickly.
                 </p>
               </div>
             </NavigationMenuLink>
@@ -78,7 +78,7 @@ export const Default: Story = {
                     color: tokens.colors.text.secondary,
                   }}
                 >
-                  • Microciclos semanales
+                  • Weekly microcycles
                 </span>
                 <span
                   style={{
@@ -96,7 +96,7 @@ export const Default: Story = {
                     color: tokens.colors.text.secondary,
                   }}
                 >
-                  • Alertas por sobreesfuerzo
+                  • Overexertion alerts
                 </span>
               </div>
             </NavigationMenuLink>

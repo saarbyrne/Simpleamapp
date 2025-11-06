@@ -32,8 +32,8 @@ export const Default: Story = {
       <MenubarMenu>
         <MenubarTrigger>Archivo</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>Nuevo reporte</MenubarItem>
-          <MenubarItem>Importar plantillas</MenubarItem>
+          <MenubarItem>New report</MenubarItem>
+          <MenubarItem>Import templates</MenubarItem>
           <MenubarSeparator />
           <MenubarItem variant="destructive">Close season</MenubarItem>
         </MenubarContent>
@@ -43,8 +43,8 @@ export const Default: Story = {
         <MenubarContent>
           <MenubarLabel>Secciones visibles</MenubarLabel>
           <MenubarCheckboxItem>Daily wellness</MenubarCheckboxItem>
-          <MenubarCheckboxItem checked>Planificaciones</MenubarCheckboxItem>
-          <MenubarCheckboxItem>Alertas médicas</MenubarCheckboxItem>
+          <MenubarCheckboxItem checked>Planning</MenubarCheckboxItem>
+          <MenubarCheckboxItem>Medical alerts</MenubarCheckboxItem>
           <MenubarSeparator />
           <MenubarLabel>Densidad de datos</MenubarLabel>
           <MenubarRadioGroup value="normal">

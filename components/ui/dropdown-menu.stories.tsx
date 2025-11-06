@@ -44,7 +44,7 @@ export const Default: Story = {
         <DropdownMenuContent style={{ gap: tokens.spacing.gap.xs }}>
           <DropdownMenuLabel>Acciones rápidas</DropdownMenuLabel>
           <DropdownMenuItem>
-            <span>Ver reporte semanal</span>
+            <span>View weekly report</span>
             <DropdownMenuShortcut>⌘R</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem>
@@ -61,7 +61,7 @@ export const Default: Story = {
               setShowNotifications(Boolean(checked))
             }
           >
-            Mostrar notificaciones
+            Show notifications
           </DropdownMenuCheckboxItem>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
@@ -79,7 +79,7 @@ export const Default: Story = {
                   Individual profile
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="medical">
-                  Seguimiento médico
+                  Medical follow-up
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuSubContent>

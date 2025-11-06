@@ -33,7 +33,7 @@ export const Default: Story = {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Notas del staff</DrawerTitle>
+          <DrawerTitle>Staff notes</DrawerTitle>
           <DrawerDescription>
             Use this panel to coordinate quick messages during the match or session.
           </DrawerDescription>

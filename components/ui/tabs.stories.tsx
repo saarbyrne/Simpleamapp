@@ -21,7 +21,7 @@ export const Default: Story = {
       <TabsList>
         <TabsTrigger value="summary">Resumen</TabsTrigger>
         <TabsTrigger value="wellness">Wellness</TabsTrigger>
-        <TabsTrigger value="load">Carga</TabsTrigger>
+        <TabsTrigger value="load">Load</TabsTrigger>
       </TabsList>
       <TabsContent value="summary">
         <div
@@ -39,7 +39,7 @@ export const Default: Story = {
               color: tokens.colors.text.primary,
             }}
           >
-            Balance semanal
+            Weekly balance
           </h4>
           <p
             style={{
@@ -48,7 +48,7 @@ export const Default: Story = {
               color: tokens.colors.text.secondary,
             }}
           >
-            La carga aguda se mantiene en rango. Revisa viernes para controlar la fatiga acumulada.
+            Acute load remains within range. Review Friday to control accumulated fatigue.
           </p>
         </div>
       </TabsContent>
@@ -71,7 +71,7 @@ export const Default: Story = {
             color: tokens.colors.text.secondary,
           }}
         >
-          Microciclo orientado a velocidad y potencia. Sugerido: reducir 15% la carga de fuerza el jueves.
+          Microcycle focused on speed and power. Suggested: reduce strength load by 15% on Thursday.
         </p>
       </TabsContent>
     </Tabs>
