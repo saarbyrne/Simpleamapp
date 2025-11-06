@@ -1,16 +1,19 @@
 import { cn } from "./utils";
-import { tokens } from "@/design-system/tokens";
 
-function Skeleton({ className, style, ...props }: React.ComponentProps<"div">) {
+/**
+ * Skeleton Component
+ *
+ * A placeholder for loading content that uses your globals.css design tokens.
+ * All styling is controlled via CSS variables in globals.css.
+ */
+
+function Skeleton({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      data-slot="skeleton"
-      className={cn("animate-pulse", className)}
-      style={{
-        backgroundColor: tokens.colors.surface.sunken,
-        borderRadius: tokens.radius.radius.sm,
-        ...style,
-      }}
+      className={cn("animate-pulse rounded-md bg-muted", className)}
       {...props}
     />
   );

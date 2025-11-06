@@ -1,30 +1,29 @@
 import * as React from "react";
 
 import { cn } from "./utils";
-import { tokens } from "@/design-system/tokens";
 
-function Textarea({ className, style, ...props }: React.ComponentProps<"textarea">) {
+/**
+ * Textarea Component
+ *
+ * A multi-line text input that uses your globals.css design tokens.
+ * All styling is controlled via CSS variables in globals.css.
+ */
+
+const Textarea = React.forwardRef<
+  HTMLTextAreaElement,
+  React.ComponentPropsWithoutRef<"textarea">
+>(({ className, ...props }, ref) => {
   return (
     <textarea
-      data-slot="textarea"
       className={cn(
-        "resize-none flex field-sizing-content w-full border transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50",
-        className,
+        "flex min-h-[80px] w-full rounded-md border border-input bg-input-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        className
       )}
-      style={{
-        minHeight: tokens.spacing.spacing['4xl'],
-        backgroundColor: tokens.colors.surface.sunken,
-        color: tokens.colors.text.primary,
-        borderColor: tokens.colors.border.default,
-        borderRadius: tokens.radius.component.input,
-        padding: `${tokens.spacing.spacing.sm} ${tokens.spacing.component.inputPadding}`,
-        fontSize: tokens.typography.ui.input.fontSize,
-        lineHeight: tokens.typography.ui.input.lineHeight,
-        ...style,
-      }}
+      ref={ref}
       {...props}
     />
   );
-}
+});
+Textarea.displayName = "Textarea";
 
 export { Textarea };
