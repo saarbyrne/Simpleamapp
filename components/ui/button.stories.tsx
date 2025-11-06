@@ -367,21 +367,18 @@ export const AllVariants: Story = {
  */
 export const Showcase: Story = {
   render: () => (
-    <div style={{
+    <div className="bg-card border rounded-lg" style={{
       display: 'flex',
       flexDirection: 'column',
       gap: tokens.spacing.gap.xl,
       padding: tokens.spacing.spacing.xl,
-      backgroundColor: tokens.colors.surface.elevated,
       borderRadius: tokens.radius.component.card,
-      border: `1px solid ${tokens.colors.border.default}`,
     }}>
       {/* Primary actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.sm }}>
-        <h3 style={{
+        <h3 className="text-foreground" style={{
           fontSize: tokens.typography.heading.h5.fontSize,
           fontWeight: tokens.typography.heading.h5.fontWeight,
-          color: tokens.colors.text.primary,
         }}>
           Primary Actions
         </h3>
@@ -400,10 +397,9 @@ export const Showcase: Story = {
 
       {/* Destructive actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.sm }}>
-        <h3 style={{
+        <h3 className="text-foreground" style={{
           fontSize: tokens.typography.heading.h5.fontSize,
           fontWeight: tokens.typography.heading.h5.fontWeight,
-          color: tokens.colors.text.primary,
         }}>
           Destructive Actions
         </h3>
@@ -422,10 +418,9 @@ export const Showcase: Story = {
 
       {/* Loading states */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.sm }}>
-        <h3 style={{
+        <h3 className="text-foreground" style={{
           fontSize: tokens.typography.heading.h5.fontSize,
           fontWeight: tokens.typography.heading.h5.fontWeight,
-          color: tokens.colors.text.primary,
         }}>
           Loading States
         </h3>
@@ -438,10 +433,9 @@ export const Showcase: Story = {
 
       {/* Size variants */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.sm }}>
-        <h3 style={{
+        <h3 className="text-foreground" style={{
           fontSize: tokens.typography.heading.h5.fontSize,
           fontWeight: tokens.typography.heading.h5.fontWeight,
-          color: tokens.colors.text.primary,
         }}>
           Size Variants
         </h3>
@@ -463,23 +457,19 @@ export const Showcase: Story = {
  */
 export const FormActions: Story = {
   render: () => (
-    <div style={{
+    <div className="bg-card border" style={{
       width: '500px',
       padding: tokens.spacing.spacing.xl,
-      backgroundColor: tokens.colors.surface.elevated,
       borderRadius: tokens.radius.component.card,
-      border: `1px solid ${tokens.colors.border.default}`,
     }}>
       {/* Form content would go here */}
-      <div style={{
+      <div className="bg-muted text-muted-foreground" style={{
         height: '200px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: tokens.colors.surface.sunken,
         borderRadius: tokens.radius.component.input,
         marginBottom: tokens.spacing.gap.lg,
-        color: tokens.colors.text.tertiary,
       }}>
         Form fields here...
       </div>
