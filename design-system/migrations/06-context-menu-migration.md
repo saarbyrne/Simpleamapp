@@ -8,7 +8,7 @@
 
 ## Resumen
 
-Los menús contextuales ahora utilizan los tokens de superficie, tipografía y espaciado del sistema, eliminando las dependencias de `bg-popover`, `text-popover-foreground` y valores arbitrarios. También se creó una historia en Storybook para validar las variantes más comunes (items, checkbox, radio group y submenús).
+Los menús contextuales ahora utilizan los tokens de superficie, tipografía y espaciado del sistema, eliminando las dependencias de `bg-popover`, `text-popover-foreground` y valores arbitrarios. También se creó una story en Storybook para validar las variantes más comunes (items, checkbox, radio group y submenús).
 
 ## Cambios
 
@@ -17,7 +17,7 @@ Los menús contextuales ahora utilizan los tokens de superficie, tipografía y e
   - Los items definen `--accent`, `--accent-foreground`, `--destructive` y `--destructive-foreground` con tokens para mantener los estilos Radix en focus/hover.
   - Tipografía y espaciado usan `tokens.typography.body.*` y `tokens.spacing.*`.
 - `components/ui/context-menu.stories.tsx`
-  - Nueva historia “Default” con acciones reales, checkbox y submenús para pruebas visuales.
+  - Nueva story “Default” con acciones reales, checkbox y submenús para pruebas visuales.
 
 ## Pruebas
 

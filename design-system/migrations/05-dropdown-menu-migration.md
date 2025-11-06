@@ -8,7 +8,7 @@
 
 ## Summary
 
-El menú desplegable ahora consume los tokens para color, espaciado, tipografía y z-index, reemplazando `bg-popover`, `text-popover-foreground`, `focus:bg-accent` hardcodeados. También se creó una historia en Storybook que cubre items, checkbox, radio group y submenús.
+El menú desplegable ahora consume los tokens para color, espaciado, tipografía y z-index, reemplazando `bg-popover`, `text-popover-foreground`, `focus:bg-accent` hardcodeados. También se creó una story en Storybook que cubre items, checkbox, radio group y submenús.
 
 ## Cambios
 

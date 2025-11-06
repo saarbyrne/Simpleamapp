@@ -130,63 +130,63 @@ Components prioritized by:
 #### 4. Select Component
 **File:** `components/ui/select.tsx`
 **Status:** ✅ MIGRATED & DOCUMENTED
-**Impact:** HIGH - Dropdowns son comunes
+**Impact:** HIGH - Dropdowns are common
 
-**Notas:** Trigger y contenido usan tokens (`surface.sunken`, `zIndex.component.selectContent`, `spacing.component.inputPadding`, etc.). Historia creada previamente.
+**Notes:** Trigger and content use tokens (`surface.sunken`, `zIndex.component.selectContent`, `spacing.component.inputPadding`, etc.). Story created previously.
 
 ---
 
 #### 5. Dropdown Menu Component
 **File:** `components/ui/dropdown-menu.tsx`
 **Status:** ✅ MIGRATED & DOCUMENTED
-**Impact:** HIGH - Soporta patrones de selección
+**Impact:** HIGH - Supports selection patterns
 
-**Notas:** Tokens aplicados a superficie, estados hover/focus mediante variables CSS, y Storybook listo (`components/ui/dropdown-menu.stories.tsx`). Ver `design-system/migrations/05-dropdown-menu-migration.md`.
+**Notes:** Tokens applied to surface, hover/focus states via CSS variables, and Storybook ready (`components/ui/dropdown-menu.stories.tsx`). See `design-system/migrations/05-dropdown-menu-migration.md`.
 
 ---
 
 #### 6. Context Menu Component
 **File:** `components/ui/context-menu.tsx`
 **Status:** ✅ MIGRATED & DOCUMENTED
-**Impact:** HIGH - Menú contextual para listas/tablas
+**Impact:** HIGH - Context menu for lists/tables
 
-**Notas:** Coincide con DropdownMenu en superficies, border y z-index. Historia en `components/ui/context-menu.stories.tsx`. Detalles en `design-system/migrations/06-context-menu-migration.md`.
+**Notes:** Matches DropdownMenu for surfaces, border and z-index. Story at `components/ui/context-menu.stories.tsx`. Details in `design-system/migrations/06-context-menu-migration.md`.
 
 ---
 
 #### 7. Popover Component
 **File:** `components/ui/popover.tsx`
-**Status:** ✅ DOCUMENTADO
-**Impact:** MEDIA - Overlays ligeros
+**Status:** ✅ DOCUMENTED
+**Impact:** MEDIUM - Lightweight overlays
 
-**Notas:** Tokens ya aplicados; se añadió historia `components/ui/popover.stories.tsx`.
+**Notes:** Tokens already applied; story added `components/ui/popover.stories.tsx`.
 
 ---
 
 #### 8. Tooltip Component
 **File:** `components/ui/tooltip.tsx`
-**Status:** ✅ DOCUMENTADO
-**Impact:** MEDIA - Indicaciones rápidas
+**Status:** ✅ DOCUMENTED
+**Impact:** MEDIUM - Quick hints
 
-**Notas:** Tokens existentes; historia `components/ui/tooltip.stories.tsx`.
+**Notes:** Existing tokens; story `components/ui/tooltip.stories.tsx`.
 
 ---
 
 #### 9. Hover Card Component
 **File:** `components/ui/hover-card.tsx`
-**Status:** ✅ DOCUMENTADO
-**Impact:** MEDIA - Previsualizaciones
+**Status:** ✅ DOCUMENTED
+**Impact:** MEDIUM - Previews
 
-**Notas:** Tokens presentes; historia `components/ui/hover-card.stories.tsx`.
+**Notes:** Tokens present; story `components/ui/hover-card.stories.tsx`.
 
 ---
 
 #### 10. Sheet Component
 **File:** `components/ui/sheet.tsx`
-**Status:** ✅ DOCUMENTADO
-**Impact:** ALTA - Drawer lateral
+**Status:** ✅ DOCUMENTED
+**Impact:** HIGH - Side drawer
 
-**Notas:** Tokens aplicados previamente; historia `components/ui/sheet.stories.tsx`.
+**Notes:** Tokens previously applied; story `components/ui/sheet.stories.tsx`.
 
 ---
 
@@ -195,43 +195,43 @@ Components prioritized by:
 **Status:** ✅ MIGRATED & DOCUMENTED
 **Impact:** Alta - búsqueda y acceso rápido
 
-**Notas:** Tokens aplicados y historia `components/ui/command.stories.tsx`. Documentado en `design-system/migrations/07-command-migration.md`.
+**Notes:** Tokens applied and story `components/ui/command.stories.tsx`. Documented in `design-system/migrations/07-command-migration.md`.
 
 ---
 
 #### 12. Alert Component
 **File:** `components/ui/alert.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Media - mensajes de estado
 
-**Notas:** Historia `components/ui/alert.stories.tsx`; destructivo usa tokens de feedback.
+**Notes:** Story `components/ui/alert.stories.tsx`; destructive uses feedback tokens.
 
 ---
 
 #### 13. Alert Dialog Component
 **File:** `components/ui/alert-dialog.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Alta - confirmaciones críticas
 
-**Notas:** Historia `components/ui/alert-dialog.stories.tsx`; ya migrado al iniciar.
+**Notes:** Story `components/ui/alert-dialog.stories.tsx`; already migrated at start.
 
 ---
 
 #### 14. Table Component
 **File:** `components/ui/table.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Media - listados
 
-**Notas:** Historia `components/ui/table.stories.tsx`; valores de tokens confirmados.
+**Notes:** Story `components/ui/table.stories.tsx`; token values confirmed.
 
 ---
 
 #### 15. Tabs Component
 **File:** `components/ui/tabs.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Media - navegación por secciones
 
-**Notas:** Historia `components/ui/tabs.stories.tsx`; triggers usan tokens `--accent`.
+**Notes:** Story `components/ui/tabs.stories.tsx`; triggers use tokens `--accent`.
 
 ---
 
@@ -240,133 +240,133 @@ Components prioritized by:
 **Status:** ✅ MIGRATED & DOCUMENTED
 **Impact:** Media - navegación contextual
 
-**Notas:** Historias en `components/ui/menubar.stories.tsx`; superficie/bordes desde tokens. Documentado en `design-system/migrations/08-navigation-components-migration.md`.
+**Notes:** Stories at `components/ui/menubar.stories.tsx`; surface/borders from tokens. Documented in `design-system/migrations/08-navigation-components-migration.md`.
 
 ---
 
 #### 17. Navigation Menu Component
 **File:** `components/ui/navigation-menu.tsx`
-**Status:** ✅ MIGRATED & DOCUMENTADO
+**Status:** ✅ MIGRATED & DOCUMENTED
 **Impact:** Alta - navegación avanzada
 
-**Notas:** Viewport y links con tokens; historia `components/ui/navigation-menu.stories.tsx`.
+**Notes:** Viewport and links with tokens; story `components/ui/navigation-menu.stories.tsx`.
 
 ---
 
 #### 18. Slider Component
 **File:** `components/ui/slider.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Media - control continuo
 
-**Notas:** Historia `components/ui/slider.stories.tsx`; raíces exponen `--accent`.
+**Notes:** Story `components/ui/slider.stories.tsx`; roots expose `--accent`.
 
 ---
 
 #### 19. Switch Component
 **File:** `components/ui/switch.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Media - toggles
 
-**Notas:** Historia `components/ui/switch.stories.tsx`; `--primary`/`--input` desde tokens.
+**Notes:** Story `components/ui/switch.stories.tsx`; `--primary`/`--input` from tokens.
 
 ---
 
 #### 20. Progress Component
 **File:** `components/ui/progress.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Baja - feedback visual
 
-**Notas:** Historia `components/ui/progress.stories.tsx`.
+**Notes:** Story `components/ui/progress.stories.tsx`.
 
 ---
 
 #### 21. Checkbox Component
 **File:** `components/ui/checkbox.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Media - formularios
 
-**Notas:** Historia `components/ui/checkbox.stories.tsx`; se exponen `--primary`.
+**Notes:** Story `components/ui/checkbox.stories.tsx`; expose `--primary`.
 
 ---
 
 #### 22. Radio Group Component
 **File:** `components/ui/radio-group.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Media - formularios
 
-**Notas:** Historia `components/ui/radio-group.stories.tsx`.
+**Notes:** Story `components/ui/radio-group.stories.tsx`.
 
 ---
 
 #### 23. Toggle Component
 **File:** `components/ui/toggle.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Media - acciones rápidas
 
-**Notas:** Historia `components/ui/toggle.stories.tsx` (incluye grupo multiple).
+**Notes:** Story `components/ui/toggle.stories.tsx` (includes multiple group).
 
 ---
 
 #### 24. Accordion Component
 **File:** `components/ui/accordion.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Baja - paneles desplegables
 
-**Notas:** Historia `components/ui/accordion.stories.tsx`.
+**Notes:** Story `components/ui/accordion.stories.tsx`.
 
 ---
 
 #### 25. Pagination Component
 **File:** `components/ui/pagination.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Media - navegación de listados
 
-**Notas:** Historia `components/ui/pagination.stories.tsx`.
+**Notes:** Story `components/ui/pagination.stories.tsx`.
 
 ---
 
 #### 26. Skeleton Component
 **File:** `components/ui/skeleton.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Baja - placeholders
 
-**Notas:** Historia `components/ui/skeleton.stories.tsx`.
+**Notes:** Story `components/ui/skeleton.stories.tsx`.
 
 ---
 
 #### 27. Scroll Area Component
 **File:** `components/ui/scroll-area.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Baja - contenedores
 
-**Notas:** Historia `components/ui/scroll-area.stories.tsx`.
+**Notes:** Story `components/ui/scroll-area.stories.tsx`.
 
 ---
 
 #### 28. Resizable Component
 **File:** `components/ui/resizable.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Media - paneles dinámicos
 
-**Notas:** Historia `components/ui/resizable.stories.tsx`.
+**Notes:** Story `components/ui/resizable.stories.tsx`.
 
 ---
 
 #### 29. Drawer Component
 **File:** `components/ui/drawer.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Media - panel lateral adicional
 
-**Notas:** Historia `components/ui/drawer.stories.tsx`.
+**Notes:** Story `components/ui/drawer.stories.tsx`.
 
 ---
 
 #### 30. Toaster Component
 **File:** `components/ui/sonner.tsx`
-**Status:** ✅ DOCUMENTADO
+**Status:** ✅ DOCUMENTED
 **Impact:** Media - notificaciones
 
-**Notas:** Historia `components/ui/sonner.stories.tsx`.
+**Notes:** Story `components/ui/sonner.stories.tsx`.
 
 ---
 
@@ -424,9 +424,9 @@ Components prioritized by:
 - [x] Use `elevation.component.card` para estado base y `cardHover` en el hover
 - [x] Use `typography.heading.h5` para CardTitle
 - [x] Use `typography.body.sm` para CardDescription
-- [x] Crear historias en Storybook (`components/ui/card.stories.tsx`)
+- [x] Create stories in Storybook (`components/ui/card.stories.tsx`)
 
-**Notas:** Migración registrada en `design-system/migrations/03-card-migration.md`. Próximo paso: abordar Sidebar.
+**Notes:** Migración registrada en `design-system/migrations/03-card-migration.md`. Próximo paso: abordar Sidebar.
 
 ---
 
@@ -436,12 +436,12 @@ Components prioritized by:
 **Impact:** CRITICAL - Main navigation
 **Estimated Time:** 4-5 hours
 
-**Notas:**
+**Notes:**
 - Variables CSS del sidebar alimentadas con tokens (`surface.sidebar`, `focus.ring`, etc.).
 - Z-index reemplazado por `tokens.zIndex.component.sidebar` y `sidebarInset`.
 - Espaciados, tipografías y alturas ahora enlazados al sistema.
-- Historia completa en `components/ui/sidebar.stories.tsx`.
-- Detalles en `design-system/migrations/04-sidebar-migration.md`.
+- Complete story at `components/ui/sidebar.stories.tsx`.
+- Details in `design-system/migrations/04-sidebar-migration.md`.
 
 ---
 
@@ -714,9 +714,9 @@ Each migrated component must:
 
 ### Componentes completados recientemente
 
-- **Tabs (`components/ui/tabs.tsx`)** – ✅ Documentado. Historia en `components/ui/tabs.stories.tsx`; tokens `--accent` configurados.
-- **Menubar (`components/ui/menubar.tsx`)** – ✅ Migrado & documentado. Coincide con Dropdown/ContextMenu. Historia en `components/ui/menubar.stories.tsx`.
-- **Navigation Menu (`components/ui/navigation-menu.tsx`)** – ✅ Migrado & documentado. Ver `design-system/migrations/08-navigation-components-migration.md` y `components/ui/navigation-menu.stories.tsx`.
-- **Slider (`components/ui/slider.tsx`)** – ✅ Documentado. Historia `components/ui/slider.stories.tsx`.
-- **Switch (`components/ui/switch.tsx`)** – ✅ Documentado. Historia `components/ui/switch.stories.tsx`.
-- **Progress (`components/ui/progress.tsx`)** – ✅ Documentado. Historia `components/ui/progress.stories.tsx`.
+- **Tabs (`components/ui/tabs.tsx`)** – ✅ Documentado. Story at `components/ui/tabs.stories.tsx`; tokens `--accent` configurados.
+- **Menubar (`components/ui/menubar.tsx`)** – ✅ Migrado & documentado. Coincide con Dropdown/ContextMenu. Story at `components/ui/menubar.stories.tsx`.
+- **Navigation Menu (`components/ui/navigation-menu.tsx`)** – ✅ Migrado & documentado. See `design-system/migrations/08-navigation-components-migration.md` y `components/ui/navigation-menu.stories.tsx`.
+- **Slider (`components/ui/slider.tsx`)** – ✅ Documentado. Story `components/ui/slider.stories.tsx`.
+- **Switch (`components/ui/switch.tsx`)** – ✅ Documentado. Story `components/ui/switch.stories.tsx`.
+- **Progress (`components/ui/progress.tsx`)** – ✅ Documentado. Story `components/ui/progress.stories.tsx`.

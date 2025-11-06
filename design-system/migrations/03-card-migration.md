@@ -23,7 +23,7 @@ Migrated the Card component family to the design-system token architecture and d
   - Se mapearon los paddings de header, content y footer a los tokens de componente (`cardPadding`, `cardPaddingSm`).
   - Se actualizó la tipografía de `CardTitle` a `heading.h5` y se homogenizó la paleta de borde.
 - `components/ui/card.stories.tsx`
-  - Historias de Storybook para escenarios comunes (simple, con acciones, layout multimedia).
+  - Stories de Storybook para escenarios comunes (simple, con acciones, layout multimedia).
 
 ## Testing Checklist
 
