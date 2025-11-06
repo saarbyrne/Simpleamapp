@@ -67,10 +67,10 @@ export const TrainingBlocks: Story = {
                 <CardTitle>{session.title}</CardTitle>
               </CardHeader>
               <CardContent
+                className="text-muted-foreground"
                 style={{
                   display: 'grid',
                   gap: tokens.spacing.gap.sm,
-                  color: tokens.colors.text.secondary,
                 }}
               >
                 <span>{session.focus}</span>

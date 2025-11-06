@@ -54,10 +54,10 @@ export const Verification: Story = {
           </InputOTPGroup>
         </InputOTP>
         <span
+          className="text-muted-foreground"
           style={{
             fontSize: tokens.typography.body.sm.fontSize,
             lineHeight: tokens.typography.body.sm.lineHeight,
-            color: tokens.colors.text.secondary,
           }}
         >
           Code sent to the fitness coach.

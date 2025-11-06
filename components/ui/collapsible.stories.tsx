@@ -29,14 +29,13 @@ export const TrainingNotes: Story = {
     return (
       <Collapsible open={open} onOpenChange={setOpen} style={{ width: '360px' }}>
         <div
+          className="bg-card shadow-sm"
           style={{
             display: 'flex',
             flexDirection: 'column',
             gap: tokens.spacing.gap.sm,
             padding: tokens.spacing.spacing.lg,
             borderRadius: tokens.radius.component.card,
-            backgroundColor: tokens.colors.surface.base,
-            boxShadow: tokens.elevation.shadow.sm,
           }}
         >
           <div
@@ -64,10 +63,10 @@ export const TrainingNotes: Story = {
           </div>
           <CollapsibleContent>
             <p
+              className="text-muted-foreground"
               style={{
                 fontSize: tokens.typography.body.sm.fontSize,
                 lineHeight: tokens.typography.body.sm.lineHeight,
-                color: tokens.colors.text.secondary,
                 margin: 0,
               }}
             >
