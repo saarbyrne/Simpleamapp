@@ -32,7 +32,7 @@ export const Default: Story = {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2 text-sm text-[color:var(--ds-text-secondary,#52525b)]">
+        <div className="space-y-2 text-sm text-muted-foreground">
           <p>• 78% of players completed the wellness questionnaire.</p>
           <p>• Two early fatigue alerts in the defender group.</p>
           <p>• Recommendation: reduce load in Thursday's session.</p>
@@ -50,7 +50,7 @@ export const WithAction: Story = {
         <CardDescription>Review and adjust next week's schedule.</CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-[color:var(--ds-text-secondary,#52525b)]">
+        <p className="text-sm text-muted-foreground">
           Total load remains within target range. Review Tuesday and Thursday microcycles
           to balance intensity and recovery.
         </p>
@@ -67,7 +67,7 @@ export const MediaLayout: Story = {
   render: () => (
     <Card className="md:flex-row md:items-center md:gap-0">
       <CardContent className="md:w-1/3">
-        <div className="aspect-video overflow-hidden rounded-md bg-[color:var(--ds-surface-overlay,#18181b)]" />
+        <div className="aspect-video overflow-hidden rounded-md bg-muted" />
       </CardContent>
       <CardContent className="md:w-2/3 md:border-l md:[&:last-child]:pb-0">
         <CardHeader className="md:px-0 md:pt-0">
@@ -76,7 +76,7 @@ export const MediaLayout: Story = {
             Clips ready to share with technical staff and key players.
           </CardDescription>
         </CardHeader>
-        <div className="space-y-2 text-sm text-[color:var(--ds-text-secondary,#52525b)]">
+        <div className="space-y-2 text-sm text-muted-foreground">
           <p>• Highlights from the last match.</p>
           <p>• Tactical segments for field work.</p>
           <p>• Specific clips for individual sessions.</p>
