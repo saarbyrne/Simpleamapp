@@ -45,18 +45,18 @@ export const Default: Story = {
           <Button variant="secondary">Player: Jordan Smith</Button>
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuLabel>Acciones rápidas</ContextMenuLabel>
+          <ContextMenuLabel>Quick Actions</ContextMenuLabel>
           <ContextMenuItem>
             <Icon icon={PenSquareIcon} size="sm" decorative className="mr-2" />
             <span>Open profile</span>
           </ContextMenuItem>
           <ContextMenuItem>
             <Icon icon={ClipboardCopyIcon} size="sm" decorative className="mr-2" />
-            <span>Copiar link</span>
+            <span>Copy link</span>
           </ContextMenuItem>
           <ContextMenuItem variant="destructive">
             <Icon icon={Share2Icon} size="sm" decorative className="mr-2" />
-            <span>Desactivar notificaciones</span>
+            <span>Disable notifications</span>
           </ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuCheckboxItem

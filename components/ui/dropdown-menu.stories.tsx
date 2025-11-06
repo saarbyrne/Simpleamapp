@@ -39,16 +39,16 @@ export const Default: Story = {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary">Opciones</Button>
+          <Button variant="secondary">Options</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent style={{ gap: tokens.spacing.gap.xs }}>
-          <DropdownMenuLabel>Acciones rápidas</DropdownMenuLabel>
+          <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
           <DropdownMenuItem>
             <span>View weekly report</span>
             <DropdownMenuShortcut>⌘R</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <span>Crear evaluación</span>
+            <span>Create assessment</span>
             <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem variant="destructive">
@@ -65,7 +65,7 @@ export const Default: Story = {
           </DropdownMenuCheckboxItem>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <span>Vista actual</span>
+              <span>Current view</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuRadioGroup

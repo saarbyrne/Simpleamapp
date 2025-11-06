@@ -31,10 +31,10 @@ export const Default: Story = {
 
     return (
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Busca acciones rápidas..." />
+        <CommandInput placeholder="Search for actions..." />
         <CommandList>
-          <CommandEmpty>No encontramos resultados.</CommandEmpty>
-          <CommandGroup heading="Navegación principal">
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup heading="Main Navigation">
             <CommandItem>
               Open dashboard
               <CommandShortcut>⌘ D</CommandShortcut>
@@ -49,7 +49,7 @@ export const Default: Story = {
             </CommandItem>
           </CommandGroup>
           <CommandSeparator />
-          <CommandGroup heading="Acciones rápidas">
+          <CommandGroup heading="Quick Actions">
             <CommandItem>Create wellness evaluation</CommandItem>
             <CommandItem>Invite new staff</CommandItem>
             <CommandItem>Export weekly report</CommandItem>
