@@ -2,15 +2,7 @@
 
 import * as React from "react";
 import * as SliderPrimitive from "@radix-ui/react-slider";
-
 import { cn } from "./utils";
-
-/**
- * Slider Component
- *
- * A slider control that uses your globals.css design tokens.
- * All styling is controlled via CSS variables in globals.css.
- */
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,

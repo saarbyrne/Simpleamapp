@@ -2,15 +2,7 @@
 
 import * as React from "react";
 import * as SeparatorPrimitive from "@radix-ui/react-separator";
-
 import { cn } from "./utils";
-
-/**
- * Separator Component
- *
- * A visual divider that uses your globals.css design tokens.
- * All styling is controlled via CSS variables in globals.css.
- */
 
 const Separator = React.forwardRef<
   React.ElementRef<typeof SeparatorPrimitive.Root>,

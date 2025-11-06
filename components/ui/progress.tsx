@@ -2,15 +2,7 @@
 
 import * as React from "react";
 import * as ProgressPrimitive from "@radix-ui/react-progress";
-
 import { cn } from "./utils";
-
-/**
- * Progress Component
- *
- * A progress bar that uses your globals.css design tokens.
- * All styling is controlled via CSS variables in globals.css.
- */
 
 const Progress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,

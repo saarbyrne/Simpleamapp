@@ -2,15 +2,7 @@
 
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
-
 import { cn } from "./utils";
-
-/**
- * Tabs Component
- *
- * A set of layered sections of content that uses your globals.css design tokens.
- * All styling is controlled via CSS variables in globals.css.
- */
 
 const Tabs = TabsPrimitive.Root;
 

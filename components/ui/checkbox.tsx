@@ -3,15 +3,7 @@
 import * as React from "react";
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import { Check } from "lucide-react";
-
 import { cn } from "./utils";
-
-/**
- * Checkbox Component
- *
- * A checkbox control that uses your globals.css design tokens.
- * All styling is controlled via CSS variables in globals.css.
- */
 
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,

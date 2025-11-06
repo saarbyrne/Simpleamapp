@@ -2,15 +2,7 @@
 
 import * as React from "react";
 import * as SwitchPrimitives from "@radix-ui/react-switch";
-
 import { cn } from "./utils";
-
-/**
- * Switch Component
- *
- * A toggle switch control that uses your globals.css design tokens.
- * All styling is controlled via CSS variables in globals.css.
- */
 
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,

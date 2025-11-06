@@ -3,15 +3,7 @@
 import * as React from "react";
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { Circle } from "lucide-react";
-
 import { cn } from "./utils";
-
-/**
- * Radio Group Component
- *
- * A set of radio buttons that uses your globals.css design tokens.
- * All styling is controlled via CSS variables in globals.css.
- */
 
 const RadioGroup = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Root>,

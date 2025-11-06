@@ -1,200 +1,75 @@
-import * as React from 'react';
-import { type LucideIcon, type LucideProps } from 'lucide-react';
-import { tokens } from '@/design-system/tokens';
-import { cn } from './utils';
-import type { IconSize, IconColor, IconStrokeWidth } from '@/design-system/tokens/icons';
+import * as React from "react";
+import { type LucideIcon } from "lucide-react";
+import { cn } from "./utils";
 
-export interface IconProps extends Omit<LucideProps, 'size' | 'color' | 'strokeWidth'> {
-  /**
-   * The Lucide icon component to render
-   */
+const iconSizes = {
+  xs: "size-3",
+  sm: "size-4",
+  md: "size-5",
+  lg: "size-6",
+  xl: "size-8",
+  "2xl": "size-12",
+};
+
+const iconColors = {
+  inherit: "text-current",
+  primary: "text-primary",
+  secondary: "text-secondary",
+  success: "text-green-600",
+  error: "text-destructive",
+  warning: "text-yellow-600",
+  info: "text-blue-600",
+  disabled: "text-muted-foreground opacity-50",
+};
+
+const strokeWeights = {
+  thin: "1",
+  regular: "1.5",
+  medium: "2",
+  bold: "2.5",
+};
+
+export interface IconProps extends Omit<React.HTMLAttributes<HTMLElement>, "color"> {
   icon: LucideIcon;
-
-  /**
-   * Size of the icon using design token sizes
-   * @default 'md'
-   */
-  size?: IconSize;
-
-  /**
-   * Color of the icon using design token colors
-   * @default 'inherit' (inherits from parent)
-   */
-  color?: IconColor;
-
-  /**
-   * Stroke width of the icon
-   * @default 'regular'
-   */
-  strokeWidth?: IconStrokeWidth;
-
-  /**
-   * Label for accessibility (required for semantic icons)
-   */
+  size?: keyof typeof iconSizes;
+  color?: keyof typeof iconColors;
+  strokeWidth?: keyof typeof strokeWeights;
   label?: string;
-
-  /**
-   * Whether the icon is purely decorative (no semantic meaning)
-   * @default false
-   */
   decorative?: boolean;
-
-  /**
-   * Additional CSS class names
-   */
-  className?: string;
 }
 
-/**
- * Icon Component
- *
- * A standardized wrapper around Lucide React icons that applies
- * design system tokens for consistent sizing, spacing, and colors.
- *
- * @example
- * ```tsx
- * // Basic usage
- * <Icon icon={CheckIcon} />
- *
- * // With custom size and color
- * <Icon icon={AlertIcon} size="lg" color="error" />
- *
- * // Decorative icon (no label needed)
- * <Icon icon={StarIcon} decorative />
- *
- * // Semantic icon (requires label)
- * <Icon icon={InfoIcon} label="Information" />
- * ```
- */
-export function Icon({
-  icon: LucideIcon,
-  size = 'md',
-  color = 'inherit',
-  strokeWidth = 'regular',
-  label,
-  decorative = false,
-  className,
-  ...props
-}: IconProps) {
-  const iconSize = tokens.icons.size[size];
-  const iconColor = tokens.icons.color[color];
-  const iconStrokeWidth = tokens.icons.strokeWidth[strokeWidth];
-
-  // Accessibility attributes
-  const a11yProps = decorative
-    ? tokens.icons.accessibility.decorative
-    : {
-        role: 'img',
-        'aria-label': label,
-      };
-
-  // Warn in development if semantic icon is missing a label
-  if (process.env.NODE_ENV === 'development' && !decorative && !label) {
-    console.warn(
-      'Icon: Semantic icons should have a label for accessibility. Either provide a `label` prop or set `decorative={true}`.'
+const Icon = React.forwardRef<HTMLElement, IconProps>(
+  (
+    {
+      icon: LucideIconComponent,
+      size = "md",
+      color = "inherit",
+      strokeWidth = "regular",
+      label,
+      decorative = false,
+      className,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <LucideIconComponent
+        ref={ref as any}
+        className={cn(iconSizes[size], iconColors[color], className)}
+        strokeWidth={strokeWeights[strokeWidth]}
+        aria-label={decorative ? undefined : label}
+        aria-hidden={decorative}
+        {...props}
+      />
     );
   }
+);
+Icon.displayName = "Icon";
 
-  return (
-    <LucideIcon
-      className={cn('inline-block flex-shrink-0', className)}
-      style={{
-        width: iconSize,
-        height: iconSize,
-        color: iconColor,
-      }}
-      strokeWidth={iconStrokeWidth}
-      {...a11yProps}
-      {...props}
-    />
-  );
-}
+// Alias exports for backwards compatibility with stories
+const IconButton = Icon;
+const IconInline = Icon;
+const IconNav = Icon;
+const IconEmptyState = Icon;
 
-/**
- * IconButton Helper
- * Creates an icon with button-optimized sizing and spacing
- */
-export function IconButton({
-  icon,
-  label,
-  className,
-  ...props
-}: Omit<IconProps, 'size' | 'strokeWidth'>) {
-  return (
-    <Icon
-      icon={icon}
-      size="md"
-      strokeWidth="medium"
-      label={label}
-      className={cn('mr-2', className)}
-      {...props}
-    />
-  );
-}
-
-/**
- * IconInline Helper
- * Creates an icon optimized for inline text usage
- */
-export function IconInline({
-  icon,
-  className,
-  ...props
-}: Omit<IconProps, 'size' | 'strokeWidth'>) {
-  return (
-    <Icon
-      icon={icon}
-      size="sm"
-      strokeWidth="regular"
-      decorative
-      className={cn('inline align-text-bottom', className)}
-      {...props}
-    />
-  );
-}
-
-/**
- * IconNav Helper
- * Creates an icon optimized for navigation menus
- */
-export function IconNav({
-  icon,
-  label,
-  className,
-  ...props
-}: Omit<IconProps, 'size' | 'strokeWidth'>) {
-  return (
-    <Icon
-      icon={icon}
-      size="md"
-      strokeWidth="regular"
-      label={label}
-      className={cn('mr-3', className)}
-      {...props}
-    />
-  );
-}
-
-/**
- * IconEmptyState Helper
- * Creates a large icon for empty states
- */
-export function IconEmptyState({
-  icon,
-  label,
-  className,
-  ...props
-}: Omit<IconProps, 'size' | 'strokeWidth'>) {
-  return (
-    <Icon
-      icon={icon}
-      size="2xl"
-      strokeWidth="thin"
-      label={label}
-      className={cn('mx-auto', className)}
-      {...props}
-    />
-  );
-}
-
-export default Icon;
+export { Icon, IconButton, IconInline, IconNav, IconEmptyState };
