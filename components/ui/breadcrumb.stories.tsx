@@ -27,11 +27,10 @@ type Story = StoryObj<typeof Breadcrumb>;
 export const PerformanceJourney: Story = {
   render: () => (
     <Breadcrumb
+      className="bg-card shadow-sm"
       style={{
         padding: tokens.spacing.spacing.sm,
         borderRadius: tokens.radius.component.card,
-        backgroundColor: tokens.colors.surface.base,
-        boxShadow: tokens.elevation.shadow.xs,
       }}
     >
       <BreadcrumbList>

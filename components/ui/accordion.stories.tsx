@@ -32,10 +32,10 @@ export const Default: Story = {
           <AccordionTrigger>{item.title}</AccordionTrigger>
           <AccordionContent>
             <p
+              className="text-muted-foreground"
               style={{
                 fontSize: tokens.typography.body.sm.fontSize,
                 lineHeight: tokens.typography.body.sm.lineHeight,
-                color: tokens.colors.text.secondary,
               }}
             >
               {item.content}
