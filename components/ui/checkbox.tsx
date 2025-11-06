@@ -2,45 +2,36 @@
 
 import * as React from "react";
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
-import { CheckIcon } from "lucide-react";
+import { Check } from "lucide-react";
 
 import { cn } from "./utils";
-import { tokens } from "@/design-system/tokens";
 
-function Checkbox({
-  className,
-  style,
-  ...props
-}: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
-  return (
-    <CheckboxPrimitive.Root
-      data-slot="checkbox"
-      className={cn(
-        "peer border shrink-0 transition-shadow outline-none disabled:cursor-not-allowed disabled:opacity-50",
-        "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary",
-        className,
-      )}
-      style={{
-        width: tokens.spacing.spacing.lg,
-        height: tokens.spacing.spacing.lg,
-        borderRadius: tokens.radius.radius.sm,
-        borderColor: tokens.colors.border.default,
-        backgroundColor: tokens.colors.surface.sunken,
-        boxShadow: tokens.elevation.shadow.xs,
-        ["--primary" as string]: tokens.colors.interactive.primary,
-        ["--primary-foreground" as string]: tokens.colors.text.inverse,
-        ...style,
-      }}
-      {...props}
+/**
+ * Checkbox Component
+ *
+ * A checkbox control that uses your globals.css design tokens.
+ * All styling is controlled via CSS variables in globals.css.
+ */
+
+const Checkbox = React.forwardRef<
+  React.ElementRef<typeof CheckboxPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <CheckboxPrimitive.Root
+    ref={ref}
+    className={cn(
+      "peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+      className
+    )}
+    {...props}
+  >
+    <CheckboxPrimitive.Indicator
+      className={cn("flex items-center justify-center text-current")}
     >
-      <CheckboxPrimitive.Indicator
-        data-slot="checkbox-indicator"
-        className="flex items-center justify-center text-current transition-none"
-      >
-        <CheckIcon className="size-3.5" />
-      </CheckboxPrimitive.Indicator>
-    </CheckboxPrimitive.Root>
-  );
-}
+      <Check className="h-4 w-4" />
+    </CheckboxPrimitive.Indicator>
+  </CheckboxPrimitive.Root>
+));
+Checkbox.displayName = CheckboxPrimitive.Root.displayName;
 
 export { Checkbox };
