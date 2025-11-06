@@ -242,15 +242,13 @@ export const CompleteFormField: Story = {
         id="bio"
         rows={4}
         placeholder="I've been playing basketball since..."
+        className="border bg-background text-foreground"
         style={{
           width: '100%',
           padding: tokens.spacing.component.inputPadding,
           fontSize: tokens.typography.ui.input.fontSize,
           lineHeight: tokens.typography.ui.input.lineHeight,
-          border: `1px solid ${tokens.colors.border.default}`,
           borderRadius: tokens.radius.component.input,
-          backgroundColor: tokens.colors.surface.sunken,
-          color: tokens.colors.text.primary,
           resize: 'vertical',
         }}
       />
@@ -266,15 +264,13 @@ export const CompleteFormField: Story = {
  */
 export const FormExample: Story = {
   render: () => (
-    <div style={{
+    <div className="bg-card border" style={{
       width: '400px',
       display: 'flex',
       flexDirection: 'column',
       gap: tokens.spacing.gap.lg,
       padding: tokens.spacing.spacing.xl,
-      backgroundColor: tokens.colors.surface.elevated,
       borderRadius: tokens.radius.component.card,
-      border: `1px solid ${tokens.colors.border.default}`,
     }}>
       {/* Required field */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
