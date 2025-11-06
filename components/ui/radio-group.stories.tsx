@@ -29,12 +29,12 @@ export const Default: Story = {
         ].map((option) => (
           <label
             key={option.value}
+            className="text-foreground"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: tokens.spacing.gap.sm,
               fontSize: tokens.typography.body.sm.fontSize,
-              color: tokens.colors.text.primary,
             }}
           >
             <RadioGroupItem value={option.value} />

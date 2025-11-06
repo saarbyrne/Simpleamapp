@@ -55,12 +55,12 @@ export const Default: Story = {
             }}
           >
             <label
+              className="text-foreground"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: tokens.spacing.gap.xs,
                 fontSize: tokens.typography.body.sm.fontSize,
-                color: tokens.colors.text.primary,
               }}
             >
               Current Status
@@ -70,12 +70,12 @@ export const Default: Story = {
               />
             </label>
             <label
+              className="text-foreground"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: tokens.spacing.gap.xs,
                 fontSize: tokens.typography.body.sm.fontSize,
-                color: tokens.colors.text.primary,
               }}
             >
               Observations
