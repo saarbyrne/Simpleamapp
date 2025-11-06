@@ -1,12 +1,16 @@
 import * as Sentry from '@sentry/nextjs'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import '@/app/globals.css'
 import '@/app/design-system.css'
 import { AnalyticsProviders } from '@/lib/analytics/providers'
 import { ThemeProvider } from '@/components/theme-provider'
 
-const inter = Inter({ subsets: ['latin'] })
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-plus-jakarta-sans',
+})
 
 // Include Sentry trace data in the metadata for request correlation.
 export function generateMetadata(): Metadata {
@@ -26,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={plusJakartaSans.className}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

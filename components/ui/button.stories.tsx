@@ -1,16 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { ArrowRightIcon } from 'lucide-react';
-import { Button } from './button';
-import { Icon } from './icon';
+import { ArrowRightIcon, PlusIcon, Trash2Icon, DownloadIcon, CheckIcon, XIcon } from 'lucide-react';
+import { Button, ButtonGroup } from './button';
+import { tokens } from '@/design-system/tokens';
+
+/**
+ * Button Component Stories
+ *
+ * A flexible button component with extensive variant support, loading states,
+ * and icon positioning. Built with shadcn aesthetic and design tokens.
+ */
 
 const meta: Meta<typeof Button> = {
   title: 'Components/Button',
   component: Button,
-  args: {
-    children: 'Button',
-    variant: 'default',
-    size: 'default',
-  },
   parameters: {
     layout: 'centered',
     controls: {
@@ -18,14 +20,67 @@ const meta: Meta<typeof Button> = {
     },
   },
   tags: ['autodocs'],
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'],
+      description: 'Visual style variant',
+      table: {
+        defaultValue: { summary: 'default' },
+      },
+    },
+    size: {
+      control: 'select',
+      options: ['sm', 'default', 'lg', 'icon'],
+      description: 'Size of the button',
+      table: {
+        defaultValue: { summary: 'default' },
+      },
+    },
+    loading: {
+      control: 'boolean',
+      description: 'Show loading spinner',
+      table: {
+        defaultValue: { summary: 'false' },
+      },
+    },
+    fullWidth: {
+      control: 'boolean',
+      description: 'Make button full width',
+      table: {
+        defaultValue: { summary: 'false' },
+      },
+    },
+    disabled: {
+      control: 'boolean',
+      description: 'Disabled state',
+      table: {
+        defaultValue: { summary: 'false' },
+      },
+    },
+  },
 };
 
 export default meta;
 
 type Story = StoryObj<typeof Button>;
 
-export const Default: Story = {};
+// ============================================================================
+// Basic Examples
+// ============================================================================
 
+/**
+ * Default button with primary styling
+ */
+export const Default: Story = {
+  args: {
+    children: 'Button',
+  },
+};
+
+/**
+ * Secondary variant with subtle styling
+ */
 export const Secondary: Story = {
   args: {
     variant: 'secondary',
@@ -33,6 +88,9 @@ export const Secondary: Story = {
   },
 };
 
+/**
+ * Destructive variant for dangerous actions
+ */
 export const Destructive: Story = {
   args: {
     variant: 'destructive',
@@ -40,6 +98,9 @@ export const Destructive: Story = {
   },
 };
 
+/**
+ * Outline variant with border
+ */
 export const Outline: Story = {
   args: {
     variant: 'outline',
@@ -47,6 +108,9 @@ export const Outline: Story = {
   },
 };
 
+/**
+ * Ghost variant with transparent background
+ */
 export const Ghost: Story = {
   args: {
     variant: 'ghost',
@@ -54,6 +118,9 @@ export const Ghost: Story = {
   },
 };
 
+/**
+ * Link variant styled as hyperlink
+ */
 export const Link: Story = {
   args: {
     variant: 'link',
@@ -61,29 +128,457 @@ export const Link: Story = {
   },
 };
 
-export const WithIcon: Story = {
-  args: {
-    children: (
-      <>
-        Continue
-        <Icon icon={ArrowRightIcon} size="sm" decorative className="ml-2" />
-      </>
-    ),
-  },
-};
+// ============================================================================
+// Size Variants
+// ============================================================================
 
-export const Sizes: Story = {
+/**
+ * All available size variants
+ */
+export const SizeVariants: Story = {
   render: () => (
-    <div className="flex flex-col items-start gap-3">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.md, alignItems: 'flex-start' }}>
       <Button size="sm">Small</Button>
       <Button size="default">Default</Button>
       <Button size="lg">Large</Button>
       <Button size="icon" aria-label="Icon button">
-        <Icon icon={ArrowRightIcon} size="sm" decorative />
+        <ArrowRightIcon size={16} />
       </Button>
     </div>
   ),
   parameters: {
-    controls: { exclude: ['size', 'variant', 'children'] },
+    controls: { disable: true },
+  },
+};
+
+// ============================================================================
+// Loading States
+// ============================================================================
+
+/**
+ * Button with loading spinner
+ */
+export const Loading: Story = {
+  args: {
+    loading: true,
+    children: 'Processing...',
+  },
+};
+
+/**
+ * All variants in loading state
+ */
+export const LoadingVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: tokens.spacing.gap.md, flexWrap: 'wrap' }}>
+      <Button loading>Default</Button>
+      <Button variant="secondary" loading>Secondary</Button>
+      <Button variant="destructive" loading>Destructive</Button>
+      <Button variant="outline" loading>Outline</Button>
+      <Button variant="ghost" loading>Ghost</Button>
+    </div>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+/**
+ * Different sizes in loading state
+ */
+export const LoadingSizes: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: tokens.spacing.gap.md, alignItems: 'center' }}>
+      <Button size="sm" loading>Small</Button>
+      <Button loading>Default</Button>
+      <Button size="lg" loading>Large</Button>
+    </div>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+// ============================================================================
+// With Icons
+// ============================================================================
+
+/**
+ * Button with left icon
+ */
+export const WithLeftIcon: Story = {
+  render: () => (
+    <Button leftIcon={<PlusIcon size={16} />}>
+      Add Item
+    </Button>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+/**
+ * Button with right icon
+ */
+export const WithRightIcon: Story = {
+  render: () => (
+    <Button rightIcon={<ArrowRightIcon size={16} />}>
+      Continue
+    </Button>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+/**
+ * Various icon positions and combinations
+ */
+export const IconExamples: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.md, alignItems: 'flex-start' }}>
+      <Button leftIcon={<PlusIcon size={16} />}>
+        Add Item
+      </Button>
+
+      <Button rightIcon={<ArrowRightIcon size={16} />}>
+        Continue
+      </Button>
+
+      <Button variant="destructive" leftIcon={<Trash2Icon size={16} />}>
+        Delete
+      </Button>
+
+      <Button variant="outline" leftIcon={<DownloadIcon size={16} />}>
+        Download
+      </Button>
+
+      <Button size="icon" aria-label="Check">
+        <CheckIcon size={16} />
+      </Button>
+    </div>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+// ============================================================================
+// Disabled State
+// ============================================================================
+
+/**
+ * Disabled button
+ */
+export const Disabled: Story = {
+  args: {
+    disabled: true,
+    children: 'Disabled',
+  },
+};
+
+/**
+ * All variants in disabled state
+ */
+export const DisabledVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: tokens.spacing.gap.md, flexWrap: 'wrap' }}>
+      <Button disabled>Default</Button>
+      <Button variant="secondary" disabled>Secondary</Button>
+      <Button variant="destructive" disabled>Destructive</Button>
+      <Button variant="outline" disabled>Outline</Button>
+      <Button variant="ghost" disabled>Ghost</Button>
+      <Button variant="link" disabled>Link</Button>
+    </div>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+// ============================================================================
+// Full Width
+// ============================================================================
+
+/**
+ * Full width button
+ */
+export const FullWidth: Story = {
+  render: () => (
+    <div style={{ width: '400px' }}>
+      <Button fullWidth>Full Width Button</Button>
+    </div>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+/**
+ * Full width form example
+ */
+export const FullWidthForm: Story = {
+  render: () => (
+    <div style={{
+      width: '400px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: tokens.spacing.gap.md,
+      padding: tokens.spacing.spacing.xl,
+      backgroundColor: tokens.colors.surface.elevated,
+      borderRadius: tokens.radius.component.card,
+      border: `1px solid ${tokens.colors.border.default}`,
+    }}>
+      <Button fullWidth variant="default">Submit</Button>
+      <Button fullWidth variant="outline">Cancel</Button>
+      <Button fullWidth variant="ghost">Reset</Button>
+    </div>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+// ============================================================================
+// Button Groups
+// ============================================================================
+
+/**
+ * Horizontal button group
+ */
+export const ButtonGroupHorizontal: Story = {
+  render: () => (
+    <ButtonGroup>
+      <Button variant="outline">Left</Button>
+      <Button variant="outline">Middle</Button>
+      <Button variant="outline">Right</Button>
+    </ButtonGroup>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+/**
+ * Vertical button group
+ */
+export const ButtonGroupVertical: Story = {
+  render: () => (
+    <ButtonGroup vertical>
+      <Button variant="outline">Top</Button>
+      <Button variant="outline">Middle</Button>
+      <Button variant="outline">Bottom</Button>
+    </ButtonGroup>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+/**
+ * Button group with icons
+ */
+export const ButtonGroupWithIcons: Story = {
+  render: () => (
+    <ButtonGroup>
+      <Button variant="outline" size="icon" aria-label="Accept">
+        <CheckIcon size={16} />
+      </Button>
+      <Button variant="outline" size="icon" aria-label="Reject">
+        <XIcon size={16} />
+      </Button>
+      <Button variant="outline" size="icon" aria-label="Delete">
+        <Trash2Icon size={16} />
+      </Button>
+    </ButtonGroup>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+// ============================================================================
+// Complex Examples
+// ============================================================================
+
+/**
+ * All variants side by side
+ */
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: tokens.spacing.gap.md, flexWrap: 'wrap' }}>
+      <Button>Default</Button>
+      <Button variant="secondary">Secondary</Button>
+      <Button variant="destructive">Destructive</Button>
+      <Button variant="outline">Outline</Button>
+      <Button variant="ghost">Ghost</Button>
+      <Button variant="link">Link</Button>
+    </div>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+/**
+ * Comprehensive button showcase
+ */
+export const Showcase: Story = {
+  render: () => (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: tokens.spacing.gap.xl,
+      padding: tokens.spacing.spacing.xl,
+      backgroundColor: tokens.colors.surface.elevated,
+      borderRadius: tokens.radius.component.card,
+      border: `1px solid ${tokens.colors.border.default}`,
+    }}>
+      {/* Primary actions */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.sm }}>
+        <h3 style={{
+          fontSize: tokens.typography.heading.h5.fontSize,
+          fontWeight: tokens.typography.heading.h5.fontWeight,
+          color: tokens.colors.text.primary,
+        }}>
+          Primary Actions
+        </h3>
+        <div style={{ display: 'flex', gap: tokens.spacing.gap.md, flexWrap: 'wrap' }}>
+          <Button leftIcon={<PlusIcon size={16} />}>
+            Create New
+          </Button>
+          <Button variant="secondary" leftIcon={<DownloadIcon size={16} />}>
+            Download
+          </Button>
+          <Button variant="outline" rightIcon={<ArrowRightIcon size={16} />}>
+            Continue
+          </Button>
+        </div>
+      </div>
+
+      {/* Destructive actions */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.sm }}>
+        <h3 style={{
+          fontSize: tokens.typography.heading.h5.fontSize,
+          fontWeight: tokens.typography.heading.h5.fontWeight,
+          color: tokens.colors.text.primary,
+        }}>
+          Destructive Actions
+        </h3>
+        <div style={{ display: 'flex', gap: tokens.spacing.gap.md, flexWrap: 'wrap' }}>
+          <Button variant="destructive" leftIcon={<Trash2Icon size={16} />}>
+            Delete
+          </Button>
+          <Button variant="destructive" size="sm">
+            Remove All
+          </Button>
+          <Button variant="outline" size="icon" aria-label="Delete">
+            <Trash2Icon size={16} />
+          </Button>
+        </div>
+      </div>
+
+      {/* Loading states */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.sm }}>
+        <h3 style={{
+          fontSize: tokens.typography.heading.h5.fontSize,
+          fontWeight: tokens.typography.heading.h5.fontWeight,
+          color: tokens.colors.text.primary,
+        }}>
+          Loading States
+        </h3>
+        <div style={{ display: 'flex', gap: tokens.spacing.gap.md, flexWrap: 'wrap' }}>
+          <Button loading>Saving...</Button>
+          <Button variant="secondary" loading>Processing</Button>
+          <Button variant="outline" loading>Loading</Button>
+        </div>
+      </div>
+
+      {/* Size variants */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.sm }}>
+        <h3 style={{
+          fontSize: tokens.typography.heading.h5.fontSize,
+          fontWeight: tokens.typography.heading.h5.fontWeight,
+          color: tokens.colors.text.primary,
+        }}>
+          Size Variants
+        </h3>
+        <div style={{ display: 'flex', gap: tokens.spacing.gap.md, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Button size="sm">Small</Button>
+          <Button>Default</Button>
+          <Button size="lg">Large</Button>
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+/**
+ * Form actions example
+ */
+export const FormActions: Story = {
+  render: () => (
+    <div style={{
+      width: '500px',
+      padding: tokens.spacing.spacing.xl,
+      backgroundColor: tokens.colors.surface.elevated,
+      borderRadius: tokens.radius.component.card,
+      border: `1px solid ${tokens.colors.border.default}`,
+    }}>
+      {/* Form content would go here */}
+      <div style={{
+        height: '200px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: tokens.colors.surface.sunken,
+        borderRadius: tokens.radius.component.input,
+        marginBottom: tokens.spacing.gap.lg,
+        color: tokens.colors.text.tertiary,
+      }}>
+        Form fields here...
+      </div>
+
+      {/* Action buttons */}
+      <div style={{
+        display: 'flex',
+        gap: tokens.spacing.gap.md,
+        justifyContent: 'flex-end',
+      }}>
+        <Button variant="ghost">
+          Cancel
+        </Button>
+        <Button variant="outline">
+          Save Draft
+        </Button>
+        <Button rightIcon={<CheckIcon size={16} />}>
+          Submit
+        </Button>
+      </div>
+    </div>
+  ),
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+// ============================================================================
+// Interactive Playground
+// ============================================================================
+
+/**
+ * Playground for testing all props combinations
+ */
+export const Playground: Story = {
+  args: {
+    children: 'Click me',
+    variant: 'default',
+    size: 'default',
+    loading: false,
+    fullWidth: false,
+    disabled: false,
   },
 };

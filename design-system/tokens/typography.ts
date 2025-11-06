@@ -18,7 +18,7 @@
 export const fontFamily = {
   // Primary font for all UI elements and body text
   sans: [
-    'Inter',
+    '"Plus Jakarta Sans"',
     'system-ui',
     '-apple-system',
     'BlinkMacSystemFont',
@@ -41,7 +41,7 @@ export const fontFamily = {
 
   // Display font for marketing and hero sections (optional)
   display: [
-    'Inter',
+    '"Plus Jakarta Sans"',
     'system-ui',
     '-apple-system',
     'BlinkMacSystemFont',
@@ -120,7 +120,7 @@ export const lineHeight = {
 
 /**
  * Font Weights
- * Inter font family supports variable weights
+ * Plus Jakarta Sans font family supports variable weights
  */
 export const fontWeight = {
   // 300 - Light, used sparingly for large display text
