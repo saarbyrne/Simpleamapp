@@ -21,7 +21,7 @@ export const Default: Story = {
       <AlertTitle>Remember to record daily wellness</AlertTitle>
       <AlertDescription>
         Players have until 09:00 to complete the form. We will notify you if someone
-        no lo envía.
+        doesn't submit it.
       </AlertDescription>
     </Alert>
   ),

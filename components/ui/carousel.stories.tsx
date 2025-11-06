@@ -25,23 +25,23 @@ type Story = StoryObj<typeof Carousel>;
 
 const sessions = [
   {
-    title: 'Fase preventiva',
-    focus: 'Movilidad + Core',
+    title: 'Preventive Phase',
+    focus: 'Mobility + Core',
     duration: '15 minutes',
   },
   {
-    title: 'Bloque principal',
-    focus: 'Fuerza excéntrica',
+    title: 'Main Block',
+    focus: 'Eccentric Strength',
     duration: '30 minutes',
   },
   {
-    title: 'Potencia',
-    focus: 'Pliometría horizontal',
+    title: 'Power',
+    focus: 'Horizontal Plyometrics',
     duration: '20 minutes',
   },
   {
-    title: 'Regenerativo',
-    focus: 'Trabajo respiratorio',
+    title: 'Recovery',
+    focus: 'Breathing Work',
     duration: '10 minutes',
   },
 ];
@@ -80,7 +80,7 @@ export const TrainingBlocks: Story = {
                     lineHeight: tokens.typography.body.sm.lineHeight,
                   }}
                 >
-                  Duración: {session.duration}
+                  Duration: {session.duration}
                 </span>
               </CardContent>
             </Card>
