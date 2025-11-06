@@ -30,7 +30,7 @@ type Story = StoryObj<typeof Sheet>;
 export const Default: Story = {
   render: () => {
     const [notes, setNotes] = useState('');
-    const [status, setStatus] = useState('Disponible');
+    const [status, setStatus] = useState('Available');
 
     return (
       <Sheet>
@@ -39,10 +39,10 @@ export const Default: Story = {
         </SheetTrigger>
         <SheetContent side="right">
           <SheetHeader>
-            <SheetTitle>Ficha médica</SheetTitle>
+            <SheetTitle>Medical Record</SheetTitle>
             <SheetDescription>
               Add quick observations for the medical team. The player will be able to see the
-              recomendaciones públicas.
+              public recommendations.
             </SheetDescription>
           </SheetHeader>
           <div
@@ -63,7 +63,7 @@ export const Default: Story = {
                 color: tokens.colors.text.primary,
               }}
             >
-              Estado actual
+              Current Status
               <Input
                 value={status}
                 onChange={(event) => setStatus(event.target.value)}
@@ -78,7 +78,7 @@ export const Default: Story = {
                 color: tokens.colors.text.primary,
               }}
             >
-              Observaciones
+              Observations
               <Textarea
                 rows={4}
                 value={notes}

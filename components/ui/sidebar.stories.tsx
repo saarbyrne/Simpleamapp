@@ -128,7 +128,7 @@ const ExampleLayout = () => (
               <SidebarMenuItem>
                 <SidebarMenuButton>
                   <Icon icon={LayersIcon} size="md" decorative className="mr-2" />
-                  <span>Formularios</span>
+                  <span>Forms</span>
                 </SidebarMenuButton>
                 <SidebarMenuAction showOnHover>
                   <Icon icon={PlusIcon} size="sm" decorative />
