@@ -49,9 +49,9 @@ type Story = StoryObj<typeof SidebarProvider>;
 
 const ExampleLayout = () => (
   <SidebarProvider
+    className="bg-background"
     style={{
       minHeight: '100vh',
-      backgroundColor: tokens.colors.surface.base,
     }}
   >
     <Sidebar>
@@ -82,12 +82,12 @@ const ExampleLayout = () => (
               SimpleAM
             </span>
             <span
+              className="text-muted-foreground"
               style={{
                 fontSize: tokens.typography.body.xs.fontSize,
-                color: tokens.colors.text.secondary,
               }}
             >
-              Temporada 2025
+              Season 2025
             </span>
           </div>
         </div>
@@ -179,20 +179,20 @@ const ExampleLayout = () => (
         }}
       >
         <h2
+          className="text-foreground"
           style={{
             fontSize: tokens.typography.heading.h3.fontSize,
             fontWeight: tokens.typography.heading.h3.fontWeight,
             lineHeight: tokens.typography.heading.h3.lineHeight,
-            color: tokens.colors.text.primary,
           }}
         >
-          Panel principal
+          Main Panel
         </h2>
         <p
+          className="text-muted-foreground"
           style={{
             fontSize: tokens.typography.body.md.fontSize,
             lineHeight: tokens.typography.body.md.lineHeight,
-            color: tokens.colors.text.secondary,
             maxWidth: '42rem',
           }}
         >

@@ -32,11 +32,11 @@ export const Default: Story = {
           }}
         >
           <h4
+            className="text-foreground"
             style={{
               fontSize: tokens.typography.heading.h5.fontSize,
               fontWeight: tokens.typography.heading.h5.fontWeight,
               lineHeight: tokens.typography.heading.h5.lineHeight,
-              color: tokens.colors.text.primary,
             }}
           >
             Weekly balance
@@ -54,10 +54,10 @@ export const Default: Story = {
       </TabsContent>
       <TabsContent value="wellness">
         <p
+          className="text-muted-foreground"
           style={{
             fontSize: tokens.typography.body.sm.fontSize,
             lineHeight: tokens.typography.body.sm.lineHeight,
-            color: tokens.colors.text.secondary,
           }}
         >
           82% of the team completed the wellness form this morning.
@@ -65,10 +65,10 @@ export const Default: Story = {
       </TabsContent>
       <TabsContent value="load">
         <p
+          className="text-muted-foreground"
           style={{
             fontSize: tokens.typography.body.sm.fontSize,
             lineHeight: tokens.typography.body.sm.lineHeight,
-            color: tokens.colors.text.secondary,
           }}
         >
           Microcycle focused on speed and power. Suggested: reduce strength load by 15% on Thursday.

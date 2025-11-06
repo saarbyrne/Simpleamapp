@@ -38,20 +38,20 @@ export const Default: Story = {
                 }}
               >
                 <h4
+                  className="text-foreground"
                   style={{
                     fontSize: tokens.typography.heading.h5.fontSize,
                     fontWeight: tokens.typography.heading.h5.fontWeight,
                     lineHeight: tokens.typography.heading.h5.lineHeight,
-                    color: tokens.colors.text.primary,
                   }}
                 >
                   Main squad
                 </h4>
                 <p
+                  className="text-muted-foreground"
                   style={{
                     fontSize: tokens.typography.body.sm.fontSize,
                     lineHeight: tokens.typography.body.sm.lineHeight,
-                    color: tokens.colors.text.secondary,
                   }}
                 >
                   Manage availability, historical loads and medical documentation quickly.
@@ -72,28 +72,28 @@ export const Default: Story = {
                 }}
               >
                 <span
+                  className="text-muted-foreground"
                   style={{
                     fontSize: tokens.typography.body.sm.fontSize,
                     lineHeight: tokens.typography.body.sm.lineHeight,
-                    color: tokens.colors.text.secondary,
                   }}
                 >
                   • Weekly microcycles
                 </span>
                 <span
+                  className="text-muted-foreground"
                   style={{
                     fontSize: tokens.typography.body.sm.fontSize,
                     lineHeight: tokens.typography.body.sm.lineHeight,
-                    color: tokens.colors.text.secondary,
                   }}
                 >
                   • Load per session
                 </span>
                 <span
+                  className="text-muted-foreground"
                   style={{
                     fontSize: tokens.typography.body.sm.fontSize,
                     lineHeight: tokens.typography.body.sm.lineHeight,
-                    color: tokens.colors.text.secondary,
                   }}
                 >
                   • Overexertion alerts
