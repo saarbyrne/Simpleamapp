@@ -386,9 +386,9 @@ export const FormField: Story = {
           </SelectContent>
         </Select>
         <p
+          className="text-muted-foreground"
           style={{
             fontSize: tokens.typography.body.xs.fontSize,
-            color: tokens.colors.text.tertiary,
             marginTop: tokens.spacing.spacing.xs,
           }}
         >
@@ -413,15 +413,14 @@ export const MultipleFields: Story = {
 
     return (
       <div
+        className="bg-card border"
         style={{
           width: '400px',
           display: 'flex',
           flexDirection: 'column',
           gap: tokens.spacing.gap.lg,
           padding: tokens.spacing.spacing.xl,
-          backgroundColor: tokens.colors.surface.elevated,
           borderRadius: tokens.radius.component.card,
-          border: `1px solid ${tokens.colors.border.default}`,
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
@@ -519,10 +518,10 @@ export const Showcase: Story = {
         {/* Basic */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.sm }}>
           <h3
+            className="text-foreground"
             style={{
               fontSize: tokens.typography.heading.h5.fontSize,
               fontWeight: tokens.typography.heading.h5.fontWeight,
-              color: tokens.colors.text.primary,
             }}
           >
             Basic Select
@@ -561,10 +560,10 @@ export const Showcase: Story = {
         {/* Sizes */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.sm }}>
           <h3
+            className="text-foreground"
             style={{
               fontSize: tokens.typography.heading.h5.fontSize,
               fontWeight: tokens.typography.heading.h5.fontWeight,
-              color: tokens.colors.text.primary,
             }}
           >
             Size Variants
@@ -623,10 +622,10 @@ export const Showcase: Story = {
         {/* Validation States */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.sm }}>
           <h3
+            className="text-foreground"
             style={{
               fontSize: tokens.typography.heading.h5.fontSize,
               fontWeight: tokens.typography.heading.h5.fontWeight,
-              color: tokens.colors.text.primary,
             }}
           >
             Validation States
@@ -669,10 +668,10 @@ export const Showcase: Story = {
         {/* With Icons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.sm }}>
           <h3
+            className="text-foreground"
             style={{
               fontSize: tokens.typography.heading.h5.fontSize,
               fontWeight: tokens.typography.heading.h5.fontWeight,
-              color: tokens.colors.text.primary,
             }}
           >
             With Icons
