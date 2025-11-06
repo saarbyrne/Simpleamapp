@@ -30,20 +30,20 @@ export const Default: Story = {
         }}
       >
         <label
+          className="text-foreground"
           style={{
             fontSize: tokens.typography.body.sm.fontSize,
             lineHeight: tokens.typography.body.sm.lineHeight,
-            color: tokens.colors.text.primary,
           }}
         >
           Target intensity
         </label>
         <Slider value={value} onValueChange={setValue} min={0} max={100} />
         <span
+          className="text-muted-foreground"
           style={{
             fontSize: tokens.typography.body.xs.fontSize,
             lineHeight: tokens.typography.body.xs.lineHeight,
-            color: tokens.colors.text.secondary,
           }}
         >
           {value[0]}% for today's session

@@ -22,12 +22,12 @@ export const Default: Story = {
 
     return (
       <label
+        className="text-foreground"
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: tokens.spacing.gap.sm,
           fontSize: tokens.typography.body.sm.fontSize,
-          color: tokens.colors.text.primary,
         }}
       >
         Notify staff of changes
