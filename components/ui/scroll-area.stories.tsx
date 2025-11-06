@@ -18,10 +18,10 @@ type Story = StoryObj<typeof ScrollArea>;
 export const Default: Story = {
   render: () => (
     <ScrollArea
+      className="border"
       style={{
         width: '320px',
         height: '180px',
-        border: `1px solid ${tokens.colors.border.default}`,
         borderRadius: tokens.radius.radius.md,
         padding: tokens.spacing.spacing.sm,
       }}
@@ -36,10 +36,10 @@ export const Default: Story = {
         {[...Array(12)].map((_, index) => (
           <div
             key={index}
+            className="text-foreground"
             style={{
               fontSize: tokens.typography.body.sm.fontSize,
               lineHeight: tokens.typography.body.sm.lineHeight,
-              color: tokens.colors.text.primary,
             }}
           >
             Entry #{index + 1}: training session summary and notes for staff.

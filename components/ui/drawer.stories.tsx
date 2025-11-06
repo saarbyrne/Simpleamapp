@@ -47,19 +47,19 @@ export const Default: Story = {
           }}
         >
           <p
+            className="text-muted-foreground"
             style={{
               fontSize: tokens.typography.body.sm.fontSize,
               lineHeight: tokens.typography.body.sm.lineHeight,
-              color: tokens.colors.text.secondary,
             }}
           >
-            • Ajustar marcaje en pelota parada.
+            • Adjust set-piece marking.
           </p>
           <p
+            className="text-muted-foreground"
             style={{
               fontSize: tokens.typography.body.sm.fontSize,
               lineHeight: tokens.typography.body.sm.lineHeight,
-              color: tokens.colors.text.secondary,
             }}
           >
             • Remember load control for starters tomorrow.
