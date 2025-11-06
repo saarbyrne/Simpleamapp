@@ -57,7 +57,7 @@ export const Default: Story = {
             <Input
               value={objective}
               onChange={(event) => setObjective(event.target.value)}
-              placeholder="Ej. Mejorar la comunicación defensiva"
+              placeholder="E.g. Improve defensive communication"
             />
             <Button disabled={!objective}>Save objective</Button>
           </div>

@@ -21,8 +21,8 @@ export const Default: Story = {
     <>
       <Button
         onClick={() =>
-          toast.success('Formulario de wellness enviado', {
-            description: 'Se notificó a los preparadores físicos.',
+          toast.success('Wellness form submitted', {
+            description: 'Fitness coaches have been notified.',
           })
         }
       >

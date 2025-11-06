@@ -71,8 +71,7 @@ export const TrainingNotes: Story = {
                 margin: 0,
               }}
             >
-              Limitar cambios de dirección en los últimos dos bloques y priorizar activaciones de
-              deep core. Reinforce check with physio after session.
+              Limit direction changes in the last two blocks and prioritize deep core activations. Reinforce check with physio after session.
             </p>
           </CollapsibleContent>
         </div>

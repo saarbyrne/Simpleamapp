@@ -60,7 +60,7 @@ export const Verification: Story = {
             color: tokens.colors.text.secondary,
           }}
         >
-          Código enviado al preparador físico.
+          Code sent to the fitness coach.
         </span>
       </div>
     );
