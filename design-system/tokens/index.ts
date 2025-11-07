@@ -28,6 +28,8 @@ export * as elevationTokens from './elevation';
 export * as radiusTokens from './radius';
 export * as motionTokens from './motion';
 export * as iconSystem from './icons';
+export * as breakpointSystem from './breakpoints';
+export * as gridSystem from './grid';
 
 // Individual token imports for unified object
 import { colors, primitives, surface, text, border, interactive, feedback, focus, darkMode } from './colors';
@@ -38,6 +40,8 @@ import { elevation } from './elevation';
 import { borderRadius } from './radius';
 import { motion } from './motion';
 import { iconTokens } from './icons';
+import { breakpointTokens } from './breakpoints';
+import { gridTokens } from './grid';
 
 /**
  * Unified Token Object
@@ -59,6 +63,8 @@ export const tokens = {
   radius: borderRadius,
   motion,
   icons: iconTokens,
+  breakpoints: breakpointTokens,
+  grid: gridTokens,
 } as const;
 
 export type Tokens = typeof tokens;
