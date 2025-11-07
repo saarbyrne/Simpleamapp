@@ -108,6 +108,7 @@
     "test:e2e": "playwright test",
     "test:visual": "playwright test --grep \"@visual\"",
     "test:a11y": "playwright test --grep \"@a11y\"",
+    "test:a11y:audit": "npx tsx scripts/a11y-audit.ts",
     "test:perf": "lhci autorun",
     "qa:prep": "npm run lint && npm run typecheck && npm run test:unit",
     "db:generate": "prisma generate",
