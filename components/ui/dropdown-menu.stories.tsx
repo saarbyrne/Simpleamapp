@@ -51,7 +51,7 @@ export const Default: Story = {
             <span>Create assessment</span>
             <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive">
+          <DropdownMenuItem className="text-destructive focus:text-destructive">
             <span>Archive player</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />

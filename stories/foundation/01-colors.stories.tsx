@@ -50,7 +50,7 @@ const ColorSwatch = ({
   value: string
   description?: string
 }) => (
-  <div className="flex items-center gap-4 p-4 border rounded-lg">
+  <div className="flex items-center gap-4 p-4 border rounded-lg bg-card">
     <div
       className="w-16 h-16 rounded-lg border shadow-sm flex-shrink-0"
       style={{ backgroundColor: value }}

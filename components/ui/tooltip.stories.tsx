@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Tooltip, TooltipTrigger, TooltipContent } from './tooltip';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './tooltip';
 import { Button } from './button';
 import { InfoIcon } from 'lucide-react';
 import { tokens } from '@/design-system/tokens';
@@ -20,22 +20,24 @@ type Story = StoryObj<typeof Tooltip>;
 
 export const Default: Story = {
   render: () => (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="View help">
-          <Icon icon={InfoIcon} size="sm" decorative />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <span
-          style={{
-            fontSize: tokens.typography.body.xs.fontSize,
-            lineHeight: tokens.typography.body.xs.lineHeight,
-          }}
-        >
-          Check the wellness manual before closing the daily evaluation.
-        </span>
-      </TooltipContent>
-    </Tooltip>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="ghost" size="icon" aria-label="View help">
+            <Icon icon={InfoIcon} size="sm" decorative />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <span
+            style={{
+              fontSize: tokens.typography.body.xs.fontSize,
+              lineHeight: tokens.typography.body.xs.lineHeight,
+            }}
+          >
+            Check the wellness manual before closing the daily evaluation.
+          </span>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   ),
 };
