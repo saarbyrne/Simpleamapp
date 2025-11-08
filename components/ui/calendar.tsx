@@ -37,6 +37,7 @@ function Calendar({
   showOutsideDays = true,
   captionLayout = "dropdown",
   buttonVariant = "ghost",
+  navLayout = "around",
   formatters,
   components,
   fromYear,
@@ -66,30 +67,34 @@ function Calendar({
       classNames={{
         root: cn("w-fit", defaultClassNames.root),
         months: cn(
-          "relative flex flex-col gap-4 md:flex-row",
+          "relative flex flex-col items-center gap-6 md:flex-row",
           defaultClassNames.months
         ),
-        month: cn("relative flex w-full flex-col gap-6", defaultClassNames.month),
+        month: cn(
+          "relative inline-grid grid-cols-[auto,max-content,auto] grid-rows-[auto,1fr] items-center justify-items-center gap-x-3 gap-y-4 mx-auto",
+          defaultClassNames.month
+        ),
         nav: cn(
-          "absolute inset-x-0 top-0 flex h-[--cell-size] items-center justify-between pointer-events-none",
+          "flex h-[--cell-size] w-full items-center justify-between gap-2",
           defaultClassNames.nav
         ),
+        // Add equal horizontal padding on both sides of the left arrow
         button_previous: cn(
-          buttonVariants({ variant: buttonVariant }),
-          "h-[--cell-size] w-[--cell-size] select-none p-0 aria-disabled:opacity-50 pointer-events-auto",
+          buttonVariants({ variant: buttonVariant, size: "icon" }),
+          "col-start-1 row-start-1 !h-8 !w-8 rounded-full text-sm aria-disabled:opacity-50 px-4",
           defaultClassNames.button_previous
         ),
         button_next: cn(
-          buttonVariants({ variant: buttonVariant }),
-          "h-[--cell-size] w-[--cell-size] select-none p-0 aria-disabled:opacity-50 pointer-events-auto",
+          buttonVariants({ variant: buttonVariant, size: "icon" }),
+          "col-start-3 row-start-1 !h-8 !w-8 rounded-full text-sm aria-disabled:opacity-50 px-4",
           defaultClassNames.button_next
         ),
         month_caption: cn(
-          "relative flex h-[--cell-size] w-full items-center justify-center",
+          "col-start-2 row-start-1 inline-flex h-[--cell-size] items-center justify-center gap-2 w-auto",
           defaultClassNames.month_caption
         ),
         dropdowns: cn(
-          "flex h-[--cell-size] items-center justify-center gap-1.5 text-sm font-medium mx-auto",
+          "inline-flex h-[--cell-size] items-center justify-center gap-1.5 text-sm font-medium",
           defaultClassNames.dropdowns
         ),
         dropdown_root: cn(
@@ -101,11 +106,15 @@ function Calendar({
           defaultClassNames.dropdown
         ),
         caption_label: cn(
-          "select-none font-medium",
+          "select-none font-medium text-center",
           captionLayout === "label"
             ? "text-sm"
             : "[&>svg]:text-muted-foreground flex h-8 items-center gap-1 rounded-md px-2 text-sm [&>svg]:size-3.5",
           defaultClassNames.caption_label
+        ),
+        month_grid: cn(
+          "col-span-3 row-start-2",
+          defaultClassNames.month_grid
         ),
         table: "w-full border-collapse",
         weekdays: cn("flex gap-1", defaultClassNames.weekdays),
@@ -153,27 +162,29 @@ function Calendar({
       }}
       components={{
         Root: ({ className: rootClassName, rootRef, ...rootProps }) => (
-          <div
-            data-slot="calendar"
-            ref={rootRef}
-            className={cn(rootClassName)}
-            {...rootProps}
-          />
+          <div className="flex w-full justify-center">
+            <div
+              data-slot="calendar"
+              ref={rootRef}
+              className={cn("inline-flex flex-col items-center", rootClassName)}
+              {...rootProps}
+            />
+          </div>
         ),
         Chevron: ({ className: chevronClassName, orientation, ...iconProps }) =>
           orientation === "left" ? (
             <ChevronLeftIcon
-              className={cn("size-4", chevronClassName)}
+              className={cn("size-3.5", chevronClassName)}
               {...iconProps}
             />
           ) : orientation === "right" ? (
             <ChevronRightIcon
-              className={cn("size-4", chevronClassName)}
+              className={cn("size-3.5", chevronClassName)}
               {...iconProps}
             />
           ) : (
             <ChevronDownIcon
-              className={cn("size-4", chevronClassName)}
+              className={cn("size-3.5", chevronClassName)}
               {...iconProps}
             />
           ),
@@ -200,19 +211,21 @@ function Calendar({
               value={value?.toString()}
               onValueChange={handleChange}
             >
-              <SelectTrigger className="pr-1.5 focus:ring-0">
+              <SelectTrigger className="h-8 w-auto min-w-[3.5rem] justify-between whitespace-nowrap px-2 text-sm focus:ring-0">
                 <SelectValue>{selected?.label}</SelectValue>
               </SelectTrigger>
-              <SelectContent position="popper">
-                <ScrollArea className="h-80">
-                  {options?.map((option, id) => (
-                    <SelectItem
-                      key={`${option.value}-${id}`}
-                      value={option.value.toString()}
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
+              <SelectContent position="popper" className="p-0">
+                <ScrollArea className="max-h-60">
+                  <div className="p-1">
+                    {options?.map((option, id) => (
+                      <SelectItem
+                        key={`${option.value}-${id}`}
+                        value={option.value.toString()}
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </div>
                 </ScrollArea>
               </SelectContent>
             </Select>
@@ -220,6 +233,7 @@ function Calendar({
         },
         ...components,
       }}
+      navLayout={navLayout}
       {...props}
     />
   );
