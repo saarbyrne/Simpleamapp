@@ -52,8 +52,12 @@ const ColorSwatch = ({
 }) => (
   <div className="flex items-center gap-4 p-4 border rounded-lg bg-card">
     <div
-      className="w-16 h-16 rounded-lg border shadow-sm flex-shrink-0"
-      style={{ backgroundColor: value }}
+      className="rounded-lg border shadow-sm flex-shrink-0"
+      style={{
+        backgroundColor: value,
+        width: '4rem',
+        height: '4rem',
+      }}
     />
     <div className="flex-1 min-w-0">
       <div className="font-semibold text-sm">{name}</div>
