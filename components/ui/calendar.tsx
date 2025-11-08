@@ -30,25 +30,25 @@ function Calendar({
   buttonVariant = "ghost",
   formatters,
   components,
+  fromYear,
+  toYear,
   ...props
 }: Props) {
   const defaultClassNames = getDefaultClassNames();
   const currentYear = new Date().getFullYear();
-  const fromYear = props.fromYear ?? 1900;
-  const toYear = props.toYear ?? currentYear + 10;
 
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "group/calendar bg-background p-3 [--cell-size:2.25rem] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
+        "group/calendar bg-background p-4 [--cell-size:2.25rem] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
         String.raw`rtl:**:[.rdp-button_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button_previous>svg]:rotate-180`,
         className
       )}
       captionLayout={captionLayout}
-      fromYear={fromYear}
-      toYear={toYear}
+      fromYear={fromYear ?? 1900}
+      toYear={toYear ?? currentYear + 10}
       formatters={{
         formatMonthDropdown: (date) =>
           date.toLocaleString("default", { month: "short" }),
@@ -60,7 +60,7 @@ function Calendar({
           "relative flex flex-col gap-4 md:flex-row",
           defaultClassNames.months
         ),
-        month: cn("flex w-full flex-col gap-4", defaultClassNames.month),
+        month: cn("flex w-full flex-col gap-6", defaultClassNames.month),
         nav: cn(
           "absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1",
           defaultClassNames.nav
@@ -104,7 +104,7 @@ function Calendar({
           "flex-1 select-none rounded-md px-1 text-center text-[0.8rem] font-normal text-muted-foreground",
           defaultClassNames.weekday
         ),
-        week: cn("mt-2 flex w-full gap-1", defaultClassNames.week),
+        week: cn("mt-3 flex w-full gap-1", defaultClassNames.week),
         week_number_header: cn(
           "w-[--cell-size] select-none",
           defaultClassNames.week_number_header
