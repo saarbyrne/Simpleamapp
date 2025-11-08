@@ -31,3 +31,35 @@ export const Default: Story = {
     );
   },
 };
+
+export const WithDropdowns: Story = {
+  render: () => {
+    const [value, setValue] = React.useState<Date | undefined>(new Date());
+
+    return (
+      <Calendar
+        mode="single"
+        selected={value}
+        onSelect={setValue}
+        captionLayout="dropdown"
+        className="rounded-md border bg-card shadow-md"
+      />
+    );
+  },
+};
+
+export const WithLabel: Story = {
+  render: () => {
+    const [value, setValue] = React.useState<Date | undefined>(new Date());
+
+    return (
+      <Calendar
+        mode="single"
+        selected={value}
+        onSelect={setValue}
+        captionLayout="label"
+        className="rounded-md border bg-card shadow-md"
+      />
+    );
+  },
+};

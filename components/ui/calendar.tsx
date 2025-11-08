@@ -26,13 +26,16 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
-  captionLayout = "label",
+  captionLayout = "dropdown",
   buttonVariant = "ghost",
   formatters,
   components,
   ...props
 }: Props) {
   const defaultClassNames = getDefaultClassNames();
+  const currentYear = new Date().getFullYear();
+  const startYear = props.startYear ?? 1900;
+  const endYear = props.endYear ?? currentYear + 10;
 
   return (
     <DayPicker
@@ -44,6 +47,8 @@ function Calendar({
         className
       )}
       captionLayout={captionLayout}
+      startYear={startYear}
+      endYear={endYear}
       formatters={{
         formatMonthDropdown: (date) =>
           date.toLocaleString("default", { month: "short" }),
@@ -79,18 +84,18 @@ function Calendar({
           defaultClassNames.dropdowns
         ),
         dropdown_root: cn(
-          "has-focus:border-ring has-focus:ring-ring/50 has-focus:ring-[3px] relative rounded-md border border-input shadow-xs",
+          "has-focus:border-ring has-focus:ring-ring/50 has-focus:ring-[3px] relative rounded-md border border-input bg-background shadow-xs hover:bg-accent transition-colors",
           defaultClassNames.dropdown_root
         ),
         dropdown: cn(
-          "absolute inset-0 opacity-0",
+          "absolute inset-0 cursor-pointer opacity-0",
           defaultClassNames.dropdown
         ),
         caption_label: cn(
           "select-none font-medium",
           captionLayout === "label"
             ? "text-sm"
-            : "[&>svg]:text-muted-foreground flex h-8 items-center gap-1 rounded-md pl-2 pr-1 text-sm [&>svg]:size-3.5",
+            : "[&>svg]:text-muted-foreground flex h-8 items-center gap-1 rounded-md px-2 text-sm [&>svg]:size-3.5",
           defaultClassNames.caption_label
         ),
         table: "w-full border-collapse",
