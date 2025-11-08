@@ -69,19 +69,19 @@ function Calendar({
           "relative flex flex-col gap-4 md:flex-row",
           defaultClassNames.months
         ),
-        month: cn("flex w-full flex-col gap-6", defaultClassNames.month),
+        month: cn("relative flex w-full flex-col gap-6", defaultClassNames.month),
         nav: cn(
-          "flex w-full items-center justify-between gap-1",
+          "absolute inset-x-0 top-0 flex items-center justify-between pointer-events-none",
           defaultClassNames.nav
         ),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
-          "absolute left-1 h-[--cell-size] w-[--cell-size] select-none p-0 aria-disabled:opacity-50",
+          "h-[--cell-size] w-[--cell-size] select-none p-0 aria-disabled:opacity-50 pointer-events-auto",
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
-          "absolute right-1 h-[--cell-size] w-[--cell-size] select-none p-0 aria-disabled:opacity-50",
+          "h-[--cell-size] w-[--cell-size] select-none p-0 aria-disabled:opacity-50 pointer-events-auto",
           defaultClassNames.button_next
         ),
         month_caption: cn(
