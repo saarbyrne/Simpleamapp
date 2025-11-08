@@ -34,8 +34,8 @@ function Calendar({
 }: Props) {
   const defaultClassNames = getDefaultClassNames();
   const currentYear = new Date().getFullYear();
-  const startYear = props.startYear ?? 1900;
-  const endYear = props.endYear ?? currentYear + 10;
+  const fromYear = props.fromYear ?? 1900;
+  const toYear = props.toYear ?? currentYear + 10;
 
   return (
     <DayPicker
@@ -47,8 +47,8 @@ function Calendar({
         className
       )}
       captionLayout={captionLayout}
-      startYear={startYear}
-      endYear={endYear}
+      fromYear={fromYear}
+      toYear={toYear}
       formatters={{
         formatMonthDropdown: (date) =>
           date.toLocaleString("default", { month: "short" }),
