@@ -35,11 +35,11 @@ export const PerformanceJourney: Story = {
     >
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
+          <BreadcrumbLink href="#" onClick={(e) => e.preventDefault()}>Dashboard</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href="#">Senior Team</BreadcrumbLink>
+          <BreadcrumbLink href="#" onClick={(e) => e.preventDefault()}>Senior Team</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
@@ -47,7 +47,7 @@ export const PerformanceJourney: Story = {
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href="#">Plans</BreadcrumbLink>
+          <BreadcrumbLink href="#" onClick={(e) => e.preventDefault()}>Plans</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
