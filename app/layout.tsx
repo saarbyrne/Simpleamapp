@@ -1,10 +1,11 @@
 import * as Sentry from '@sentry/nextjs'
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
+
 import '@/app/globals.css'
 import '@/app/design-system.css'
-import { AnalyticsProviders } from '@/lib/analytics/providers'
 import { ThemeProvider } from '@/components/theme-provider'
+import { AnalyticsProviders } from '@/lib/analytics/providers'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -12,13 +13,18 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: '--font-plus-jakarta-sans',
 })
 
+export const metadata: Metadata = {
+  title: 'SimpleAM - Athlete Management Platform',
+  description: 'Low-cost, high-quality athlete management for sports teams',
+}
+
 // Include Sentry trace data in the metadata for request correlation.
 export function generateMetadata(): Metadata {
   return {
-    title: 'SimpleAM - Athlete Management Platform',
-    description: 'Low-cost, high-quality athlete management for sports teams',
+    ...metadata,
     other: {
       ...Sentry.getTraceData(),
+      ...(metadata.other ?? {}),
     },
   }
 }
