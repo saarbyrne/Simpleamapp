@@ -4,6 +4,14 @@ test.describe('Input OTP Component', () => {
   // This test ensures the Input OTP component renders correctly in SSR
   // and that the caret animation doesn't break server-side rendering
   test('renders without SSR hydration errors', async ({ page }) => {
+    // Verify no console errors related to hydration
+    const errors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      }
+    });
+
     // Navigate to a page with the Input OTP component
     // For now, we'll use the Storybook story as the test target
     await page.goto('http://localhost:6006/iframe.html?id=components-inputotp--default');
@@ -15,14 +23,6 @@ test.describe('Input OTP Component', () => {
     // Check that slots are rendered
     const slots = page.locator('[data-input-otp-slot]');
     await expect(slots.first()).toBeVisible();
-
-    // Verify no console errors related to hydration
-    const errors: string[] = [];
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        errors.push(msg.text());
-      }
-    });
 
     // Allow time for any hydration errors to appear
     await page.waitForTimeout(1000);
@@ -39,6 +39,14 @@ test.describe('Input OTP Component', () => {
   });
 
   test('accepts keyboard input', async ({ page }) => {
+    // Check that no errors were thrown
+    const errors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      }
+    });
+
     await page.goto('http://localhost:6006/iframe.html?id=components-inputotp--default');
 
     // Wait for component to load
@@ -55,14 +63,6 @@ test.describe('Input OTP Component', () => {
     // The actual verification depends on the component implementation
     // For now, we just ensure no errors occur during typing
     await page.waitForTimeout(500);
-
-    // Check that no errors were thrown
-    const errors: string[] = [];
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        errors.push(msg.text());
-      }
-    });
 
     expect(errors.length).toBe(0);
   });
