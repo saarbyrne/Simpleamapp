@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { cn } from "./utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-ds-sm whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-ds-icon-sm [&_svg]:w-ds-icon-sm [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -18,9 +18,9 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8 py-2",
+        default: "h-10 px-ds-lg py-ds-sm",
+        sm: "h-9 rounded-md px-ds-md",
+        lg: "h-11 rounded-md px-ds-3xl py-ds-sm",
         icon: "h-10 w-10",
       },
     },
@@ -68,14 +68,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-ds-icon-sm w-ds-icon-sm animate-spin" />
             {children}
           </>
         ) : (
           <>
-            {leftIcon && <span className="[&_svg]:size-4">{leftIcon}</span>}
+            {leftIcon && <span className="[&_svg]:h-ds-icon-sm [&_svg]:w-ds-icon-sm">{leftIcon}</span>}
             {children}
-            {rightIcon && <span className="[&_svg]:size-4">{rightIcon}</span>}
+            {rightIcon && <span className="[&_svg]:h-ds-icon-sm [&_svg]:w-ds-icon-sm">{rightIcon}</span>}
           </>
         )}
       </Comp>

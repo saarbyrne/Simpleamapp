@@ -4,6 +4,7 @@ import { Plus_Jakarta_Sans } from 'next/font/google'
 
 import '@/app/globals.css'
 import '@/app/design-system.css'
+import '@/app/design-system-tokens.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { AnalyticsProviders } from '@/lib/analytics/providers'
 
