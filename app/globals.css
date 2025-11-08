@@ -59,6 +59,47 @@
     --color-black: #000;
     --color-white: #fff;
     --spacing: .25rem;
+
+    /* Design System Spacing Tokens - Tailwind v4 naming convention */
+    --spacing-ds-none: 0;
+    --spacing-ds-3xs: 0.125rem;
+    --spacing-ds-2xs: 0.25rem;
+    --spacing-ds-xs: 0.375rem;
+    --spacing-ds-sm: 0.5rem;
+    --spacing-ds-md: 0.75rem;
+    --spacing-ds-lg: 1rem;
+    --spacing-ds-xl: 1.25rem;
+    --spacing-ds-2xl: 1.5rem;
+    --spacing-ds-3xl: 2rem;
+    --spacing-ds-4xl: 2.5rem;
+    --spacing-ds-5xl: 3rem;
+    --spacing-ds-6xl: 4rem;
+    --spacing-ds-7xl: 5rem;
+    --spacing-ds-8xl: 6rem;
+    --spacing-ds-9xl: 8rem;
+
+    /* Design System Icon Sizing - Tailwind v4 naming convention */
+    --width-ds-icon-2xs: 0.5rem;
+    --width-ds-icon-xs: 0.75rem;
+    --width-ds-icon-sm: 1rem;
+    --width-ds-icon-md: 1.25rem;
+    --width-ds-icon-lg: 1.5rem;
+    --width-ds-icon-xl: 2rem;
+    --width-ds-icon-2xl: 2.5rem;
+
+    --height-ds-icon-2xs: 0.5rem;
+    --height-ds-icon-xs: 0.75rem;
+    --height-ds-icon-sm: 1rem;
+    --height-ds-icon-md: 1.25rem;
+    --height-ds-icon-lg: 1.5rem;
+    --height-ds-icon-xl: 2rem;
+    --height-ds-icon-2xl: 2.5rem;
+
+    /* Design System Dialog Widths */
+    --max-width-ds-dialog-sm: 24rem;
+    --max-width-ds-dialog-md: 28rem;
+    --max-width-ds-dialog-lg: 32rem;
+    --max-width-ds-dialog-xl: 36rem;
     --container-sm: 24rem;
     --text-xs: .75rem;
     --text-xs--line-height: calc(1 / .75);
