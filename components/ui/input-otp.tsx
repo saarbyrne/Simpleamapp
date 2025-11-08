@@ -45,7 +45,10 @@ const InputOTPSlot = React.forwardRef<
 >(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext);
   const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index];
-  const { ["data-input-otp-slot"]: dataInputOtpSlot = "", ...rest } = props;
+  const {
+    ["data-input-otp-slot"]: dataInputOtpSlot = "input-otp-slot",
+    ...rest
+  } = props;
 
   return (
     <div
@@ -73,10 +76,18 @@ const InputOTPSeparator = React.forwardRef<
   React.ElementRef<"div">,
   React.ComponentPropsWithoutRef<"div">
 >((props, ref) => {
-  const { ["data-input-otp-separator"]: dataInputOtpSeparator = "", ...rest } = props;
+  const {
+    ["data-input-otp-separator"]: dataInputOtpSeparator = "input-otp-separator",
+    ...rest
+  } = props;
 
   return (
-    <div ref={ref} role="separator" data-input-otp-separator={dataInputOtpSeparator} {...rest}>
+    <div
+      ref={ref}
+      role="separator"
+      data-input-otp-separator={dataInputOtpSeparator}
+      {...rest}
+    >
       <Dot />
     </div>
   );

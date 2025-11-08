@@ -1,16 +1,21 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+const registerConsoleErrorListener = (page: Page) => {
+  const errors: string[] = [];
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') {
+      errors.push(msg.text());
+    }
+  });
+  return errors;
+};
 
 test.describe('Input OTP Component', () => {
   // This test ensures the Input OTP component renders correctly in SSR
   // and that the caret animation doesn't break server-side rendering
   test('renders without SSR hydration errors', async ({ page }) => {
     // Verify no console errors related to hydration
-    const errors: string[] = [];
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        errors.push(msg.text());
-      }
-    });
+    const errors = registerConsoleErrorListener(page);
 
     // Navigate to a page with the Input OTP component
     // For now, we'll use the Storybook story as the test target
@@ -40,12 +45,7 @@ test.describe('Input OTP Component', () => {
 
   test('accepts keyboard input', async ({ page }) => {
     // Check that no errors were thrown
-    const errors: string[] = [];
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        errors.push(msg.text());
-      }
-    });
+    const errors = registerConsoleErrorListener(page);
 
     await page.goto('http://localhost:6006/iframe.html?id=components-inputotp--default');
 
@@ -69,6 +69,7 @@ test.describe('Input OTP Component', () => {
 
   test('handles separator rendering', async ({ page }) => {
     // Test the grouped OTP input with separator
+    const errors = registerConsoleErrorListener(page);
     await page.goto('http://localhost:6006/iframe.html?id=components-inputotp--with-separator');
 
     const inputOtp = page.locator('[data-slot="input-otp"]');
@@ -82,9 +83,14 @@ test.describe('Input OTP Component', () => {
     const slots = page.locator('[data-input-otp-slot]');
     const slotCount = await slots.count();
     expect(slotCount).toBeGreaterThan(0);
+
+    await page.waitForTimeout(500);
+    expect(errors.length).toBe(0);
   });
 
   test('@visual input-otp renders correctly', async ({ page }) => {
+    const errors = registerConsoleErrorListener(page);
+
     await page.goto('http://localhost:6006/iframe.html?id=components-inputotp--default');
 
     const inputOtp = page.locator('[data-slot="input-otp"]');
@@ -92,9 +98,14 @@ test.describe('Input OTP Component', () => {
 
     // Visual regression test placeholder
     // When visual regression tools are set up, this will capture and compare screenshots
+
+    await page.waitForTimeout(500);
+    expect(errors.length).toBe(0);
   });
 
   test('@a11y input-otp is accessible', async ({ page }) => {
+    const errors = registerConsoleErrorListener(page);
+
     await page.goto('http://localhost:6006/iframe.html?id=components-inputotp--default');
 
     const inputOtp = page.locator('[data-slot="input-otp"]');
@@ -107,5 +118,8 @@ test.describe('Input OTP Component', () => {
     // - Keyboard navigation
     // - Focus management
     // - Screen reader compatibility
+
+    await page.waitForTimeout(500);
+    expect(errors.length).toBe(0);
   });
 });
