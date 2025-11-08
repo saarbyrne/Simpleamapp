@@ -2896,5 +2896,5 @@ html {
 
 /* React Day Picker - Hide visually hidden elements */
 .rdp-vhidden {
-  @apply hidden;
+  display: none !important;
 }
