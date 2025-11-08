@@ -22,15 +22,15 @@ export const Default: Story = {
 
     return (
       <label
+        className="text-foreground"
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: tokens.spacing.gap.sm,
           fontSize: tokens.typography.body.sm.fontSize,
-          color: tokens.colors.text.primary,
         }}
       >
-        Incluir en informe semanal
+        Include in weekly report
         <Checkbox checked={checked} onCheckedChange={setChecked} />
       </label>
     );

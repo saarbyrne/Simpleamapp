@@ -18,24 +18,24 @@ type Story = StoryObj<typeof Accordion>;
 export const Default: Story = {
   render: () => (
     <Accordion type="single" collapsible style={{ width: '320px' }}>
-      {[{
-        title: 'Plan de recuperación',
-        content:
-          'Sesión de movilidad + crioterapia. Evaluar respuesta antes del entrenamiento de mañana.',
-      },
-      {
-        title: 'Recomendaciones nutricionales',
-        content:
-          'Aumentar ingesta de carbohidratos complejos el día previo al partido.',
-      }].map((item, index) => (
+      {[
+        {
+          title: 'Recovery Plan',
+          content: 'Mobility session + cryotherapy. Evaluate response before tomorrow\'s training.',
+        },
+        {
+          title: 'Nutritional Recommendations',
+          content: 'Increase complex carbohydrate intake the day before the match.',
+        },
+      ].map((item, index) => (
         <AccordionItem key={item.title} value={`item-${index}`}>
           <AccordionTrigger>{item.title}</AccordionTrigger>
           <AccordionContent>
             <p
+              className="text-muted-foreground"
               style={{
                 fontSize: tokens.typography.body.sm.fontSize,
                 lineHeight: tokens.typography.body.sm.lineHeight,
-                color: tokens.colors.text.secondary,
               }}
             >
               {item.content}

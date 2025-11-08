@@ -23,18 +23,18 @@ export const Default: Story = {
     return (
       <RadioGroup value={value} onValueChange={setValue}>
         {[
-          { value: 'available', label: 'Disponible' },
-          { value: 'limited', label: 'Precaución' },
-          { value: 'unavailable', label: 'No disponible' },
+          { value: 'available', label: 'Available' },
+          { value: 'limited', label: 'Caution' },
+          { value: 'unavailable', label: 'Unavailable' },
         ].map((option) => (
           <label
             key={option.value}
+            className="text-foreground"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: tokens.spacing.gap.sm,
               fontSize: tokens.typography.body.sm.fontSize,
-              color: tokens.colors.text.primary,
             }}
           >
             <RadioGroupItem value={option.value} />

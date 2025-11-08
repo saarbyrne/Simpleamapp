@@ -25,24 +25,24 @@ type Story = StoryObj<typeof Carousel>;
 
 const sessions = [
   {
-    title: 'Fase preventiva',
-    focus: 'Movilidad + Core',
-    duration: '15 minutos',
+    title: 'Preventive Phase',
+    focus: 'Mobility + Core',
+    duration: '15 minutes',
   },
   {
-    title: 'Bloque principal',
-    focus: 'Fuerza excéntrica',
-    duration: '30 minutos',
+    title: 'Main Block',
+    focus: 'Eccentric Strength',
+    duration: '30 minutes',
   },
   {
-    title: 'Potencia',
-    focus: 'Pliometría horizontal',
-    duration: '20 minutos',
+    title: 'Power',
+    focus: 'Horizontal Plyometrics',
+    duration: '20 minutes',
   },
   {
-    title: 'Regenerativo',
-    focus: 'Trabajo respiratorio',
-    duration: '10 minutos',
+    title: 'Recovery',
+    focus: 'Breathing Work',
+    duration: '10 minutes',
   },
 ];
 
@@ -67,10 +67,10 @@ export const TrainingBlocks: Story = {
                 <CardTitle>{session.title}</CardTitle>
               </CardHeader>
               <CardContent
+                className="text-muted-foreground"
                 style={{
                   display: 'grid',
                   gap: tokens.spacing.gap.sm,
-                  color: tokens.colors.text.secondary,
                 }}
               >
                 <span>{session.focus}</span>
@@ -80,15 +80,15 @@ export const TrainingBlocks: Story = {
                     lineHeight: tokens.typography.body.sm.lineHeight,
                   }}
                 >
-                  Duración: {session.duration}
+                  Duration: {session.duration}
                 </span>
               </CardContent>
             </Card>
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious aria-label="Bloque anterior" />
-      <CarouselNext aria-label="Bloque siguiente" />
+      <CarouselPrevious aria-label="Previous block" />
+      <CarouselNext aria-label="Next block" />
     </Carousel>
   ),
 };

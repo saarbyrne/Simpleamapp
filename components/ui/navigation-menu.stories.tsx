@@ -27,7 +27,7 @@ export const Default: Story = {
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <NavigationMenuTrigger>Equipo</NavigationMenuTrigger>
+          <NavigationMenuTrigger>Team</NavigationMenuTrigger>
           <NavigationMenuContent>
             <NavigationMenuLink asChild>
               <div
@@ -38,30 +38,30 @@ export const Default: Story = {
                 }}
               >
                 <h4
+                  className="text-foreground"
                   style={{
                     fontSize: tokens.typography.heading.h5.fontSize,
                     fontWeight: tokens.typography.heading.h5.fontWeight,
                     lineHeight: tokens.typography.heading.h5.lineHeight,
-                    color: tokens.colors.text.primary,
                   }}
                 >
-                  Plantilla principal
+                  Main squad
                 </h4>
                 <p
+                  className="text-muted-foreground"
                   style={{
                     fontSize: tokens.typography.body.sm.fontSize,
                     lineHeight: tokens.typography.body.sm.lineHeight,
-                    color: tokens.colors.text.secondary,
                   }}
                 >
-                  Gestiona disponibilidad, cargas históricas y documentación médica de forma rápida.
+                  Manage availability, historical loads and medical documentation quickly.
                 </p>
               </div>
             </NavigationMenuLink>
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuTrigger>Planificación</NavigationMenuTrigger>
+          <NavigationMenuTrigger>Planning</NavigationMenuTrigger>
           <NavigationMenuContent>
             <NavigationMenuLink asChild>
               <div
@@ -72,31 +72,31 @@ export const Default: Story = {
                 }}
               >
                 <span
+                  className="text-muted-foreground"
                   style={{
                     fontSize: tokens.typography.body.sm.fontSize,
                     lineHeight: tokens.typography.body.sm.lineHeight,
-                    color: tokens.colors.text.secondary,
                   }}
                 >
-                  • Microciclos semanales
+                  • Weekly microcycles
                 </span>
                 <span
+                  className="text-muted-foreground"
                   style={{
                     fontSize: tokens.typography.body.sm.fontSize,
                     lineHeight: tokens.typography.body.sm.lineHeight,
-                    color: tokens.colors.text.secondary,
                   }}
                 >
-                  • Carga por sesión
+                  • Load per session
                 </span>
                 <span
+                  className="text-muted-foreground"
                   style={{
                     fontSize: tokens.typography.body.sm.fontSize,
                     lineHeight: tokens.typography.body.sm.lineHeight,
-                    color: tokens.colors.text.secondary,
                   }}
                 >
-                  • Alertas por sobreesfuerzo
+                  • Overexertion alerts
                 </span>
               </div>
             </NavigationMenuLink>

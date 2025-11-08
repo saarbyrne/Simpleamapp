@@ -17,6 +17,7 @@ import { Button } from './button';
 import { tokens } from '@/design-system/tokens';
 import { ClipboardCopyIcon, Share2Icon, PenSquareIcon } from 'lucide-react';
 import { useState } from 'react';
+import { Icon } from './icon';
 
 const meta: Meta<typeof ContextMenu> = {
   title: 'Components/Context Menu',
@@ -41,21 +42,21 @@ export const Default: Story = {
     return (
       <ContextMenu>
         <ContextMenuTrigger asChild>
-          <Button variant="secondary">Jugador: Jordan Smith</Button>
+          <Button variant="secondary">Player: Jordan Smith</Button>
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuLabel>Acciones rápidas</ContextMenuLabel>
+          <ContextMenuLabel>Quick Actions</ContextMenuLabel>
           <ContextMenuItem>
-            <PenSquareIcon className="mr-2 size-4" />
-            <span>Abrir perfil</span>
+            <Icon icon={PenSquareIcon} size="sm" decorative className="mr-2" />
+            <span>Open profile</span>
           </ContextMenuItem>
           <ContextMenuItem>
-            <ClipboardCopyIcon className="mr-2 size-4" />
-            <span>Copiar link</span>
+            <Icon icon={ClipboardCopyIcon} size="sm" decorative className="mr-2" />
+            <span>Copy link</span>
           </ContextMenuItem>
           <ContextMenuItem variant="destructive">
-            <Share2Icon className="mr-2 size-4" />
-            <span>Desactivar notificaciones</span>
+            <Icon icon={Share2Icon} size="sm" decorative className="mr-2" />
+            <span>Disable notifications</span>
           </ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuCheckboxItem
@@ -64,7 +65,7 @@ export const Default: Story = {
               setShowNotifications(Boolean(checked))
             }
           >
-            Alertas de bienestar
+            Wellness alerts
           </ContextMenuCheckboxItem>
           <ContextMenuSub>
             <ContextMenuSubTrigger>
@@ -79,10 +80,10 @@ export const Default: Story = {
                   Resumen general
                 </ContextMenuRadioItem>
                 <ContextMenuRadioItem value="medical">
-                  Seguimiento médico
+                  Medical follow-up
                 </ContextMenuRadioItem>
                 <ContextMenuRadioItem value="training">
-                  Carga de entrenamiento
+                  Training load
                 </ContextMenuRadioItem>
               </ContextMenuRadioGroup>
             </ContextMenuSubContent>

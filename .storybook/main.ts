@@ -5,6 +5,7 @@ const config: StorybookConfig = {
   stories: [
     '../design-system/**/*.mdx',
     '../design-system/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)',
     '../components/**/*.stories.@(js|jsx|mjs|ts|tsx)',
   ],
   addons: [

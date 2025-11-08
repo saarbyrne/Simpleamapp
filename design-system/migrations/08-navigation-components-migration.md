@@ -14,17 +14,17 @@
 1. **Tabs**
    - Se añadieron variables `--accent`/`--accent-foreground` para que los estados activos utilicen `tokens.colors.interactive.secondary`.
    - Listas y triggers emplean `surface.sunken`, tipografía `ui.button` y spacing semántico.
-   - Nueva historia `components/ui/tabs.stories.tsx` con escenarios de planificación semanal.
+   - Nueva story `components/ui/tabs.stories.tsx` con escenarios de planificación semanal.
 
 2. **Menubar**
    - Fondo, bordes y sombras alineados con `surface.elevated`, `border.default` y `elevation.dropdown`.
-   - Items/checkbox/radios configuran `--accent`, `--destructive` desde tokens para mantener los estados Radix.
-   - Historia `components/ui/menubar.stories.tsx` mostrando acciones de Archivo/Vista/Ayuda.
+   - Items/checkbox/radios configuran `--accent`, `--destructive` from tokens para mantener los estados Radix.
+   - Story `components/ui/menubar.stories.tsx` mostrando acciones de Archivo/Vista/Ayuda.
 
 3. **Navigation Menu**
    - Trigger, contenido y viewport adoptan tokens de superficie y z-index (`popup.dropdown`).
    - La flecha indicadora usa borde y fondo del sistema; enlaces definen `--accent` para estados hover/active.
-   - Historia `components/ui/navigation-menu.stories.tsx` con enlaces de Equipo y Planificación.
+   - Story `components/ui/navigation-menu.stories.tsx` con enlaces de Equipo y Planificación.
 
 ## Pruebas
 - [x] `npm run lint`
@@ -37,5 +37,5 @@
 - **Documentación** lista en Storybook para Producto y QA.
 
 ## Próximos pasos
-- Añadir historias en modo oscuro cuando se definan los tokens dark.
+- Añadir stories en modo oscuro cuando se definan los tokens dark.
 - Considerar estados avanzados (multi-columnas, viewports personalizados) en documentación adicional.

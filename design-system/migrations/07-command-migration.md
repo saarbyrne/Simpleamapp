@@ -12,7 +12,7 @@
 - Se añadieron variables CSS (`--accent`, `--accent-foreground`, `--muted-foreground`) obtenidas del sistema para que los estados Radix (selected, muted) conserven el estilo sin depender de Tailwind por defecto.
 - Ajustes de tipografía y espaciado con `tokens.typography.body.*` y `tokens.spacing.*`.
 - Actualización del separador (`CommandSeparator`) para usar `tokens.colors.border.subtle`.
-- Nueva historia en `components/ui/command.stories.tsx` que muestra un diálogo con grupos, separadores y shortcuts.
+- Nueva story en `components/ui/command.stories.tsx` que muestra un diálogo con grupos, separadores y shortcuts.
 
 ## Pruebas
 

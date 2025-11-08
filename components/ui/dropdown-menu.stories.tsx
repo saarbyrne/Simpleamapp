@@ -39,20 +39,20 @@ export const Default: Story = {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary">Opciones</Button>
+          <Button variant="secondary">Options</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent style={{ gap: tokens.spacing.gap.xs }}>
-          <DropdownMenuLabel>Acciones rápidas</DropdownMenuLabel>
+          <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
           <DropdownMenuItem>
-            <span>Ver reporte semanal</span>
+            <span>View weekly report</span>
             <DropdownMenuShortcut>⌘R</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <span>Crear evaluación</span>
+            <span>Create assessment</span>
             <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive">
-            <span>Archivar jugador</span>
+          <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <span>Archive player</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuCheckboxItem
@@ -61,11 +61,11 @@ export const Default: Story = {
               setShowNotifications(Boolean(checked))
             }
           >
-            Mostrar notificaciones
+            Show notifications
           </DropdownMenuCheckboxItem>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <span>Vista actual</span>
+              <span>Current view</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuRadioGroup
@@ -73,13 +73,13 @@ export const Default: Story = {
                 onValueChange={(value) => setMode(value as typeof mode)}
               >
                 <DropdownMenuRadioItem value="team">
-                  Equipo completo
+                  Full team
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="player">
-                  Perfil individual
+                  Individual profile
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="medical">
-                  Seguimiento médico
+                  Medical follow-up
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuSubContent>

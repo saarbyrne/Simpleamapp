@@ -30,23 +30,23 @@ export const Default: Story = {
         }}
       >
         <label
+          className="text-foreground"
           style={{
             fontSize: tokens.typography.body.sm.fontSize,
             lineHeight: tokens.typography.body.sm.lineHeight,
-            color: tokens.colors.text.primary,
           }}
         >
-          Intensidad objetivo
+          Target intensity
         </label>
         <Slider value={value} onValueChange={setValue} min={0} max={100} />
         <span
+          className="text-muted-foreground"
           style={{
             fontSize: tokens.typography.body.xs.fontSize,
             lineHeight: tokens.typography.body.xs.lineHeight,
-            color: tokens.colors.text.secondary,
           }}
         >
-          {value[0]}% para la sesión de hoy
+          {value[0]}% for today&apos;s session
         </span>
       </div>
     );

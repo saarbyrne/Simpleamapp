@@ -33,9 +33,9 @@ export const Default: Story = {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Notas del staff</DrawerTitle>
+          <DrawerTitle>Staff notes</DrawerTitle>
           <DrawerDescription>
-            Usa este panel para coordinar mensajes rápidos durante el partido o la sesión.
+            Use this panel to coordinate quick messages during the match or session.
           </DrawerDescription>
         </DrawerHeader>
         <div
@@ -47,29 +47,29 @@ export const Default: Story = {
           }}
         >
           <p
+            className="text-muted-foreground"
             style={{
               fontSize: tokens.typography.body.sm.fontSize,
               lineHeight: tokens.typography.body.sm.lineHeight,
-              color: tokens.colors.text.secondary,
             }}
           >
-            • Ajustar marcaje en pelota parada.
+            • Adjust set-piece marking.
           </p>
           <p
+            className="text-muted-foreground"
             style={{
               fontSize: tokens.typography.body.sm.fontSize,
               lineHeight: tokens.typography.body.sm.lineHeight,
-              color: tokens.colors.text.secondary,
             }}
           >
-            • Recordar control de carga para los titulares mañana.
+            • Remember load control for starters tomorrow.
           </p>
         </div>
         <DrawerFooter>
           <DrawerClose asChild>
-            <Button variant="secondary">Cerrar</Button>
+            <Button variant="secondary">Close</Button>
           </DrawerClose>
-          <Button>Enviar al equipo</Button>
+          <Button>Send to team</Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

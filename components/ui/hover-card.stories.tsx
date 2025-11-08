@@ -43,38 +43,38 @@ export const Default: Story = {
         >
           <div>
             <h4
+              className="text-foreground"
               style={{
                 fontSize: tokens.typography.heading.h5.fontSize,
                 fontWeight: tokens.typography.heading.h5.fontWeight,
                 lineHeight: tokens.typography.heading.h5.lineHeight,
-                color: tokens.colors.text.primary,
               }}
             >
               Jordan Smith
             </h4>
             <p
+              className="text-muted-foreground"
               style={{
                 fontSize: tokens.typography.body.sm.fontSize,
                 lineHeight: tokens.typography.body.sm.lineHeight,
-                color: tokens.colors.text.secondary,
               }}
             >
-              Defensa central • Plan individual activo
+              Center back • Individual plan active
             </p>
           </div>
           <div
+            className="text-muted-foreground"
             style={{
               display: 'flex',
               flexDirection: 'column',
               gap: tokens.spacing.gap.xs,
               fontSize: tokens.typography.body.xs.fontSize,
               lineHeight: tokens.typography.body.xs.lineHeight,
-              color: tokens.colors.text.secondary,
             }}
           >
-            <span>• Carga aguda: equilibrada</span>
-            <span>• Última alerta: 12 días</span>
-            <span>• Próximo control médico: jueves</span>
+            <span>• Acute load: balanced</span>
+            <span>• Last alert: 12 days ago</span>
+            <span>• Next medical check: Thursday</span>
           </div>
         </div>
       </HoverCardContent>

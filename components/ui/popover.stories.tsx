@@ -25,7 +25,7 @@ export const Default: Story = {
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="secondary">Agregar objetivo semanal</Button>
+          <Button variant="secondary">Add weekly objective</Button>
         </PopoverTrigger>
         <PopoverContent>
           <div
@@ -36,30 +36,30 @@ export const Default: Story = {
             }}
           >
             <h4
+              className="text-foreground"
               style={{
                 fontSize: tokens.typography.heading.h5.fontSize,
                 fontWeight: tokens.typography.heading.h5.fontWeight,
                 lineHeight: tokens.typography.heading.h5.lineHeight,
-                color: tokens.colors.text.primary,
               }}
             >
-              Objetivo del equipo
+              Team objective
             </h4>
             <p
+              className="text-muted-foreground"
               style={{
                 fontSize: tokens.typography.body.sm.fontSize,
                 lineHeight: tokens.typography.body.sm.lineHeight,
-                color: tokens.colors.text.secondary,
               }}
             >
-              Define un punto clave para la semana. Esto se mostrará en el dashboard del staff.
+              Define a key point for the week. This will be shown on the staff dashboard.
             </p>
             <Input
               value={objective}
               onChange={(event) => setObjective(event.target.value)}
-              placeholder="Ej. Mejorar la comunicación defensiva"
+              placeholder="E.g. Improve defensive communication"
             />
-            <Button disabled={!objective}>Guardar objetivo</Button>
+            <Button disabled={!objective}>Save objective</Button>
           </div>
         </PopoverContent>
       </Popover>

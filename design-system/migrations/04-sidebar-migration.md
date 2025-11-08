@@ -15,7 +15,7 @@ La navegación principal ahora consume los design tokens en lugar de las clases 
 1. **Colores inconsistentes** – El sidebar usaba `bg-sidebar` y `text-sidebar-foreground` con valores hardcodeados en `globals.css`. Se inyectan los tokens por medio de CSS variables en `SidebarProvider`.
 2. **Z-index arbitrario (`z-[40]`)** – Reemplazados por `tokens.zIndex.component.sidebar` y ajustes locales (`+10` para `SidebarRail`).
 3. **Espaciado y tipografía** – Paddings, gaps y tamaños de texto ahora derivan del set de tokens (`tokens.spacing.component.cardPadding`, `tokens.typography.body.*`).
-4. **Falta de documentación** – Nueva historia interactiva `components/ui/sidebar.stories.tsx` que muestra header, grupos, menús secundarios y `SidebarInset`.
+4. **Falta de documentación** – Nueva story interactiva `components/ui/sidebar.stories.tsx` que muestra header, grupos, menús secundarios y `SidebarInset`.
 
 ## Cambios Principales
 

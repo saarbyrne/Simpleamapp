@@ -32,6 +32,7 @@ import {
   SettingsIcon,
   UsersIcon,
 } from 'lucide-react';
+import { Icon } from './icon';
 
 const meta: Meta<typeof SidebarProvider> = {
   title: 'Components/Sidebar',
@@ -48,9 +49,9 @@ type Story = StoryObj<typeof SidebarProvider>;
 
 const ExampleLayout = () => (
   <SidebarProvider
+    className="bg-background"
     style={{
       minHeight: '100vh',
-      backgroundColor: tokens.colors.surface.base,
     }}
   >
     <Sidebar>
@@ -81,16 +82,16 @@ const ExampleLayout = () => (
               SimpleAM
             </span>
             <span
+              className="text-muted-foreground"
               style={{
                 fontSize: tokens.typography.body.xs.fontSize,
-                color: tokens.colors.text.secondary,
               }}
             >
-              Temporada 2025
+              Season 2025
             </span>
           </div>
         </div>
-        <SidebarInput placeholder="Buscar jugadores..." />
+        <SidebarInput placeholder="Search players..." />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -99,19 +100,19 @@ const ExampleLayout = () => (
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton isActive>
-                  <HomeIcon className="mr-2" />
+                  <Icon icon={HomeIcon} size="md" decorative className="mr-2" />
                   <span>Inicio</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <UsersIcon className="mr-2" />
-                  <span>Plantilla</span>
+                  <Icon icon={UsersIcon} size="md" decorative className="mr-2" />
+                  <span>Squad</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <CalendarIcon className="mr-2" />
+                  <Icon icon={CalendarIcon} size="md" decorative className="mr-2" />
                   <span>Calendario</span>
                 </SidebarMenuButton>
                 <SidebarMenuBadge>3</SidebarMenuBadge>
@@ -126,35 +127,35 @@ const ExampleLayout = () => (
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <LayersIcon className="mr-2" />
-                  <span>Formularios</span>
+                  <Icon icon={LayersIcon} size="md" decorative className="mr-2" />
+                  <span>Forms</span>
                 </SidebarMenuButton>
                 <SidebarMenuAction showOnHover>
-                  <PlusIcon className="size-4" />
+                  <Icon icon={PlusIcon} size="sm" decorative />
                 </SidebarMenuAction>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <BellIcon className="mr-2" />
-                  <span>Alertas</span>
+                  <Icon icon={BellIcon} size="md" decorative className="mr-2" />
+                  <span>Alerts</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Ver planes individuales">
-                  <SettingsIcon className="mr-2" />
-                  <span>Configuración</span>
+                <SidebarMenuButton tooltip="View individual plans">
+                  <Icon icon={SettingsIcon} size="md" decorative className="mr-2" />
+                  <span>Settings</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuSub>
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton isActive>
-                      <span>Recuperación</span>
+                      <span>Recovery</span>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton>
-                      <span>Carga aguda</span>
+                      <span>Acute load</span>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>
@@ -164,8 +165,8 @@ const ExampleLayout = () => (
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <Button variant="secondary">Invitar staff</Button>
-        <Button>Nuevo reporte</Button>
+        <Button variant="secondary">Invite staff</Button>
+        <Button>New report</Button>
       </SidebarFooter>
     </Sidebar>
     <SidebarInset>
@@ -178,25 +179,25 @@ const ExampleLayout = () => (
         }}
       >
         <h2
+          className="text-foreground"
           style={{
             fontSize: tokens.typography.heading.h3.fontSize,
             fontWeight: tokens.typography.heading.h3.fontWeight,
             lineHeight: tokens.typography.heading.h3.lineHeight,
-            color: tokens.colors.text.primary,
           }}
         >
-          Panel principal
+          Main Panel
         </h2>
         <p
+          className="text-muted-foreground"
           style={{
             fontSize: tokens.typography.body.md.fontSize,
             lineHeight: tokens.typography.body.md.lineHeight,
-            color: tokens.colors.text.secondary,
             maxWidth: '42rem',
           }}
         >
-          Utiliza la barra lateral para navegar por la información crítica del equipo: wellness
-          diario, cargas de entrenamiento, documentación médica y reportes personalizados.
+          Use the sidebar to navigate critical team information: wellness
+          daily, training loads, medical documentation and custom reports.
         </p>
       </div>
     </SidebarInset>

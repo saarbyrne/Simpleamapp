@@ -25,21 +25,21 @@ export default meta;
 type Story = StoryObj<typeof Table>;
 
 const players = [
-  { name: 'Jordan Smith', position: 'Defensa central', availability: 'Disponible', workload: 'Media' },
-  { name: 'Alex Martínez', position: 'Extremo derecho', availability: 'Precaución', workload: 'Alta' },
-  { name: 'Luis Ortega', position: 'Volante mixto', availability: 'Revisar', workload: 'Baja' },
+  { name: 'Jordan Smith', position: 'Center back', availability: 'Available', workload: 'Medium' },
+  { name: 'Alex Martínez', position: 'Right winger', availability: 'Caution', workload: 'High' },
+  { name: 'Luis Ortega', position: 'Box-to-box midfielder', availability: 'Review', workload: 'Low' },
 ];
 
 export const Default: Story = {
   render: () => (
     <Table>
-      <TableCaption>Estado actualizado de la plantilla principal.</TableCaption>
+      <TableCaption>Updated status of the main squad.</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead>Jugador</TableHead>
-          <TableHead>Posición</TableHead>
-          <TableHead>Disponibilidad</TableHead>
-          <TableHead>Carga estimada</TableHead>
+          <TableHead>Player</TableHead>
+          <TableHead>Position</TableHead>
+          <TableHead>Availability</TableHead>
+          <TableHead>Estimated load</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -55,7 +55,7 @@ export const Default: Story = {
       <TableFooter>
         <TableRow>
           <TableCell colSpan={4}>
-            Última actualización: {new Date().toLocaleDateString()}
+            Last updated: {new Date().toLocaleDateString()}
           </TableCell>
         </TableRow>
       </TableFooter>

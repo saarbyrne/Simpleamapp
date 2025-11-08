@@ -18,10 +18,10 @@ type Story = StoryObj<typeof Alert>;
 export const Default: Story = {
   render: () => (
     <Alert>
-      <AlertTitle>Recuerda registrar el wellness diario</AlertTitle>
+      <AlertTitle>Remember to record daily wellness</AlertTitle>
       <AlertDescription>
-        Los jugadores tienen hasta las 09:00 para completar el formulario. Te avisaremos si alguien
-        no lo envía.
+        Players have until 09:00 to complete the form. We will notify you if someone
+        doesn&apos;t submit it.
       </AlertDescription>
     </Alert>
   ),
@@ -30,10 +30,10 @@ export const Default: Story = {
 export const Destructive: Story = {
   render: () => (
     <Alert variant="destructive">
-      <AlertTitle>Advertencia médica</AlertTitle>
+      <AlertTitle>Medical warning</AlertTitle>
       <AlertDescription>
-        Alex Martínez fue marcado como “no disponible” por el staff médico. Evita incluirlo en las
-        sesiones de alta carga hasta nuevo aviso.
+        Alex Martínez was marked as &ldquo;unavailable&rdquo; by the medical staff. Avoid including him in
+        high-load sessions until further notice.
       </AlertDescription>
     </Alert>
   ),

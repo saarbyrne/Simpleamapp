@@ -27,15 +27,21 @@ export * as zIndexTokens from './z-index';
 export * as elevationTokens from './elevation';
 export * as radiusTokens from './radius';
 export * as motionTokens from './motion';
+export * as iconSystem from './icons';
+export * as breakpointSystem from './breakpoints';
+export * as gridSystem from './grid';
 
 // Individual token imports for unified object
-import { colors, primitives, surface, text, border, interactive, feedback, focus } from './colors';
+import { colors, primitives, surface, text, border, interactive, feedback, focus, darkMode } from './colors';
 import { typography } from './typography';
 import { spacingTokens } from './spacing';
 import { zIndex } from './z-index';
 import { elevation } from './elevation';
 import { borderRadius } from './radius';
 import { motion } from './motion';
+import { iconTokens } from './icons';
+import { breakpointTokens } from './breakpoints';
+import { gridTokens } from './grid';
 
 /**
  * Unified Token Object
@@ -56,6 +62,9 @@ export const tokens = {
   elevation,
   radius: borderRadius,
   motion,
+  icons: iconTokens,
+  breakpoints: breakpointTokens,
+  grid: gridTokens,
 } as const;
 
 export type Tokens = typeof tokens;
@@ -269,13 +278,84 @@ export function generateCSSString(): string {
 }
 
 /**
+ * Generate CSS variables for dark mode
+ * Uses dark mode color tokens for theme switching
+ */
+export function generateDarkModeColorVariables(): Record<string, string> {
+  return {
+    // Surface colors - dark mode
+    '--ds-surface-base': darkMode.surface.base,
+    '--ds-surface-elevated': darkMode.surface.elevated,
+    '--ds-surface-elevated-hover': darkMode.surface.elevatedHover,
+    '--ds-surface-sunken': darkMode.surface.sunken,
+    '--ds-surface-overlay': darkMode.surface.overlay,
+    '--ds-surface-overlay-light': darkMode.surface.overlayLight,
+    '--ds-surface-sidebar': darkMode.surface.sidebar,
+    '--ds-surface-sidebar-hover': darkMode.surface.sidebarHover,
+    '--ds-surface-sidebar-active': darkMode.surface.sidebarActive,
+
+    // Text colors - dark mode
+    '--ds-text-primary': darkMode.text.primary,
+    '--ds-text-secondary': darkMode.text.secondary,
+    '--ds-text-tertiary': darkMode.text.tertiary,
+    '--ds-text-disabled': darkMode.text.disabled,
+    '--ds-text-inverse': darkMode.text.inverse,
+    '--ds-text-link': darkMode.text.link,
+    '--ds-text-link-hover': darkMode.text.linkHover,
+    '--ds-text-link-visited': darkMode.text.linkVisited,
+    '--ds-text-placeholder': darkMode.text.placeholder,
+
+    // Border colors - dark mode
+    '--ds-border-default': darkMode.border.default,
+    '--ds-border-hover': darkMode.border.hover,
+    '--ds-border-focus': darkMode.border.focus,
+    '--ds-border-strong': darkMode.border.strong,
+    '--ds-border-subtle': darkMode.border.subtle,
+
+    // Interactive colors - dark mode
+    '--ds-interactive-primary': darkMode.interactive.primary,
+    '--ds-interactive-primary-hover': darkMode.interactive.primaryHover,
+    '--ds-interactive-primary-active': darkMode.interactive.primaryActive,
+    '--ds-interactive-primary-disabled': darkMode.interactive.primaryDisabled,
+    '--ds-interactive-secondary': darkMode.interactive.secondary,
+    '--ds-interactive-secondary-hover': darkMode.interactive.secondaryHover,
+    '--ds-interactive-secondary-active': darkMode.interactive.secondaryActive,
+    '--ds-interactive-destructive': darkMode.interactive.destructive,
+    '--ds-interactive-destructive-hover': darkMode.interactive.destructiveHover,
+    '--ds-interactive-ghost': darkMode.interactive.ghost,
+    '--ds-interactive-ghost-hover': darkMode.interactive.ghostHover,
+
+    // Feedback colors - dark mode
+    '--ds-feedback-success': darkMode.feedback.success,
+    '--ds-feedback-success-light': darkMode.feedback.successLight,
+    '--ds-feedback-success-border': darkMode.feedback.successBorder,
+    '--ds-feedback-error': darkMode.feedback.error,
+    '--ds-feedback-error-light': darkMode.feedback.errorLight,
+    '--ds-feedback-error-border': darkMode.feedback.errorBorder,
+    '--ds-feedback-warning': darkMode.feedback.warning,
+    '--ds-feedback-warning-light': darkMode.feedback.warningLight,
+    '--ds-feedback-warning-border': darkMode.feedback.warningBorder,
+    '--ds-feedback-info': darkMode.feedback.info,
+    '--ds-feedback-info-light': darkMode.feedback.infoLight,
+    '--ds-feedback-info-border': darkMode.feedback.infoBorder,
+
+    // Focus colors - dark mode
+    '--ds-focus-ring': darkMode.focus.ring,
+    '--ds-focus-ring-offset': darkMode.focus.ringOffset,
+  };
+}
+
+/**
  * Generate CSS string for dark mode
- * Uses dark mode color tokens
+ * Uses dark mode color tokens for theme switching
  */
 export function generateDarkModeCSSString(): string {
-  // TODO: Implement when dark mode is ready
-  // This will use darkMode tokens from colors.ts
-  return '';
+  const variables = generateDarkModeColorVariables();
+  const entries = Object.entries(variables)
+    .map(([key, value]) => `  ${key}: ${value};`)
+    .join('\n');
+
+  return `.dark {\n${entries}\n}`;
 }
 
 /**

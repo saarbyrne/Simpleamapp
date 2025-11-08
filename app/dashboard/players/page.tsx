@@ -26,7 +26,7 @@ export default async function PlayersPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 md:p-8">
-      <Card>
+      <Card className="w-full max-w-6xl">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>

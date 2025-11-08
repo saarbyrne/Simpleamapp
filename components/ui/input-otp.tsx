@@ -2,108 +2,96 @@
 
 import * as React from "react";
 import { OTPInput, OTPInputContext } from "input-otp";
-import { MinusIcon } from "lucide-react";
-
+import { Dot } from "lucide-react";
 import { cn } from "./utils";
-import { tokens } from "@/design-system/tokens";
 
-function InputOTP({
-  className,
-  style,
-  containerClassName,
-  ...props
-}: React.ComponentProps<typeof OTPInput> & {
-  containerClassName?: string;
-}) {
+const InputOTP = React.forwardRef<
+  React.ElementRef<typeof OTPInput>,
+  React.ComponentPropsWithoutRef<typeof OTPInput>
+>((props, ref) => {
+  const {
+    className,
+    containerClassName,
+    ["data-slot"]: dataSlot = "input-otp",
+    ...rest
+  } = props;
+
   return (
     <OTPInput
-      data-slot="input-otp"
+      ref={ref}
+      data-slot={dataSlot}
       containerClassName={cn(
-        "flex items-center has-disabled:opacity-50",
-        containerClassName,
+        "flex items-center gap-2 has-[:disabled]:opacity-50",
+        containerClassName
       )}
-      style={{
-        gap: tokens.spacing.gap.sm,
-        ["--ring" as string]: tokens.focus.ring,
-        ["--ring-offset" as string]: tokens.focus.ringOffset,
-        ["--destructive" as string]: tokens.feedback.error,
-        ["--destructive-foreground" as string]: tokens.colors.text.inverse,
-        ["--input" as string]: tokens.colors.surface.sunken,
-        ...style,
-      }}
       className={cn("disabled:cursor-not-allowed", className)}
-      {...props}
+      {...rest}
     />
   );
-}
+});
+InputOTP.displayName = "InputOTP";
 
-function InputOTPGroup({ className, style, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="input-otp-group"
-      className={cn("flex items-center", className)}
-      style={{
-        gap: tokens.spacing.gap.xs,
-        ...style,
-      }}
-      {...props}
-    />
-  );
-}
+const InputOTPGroup = React.forwardRef<
+  React.ElementRef<"div">,
+  React.ComponentPropsWithoutRef<"div">
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("flex items-center", className)} {...props} />
+));
+InputOTPGroup.displayName = "InputOTPGroup";
 
-function InputOTPSlot({
-  index,
-  className,
-  style,
-  ...props
-}: React.ComponentProps<"div"> & {
-  index: number;
-}) {
+const InputOTPSlot = React.forwardRef<
+  React.ElementRef<"div">,
+  React.ComponentPropsWithoutRef<"div"> & { index: number }
+>(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext);
-  const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {};
+  const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index];
+  const {
+    ["data-input-otp-slot"]: dataInputOtpSlot = "input-otp-slot",
+    ...rest
+  } = props;
 
   return (
     <div
-      data-slot="input-otp-slot"
-      data-active={isActive}
+      ref={ref}
+      data-input-otp-slot={dataInputOtpSlot}
       className={cn(
-        "data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 dark:data-[active=true]:aria-invalid:ring-destructive/40 aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive relative flex items-center justify-center border-y border-r transition-all outline-none first:rounded-l-md first:border-l last:rounded-r-md data-[active=true]:z-10 data-[active=true]:ring-[3px]",
-        className,
+        "relative flex h-10 w-10 items-center justify-center border-y border-r border-input text-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
+        isActive && "z-10 ring-2 ring-ring ring-offset-background",
+        className
       )}
-      style={{
-        backgroundColor: tokens.colors.surface.sunken,
-        borderColor: tokens.colors.border.default,
-        height: tokens.spacing.spacing.xl,
-        width: tokens.spacing.spacing.xl,
-        fontSize: tokens.typography.body.sm.fontSize,
-        lineHeight: tokens.typography.body.sm.lineHeight,
-        boxShadow: isActive ? tokens.elevation.shadow.sm : undefined,
-        ...style,
-      }}
-      {...props}
+      {...rest}
     >
       {char}
       {hasFakeCaret && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div
-            className="animate-caret-blink w-px duration-1000"
-            style={{
-              backgroundColor: tokens.colors.text.primary,
-              height: tokens.spacing.spacing.lg,
-            }}
-          />
+          <div className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />
         </div>
       )}
     </div>
   );
-}
+});
+InputOTPSlot.displayName = "InputOTPSlot";
 
-function InputOTPSeparator({ style, ...props }: React.ComponentProps<"div">) {
+const InputOTPSeparator = React.forwardRef<
+  React.ElementRef<"div">,
+  React.ComponentPropsWithoutRef<"div">
+>((props, ref) => {
+  const {
+    ["data-input-otp-separator"]: dataInputOtpSeparator = "input-otp-separator",
+    ...rest
+  } = props;
+
   return (
-    <div data-slot="input-otp-separator" role="separator" style={style} {...props}>
-      <MinusIcon />
+    <div
+      ref={ref}
+      role="separator"
+      data-input-otp-separator={dataInputOtpSeparator}
+      {...rest}
+    >
+      <Dot />
     </div>
   );
-}
+});
+InputOTPSeparator.displayName = "InputOTPSeparator";
 
 export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator };

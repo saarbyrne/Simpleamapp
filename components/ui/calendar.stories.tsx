@@ -26,10 +26,7 @@ export const Default: Story = {
         mode="single"
         selected={value}
         onSelect={setValue}
-        style={{
-          backgroundColor: tokens.colors.surface.base,
-          boxShadow: tokens.elevation.shadow.md,
-        }}
+        className="rounded-md border bg-card shadow-md"
       />
     );
   },
