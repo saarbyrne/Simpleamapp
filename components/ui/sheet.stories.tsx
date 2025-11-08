@@ -50,8 +50,6 @@ export const Default: Story = {
               display: 'flex',
               flexDirection: 'column',
               gap: tokens.spacing.gap.md,
-              paddingLeft: tokens.spacing.spacing.xl,
-              paddingRight: tokens.spacing.spacing.xl,
             }}
           >
             <label

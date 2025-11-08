@@ -40,10 +40,16 @@ export const Default: Story = {
     );
 
     return (
-      <ContextMenu>
-        <ContextMenuTrigger asChild>
-          <Button variant="secondary">Player: Jordan Smith</Button>
-        </ContextMenuTrigger>
+      <div className="flex flex-col items-center gap-4">
+        <p className="text-sm text-muted-foreground">
+          Right-click the button below to open the context menu
+        </p>
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <Button variant="secondary" className="w-48">
+              Player: Jordan Smith
+            </Button>
+          </ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuLabel>Quick Actions</ContextMenuLabel>
           <ContextMenuItem>
@@ -90,6 +96,7 @@ export const Default: Story = {
           </ContextMenuSub>
         </ContextMenuContent>
       </ContextMenu>
+      </div>
     );
   },
 };

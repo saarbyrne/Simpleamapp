@@ -40,6 +40,18 @@ export const Default: Story = {
   render: (args) => (
     <div className="w-[450px]">
       <AspectRatio {...args}>
+        <div className="flex h-full w-full items-center justify-center rounded-md bg-muted border">
+          <span className="text-sm text-muted-foreground">16:9 Aspect Ratio</span>
+        </div>
+      </AspectRatio>
+    </div>
+  ),
+};
+
+export const WithImage: Story = {
+  render: (args) => (
+    <div className="w-[450px]">
+      <AspectRatio {...args}>
         <OptimizedImage />
       </AspectRatio>
     </div>
