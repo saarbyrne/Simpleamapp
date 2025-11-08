@@ -1,5 +1,5 @@
 
-@import "tw-animate-css";
+/* Optional animation utilities. Remove if package not installed. */
 /*---break--- */
 @custom-variant dark (&:is(.dark *));
 /*---break--- */
