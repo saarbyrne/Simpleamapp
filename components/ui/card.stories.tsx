@@ -35,7 +35,7 @@ export const Default: Story = {
         <div className="space-y-2 text-sm text-muted-foreground">
           <p>• 78% of players completed the wellness questionnaire.</p>
           <p>• Two early fatigue alerts in the defender group.</p>
-          <p>• Recommendation: reduce load in Thursday's session.</p>
+          <p>• Recommendation: reduce load in Thursday&apos;s session.</p>
         </div>
       </CardContent>
     </Card>
@@ -47,7 +47,7 @@ export const WithAction: Story = {
     <Card>
       <CardHeader>
         <CardTitle>Training plan</CardTitle>
-        <CardDescription>Review and adjust next week's schedule.</CardDescription>
+        <CardDescription>Review and adjust next week&apos;s schedule.</CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">

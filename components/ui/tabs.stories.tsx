@@ -18,7 +18,7 @@ type Story = StoryObj<typeof Tabs>;
 export const Default: Story = {
   render: () => (
     <Tabs defaultValue="summary" style={{ width: '320px' }}>
-      <TabsList>
+      <TabsList aria-label="Weekly health overview">
         <TabsTrigger value="summary">Resumen</TabsTrigger>
         <TabsTrigger value="wellness">Wellness</TabsTrigger>
         <TabsTrigger value="load">Load</TabsTrigger>

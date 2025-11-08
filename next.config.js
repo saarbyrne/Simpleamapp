@@ -3,7 +3,11 @@ const { withSentryConfig } = require('@sentry/nextjs')
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['api.dicebear.com', 'hjzcimtmdxafilgrfeye.supabase.co'],
+    domains: [
+      'api.dicebear.com',
+      'hjzcimtmdxafilgrfeye.supabase.co',
+      'images.unsplash.com',
+    ],
   },
   experimental: {
     serverActions: {

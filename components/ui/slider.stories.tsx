@@ -46,7 +46,7 @@ export const Default: Story = {
             lineHeight: tokens.typography.body.xs.lineHeight,
           }}
         >
-          {value[0]}% for today's session
+          {value[0]}% for today&apos;s session
         </span>
       </div>
     );

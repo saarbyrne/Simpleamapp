@@ -21,7 +21,7 @@ export const Default: Story = {
       <AlertTitle>Remember to record daily wellness</AlertTitle>
       <AlertDescription>
         Players have until 09:00 to complete the form. We will notify you if someone
-        doesn't submit it.
+        doesn&apos;t submit it.
       </AlertDescription>
     </Alert>
   ),
@@ -32,7 +32,7 @@ export const Destructive: Story = {
     <Alert variant="destructive">
       <AlertTitle>Medical warning</AlertTitle>
       <AlertDescription>
-        Alex Martínez was marked as "unavailable" by the medical staff. Avoid including him in
+        Alex Martínez was marked as &ldquo;unavailable&rdquo; by the medical staff. Avoid including him in
         high-load sessions until further notice.
       </AlertDescription>
     </Alert>

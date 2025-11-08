@@ -1288,6 +1288,10 @@
     color: var(--destructive);
   }
 
+  .text-destructive-foreground {
+    color: var(--destructive-foreground);
+  }
+
   .text-foreground {
     color: var(--foreground);
   }
@@ -2602,7 +2606,7 @@
   --accent: oklch(.269 0 0);
   --accent-foreground: oklch(.985 0 0);
   --destructive: oklch(.396 .141 25.723);
-  --destructive-foreground: oklch(.637 .237 25.331);
+  --destructive-foreground: #fff;
   --border: oklch(.269 0 0);
   --input: oklch(.269 0 0);
   --ring: oklch(.439 0 0);

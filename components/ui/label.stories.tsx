@@ -94,7 +94,7 @@ export const WithDescription: Story = {
   render: () => (
     <div style={{ width: '320px', display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
       <Label htmlFor="email">Email Address</Label>
-      <p className="text-sm text-muted-foreground">We'll use this to send team updates and notifications.</p>
+      <p className="text-sm text-muted-foreground">We&apos;ll use this to send team updates and notifications.</p>
       <Input id="email" type="email" placeholder="player@example.com" />
     </div>
   ),
@@ -287,7 +287,7 @@ export const FormExample: Story = {
       {/* Field with description */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing.gap.xs }}>
         <Label htmlFor="form-email" required>Email Address</Label>
-        <p className="text-sm text-muted-foreground">We'll use this for important team communications.</p>
+        <p className="text-sm text-muted-foreground">We&apos;ll use this for important team communications.</p>
         <Input id="form-email" type="email" placeholder="player@example.com" />
       </div>
 

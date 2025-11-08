@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import Image from 'next/image';
 import { AspectRatio } from './aspect-ratio';
 
 const meta: Meta<typeof AspectRatio> = {
@@ -20,15 +21,26 @@ export default meta;
 
 type Story = StoryObj<typeof AspectRatio>;
 
+const imageSrc =
+  'https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=800&dpr=2&q=80';
+
+const OptimizedImage = () => (
+  <div className="relative h-full w-full">
+    <Image
+      src={imageSrc}
+      alt="Photo by Drew Beamer"
+      fill
+      sizes="(max-width: 700px) 100vw, 700px"
+      className="rounded-md object-cover"
+    />
+  </div>
+);
+
 export const Default: Story = {
   render: (args) => (
     <div className="w-[450px]">
       <AspectRatio {...args}>
-        <img
-          src="https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=800&dpr=2&q=80"
-          alt="Photo by Drew Beamer"
-          className="h-full w-full rounded-md object-cover"
-        />
+        <OptimizedImage />
       </AspectRatio>
     </div>
   ),
@@ -41,11 +53,7 @@ export const Square: Story = {
   render: (args) => (
     <div className="w-[300px]">
       <AspectRatio {...args}>
-        <img
-          src="https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=800&dpr=2&q=80"
-          alt="Photo by Drew Beamer"
-          className="h-full w-full rounded-md object-cover"
-        />
+        <OptimizedImage />
       </AspectRatio>
     </div>
   ),
@@ -58,11 +66,7 @@ export const Portrait: Story = {
   render: (args) => (
     <div className="w-[300px]">
       <AspectRatio {...args}>
-        <img
-          src="https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=800&dpr=2&q=80"
-          alt="Photo by Drew Beamer"
-          className="h-full w-full rounded-md object-cover"
-        />
+        <OptimizedImage />
       </AspectRatio>
     </div>
   ),
@@ -90,11 +94,7 @@ export const UltraWide: Story = {
   render: (args) => (
     <div className="w-[700px]">
       <AspectRatio {...args}>
-        <img
-          src="https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=800&dpr=2&q=80"
-          alt="Photo by Drew Beamer"
-          className="h-full w-full rounded-md object-cover"
-        />
+        <OptimizedImage />
       </AspectRatio>
     </div>
   ),
