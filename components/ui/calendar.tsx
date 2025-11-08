@@ -11,10 +11,19 @@ import {
   DayPicker,
   getDefaultClassNames,
   type DayPickerProps,
+  type DropdownProps,
 } from "react-day-picker";
 
 import { cn } from "./utils";
 import { Button, buttonVariants } from "./button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
+import { ScrollArea } from "./scroll-area";
 
 type ButtonVariant = React.ComponentProps<typeof Button>["variant"];
 
@@ -176,6 +185,39 @@ function Calendar({
             </div>
           </td>
         ),
+        Dropdown: ({ value, onChange, options }: DropdownProps) => {
+          const selected = options?.find((option) => option.value === value);
+
+          const handleChange = (value: string) => {
+            const changeEvent = {
+              target: { value },
+            } as React.ChangeEvent<HTMLSelectElement>;
+            onChange?.(changeEvent);
+          };
+
+          return (
+            <Select
+              value={value?.toString()}
+              onValueChange={handleChange}
+            >
+              <SelectTrigger className="pr-1.5 focus:ring-0">
+                <SelectValue>{selected?.label}</SelectValue>
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <ScrollArea className="h-80">
+                  {options?.map((option, id) => (
+                    <SelectItem
+                      key={`${option.value}-${id}`}
+                      value={option.value.toString()}
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </ScrollArea>
+              </SelectContent>
+            </Select>
+          );
+        },
         ...components,
       }}
       {...props}
