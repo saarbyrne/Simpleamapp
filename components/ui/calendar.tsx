@@ -85,11 +85,11 @@ function Calendar({
           defaultClassNames.button_next
         ),
         month_caption: cn(
-          "relative flex h-[--cell-size] w-full items-center justify-center px-[--cell-size]",
+          "relative flex h-[--cell-size] w-full items-center justify-center",
           defaultClassNames.month_caption
         ),
         dropdowns: cn(
-          "flex h-[--cell-size] w-full items-center justify-center gap-1.5 text-sm font-medium",
+          "flex h-[--cell-size] items-center justify-center gap-1.5 text-sm font-medium mx-auto",
           defaultClassNames.dropdowns
         ),
         dropdown_root: cn(
