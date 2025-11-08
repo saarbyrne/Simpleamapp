@@ -4,7 +4,7 @@ import {
   HoverCardTrigger,
   HoverCardContent,
 } from './hover-card';
-import { Avatar } from './avatar';
+import { Avatar, AvatarImage, AvatarFallback } from './avatar';
 import { tokens } from '@/design-system/tokens';
 
 const meta: Meta<typeof HoverCard> = {
@@ -24,14 +24,12 @@ export const Default: Story = {
   render: () => (
     <HoverCard openDelay={150}>
       <HoverCardTrigger asChild>
-        <Avatar
-          src="https://i.pravatar.cc/80?img=64"
-          alt="Jordan Smith"
-          style={{
-            width: tokens.spacing.spacing['3xl'],
-            height: tokens.spacing.spacing['3xl'],
-          }}
-        />
+        <button className="cursor-pointer">
+          <Avatar size="xl">
+            <AvatarImage src="https://i.pravatar.cc/80?img=64" alt="Jordan Smith" />
+            <AvatarFallback>JS</AvatarFallback>
+          </Avatar>
+        </button>
       </HoverCardTrigger>
       <HoverCardContent>
         <div
