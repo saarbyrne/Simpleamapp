@@ -3,9 +3,7 @@ import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 
 import '@/app/globals.css'
-import '@/app/design-system.css'
-import '@/app/design-system-tokens.css'
-import { ThemeProvider } from '@/components/theme-provider'
+import { ThemeProvider } from 'next-themes'
 import { AnalyticsProviders } from '@/lib/analytics/providers'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
