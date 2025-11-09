@@ -97,7 +97,7 @@ export default function TokenTestPage() {
         </section>
 
         {/* Diagnostic Info */}
-        <section className="border rounded-lg p-4 bg-gray-50">
+        <section className="border rounded-lg p-4 bg-muted">
           <h2 className="text-xl font-semibold mb-4">Diagnostic Checklist</h2>
           <div className="space-y-2 text-sm">
             <div className="flex items-start gap-2">
