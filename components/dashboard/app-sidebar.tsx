@@ -56,12 +56,12 @@ function LogoBadge() {
   return (
     <Link
       href="/dashboard"
-      className="flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-sidebar-accent"
+      className="flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-sidebar-accent group-data-[collapsible=icon]:justify-center"
     >
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary text-sm font-bold uppercase text-sidebar-primary-foreground">
         L
       </div>
-      <div className="flex flex-col gap-0.5 leading-none">
+      <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
         <span className="text-sm font-semibold">Logo</span>
         <span className="text-xs text-sidebar-foreground/70">Enterprise</span>
       </div>
@@ -73,7 +73,7 @@ export function AppSidebar({ userName, userEmail }: AppSidebarProps) {
   const pathname = usePathname()
 
   return (
-    <Sidebar collapsible="offcanvas">
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <LogoBadge />
       </SidebarHeader>

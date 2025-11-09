@@ -11,6 +11,12 @@ import { Table } from '@tanstack/react-table'
 import { Download, FileDown, FileJson, FileText } from 'lucide-react'
 import { exportToCSV, exportToJSON, exportToPDF } from '@/lib/table-utils'
 import { ColumnDef } from '@tanstack/react-table'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface DataTableExportProps<TData> {
   table: Table<TData>
@@ -83,13 +89,21 @@ export function DataTableExport<TData>({
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="default" className="h-10 shrink-0">
-          <Download className="mr-2 h-4 w-4" />
-          Export
-        </Button>
-      </DropdownMenuTrigger>
+    <TooltipProvider>
+      <DropdownMenu>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon-lg" className="shrink-0">
+                <Download className="h-4 w-4" />
+                <span className="sr-only">Export</span>
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Export</p>
+          </TooltipContent>
+        </Tooltip>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={handleExportCSV}>
           <FileText className="mr-2 h-4 w-4" />
@@ -104,7 +118,8 @@ export function DataTableExport<TData>({
           Export as PDF
         </DropdownMenuItem>
       </DropdownMenuContent>
-    </DropdownMenu>
+      </DropdownMenu>
+    </TooltipProvider>
   )
 }
 

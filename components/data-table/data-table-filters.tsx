@@ -34,7 +34,7 @@ export function DataTableFilters({
   className,
 }: DataTableFiltersProps) {
   return (
-    <div className={`flex flex-nowrap items-center gap-2 overflow-x-auto ${className || ''}`}>
+    <div className={`flex flex-nowrap items-center gap-2 ${className || ''}`}>
       {filters.map((filter) => {
         if (filter.type === 'search') {
           return (
@@ -49,13 +49,17 @@ export function DataTableFilters({
         }
 
         if (filter.type === 'select' && filter.options) {
+          // Make nationality selector wider to prevent text wrapping
+          const isNationality = filter.key === 'nationality'
+          const widthClass = isNationality ? 'w-[160px]' : 'w-[130px]'
+          
           return (
             <Select
               key={filter.key}
               value={values[filter.key] || 'all'}
               onValueChange={(value) => onFilterChange(filter.key, value)}
             >
-              <SelectTrigger className="h-10 w-[130px] shrink-0 [&>span]:text-left [&>span]:justify-start">
+              <SelectTrigger className={`h-10 ${widthClass} shrink-0 [&>span]:text-left [&>span]:justify-start`}>
                 <SelectValue placeholder={filter.placeholder || filter.label} />
               </SelectTrigger>
               <SelectContent>

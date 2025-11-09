@@ -11,7 +11,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Table } from '@tanstack/react-table'
-import { ChevronDown, Check, GripVertical, Eye, EyeOff } from 'lucide-react'
+import { ChevronDown, Check, GripVertical, Eye, EyeOff, Columns2 } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import {
   DndContext,
   closestCenter,
@@ -137,13 +143,21 @@ export function DataTableColumnManager<TData>({
   }
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="default" className="h-10 shrink-0">
-          Columns
-          <ChevronDown className="ml-2 h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
+    <TooltipProvider>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon-lg" className="shrink-0">
+                <Columns2 className="h-4 w-4" />
+                <span className="sr-only">Manage Columns</span>
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Manage Columns</p>
+          </TooltipContent>
+        </Tooltip>
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel>Manage Columns</DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -181,7 +195,8 @@ export function DataTableColumnManager<TData>({
           Hide all
         </DropdownMenuItem>
       </DropdownMenuContent>
-    </DropdownMenu>
+      </DropdownMenu>
+    </TooltipProvider>
   )
 }
 
