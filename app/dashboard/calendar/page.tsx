@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { EventCalendar, CalendarEvent } from '@/components/calendar/event-calendar'
 import { EventFormDialog } from '@/components/calendar/event-form-dialog'
 import { EventDetailDialog } from '@/components/calendar/event-detail-dialog'
+import { TemplateSelectorDialog } from '@/components/calendar/template-selector-dialog'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { getEvents, deleteEvent, type EventWithDetails } from '@/app/actions/events'
@@ -23,9 +24,11 @@ export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [selectedEvent, setSelectedEvent] = useState<EventWithDetails | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false)
   const [showEventForm, setShowEventForm] = useState(false)
   const [showEventDetail, setShowEventDetail] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
   const [formDefaultValues, setFormDefaultValues] = useState<any>(null)
   const [eventToDelete, setEventToDelete] = useState<string | null>(null)
 
@@ -83,6 +86,13 @@ export default function CalendarPage() {
       startTime: slotInfo.start,
       endTime: slotInfo.end,
     })
+    setShowTemplateSelector(true)
+  }, [])
+
+  // Handle template selection
+  const handleTemplateSelect = useCallback((template: any) => {
+    setSelectedTemplate(template)
+    setShowTemplateSelector(false)
     setShowEventForm(true)
   }, [])
 
@@ -90,6 +100,7 @@ export default function CalendarPage() {
   const handleEventFormSuccess = useCallback(() => {
     loadEvents()
     setFormDefaultValues(null)
+    setSelectedTemplate(null)
   }, [loadEvents])
 
   // Handle edit event
@@ -151,7 +162,8 @@ export default function CalendarPage() {
         </div>
         <Button onClick={() => {
           setFormDefaultValues(null)
-          setShowEventForm(true)
+          setSelectedTemplate(null)
+          setShowTemplateSelector(true)
         }}>
           <Plus className="mr-2 h-4 w-4" />
           New Event
@@ -176,6 +188,13 @@ export default function CalendarPage() {
         )}
       </div>
 
+      {/* Template Selector Dialog */}
+      <TemplateSelectorDialog
+        open={showTemplateSelector}
+        onOpenChange={setShowTemplateSelector}
+        onSelect={handleTemplateSelect}
+      />
+
       {/* Event Form Dialog */}
       <EventFormDialog
         open={showEventForm}
@@ -183,9 +202,11 @@ export default function CalendarPage() {
           setShowEventForm(open)
           if (!open) {
             setFormDefaultValues(null)
+            setSelectedTemplate(null)
           }
         }}
         onSuccess={handleEventFormSuccess}
+        template={selectedTemplate}
         defaultValues={formDefaultValues}
       />
 

@@ -33,7 +33,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { CalendarIcon, Loader2 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { CalendarIcon, Loader2, Sparkles } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { createEvent, updateEvent, type CreateEventData } from '@/app/actions/events'
@@ -65,10 +66,20 @@ const eventFormSchema = z.object({
 
 type EventFormValues = z.infer<typeof eventFormSchema>
 
+interface EventTemplate {
+  id: string
+  name: string
+  description: string | null
+  type: string
+  defaultDuration: number
+  isGlobal: boolean
+}
+
 interface EventFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess?: () => void
+  template?: EventTemplate | null
   defaultValues?: {
     id?: string
     title?: string
@@ -77,6 +88,7 @@ interface EventFormDialogProps {
     startTime?: Date
     endTime?: Date
     location?: string
+    templateId?: string
   }
 }
 
@@ -84,48 +96,57 @@ export function EventFormDialog({
   open,
   onOpenChange,
   onSuccess,
+  template,
   defaultValues,
 }: EventFormDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const isEditing = !!defaultValues?.id
 
+  // Calculate end time based on template or defaults
+  const getEndTime = () => {
+    if (defaultValues?.endTime) {
+      return defaultValues.endTime
+    }
+
+    const start = defaultValues?.startTime || new Date()
+    const duration = template?.defaultDuration || 120 // default 2 hours
+    return new Date(start.getTime() + duration * 60000)
+  }
+
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
-      title: defaultValues?.title || '',
-      description: defaultValues?.description || '',
-      type: defaultValues?.type || 'training',
+      title: defaultValues?.title || template?.name || '',
+      description: defaultValues?.description || template?.description || '',
+      type: (defaultValues?.type || template?.type || 'training') as any,
       startDate: defaultValues?.startTime || new Date(),
       startTime: defaultValues?.startTime
         ? format(defaultValues.startTime, 'HH:mm')
         : '09:00',
-      endDate: defaultValues?.endTime || new Date(),
-      endTime: defaultValues?.endTime
-        ? format(defaultValues.endTime, 'HH:mm')
-        : '10:00',
+      endDate: getEndTime(),
+      endTime: format(getEndTime(), 'HH:mm'),
       location: defaultValues?.location || '',
     },
   })
 
-  // Reset form when dialog opens/closes or defaultValues change
+  // Reset form when dialog opens/closes or defaultValues/template change
   useEffect(() => {
     if (open) {
+      const endTime = getEndTime()
       form.reset({
-        title: defaultValues?.title || '',
-        description: defaultValues?.description || '',
-        type: defaultValues?.type || 'training',
+        title: defaultValues?.title || template?.name || '',
+        description: defaultValues?.description || template?.description || '',
+        type: (defaultValues?.type || template?.type || 'training') as any,
         startDate: defaultValues?.startTime || new Date(),
         startTime: defaultValues?.startTime
           ? format(defaultValues.startTime, 'HH:mm')
           : '09:00',
-        endDate: defaultValues?.endTime || new Date(),
-        endTime: defaultValues?.endTime
-          ? format(defaultValues.endTime, 'HH:mm')
-          : '10:00',
+        endDate: endTime,
+        endTime: format(endTime, 'HH:mm'),
         location: defaultValues?.location || '',
       })
     }
-  }, [open, defaultValues, form])
+  }, [open, defaultValues, template, form])
 
   const onSubmit = async (data: EventFormValues) => {
     setIsLoading(true)
@@ -147,6 +168,7 @@ export function EventFormDialog({
         startTime: startDateTime.toISOString(),
         endTime: endDateTime.toISOString(),
         location: data.location,
+        templateId: template?.id || defaultValues?.templateId,
       }
 
       let result
@@ -177,10 +199,20 @@ export function EventFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Event' : 'Create Event'}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            {isEditing ? 'Edit Event' : 'Create Event'}
+            {template && (
+              <Badge variant="secondary" className="gap-1">
+                <Sparkles className="h-3 w-3" />
+                {template.name}
+              </Badge>
+            )}
+          </DialogTitle>
           <DialogDescription>
             {isEditing
               ? 'Update the event details below.'
+              : template
+              ? `Creating event using the "${template.name}" template.`
               : 'Fill in the details to create a new event.'}
           </DialogDescription>
         </DialogHeader>

@@ -13,6 +13,7 @@ export interface CreateEventData {
   startTime: string
   endTime: string
   location?: string
+  templateId?: string
   linkedFormId?: string
   attendeeIds?: string[] // PersonOrganization IDs
 }
@@ -185,6 +186,7 @@ export async function createEvent(data: CreateEventData) {
           startTime: new Date(data.startTime),
           endTime: new Date(data.endTime),
           location: data.location,
+          templateId: data.templateId,
           linkedFormId: data.linkedFormId,
           organizationId: dbUser.organizationId,
         }
