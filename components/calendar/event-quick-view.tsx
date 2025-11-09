@@ -12,10 +12,9 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+  Dialog,
+  DialogContent,
+} from '@/components/ui/dialog'
 import { Calendar, Clock, MapPin, Users, ExternalLink, Edit, Trash2, RefreshCw } from 'lucide-react'
 import { type EventWithDetails } from '@/app/actions/events'
 import { useRouter } from 'next/navigation'
@@ -26,7 +25,6 @@ interface EventQuickViewProps {
   onOpenChange: (open: boolean) => void
   onEdit: () => void
   onDelete: () => void
-  children?: React.ReactNode
 }
 
 const eventTypeColors: Record<string, string> = {
@@ -43,12 +41,11 @@ export function EventQuickView({
   onOpenChange,
   onEdit,
   onDelete,
-  children,
 }: EventQuickViewProps) {
   const router = useRouter()
 
   if (!event) {
-    return <>{children}</>
+    return null
   }
 
   const handleViewDetails = () => {
@@ -60,11 +57,8 @@ export function EventQuickView({
   const totalCount = event.attendance?.length || 0
 
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild>
-        {children}
-      </PopoverTrigger>
-      <PopoverContent className="w-96" align="start" side="right">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md p-0">
         <Card className="border-0 shadow-none">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-2">
@@ -158,7 +152,7 @@ export function EventQuickView({
             </Button>
           </CardFooter>
         </Card>
-      </PopoverContent>
-    </Popover>
+      </DialogContent>
+    </Dialog>
   )
 }
