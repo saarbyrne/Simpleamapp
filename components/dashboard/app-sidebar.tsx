@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   BarChart3,
   Calendar,
@@ -14,6 +14,9 @@ import {
   StickyNote,
   Table,
   Users,
+  UserCircle,
+  LogOut,
+  ChevronsUpDown,
 } from 'lucide-react'
 
 import {
@@ -29,6 +32,16 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { signOut } from '@/app/actions/profile'
+import { toast } from 'sonner'
 
 const navItems = [
   { label: 'Players', href: '/dashboard/players', icon: Users },
@@ -43,6 +56,7 @@ const navItems = [
 ]
 
 const settingsItems = [
+  { label: 'Profile', href: '/dashboard/profile', icon: UserCircle },
   { label: 'Data Management', href: '/dashboard/data-management', icon: Database },
   { label: 'System Settings', href: '/dashboard/system-settings', icon: Settings },
 ]
@@ -71,6 +85,17 @@ function LogoBadge() {
 
 export function AppSidebar({ userName, userEmail }: AppSidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  async function handleSignOut() {
+    const result = await signOut()
+    if (result.success) {
+      toast.success('Signed out successfully')
+      router.push('/login')
+    } else {
+      toast.error(result.error || 'Failed to sign out')
+    }
+  }
 
   return (
     <Sidebar collapsible="icon">
@@ -125,19 +150,58 @@ export function AppSidebar({ userName, userEmail }: AppSidebarProps) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground" tooltip={userName}>
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarFallback className="rounded-lg">
-                  {userName?.[0]?.toUpperCase() ?? 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="truncate font-semibold">{userName}</span>
-                <span className="truncate text-xs text-sidebar-foreground/70">
-                  {userEmail ?? 'Team member'}
-                </span>
-              </div>
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  tooltip={userName}
+                >
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarFallback className="rounded-lg">
+                      {userName?.[0]?.toUpperCase() ?? 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+                    <span className="truncate font-semibold">{userName}</span>
+                    <span className="truncate text-xs text-sidebar-foreground/70">
+                      {userEmail ?? 'Team member'}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto h-4 w-4 group-data-[collapsible=icon]:hidden" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-56"
+                align="end"
+                side="top"
+                sideOffset={8}
+              >
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{userName}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {userEmail}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/profile" className="cursor-pointer">
+                    <UserCircle className="mr-2 h-4 w-4" />
+                    Profile Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="cursor-pointer text-destructive focus:text-destructive"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

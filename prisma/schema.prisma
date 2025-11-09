@@ -46,11 +46,28 @@ model User {
   email          String    @unique
   name           String
   avatar         String?
+  phone          String?
   authProvider   String    @default("email") // email, google, facebook, instagram
   authProviderId String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   lastLoginAt    DateTime?
+
+  // Preferences
+  language       String?   // User language preference (overrides org default)
+  timezone       String?   // User timezone (overrides org default)
+  dateFormat     String?   // DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD
+  timeFormat     String?   // 12 or 24 hour format
+
+  // Notification Settings (stored as JSON)
+  notificationSettings Json? // {email: {...}, push: {...}, sms: {...}}
+
+  // Security
+  // Note: Password is managed by Supabase Auth
+  // TODO: Implement 2FA (Two-Factor Authentication) in future iteration
+  // TODO: Add twoFactorEnabled Boolean field
+  // TODO: Add twoFactorSecret String field for TOTP
+  // TODO: Add backupCodes String[] for recovery codes
 
   // Relations
   organizationId String
