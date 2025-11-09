@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -52,27 +52,27 @@ interface AttendanceManagerProps {
 const statusConfig = {
   invited: {
     label: 'Invited',
-    color: 'bg-gray-500',
+    color: 'bg-muted-foreground',
     icon: Clock,
-    textColor: 'text-gray-700 dark:text-gray-300'
+    textColor: 'text-muted-foreground'
   },
   attending: {
     label: 'Attending',
-    color: 'bg-green-500',
+    color: 'bg-chart-2',
     icon: Check,
-    textColor: 'text-green-700 dark:text-green-300'
+    textColor: 'text-chart-2'
   },
   absent: {
     label: 'Absent',
-    color: 'bg-red-500',
+    color: 'bg-destructive',
     icon: X,
-    textColor: 'text-red-700 dark:text-red-300'
+    textColor: 'text-destructive'
   },
   excused: {
     label: 'Excused',
-    color: 'bg-yellow-500',
+    color: 'bg-chart-3',
     icon: UserX,
-    textColor: 'text-yellow-700 dark:text-yellow-300'
+    textColor: 'text-chart-3'
   }
 }
 
@@ -119,18 +119,13 @@ export function AttendanceManager({
     }
   }
 
-  const getStatusSummary = () => {
-    const summary = {
-      total: attendees.length,
-      attending: attendees.filter(a => a.status === 'attending').length,
-      absent: attendees.filter(a => a.status === 'absent').length,
-      excused: attendees.filter(a => a.status === 'excused').length,
-      invited: attendees.filter(a => a.status === 'invited').length,
-    }
-    return summary
-  }
-
-  const summary = getStatusSummary()
+  const summary = useMemo(() => ({
+    total: attendees.length,
+    attending: attendees.filter(a => a.status === 'attending').length,
+    absent: attendees.filter(a => a.status === 'absent').length,
+    excused: attendees.filter(a => a.status === 'excused').length,
+    invited: attendees.filter(a => a.status === 'invited').length,
+  }), [attendees])
 
   if (attendees.length === 0) {
     return (
@@ -152,23 +147,23 @@ export function AttendanceManager({
           <div className="text-2xl font-bold">{summary.total}</div>
           <div className="text-xs text-muted-foreground">Total</div>
         </div>
-        <div className="rounded-lg border bg-green-50 p-3 dark:bg-green-950">
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+        <div className="rounded-lg border bg-chart-2/10 p-3">
+          <div className="text-2xl font-bold text-chart-2">
             {summary.attending}
           </div>
-          <div className="text-xs text-green-700 dark:text-green-300">Attending</div>
+          <div className="text-xs text-chart-2/80">Attending</div>
         </div>
-        <div className="rounded-lg border bg-red-50 p-3 dark:bg-red-950">
-          <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+        <div className="rounded-lg border bg-destructive/10 p-3">
+          <div className="text-2xl font-bold text-destructive">
             {summary.absent}
           </div>
-          <div className="text-xs text-red-700 dark:text-red-300">Absent</div>
+          <div className="text-xs text-destructive/80">Absent</div>
         </div>
-        <div className="rounded-lg border bg-gray-50 p-3 dark:bg-gray-900">
-          <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+        <div className="rounded-lg border bg-muted p-3">
+          <div className="text-2xl font-bold text-muted-foreground">
             {summary.invited}
           </div>
-          <div className="text-xs text-gray-700 dark:text-gray-300">Pending</div>
+          <div className="text-xs text-muted-foreground/80">Pending</div>
         </div>
       </div>
 

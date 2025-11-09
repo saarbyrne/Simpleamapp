@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -41,18 +41,18 @@ interface EventDetailDialogProps {
 }
 
 const eventTypeConfig = {
-  training: { label: 'Training', color: 'bg-blue-500' },
-  match: { label: 'Match', color: 'bg-green-500' },
-  medical: { label: 'Medical', color: 'bg-red-500' },
-  meeting: { label: 'Meeting', color: 'bg-purple-500' },
-  other: { label: 'Other', color: 'bg-gray-500' },
+  training: { label: 'Training', color: 'bg-primary' },
+  match: { label: 'Match', color: 'bg-chart-2' },
+  medical: { label: 'Medical', color: 'bg-destructive' },
+  meeting: { label: 'Meeting', color: 'bg-accent' },
+  other: { label: 'Other', color: 'bg-muted-foreground' },
 }
 
 const attendanceStatusConfig = {
-  invited: { label: 'Invited', color: 'bg-gray-500' },
-  attending: { label: 'Attending', color: 'bg-green-500' },
-  absent: { label: 'Absent', color: 'bg-red-500' },
-  excused: { label: 'Excused', color: 'bg-yellow-500' },
+  invited: { label: 'Invited', color: 'bg-muted-foreground' },
+  attending: { label: 'Attending', color: 'bg-chart-2' },
+  absent: { label: 'Absent', color: 'bg-destructive' },
+  excused: { label: 'Excused', color: 'bg-chart-3' },
 }
 
 export function EventDetailDialog({
@@ -69,12 +69,12 @@ export function EventDetailDialog({
 
   const typeConfig = eventTypeConfig[event.type as keyof typeof eventTypeConfig] || eventTypeConfig.other
 
-  const attendanceSummary = {
+  const attendanceSummary = useMemo(() => ({
     total: event.attendance.length,
     attending: event.attendance.filter(a => a.status === 'attending').length,
     absent: event.attendance.filter(a => a.status === 'absent').length,
     invited: event.attendance.filter(a => a.status === 'invited').length,
-  }
+  }), [event.attendance])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -88,23 +88,17 @@ export async function getEvents(startDate?: Date, endDate?: Date) {
     const events = await prisma.event.findMany({
       where: whereClause,
       orderBy: { startTime: 'asc' },
-      include: {
-        attendance: {
-          include: {
-            personOrg: {
-              include: {
-                person: {
-                  select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true,
-                    photo: true,
-                  }
-                }
-              }
-            }
-          }
-        }
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        type: true,
+        startTime: true,
+        endTime: true,
+        location: true,
+        isRecurring: true,
+        recurringRule: true,
+        seriesId: true,
       }
     })
 
@@ -200,41 +194,44 @@ export async function createEvent(data: CreateEventData) {
           throw new Error('No occurrences generated from recurrence rule')
         }
 
-        // Create all event instances
-        const events = []
-        for (const occurrence of occurrences) {
-          const instanceStartTime = new Date(occurrence)
-          const instanceEndTime = new Date(instanceStartTime.getTime() + duration)
+        // Create all event instances in parallel for better performance
+        const events = await Promise.all(
+          occurrences.map(async (occurrence) => {
+            const instanceStartTime = new Date(occurrence)
+            const instanceEndTime = new Date(instanceStartTime.getTime() + duration)
 
-          const event = await tx.event.create({
-            data: {
-              title: data.title,
-              description: data.description,
-              type: data.type,
-              startTime: instanceStartTime,
-              endTime: instanceEndTime,
-              location: data.location,
-              templateId: data.templateId,
-              linkedFormId: data.linkedFormId,
-              organizationId: dbUser.organizationId,
-              isRecurring: true,
-              recurringRule: data.recurrenceRule,
-              seriesId: seriesId,
-            }
-          })
-
-          // Add attendees if provided
-          if (data.attendeeIds && data.attendeeIds.length > 0) {
-            await tx.eventAttendance.createMany({
-              data: data.attendeeIds.map(personOrgId => ({
-                eventId: event.id,
-                personOrgId,
-                status: 'invited',
-              }))
+            return await tx.event.create({
+              data: {
+                title: data.title,
+                description: data.description,
+                type: data.type,
+                startTime: instanceStartTime,
+                endTime: instanceEndTime,
+                location: data.location,
+                templateId: data.templateId,
+                linkedFormId: data.linkedFormId,
+                organizationId: dbUser.organizationId,
+                isRecurring: true,
+                recurringRule: data.recurrenceRule,
+                seriesId: seriesId,
+              }
             })
-          }
+          })
+        )
 
-          events.push(event)
+        // Add attendees to all events in parallel if provided
+        if (data.attendeeIds && data.attendeeIds.length > 0) {
+          await Promise.all(
+            events.map(async (event) => {
+              return await tx.eventAttendance.createMany({
+                data: data.attendeeIds.map(personOrgId => ({
+                  eventId: event.id,
+                  personOrgId,
+                  status: 'invited',
+                }))
+              })
+            })
+          )
         }
 
         // Log activity

@@ -7,7 +7,14 @@ import { getEvent, deleteEvent, deleteEventSeries, type EventWithDetails } from 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DashboardHeader } from '@/components/dashboard/header'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,11 +44,11 @@ import {
 import { toast } from 'sonner'
 
 const eventTypeColors: Record<string, string> = {
-  training: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
-  match: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300',
-  medical: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
-  meeting: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300',
-  other: 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-300',
+  training: 'bg-primary/10 text-primary border-primary/20',
+  match: 'bg-chart-2/10 text-chart-2 border-chart-2/20',
+  medical: 'bg-destructive/10 text-destructive border-destructive/20',
+  meeting: 'bg-accent/20 text-accent-foreground border-accent',
+  other: 'bg-muted text-muted-foreground border-muted-foreground/20',
 }
 
 export default function EventDetailPage() {
@@ -157,6 +164,19 @@ export default function EventDetailPage() {
 
   return (
     <div className="flex h-full flex-col gap-6">
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard/calendar">Calendar</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{event.title}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 space-y-3">
