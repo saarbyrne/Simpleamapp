@@ -80,14 +80,14 @@ export function EventDetailDialog({
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <DialogTitle className="text-2xl">{event.title}</DialogTitle>
-              <DialogDescription className="mt-2 flex items-center gap-2">
+              <div className="mt-2 flex items-center gap-2">
                 <Badge variant="outline" className={cn('text-white', typeConfig.color)}>
                   {typeConfig.label}
                 </Badge>
                 {event.isRecurring && (
                   <Badge variant="outline">Recurring</Badge>
                 )}
-              </DialogDescription>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button
