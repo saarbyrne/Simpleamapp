@@ -12,19 +12,13 @@ import {
   RowSelectionState,
   type PaginationState,
 } from '@tanstack/react-table'
-import { createPlayer } from '@/app/actions/players'
+import { createPlayer, bulkUpdatePlayers } from '@/app/actions/players'
 import { useRouter, usePathname } from 'next/navigation'
 import {
   Badge,
 } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { PageCard } from '@/components/ui/page-card'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,6 +45,7 @@ import {
   type FilterConfig,
 } from '@/components/data-table'
 import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/react-table'
+import { NATIONALITIES } from '@/lib/nationalities'
 
 export type PlayerRow = {
   id: string
@@ -72,7 +67,7 @@ type PlayersTableProps = {
 const statusColors: Record<string, string> = {
   active: 'bg-green-600 text-white hover:bg-green-700',
   available: 'bg-green-600 text-white hover:bg-green-700',
-  injured: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+  injured: 'bg-destructive text-white hover:bg-destructive/90',
   suspended: 'bg-muted text-muted-foreground hover:bg-muted/80',
   inactive: 'bg-muted text-muted-foreground hover:bg-muted/80',
 }
@@ -271,6 +266,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
     nationality: '',
     email: '',
   })
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false)
 
   // Track if component has mounted to prevent initial URL update
   const isMounted = useRef(false)
@@ -316,6 +312,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
   // Function to read URL params and update state
   const syncStateFromURL = useCallback(() => {
     if (typeof window === 'undefined') return
+    if (!isMounted.current) return // Don't update state before mount
     
     const currentSearch = window.location.search
     const currentPathname = window.location.pathname
@@ -421,11 +418,13 @@ export function PlayersTable({ players }: PlayersTableProps) {
   useEffect(() => {
     if (typeof window === 'undefined') return
     
+    // Mark as mounted first
+    isMounted.current = true
+    
     // Use requestAnimationFrame to ensure we're past hydration
     const rafId = requestAnimationFrame(() => {
       lastPathnameRef.current = pathname
       syncStateFromURL()
-      isMounted.current = true
     })
     
     // Listen for popstate (browser back/forward)
@@ -612,8 +611,8 @@ export function PlayersTable({ players }: PlayersTableProps) {
       Array.from(
         new Set(
           players
-            .map((player) => normalizeFilter(player.position))
-            .filter(Boolean)
+            .map((player) => player.position)
+            .filter((pos): pos is string => Boolean(pos))
         )
       ).sort(),
     [players]
@@ -728,17 +727,55 @@ export function PlayersTable({ players }: PlayersTableProps) {
       sorting,
       pagination,
       columnVisibility,
+      rowSelection,
       columnOrder: columnOrder.length > 0 ? columnOrder : undefined,
       columnSizing: Object.keys(columnSizing).length > 0 ? columnSizing : undefined,
     },
     onSortingChange: setSorting,
     onPaginationChange: setPagination,
     onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
     onColumnOrderChange: setColumnOrder,
     onColumnSizingChange: setColumnSizing,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    enableRowSelection: true,
   })
+
+  // Handle bulk update
+  const handleBulkUpdate = useCallback(async (updates: {
+    position?: string | null
+    status?: 'active' | 'injured' | 'inactive' | null
+    nationality?: string | null
+  }) => {
+    setIsBulkUpdating(true)
+    try {
+      // Get selected player IDs from the table instance
+      const selectedRows = tableInstance.getFilteredSelectedRowModel().rows
+      const selectedIds = selectedRows.map((row) => row.original.id)
+
+      if (selectedIds.length === 0) {
+        alert('No players selected')
+        setIsBulkUpdating(false)
+        return
+      }
+
+      const result = await bulkUpdatePlayers(selectedIds, updates)
+
+      if (result.error) {
+        alert(result.error)
+      } else {
+        // Clear selection and refresh
+        setRowSelection({})
+        router.refresh()
+      }
+    } catch (error) {
+      console.error('Error bulk updating players:', error)
+      alert('Failed to update players')
+    } finally {
+      setIsBulkUpdating(false)
+    }
+  }, [tableInstance, router, setRowSelection])
 
   const { pageIndex, pageSize } = pagination
 
@@ -838,13 +875,10 @@ export function PlayersTable({ players }: PlayersTableProps) {
         </DialogContent>
       </Dialog>
 
-      <Card className="w-full max-w-full min-w-0 rounded-2xl border">
-        <div className="flex items-center justify-between p-6 pb-4 min-w-0">
-          <div className="flex flex-col gap-1 min-w-0">
-            <CardTitle className="text-2xl">Players</CardTitle>
-            <CardDescription>Manage your team roster and player information.</CardDescription>
-          </div>
-          
+      <PageCard
+        title="Players"
+        description="Manage your team roster and player information."
+        headerActions={
           <Button 
             onClick={() => setIsAddPlayerOpen(true)}
             className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
@@ -853,9 +887,8 @@ export function PlayersTable({ players }: PlayersTableProps) {
             <UserPlus className="mr-2 h-4 w-4" />
             Add Player
           </Button>
-        </div>
-        
-        <CardHeader className="space-y-4 pt-0 min-w-0 overflow-x-hidden">
+        }
+        toolbar={
           <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
             <DataTableFilters
               filters={filterConfig}
@@ -872,9 +905,8 @@ export function PlayersTable({ players }: PlayersTableProps) {
               filename="players"
             />
           </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4 min-w-0 overflow-x-hidden">
+        }
+      >
           <DataTable
             data={filteredPlayers}
             columns={columns}
@@ -901,6 +933,10 @@ export function PlayersTable({ players }: PlayersTableProps) {
             enableColumnVisibility={true}
             enableBulkActions={true}
             enableExport={false}
+            onBulkUpdate={handleBulkUpdate}
+            bulkUpdatePositionOptions={uniquePositions}
+            bulkUpdateNationalityOptions={NATIONALITIES}
+            isBulkUpdating={isBulkUpdating}
             emptyMessage="No players match the filters."
           />
 
@@ -945,8 +981,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
               </Button>
             </div>
           </div>
-        </CardContent>
-    </Card>
+      </PageCard>
     </div>
   )
 }

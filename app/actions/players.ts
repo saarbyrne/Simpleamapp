@@ -193,6 +193,94 @@ export async function deletePlayer(personId: string) {
   }
 }
 
+export async function bulkUpdatePlayers(
+  personIds: string[],
+  updates: {
+    position?: string | null
+    status?: 'active' | 'injured' | 'inactive' | null
+    nationality?: string | null
+  }
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  if (!personIds || personIds.length === 0) {
+    return { error: 'No players selected' }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    const result = await prisma.$transaction(async (tx) => {
+      const updatedCount = { person: 0, personOrg: 0 }
+
+      // Update nationality in Person table if provided
+      if (updates.nationality !== undefined) {
+        const personUpdate = await tx.person.updateMany({
+          where: {
+            id: { in: personIds },
+          },
+          data: {
+            nationality: updates.nationality || null,
+          },
+        })
+        updatedCount.person = personUpdate.count
+      }
+
+      // Update position and/or status in PersonOrganization table if provided
+      const personOrgUpdates: {
+        position?: string | null
+        status?: 'active' | 'injured' | 'inactive' | null
+      } = {}
+
+      if (updates.position !== undefined) {
+        personOrgUpdates.position = updates.position || null
+      }
+
+      if (updates.status !== undefined) {
+        personOrgUpdates.status = updates.status || null
+      }
+
+      if (Object.keys(personOrgUpdates).length > 0) {
+        const personOrgUpdate = await tx.personOrganization.updateMany({
+          where: {
+            personId: { in: personIds },
+            organizationId: dbUser.organizationId,
+          },
+          data: personOrgUpdates,
+        })
+        updatedCount.personOrg = personOrgUpdate.count
+      }
+
+      // Log activity for bulk update
+      await tx.activity.create({
+        data: {
+          type: 'players_bulk_updated',
+          data: {
+            count: personIds.length,
+            updates: Object.keys(updates).filter(key => updates[key as keyof typeof updates] !== undefined),
+          },
+          userId: user.id,
+        }
+      })
+
+      return updatedCount
+    })
+
+    revalidatePath('/dashboard/players')
+    revalidatePath('/dashboard')
+
+    return { success: true, updatedCount: result }
+  } catch (error) {
+    console.error('Error bulk updating players:', error)
+    return { error: 'Failed to bulk update players' }
+  }
+}
+
 export async function getPlayers() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

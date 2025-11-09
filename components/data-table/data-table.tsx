@@ -32,8 +32,10 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 import { useState, useMemo, ReactNode } from 'react'
 import { DataTableBulkActions, BulkAction } from './data-table-bulk-actions'
+import { InlineBulkActions } from './inline-bulk-actions'
 import { DataTableExport } from './data-table-export'
 import { DataTableColumnManager } from './data-table-column-manager'
+import { DataTable as UITable } from '@/components/ui/data-table'
 import { cn } from '@/components/ui/utils'
 
 export interface DataTableProps<TData> {
@@ -69,6 +71,14 @@ export interface DataTableProps<TData> {
   onBulkDelete?: (selectedRows: TData[]) => void | Promise<void>
   onBulkCopy?: (selectedRows: TData[]) => void | Promise<void>
   onBulkExport?: (selectedRows: TData[]) => void | Promise<void>
+  onBulkUpdate?: (updates: {
+    position?: string | null
+    status?: 'active' | 'injured' | 'inactive' | null
+    nationality?: string | null
+  }) => Promise<void>
+  bulkUpdatePositionOptions?: string[]
+  bulkUpdateNationalityOptions?: ReadonlyArray<{ code: string; name: string; flag: string }>
+  isBulkUpdating?: boolean
   exportFilename?: string
   // UI customization
   emptyMessage?: string
@@ -110,6 +120,10 @@ export function DataTable<TData>({
   onBulkDelete,
   onBulkCopy,
   onBulkExport,
+  onBulkUpdate,
+  bulkUpdatePositionOptions = [],
+  bulkUpdateNationalityOptions = [],
+  isBulkUpdating = false,
   exportFilename = 'export',
   // UI
   emptyMessage = 'No results found.',
@@ -271,8 +285,19 @@ export function DataTable<TData>({
 
   return (
     <div className={cn('space-y-4', className)}>
-      {/* Bulk Actions Bar */}
-      {enableBulkActions && enableRowSelection && (
+      {/* Inline Bulk Actions Bar */}
+      {enableBulkActions && enableRowSelection && onBulkUpdate && (
+        <InlineBulkActions
+          table={table}
+          onSave={onBulkUpdate}
+          positionOptions={bulkUpdatePositionOptions}
+          nationalityOptions={bulkUpdateNationalityOptions}
+          isLoading={isBulkUpdating}
+        />
+      )}
+      
+      {/* Legacy Dropdown Bulk Actions (for delete/copy/export) */}
+      {enableBulkActions && enableRowSelection && (onBulkDelete || onBulkCopy || onBulkExport || bulkActions.length > 0) && !onBulkUpdate && (
         <DataTableBulkActions
           table={table}
           actions={bulkActions}
@@ -283,157 +308,16 @@ export function DataTable<TData>({
       )}
 
       {/* Table */}
-      <div className="w-full min-w-0 overflow-x-auto rounded-lg border">
-        <div className="min-w-max">
-          <Table>
-          <TableHeader className={headerClassName}>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const canResize = enableColumnResizing && header.column.getCanResize()
-                  const isGrouped = enableGrouping && header.column.getIsGrouped()
-
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className={cn(
-                        'relative',
-                        header.column.id === 'actions' && 'text-right',
-                        header.column.id === 'select' && 'w-10 !px-2 !py-0'
-                      )}
-                      style={{
-                        width: header.getSize(),
-                        minWidth: header.column.columnDef.minSize,
-                        maxWidth: header.column.columnDef.maxSize,
-                      }}
-                    >
-                      {header.isPlaceholder ? null : (
-                        header.column.id === 'select' ? (
-                          <div className="flex items-center justify-center">
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            {isGrouped && (
-                              <button
-                                onClick={header.column.getToggleGroupingHandler()}
-                                className="p-1 hover:bg-muted rounded"
-                              >
-                                {header.column.getIsGrouped() ? (
-                                  <ChevronDown className="h-4 w-4" />
-                                ) : (
-                                  <ChevronRight className="h-4 w-4" />
-                                )}
-                              </button>
-                            )}
-                            <div
-                              {...{
-                                className: header.column.getCanSort()
-                                  ? 'flex cursor-pointer items-center gap-2 select-none'
-                                  : 'flex items-center gap-2',
-                                onClick: header.column.getToggleSortingHandler(),
-                              }}
-                            >
-                              {flexRender(header.column.columnDef.header, header.getContext())}
-                              {{
-                                asc: ' ▲',
-                                desc: ' ▼',
-                              }[header.column.getIsSorted() as string] ?? null}
-                            </div>
-                          </div>
-                        )
-                      )}
-                      {canResize && (
-                        <div
-                          onMouseDown={header.getResizeHandler()}
-                          onTouchStart={header.getResizeHandler()}
-                          className={cn(
-                            'absolute right-0 top-0 h-full w-1 cursor-col-resize touch-none select-none bg-border hover:bg-primary/50',
-                            header.column.getIsResizing() && 'bg-primary'
-                          )}
-                        />
-                      )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody className={bodyClassName}>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => {
-                const isGrouped = enableGrouping && row.getIsGrouped()
-                const isExpanded = enableGrouping && row.getIsExpanded()
-
-                if (isGrouped) {
-                  return (
-                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                      <TableCell
-                        colSpan={row.getVisibleCells().length}
-                        className="font-medium"
-                      >
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={row.getToggleExpandedHandler()}
-                            className="p-1 hover:bg-muted rounded"
-                          >
-                            {isExpanded ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
-                          </button>
-                          {flexRender(row.getGroupingValue(), row.getContext())} (
-                          {row.subRows.length} {row.subRows.length === 1 ? 'item' : 'items'})
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )
-                }
-
-                return (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                    className={cn(
-                      !isExpanded && isGrouped && 'hidden',
-                      isExpanded && isGrouped && ''
-                    )}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className={cn(
-                          cell.column.id === 'actions' && 'text-right',
-                          cell.column.id === 'select' && 'w-10 !px-2 !py-0'
-                        )}
-                        style={{
-                          width: cell.column.getSize(),
-                        }}
-                      >
-                        {cell.column.id === 'select' ? (
-                          <div className="flex items-center justify-center">
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </div>
-                        ) : (
-                          flexRender(cell.column.columnDef.cell, cell.getContext())
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                )
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columnsWithSelection.length} className="h-24 text-center">
-                  {emptyMessage}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-        </div>
-      </div>
+      <UITable
+        table={table}
+        columns={columnsWithSelection}
+        enableRowSelection={enableRowSelection}
+        enableGrouping={enableGrouping}
+        enableColumnResizing={enableColumnResizing}
+        emptyMessage={emptyMessage}
+        headerClassName={headerClassName}
+        bodyClassName={bodyClassName}
+      />
     </div>
   )
 }
