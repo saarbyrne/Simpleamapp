@@ -14,6 +14,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from '@/components/ui/dialog'
 import { Calendar, Clock, MapPin, Users, ExternalLink, Edit, Trash2, RefreshCw } from 'lucide-react'
 import { type EventWithDetails } from '@/app/actions/events'
@@ -59,6 +60,7 @@ export function EventQuickView({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md p-0">
+        <DialogTitle className="sr-only">{event.title}</DialogTitle>
         <Card className="border-0 shadow-none">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-2">

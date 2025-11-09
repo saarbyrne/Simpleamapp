@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Table } from '@tanstack/react-table'
 import { BulkActionsBar, type BulkField } from '@/components/ui/bulk-actions-bar'
 
@@ -28,8 +29,30 @@ export function InlineBulkActions<TData>({
   nationalityOptions = [],
   isLoading = false,
 }: InlineBulkActionsProps<TData>) {
-  const selectedRows = table.getFilteredSelectedRowModel().rows
-  const selectedCount = selectedRows.length
+  // Use state to track selected count, updated in useEffect to avoid state updates during render
+  const [selectedCount, setSelectedCount] = useState(0)
+  
+  useEffect(() => {
+    // Calculate selected count after component mounts to avoid SSR/hydration issues
+    // Use setTimeout to ensure this runs after render phase
+    const timer = setTimeout(() => {
+      try {
+        const selectedRows = table.getFilteredSelectedRowModel().rows
+        setSelectedCount(selectedRows.length)
+      } catch (error) {
+        // Fallback: count selected rows from state only (safe, doesn't trigger updates)
+        const rowSelection = table.getState().rowSelection
+        setSelectedCount(Object.keys(rowSelection).length)
+      }
+    }, 0)
+    
+    return () => clearTimeout(timer)
+  }, [
+    // Use JSON.stringify to create stable dependency strings
+    JSON.stringify(table.getState().rowSelection),
+    JSON.stringify(table.getState().columnFilters),
+    table.getState().globalFilter,
+  ])
 
   const fields: BulkField[] = []
 

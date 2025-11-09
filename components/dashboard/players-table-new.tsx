@@ -102,13 +102,12 @@ const titleCase = (value: string | null | undefined) => {
     .join(' ')
 }
 
-const createColumns = (players: PlayerRow[]): ColumnDef<PlayerRow>[] => {
+const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: string) => void): ColumnDef<PlayerRow>[] => {
   // Check which columns have data
   const hasPosition = players.some(p => p.position)
   const hasAge = players.some(p => p.age !== null)
   const hasNationality = players.some(p => p.nationality)
   const hasEmail = players.some(p => p.email)
-  const hasPhone = players.some(p => p.phone)
   const hasJoinedAt = players.some(p => p.joinedAt)
   const hasTags = players.some(p => p.tags && p.tags.length > 0)
 
@@ -128,7 +127,15 @@ const createColumns = (players: PlayerRow[]): ColumnDef<PlayerRow>[] => {
               )}
             </Avatar>
             <div className="flex flex-col">
-              <span className="font-medium text-foreground">{player.name}</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onNavigateToProfile(player.id)
+                }}
+                className="font-medium text-foreground hover:text-primary hover:underline text-left"
+              >
+                {player.name}
+              </button>
               <span className="text-sm text-muted-foreground">
                 #{player.jerseyNumber ?? '—'}
               </span>
@@ -210,26 +217,24 @@ const createColumns = (players: PlayerRow[]): ColumnDef<PlayerRow>[] => {
     })
   }
 
-  if (hasPhone) {
-    columns.push({
-      accessorKey: 'phone',
-      header: 'Phone',
-      enableHiding: true,
-      cell: ({ getValue }) => {
-        const phone = getValue() as string | null | undefined
-        if (!phone) return <span className="text-sm text-muted-foreground">—</span>
-        return (
-          <a
-            href={`tel:${phone}`}
-            className="text-sm text-primary hover:underline"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {phone}
-          </a>
-        )
-      },
-    })
-  }
+  columns.push({
+    accessorKey: 'phone',
+    header: 'Phone',
+    enableHiding: true,
+    cell: ({ getValue }) => {
+      const phone = getValue() as string | null | undefined
+      if (!phone) return <span className="text-sm text-muted-foreground">—</span>
+      return (
+        <a
+          href={`tel:${phone}`}
+          className="text-sm text-primary hover:underline"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {phone}
+        </a>
+      )
+    },
+  })
 
   if (hasJoinedAt) {
     columns.push({
@@ -279,22 +284,29 @@ const createColumns = (players: PlayerRow[]): ColumnDef<PlayerRow>[] => {
   columns.push({
     id: 'actions',
     header: () => <span className="sr-only">Actions</span>,
-    cell: () => (
-      <div className="flex justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>View profile</DropdownMenuItem>
-            <DropdownMenuItem>Send form</DropdownMenuItem>
-            <DropdownMenuItem>Add note</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const player = row.original
+      return (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => onNavigateToProfile(player.id)}
+              >
+                View profile
+              </DropdownMenuItem>
+              <DropdownMenuItem>Send form</DropdownMenuItem>
+              <DropdownMenuItem>Add note</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )
+    },
   })
 
   return columns
@@ -734,7 +746,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
     })
   }, [players, search, positionFilter, statusFilter, nationalityFilter])
 
-  const columns = useMemo(() => createColumns(players), [players])
+  const columns = useMemo(() => createColumns(players, (playerId) => router.push(`/dashboard/players/${playerId}`)), [players, router])
 
   // Prepare filter config for DataTableFilters
   const filterConfig: FilterConfig[] = useMemo(() => [

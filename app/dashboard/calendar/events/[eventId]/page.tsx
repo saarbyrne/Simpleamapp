@@ -1,20 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { getEvent, deleteEvent, deleteEventSeries, type EventWithDetails } from '@/app/actions/events'
+import { useBreadcrumb } from '@/lib/breadcrumb-context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,6 +48,7 @@ export default function EventDetailPage() {
   const params = useParams()
   const router = useRouter()
   const eventId = params.eventId as string
+  const { setCustomLabel } = useBreadcrumb()
 
   const [event, setEvent] = useState<EventWithDetails | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -63,7 +57,7 @@ export default function EventDetailPage() {
   const [showRecurringActionDialog, setShowRecurringActionDialog] = useState(false)
   const [recurringAction, setRecurringAction] = useState<'edit' | 'delete' | null>(null)
 
-  const loadEvent = async () => {
+  const loadEvent = useCallback(async () => {
     setIsLoading(true)
     try {
       const result = await getEvent(eventId)
@@ -72,6 +66,8 @@ export default function EventDetailPage() {
         router.push('/dashboard/calendar')
       } else {
         setEvent(result.event)
+        // Set the event title in breadcrumb context
+        setCustomLabel(eventId, result.event.title)
       }
     } catch (error) {
       toast.error('Failed to load event')
@@ -79,11 +75,16 @@ export default function EventDetailPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [eventId, setCustomLabel, router])
 
   useEffect(() => {
     loadEvent()
-  }, [eventId])
+    
+    // Cleanup: remove custom label when component unmounts or eventId changes
+    return () => {
+      setCustomLabel(eventId, null)
+    }
+  }, [eventId, setCustomLabel, loadEvent])
 
   const handleEdit = () => {
     if (event?.isRecurring) {
@@ -164,19 +165,6 @@ export default function EventDetailPage() {
 
   return (
     <div className="flex h-full flex-col gap-6">
-      {/* Breadcrumb */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/calendar">Calendar</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{event.title}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 space-y-3">
@@ -265,7 +253,7 @@ export default function EventDetailPage() {
             className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
           >
             <PenTool className="mr-2 h-4 w-4" />
-            Drawings
+            Canvas
           </TabsTrigger>
           <TabsTrigger
             value="forms"
@@ -356,15 +344,15 @@ export default function EventDetailPage() {
             <TabsContent value="drawings" className="mt-0">
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <PenTool className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-lg font-semibold">Event Drawings</h3>
+                <h3 className="mb-2 text-lg font-semibold">Event Canvas</h3>
                 <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                  Link drawing modules for formations, tactics, and session plans.
-                  Drawings will appear here when the Drawings module is implemented.
+                  Link canvas modules for formations, tactics, and session plans.
+                  Canvas content will appear here when the Canvas module is implemented.
                 </p>
                 <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
                   <p className="text-sm font-medium">Integration Ready</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Complete the Drawings module to enable this feature
+                    Complete the Canvas module to enable this feature
                   </p>
                 </div>
               </div>

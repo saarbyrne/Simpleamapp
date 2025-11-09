@@ -127,7 +127,7 @@ export function EventDetailDialog({
             </TabsTrigger>
             <TabsTrigger value="drawings">
               <PenTool className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Drawings</span>
+              <span className="hidden sm:inline">Canvas</span>
             </TabsTrigger>
             <TabsTrigger value="forms">
               <ClipboardList className="mr-2 h-4 w-4" />
@@ -242,15 +242,15 @@ export function EventDetailDialog({
           <TabsContent value="drawings" className="mt-6">
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <PenTool className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 text-lg font-semibold">Event Drawings</h3>
+              <h3 className="mb-2 text-lg font-semibold">Event Canvas</h3>
               <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                Link drawing modules for formations, tactics, and session plans.
-                Drawings will appear here when the Drawings module is implemented.
+                Link canvas modules for formations, tactics, and session plans.
+                Canvas content will appear here when the Canvas module is implemented.
               </p>
               <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
                 <p className="text-sm font-medium">Integration Ready</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Complete the Drawings module to enable this feature
+                  Complete the Canvas module to enable this feature
                 </p>
               </div>
             </div>

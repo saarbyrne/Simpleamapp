@@ -326,3 +326,55 @@ export async function getPlayers() {
     return { error: 'Failed to fetch players', players: [] }
   }
 }
+
+/**
+ * Get a single player by ID with full details
+ */
+export async function getPlayer(playerId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    const player = await prisma.person.findFirst({
+      where: {
+        id: playerId,
+        organizations: {
+          some: {
+            organizationId: dbUser.organizationId,
+            role: 'player',
+          }
+        }
+      },
+      include: {
+        organizations: {
+          where: {
+            organizationId: dbUser.organizationId,
+          },
+          select: {
+            position: true,
+            jerseyNumber: true,
+            status: true,
+            tags: true,
+            joinedAt: true,
+            leftAt: true,
+          }
+        }
+      }
+    })
+
+    if (!player) {
+      return { error: 'Player not found' }
+    }
+
+    return { success: true, player }
+  } catch (error) {
+    console.error('Error fetching player:', error)
+    return { error: 'Failed to fetch player' }
+  }
+}
