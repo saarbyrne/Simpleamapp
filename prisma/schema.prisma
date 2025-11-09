@@ -252,7 +252,8 @@ model Event {
   endTime        DateTime
   location       String?
   isRecurring    Boolean  @default(false)
-  recurringRule  Json?
+  recurringRule  String?  // RRule string
+  seriesId       String?  // Links instances of recurring events
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
