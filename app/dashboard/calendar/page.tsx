@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { EventCalendar, CalendarEvent } from '@/components/calendar/event-calendar'
 import { EventFormDialog } from '@/components/calendar/event-form-dialog'
-import { EventDetailDialog } from '@/components/calendar/event-detail-dialog'
+import { EventQuickView } from '@/components/calendar/event-quick-view'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import { getEvents, deleteEvent, deleteEventSeries, updateEventSeries, type EventWithDetails } from '@/app/actions/events'
+import { getEvents, deleteEvent, deleteEventSeries, type EventWithDetails } from '@/app/actions/events'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -24,7 +24,7 @@ export default function CalendarPage() {
   const [selectedEvent, setSelectedEvent] = useState<EventWithDetails | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showEventForm, setShowEventForm] = useState(false)
-  const [showEventDetail, setShowEventDetail] = useState(false)
+  const [showQuickView, setShowQuickView] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showRecurringActionDialog, setShowRecurringActionDialog] = useState(false)
   const [recurringAction, setRecurringAction] = useState<'edit' | 'delete' | null>(null)
@@ -75,7 +75,7 @@ export default function CalendarPage() {
     const fullEvent = result.events.find((e: any) => e.id === event.id)
     if (fullEvent) {
       setSelectedEvent(fullEvent as EventWithDetails)
-      setShowEventDetail(true)
+      setShowQuickView(true)
     }
   }, [])
 
@@ -112,7 +112,7 @@ export default function CalendarPage() {
           endTime: new Date(selectedEvent.endTime),
           location: selectedEvent.location,
         })
-        setShowEventDetail(false)
+        setShowQuickView(false)
         setShowEventForm(true)
       }
     }
@@ -149,7 +149,7 @@ export default function CalendarPage() {
         endTime: new Date(selectedEvent.endTime),
         location: selectedEvent.location,
       })
-      setShowEventDetail(false)
+      setShowQuickView(false)
       setShowEventForm(true)
     } else if (recurringAction === 'delete') {
       setEventToDelete(selectedEvent.id)
@@ -170,7 +170,7 @@ export default function CalendarPage() {
           toast.error(result.error)
         } else {
           toast.success('All event instances deleted successfully')
-          setShowEventDetail(false)
+          setShowQuickView(false)
           setSelectedEvent(null)
           loadEvents()
         }
@@ -179,8 +179,6 @@ export default function CalendarPage() {
         console.error(error)
       }
     }
-    // Note: For edit all, we would need to implement a different form flow
-    // For now, we'll just show the form for the selected instance
   }, [selectedEvent, recurringAction, loadEvents])
 
   // Confirm delete
@@ -193,7 +191,7 @@ export default function CalendarPage() {
         toast.error(result.error)
       } else {
         toast.success('Event deleted successfully')
-        setShowEventDetail(false)
+        setShowQuickView(false)
         setShowDeleteDialog(false)
         setEventToDelete(null)
         setSelectedEvent(null)
@@ -255,14 +253,13 @@ export default function CalendarPage() {
         defaultValues={formDefaultValues}
       />
 
-      {/* Event Detail Dialog */}
-      <EventDetailDialog
-        open={showEventDetail}
-        onOpenChange={setShowEventDetail}
+      {/* Event Quick View */}
+      <EventQuickView
         event={selectedEvent}
+        open={showQuickView}
+        onOpenChange={setShowQuickView}
         onEdit={handleEditEvent}
         onDelete={handleDeleteEvent}
-        onUpdate={loadEvents}
       />
 
       {/* Delete Confirmation Dialog */}
