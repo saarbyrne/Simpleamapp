@@ -40,7 +40,6 @@ import {
   ClipboardList,
   FolderOpen,
   RefreshCw,
-  ChevronLeft,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -164,142 +163,127 @@ export default function EventDetailPage() {
   const totalCount = event.attendance?.length || 0
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col gap-4">
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard/calendar">Calendar</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{event.title}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       {/* Header */}
-      <div className="border-b bg-background px-6 py-4">
-        <div className="mb-4">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard/calendar">Calendar</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{event.title}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 space-y-3">
+          <h1 className="text-2xl font-bold">{event.title}</h1>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className={eventTypeColors[event.type] || eventTypeColors.other}>
+              {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+            </Badge>
+            {event.isRecurring && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <RefreshCw className="h-3 w-3" />
+                Recurring Event
+              </Badge>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              {format(new Date(event.startTime), 'EEEE, MMMM d, yyyy')}
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              {format(new Date(event.startTime), 'h:mm a')} - {format(new Date(event.endTime), 'h:mm a')}
+            </div>
+            {event.location && (
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                {event.location}
+              </div>
+            )}
+            {totalCount > 0 && (
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                {attendingCount} of {totalCount} attending
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 space-y-3">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/dashboard/calendar')}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <h1 className="text-2xl font-bold">{event.title}</h1>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge className={eventTypeColors[event.type] || eventTypeColors.other}>
-                {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
-              </Badge>
-              {event.isRecurring && (
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <RefreshCw className="h-3 w-3" />
-                  Recurring Event
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                {format(new Date(event.startTime), 'EEEE, MMMM d, yyyy')}
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                {format(new Date(event.startTime), 'h:mm a')} - {format(new Date(event.endTime), 'h:mm a')}
-              </div>
-              {event.location && (
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  {event.location}
-                </div>
-              )}
-              {totalCount > 0 && (
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  {attendingCount} of {totalCount} attending
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleEdit}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
-            <Button variant="outline" onClick={handleDelete}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
-          </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleEdit}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit
+          </Button>
+          <Button variant="outline" onClick={handleDelete}>
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </Button>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-auto">
-        <Tabs defaultValue="overview" className="h-full">
-          <div className="border-b bg-background px-6">
-            <TabsList className="h-auto bg-transparent p-0">
-              <TabsTrigger
-                value="overview"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-              >
-                Overview
-              </TabsTrigger>
-              <TabsTrigger
-                value="attendance"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Attendance
-              </TabsTrigger>
-              <TabsTrigger
-                value="spreadsheets"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-              >
-                <Table className="mr-2 h-4 w-4" />
-                Spreadsheets
-              </TabsTrigger>
-              <TabsTrigger
-                value="notes"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-              >
-                <FileText className="mr-2 h-4 w-4" />
-                Notes
-              </TabsTrigger>
-              <TabsTrigger
-                value="drawings"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-              >
-                <PenTool className="mr-2 h-4 w-4" />
-                Drawings
-              </TabsTrigger>
-              <TabsTrigger
-                value="forms"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-              >
-                <ClipboardList className="mr-2 h-4 w-4" />
-                Forms
-              </TabsTrigger>
-              <TabsTrigger
-                value="files"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-              >
-                <FolderOpen className="mr-2 h-4 w-4" />
-                Files
-              </TabsTrigger>
-            </TabsList>
-          </div>
+      {/* Tabs */}
+      <Tabs defaultValue="overview" className="flex-1 flex flex-col">
+        <TabsList className="h-auto bg-transparent border-b rounded-none w-full justify-start p-0">
+          <TabsTrigger
+            value="overview"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="attendance"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+          >
+            <Users className="mr-2 h-4 w-4" />
+            Attendance
+          </TabsTrigger>
+          <TabsTrigger
+            value="spreadsheets"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+          >
+            <Table className="mr-2 h-4 w-4" />
+            Spreadsheets
+          </TabsTrigger>
+          <TabsTrigger
+            value="notes"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Notes
+          </TabsTrigger>
+          <TabsTrigger
+            value="drawings"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+          >
+            <PenTool className="mr-2 h-4 w-4" />
+            Drawings
+          </TabsTrigger>
+          <TabsTrigger
+            value="forms"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+          >
+            <ClipboardList className="mr-2 h-4 w-4" />
+            Forms
+          </TabsTrigger>
+          <TabsTrigger
+            value="files"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+          >
+            <FolderOpen className="mr-2 h-4 w-4" />
+            Files
+          </TabsTrigger>
+        </TabsList>
 
-          <div className="p-6">
+        <div className="flex-1 overflow-auto py-6">
             <TabsContent value="overview" className="mt-0">
               <div className="space-y-6">
                 {event.description && (
@@ -421,7 +405,6 @@ export default function EventDetailPage() {
             </TabsContent>
           </div>
         </Tabs>
-      </div>
 
       {/* Edit Dialog */}
       <EventFormDialog
