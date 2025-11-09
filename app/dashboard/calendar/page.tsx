@@ -6,7 +6,7 @@ import { EventFormDialog } from '@/components/calendar/event-form-dialog'
 import { EventDetailDialog } from '@/components/calendar/event-detail-dialog'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import { getEvents, deleteEvent, type EventWithDetails } from '@/app/actions/events'
+import { getEvents, deleteEvent, deleteEventSeries, updateEventSeries, type EventWithDetails } from '@/app/actions/events'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -26,6 +26,8 @@ export default function CalendarPage() {
   const [showEventForm, setShowEventForm] = useState(false)
   const [showEventDetail, setShowEventDetail] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showRecurringActionDialog, setShowRecurringActionDialog] = useState(false)
+  const [recurringAction, setRecurringAction] = useState<'edit' | 'delete' | null>(null)
   const [formDefaultValues, setFormDefaultValues] = useState<any>(null)
   const [eventToDelete, setEventToDelete] = useState<string | null>(null)
 
@@ -95,6 +97,49 @@ export default function CalendarPage() {
   // Handle edit event
   const handleEditEvent = useCallback(() => {
     if (selectedEvent) {
+      if (selectedEvent.isRecurring) {
+        // Show dialog to ask if editing just this instance or all
+        setRecurringAction('edit')
+        setShowRecurringActionDialog(true)
+      } else {
+        // Edit single event
+        setFormDefaultValues({
+          id: selectedEvent.id,
+          title: selectedEvent.title,
+          description: selectedEvent.description,
+          type: selectedEvent.type,
+          startTime: new Date(selectedEvent.startTime),
+          endTime: new Date(selectedEvent.endTime),
+          location: selectedEvent.location,
+        })
+        setShowEventDetail(false)
+        setShowEventForm(true)
+      }
+    }
+  }, [selectedEvent])
+
+  // Handle delete event
+  const handleDeleteEvent = useCallback(() => {
+    if (selectedEvent) {
+      if (selectedEvent.isRecurring) {
+        // Show dialog to ask if deleting just this instance or all
+        setRecurringAction('delete')
+        setShowRecurringActionDialog(true)
+      } else {
+        // Delete single event
+        setEventToDelete(selectedEvent.id)
+        setShowDeleteDialog(true)
+      }
+    }
+  }, [selectedEvent])
+
+  // Handle recurring action - this instance only
+  const handleRecurringThisOnly = useCallback(() => {
+    if (!selectedEvent) return
+
+    setShowRecurringActionDialog(false)
+
+    if (recurringAction === 'edit') {
       setFormDefaultValues({
         id: selectedEvent.id,
         title: selectedEvent.title,
@@ -106,16 +151,37 @@ export default function CalendarPage() {
       })
       setShowEventDetail(false)
       setShowEventForm(true)
-    }
-  }, [selectedEvent])
-
-  // Handle delete event
-  const handleDeleteEvent = useCallback(() => {
-    if (selectedEvent) {
+    } else if (recurringAction === 'delete') {
       setEventToDelete(selectedEvent.id)
       setShowDeleteDialog(true)
     }
-  }, [selectedEvent])
+  }, [selectedEvent, recurringAction])
+
+  // Handle recurring action - all instances
+  const handleRecurringAllInstances = useCallback(async () => {
+    if (!selectedEvent) return
+
+    setShowRecurringActionDialog(false)
+
+    if (recurringAction === 'delete') {
+      try {
+        const result = await deleteEventSeries(selectedEvent.id)
+        if ('error' in result) {
+          toast.error(result.error)
+        } else {
+          toast.success('All event instances deleted successfully')
+          setShowEventDetail(false)
+          setSelectedEvent(null)
+          loadEvents()
+        }
+      } catch (error) {
+        toast.error('Failed to delete event series')
+        console.error(error)
+      }
+    }
+    // Note: For edit all, we would need to implement a different form flow
+    // For now, we'll just show the form for the selected instance
+  }, [selectedEvent, recurringAction, loadEvents])
 
   // Confirm delete
   const confirmDelete = useCallback(async () => {
@@ -196,6 +262,7 @@ export default function CalendarPage() {
         event={selectedEvent}
         onEdit={handleEditEvent}
         onDelete={handleDeleteEvent}
+        onUpdate={loadEvents}
       />
 
       {/* Delete Confirmation Dialog */}
@@ -216,6 +283,34 @@ export default function CalendarPage() {
             </AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete}>
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Recurring Event Action Dialog */}
+      <AlertDialog open={showRecurringActionDialog} onOpenChange={setShowRecurringActionDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {recurringAction === 'edit' ? 'Edit Recurring Event' : 'Delete Recurring Event'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This is a recurring event. What would you like to {recurringAction}?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:flex-col sm:space-x-0 sm:space-y-2">
+            <AlertDialogCancel onClick={() => {
+              setShowRecurringActionDialog(false)
+              setRecurringAction(null)
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleRecurringThisOnly} className="bg-secondary text-secondary-foreground hover:bg-secondary/80">
+              This event only
+            </AlertDialogAction>
+            <AlertDialogAction onClick={handleRecurringAllInstances}>
+              All events in series
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

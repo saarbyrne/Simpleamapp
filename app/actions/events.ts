@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
 import type { Prisma } from '@prisma/client'
+import { RRule, rrulestr } from 'rrule'
+import { randomUUID } from 'crypto'
 
 export interface CreateEventData {
   title: string
@@ -16,6 +18,7 @@ export interface CreateEventData {
   templateId?: string
   linkedFormId?: string
   attendeeIds?: string[] // PersonOrganization IDs
+  recurrenceRule?: string // RRule string for recurring events
 }
 
 export interface UpdateEventData extends Partial<CreateEventData> {}
@@ -163,7 +166,7 @@ export async function getEvent(eventId: string): Promise<{ success: true, event:
 }
 
 /**
- * Create a new event
+ * Create a new event (handles both single and recurring events)
  */
 export async function createEvent(data: CreateEventData) {
   const supabase = await createClient()
@@ -176,47 +179,123 @@ export async function createEvent(data: CreateEventData) {
   try {
     const dbUser = await ensureUserWithOrganization(user)
 
+    // Check if this is a recurring event
+    const isRecurring = !!data.recurrenceRule
+
     const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      // Create event
-      const event = await tx.event.create({
-        data: {
-          title: data.title,
-          description: data.description,
-          type: data.type,
-          startTime: new Date(data.startTime),
-          endTime: new Date(data.endTime),
-          location: data.location,
-          templateId: data.templateId,
-          linkedFormId: data.linkedFormId,
-          organizationId: dbUser.organizationId,
+      if (isRecurring && data.recurrenceRule) {
+        // Generate series ID for recurring events
+        const seriesId = randomUUID()
+
+        // Parse the rrule to get all occurrence dates
+        const rule = rrulestr(data.recurrenceRule)
+        const startTime = new Date(data.startTime)
+        const endTime = new Date(data.endTime)
+        const duration = endTime.getTime() - startTime.getTime()
+
+        // Generate occurrences (limit to 500 to prevent abuse)
+        const occurrences = rule.all((date, i) => i < 500)
+
+        if (occurrences.length === 0) {
+          throw new Error('No occurrences generated from recurrence rule')
         }
-      })
 
-      // Add attendees if provided
-      if (data.attendeeIds && data.attendeeIds.length > 0) {
-        await tx.eventAttendance.createMany({
-          data: data.attendeeIds.map(personOrgId => ({
-            eventId: event.id,
-            personOrgId,
-            status: 'invited',
-          }))
-        })
-      }
+        // Create all event instances
+        const events = []
+        for (const occurrence of occurrences) {
+          const instanceStartTime = new Date(occurrence)
+          const instanceEndTime = new Date(instanceStartTime.getTime() + duration)
 
-      // Log activity
-      await tx.activity.create({
-        data: {
-          type: 'event_created',
+          const event = await tx.event.create({
+            data: {
+              title: data.title,
+              description: data.description,
+              type: data.type,
+              startTime: instanceStartTime,
+              endTime: instanceEndTime,
+              location: data.location,
+              templateId: data.templateId,
+              linkedFormId: data.linkedFormId,
+              organizationId: dbUser.organizationId,
+              isRecurring: true,
+              recurringRule: data.recurrenceRule,
+              seriesId: seriesId,
+            }
+          })
+
+          // Add attendees if provided
+          if (data.attendeeIds && data.attendeeIds.length > 0) {
+            await tx.eventAttendance.createMany({
+              data: data.attendeeIds.map(personOrgId => ({
+                eventId: event.id,
+                personOrgId,
+                status: 'invited',
+              }))
+            })
+          }
+
+          events.push(event)
+        }
+
+        // Log activity
+        await tx.activity.create({
           data: {
-            eventTitle: event.title,
-            eventType: event.type,
-            startTime: event.startTime.toISOString(),
-          },
-          userId: user.id,
-        }
-      })
+            type: 'event_created',
+            data: {
+              eventTitle: data.title,
+              eventType: data.type,
+              startTime: events[0].startTime.toISOString(),
+              isRecurring: true,
+              instancesCreated: events.length,
+            },
+            userId: user.id,
+          }
+        })
 
-      return event
+        return events[0] // Return first instance
+      } else {
+        // Create single event
+        const event = await tx.event.create({
+          data: {
+            title: data.title,
+            description: data.description,
+            type: data.type,
+            startTime: new Date(data.startTime),
+            endTime: new Date(data.endTime),
+            location: data.location,
+            templateId: data.templateId,
+            linkedFormId: data.linkedFormId,
+            organizationId: dbUser.organizationId,
+            isRecurring: false,
+          }
+        })
+
+        // Add attendees if provided
+        if (data.attendeeIds && data.attendeeIds.length > 0) {
+          await tx.eventAttendance.createMany({
+            data: data.attendeeIds.map(personOrgId => ({
+              eventId: event.id,
+              personOrgId,
+              status: 'invited',
+            }))
+          })
+        }
+
+        // Log activity
+        await tx.activity.create({
+          data: {
+            type: 'event_created',
+            data: {
+              eventTitle: event.title,
+              eventType: event.type,
+              startTime: event.startTime.toISOString(),
+            },
+            userId: user.id,
+          }
+        })
+
+        return event
+      }
     })
 
     revalidatePath('/dashboard/calendar')
@@ -364,6 +443,139 @@ export async function deleteEvent(eventId: string) {
   } catch (error) {
     console.error('Error deleting event:', error)
     return { error: 'Failed to delete event' }
+  }
+}
+
+/**
+ * Delete all events in a recurring series
+ */
+export async function deleteEventSeries(eventId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // Get the event to find its series ID
+      const event = await tx.event.findFirst({
+        where: {
+          id: eventId,
+          organizationId: dbUser.organizationId,
+        }
+      })
+
+      if (!event) {
+        throw new Error('Event not found')
+      }
+
+      if (!event.seriesId) {
+        throw new Error('Event is not part of a recurring series')
+      }
+
+      // Delete all events in the series
+      const deleted = await tx.event.deleteMany({
+        where: {
+          seriesId: event.seriesId,
+          organizationId: dbUser.organizationId,
+        }
+      })
+
+      // Log activity
+      await tx.activity.create({
+        data: {
+          type: 'event_series_deleted',
+          data: {
+            eventTitle: event.title,
+            eventType: event.type,
+            instancesDeleted: deleted.count,
+          },
+          userId: user.id,
+        }
+      })
+    })
+
+    revalidatePath('/dashboard/calendar')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting event series:', error)
+    return { error: 'Failed to delete event series' }
+  }
+}
+
+/**
+ * Update all events in a recurring series
+ */
+export async function updateEventSeries(eventId: string, data: UpdateEventData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // Get the event to find its series ID
+      const event = await tx.event.findFirst({
+        where: {
+          id: eventId,
+          organizationId: dbUser.organizationId,
+        }
+      })
+
+      if (!event) {
+        throw new Error('Event not found')
+      }
+
+      if (!event.seriesId) {
+        throw new Error('Event is not part of a recurring series')
+      }
+
+      // Build update data (exclude time fields as they're specific to each instance)
+      const updateData: any = {}
+      if (data.title !== undefined) updateData.title = data.title
+      if (data.description !== undefined) updateData.description = data.description
+      if (data.type !== undefined) updateData.type = data.type
+      if (data.location !== undefined) updateData.location = data.location
+      if (data.linkedFormId !== undefined) updateData.linkedFormId = data.linkedFormId
+
+      // Update all events in the series
+      const updated = await tx.event.updateMany({
+        where: {
+          seriesId: event.seriesId,
+          organizationId: dbUser.organizationId,
+        },
+        data: updateData
+      })
+
+      // Log activity
+      await tx.activity.create({
+        data: {
+          type: 'event_series_updated',
+          data: {
+            eventTitle: event.title,
+            eventType: event.type,
+            instancesUpdated: updated.count,
+          },
+          userId: user.id,
+        }
+      })
+    })
+
+    revalidatePath('/dashboard/calendar')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating event series:', error)
+    return { error: 'Failed to update event series' }
   }
 }
 

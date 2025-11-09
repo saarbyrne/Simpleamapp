@@ -29,6 +29,7 @@ import {
 import { format } from 'date-fns'
 import { EventWithDetails } from '@/app/actions/events'
 import { cn } from '@/lib/utils'
+import { AttendanceManager } from './attendance-manager'
 
 interface EventDetailDialogProps {
   open: boolean
@@ -36,6 +37,7 @@ interface EventDetailDialogProps {
   event: EventWithDetails | null
   onEdit?: () => void
   onDelete?: () => void
+  onUpdate?: () => void
 }
 
 const eventTypeConfig = {
@@ -59,6 +61,7 @@ export function EventDetailDialog({
   event,
   onEdit,
   onDelete,
+  onUpdate,
 }: EventDetailDialogProps) {
   const [activeTab, setActiveTab] = useState('overview')
 
@@ -206,15 +209,16 @@ export function EventDetailDialog({
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Table className="mb-4 h-12 w-12 text-muted-foreground" />
               <h3 className="mb-2 text-lg font-semibold">Event Spreadsheets</h3>
-              <p className="mb-4 text-sm text-muted-foreground">
-                Track performance data, stats, and metrics for this event
+              <p className="mb-4 max-w-md text-sm text-muted-foreground">
+                Link spreadsheet modules to track performance data, stats, and metrics for this event.
+                Data will sync automatically when spreadsheets are created.
               </p>
-              <Button variant="outline" disabled>
-                Add Spreadsheet
-              </Button>
-              <p className="mt-2 text-xs text-muted-foreground">
-                (Integration coming in Phase 4)
-              </p>
+              <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
+                <p className="text-sm font-medium">Integration Ready</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Complete the Spreadsheets module to enable this feature
+                </p>
+              </div>
             </div>
           </TabsContent>
 
@@ -222,15 +226,16 @@ export function EventDetailDialog({
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
               <h3 className="mb-2 text-lg font-semibold">Event Notes</h3>
-              <p className="mb-4 text-sm text-muted-foreground">
-                Add coach observations, medical notes, and other documentation
+              <p className="mb-4 max-w-md text-sm text-muted-foreground">
+                Link note modules for coach observations, medical notes, and other documentation.
+                Notes will appear here when the Notes module is implemented.
               </p>
-              <Button variant="outline" disabled>
-                Create Note
-              </Button>
-              <p className="mt-2 text-xs text-muted-foreground">
-                (Integration coming in Phase 4)
-              </p>
+              <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
+                <p className="text-sm font-medium">Integration Ready</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Complete the Notes module to enable this feature
+                </p>
+              </div>
             </div>
           </TabsContent>
 
@@ -238,15 +243,16 @@ export function EventDetailDialog({
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <PenTool className="mb-4 h-12 w-12 text-muted-foreground" />
               <h3 className="mb-2 text-lg font-semibold">Event Drawings</h3>
-              <p className="mb-4 text-sm text-muted-foreground">
-                Create formations, tactics, and session plans
+              <p className="mb-4 max-w-md text-sm text-muted-foreground">
+                Link drawing modules for formations, tactics, and session plans.
+                Drawings will appear here when the Drawings module is implemented.
               </p>
-              <Button variant="outline" disabled>
-                Create Drawing
-              </Button>
-              <p className="mt-2 text-xs text-muted-foreground">
-                (Integration coming in Phase 4)
-              </p>
+              <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
+                <p className="text-sm font-medium">Integration Ready</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Complete the Drawings module to enable this feature
+                </p>
+              </div>
             </div>
           </TabsContent>
 
@@ -254,15 +260,16 @@ export function EventDetailDialog({
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <ClipboardList className="mb-4 h-12 w-12 text-muted-foreground" />
               <h3 className="mb-2 text-lg font-semibold">Event Forms</h3>
-              <p className="mb-4 text-sm text-muted-foreground">
-                Distribute wellness checks, post-event surveys, and assessments
+              <p className="mb-4 max-w-md text-sm text-muted-foreground">
+                Link form modules to distribute wellness checks, post-event surveys, and assessments.
+                Forms linked to this event will appear here automatically.
               </p>
-              <Button variant="outline" disabled>
-                Link Form
-              </Button>
-              <p className="mt-2 text-xs text-muted-foreground">
-                (Integration coming in Phase 4)
-              </p>
+              <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
+                <p className="text-sm font-medium">Integration Ready</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  The Forms module exists - integration can be enabled when needed
+                </p>
+              </div>
             </div>
           </TabsContent>
 
@@ -270,82 +277,25 @@ export function EventDetailDialog({
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
               <h3 className="mb-2 text-lg font-semibold">Event Files</h3>
-              <p className="mb-4 text-sm text-muted-foreground">
-                Upload scouting reports, videos, and other documents
+              <p className="mb-4 max-w-md text-sm text-muted-foreground">
+                Link file modules for scouting reports, videos, and other documents.
+                Files will appear here when the Files module is implemented.
               </p>
-              <Button variant="outline" disabled>
-                Upload File
-              </Button>
-              <p className="mt-2 text-xs text-muted-foreground">
-                (Integration coming in Phase 4)
-              </p>
+              <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
+                <p className="text-sm font-medium">Integration Ready</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Complete the Files module to enable this feature
+                </p>
+              </div>
             </div>
           </TabsContent>
 
           <TabsContent value="attendance" className="mt-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Attendees ({event.attendance.length})</h3>
-                <Button variant="outline" size="sm" disabled>
-                  Update Attendance
-                </Button>
-              </div>
-
-              {event.attendance.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <Users className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    No attendees have been added to this event yet
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {event.attendance.map((attendance) => {
-                    const statusConfig = attendanceStatusConfig[attendance.status as keyof typeof attendanceStatusConfig] || attendanceStatusConfig.invited
-                    const person = attendance.personOrg.person
-
-                    return (
-                      <div
-                        key={attendance.id}
-                        className="flex items-center justify-between rounded-lg border p-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={person.photo || undefined} />
-                            <AvatarFallback>
-                              {person.firstName[0]}
-                              {person.lastName[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">
-                              {person.firstName} {person.lastName}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {attendance.personOrg.position && (
-                                <>
-                                  {attendance.personOrg.position}
-                                  {attendance.personOrg.jerseyNumber && ` • #${attendance.personOrg.jerseyNumber}`}
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <Badge variant="outline" className={cn('text-white', statusConfig.color)}>
-                          {statusConfig.label}
-                        </Badge>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-
-              {event.attendance.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  (Attendance management coming in Phase 3)
-                </p>
-              )}
-            </div>
+            <AttendanceManager
+              eventId={event.id}
+              attendees={event.attendance as any}
+              onUpdate={onUpdate}
+            />
           </TabsContent>
         </Tabs>
       </DialogContent>
