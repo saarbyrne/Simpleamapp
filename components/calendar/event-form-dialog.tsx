@@ -33,11 +33,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Badge } from '@/components/ui/badge'
-import { CalendarIcon, Loader2, Sparkles } from 'lucide-react'
-import { format } from 'date-fns'
+import { CalendarIcon, Loader2 } from 'lucide-react'
+import { format, addMinutes } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { createEvent, updateEvent, type CreateEventData } from '@/app/actions/events'
+import { getEventTemplates } from '@/app/actions/event-templates'
 import { toast } from 'sonner'
 
 const eventFormSchema = z.object({
@@ -79,7 +79,6 @@ interface EventFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess?: () => void
-  template?: EventTemplate | null
   defaultValues?: {
     id?: string
     title?: string
@@ -96,57 +95,111 @@ export function EventFormDialog({
   open,
   onOpenChange,
   onSuccess,
-  template,
   defaultValues,
 }: EventFormDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [templates, setTemplates] = useState<EventTemplate[]>([])
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const isEditing = !!defaultValues?.id
-
-  // Calculate end time based on template or defaults
-  const getEndTime = () => {
-    if (defaultValues?.endTime) {
-      return defaultValues.endTime
-    }
-
-    const start = defaultValues?.startTime || new Date()
-    const duration = template?.defaultDuration || 120 // default 2 hours
-    return new Date(start.getTime() + duration * 60000)
-  }
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
-      title: defaultValues?.title || template?.name || '',
-      description: defaultValues?.description || template?.description || '',
-      type: (defaultValues?.type || template?.type || 'training') as any,
+      title: defaultValues?.title || '',
+      description: defaultValues?.description || '',
+      type: defaultValues?.type || 'training',
       startDate: defaultValues?.startTime || new Date(),
       startTime: defaultValues?.startTime
         ? format(defaultValues.startTime, 'HH:mm')
         : '09:00',
-      endDate: getEndTime(),
-      endTime: format(getEndTime(), 'HH:mm'),
+      endDate: defaultValues?.endTime || new Date(),
+      endTime: defaultValues?.endTime
+        ? format(defaultValues.endTime, 'HH:mm')
+        : '11:00',
       location: defaultValues?.location || '',
     },
   })
 
-  // Reset form when dialog opens/closes or defaultValues/template change
+  // Load templates when dialog opens
+  useEffect(() => {
+    if (open && !isEditing) {
+      loadTemplates()
+    }
+  }, [open, isEditing])
+
+  const loadTemplates = async () => {
+    try {
+      const result = await getEventTemplates()
+      if ('error' in result) {
+        console.error('Failed to load templates:', result.error)
+      } else {
+        setTemplates(result.templates as EventTemplate[])
+      }
+    } catch (error) {
+      console.error('Error loading templates:', error)
+    }
+  }
+
+  // Handle template selection
+  const handleTemplateChange = (templateId: string) => {
+    setSelectedTemplateId(templateId)
+
+    if (templateId === 'blank') {
+      // Reset to blank event
+      const startDate = defaultValues?.startTime || new Date()
+      const endDate = defaultValues?.endTime || addMinutes(startDate, 120)
+
+      form.reset({
+        title: '',
+        description: '',
+        type: 'training',
+        startDate,
+        startTime: format(startDate, 'HH:mm'),
+        endDate,
+        endTime: format(endDate, 'HH:mm'),
+        location: '',
+      })
+    } else {
+      // Apply template
+      const template = templates.find(t => t.id === templateId)
+      if (template) {
+        const startDate = defaultValues?.startTime || new Date()
+        const endDate = addMinutes(startDate, template.defaultDuration)
+
+        form.reset({
+          title: template.name,
+          description: template.description || '',
+          type: template.type as any,
+          startDate,
+          startTime: format(startDate, 'HH:mm'),
+          endDate,
+          endTime: format(endDate, 'HH:mm'),
+          location: '',
+        })
+      }
+    }
+  }
+
+  // Reset form when dialog opens/closes
   useEffect(() => {
     if (open) {
-      const endTime = getEndTime()
+      setSelectedTemplateId('blank')
       form.reset({
-        title: defaultValues?.title || template?.name || '',
-        description: defaultValues?.description || template?.description || '',
-        type: (defaultValues?.type || template?.type || 'training') as any,
+        title: defaultValues?.title || '',
+        description: defaultValues?.description || '',
+        type: defaultValues?.type || 'training',
         startDate: defaultValues?.startTime || new Date(),
         startTime: defaultValues?.startTime
           ? format(defaultValues.startTime, 'HH:mm')
           : '09:00',
-        endDate: endTime,
-        endTime: format(endTime, 'HH:mm'),
+        endDate: defaultValues?.endTime || new Date(),
+        endTime: defaultValues?.endTime
+          ? format(defaultValues.endTime, 'HH:mm')
+          : '11:00',
         location: defaultValues?.location || '',
       })
     }
-  }, [open, defaultValues, template, form])
+  }, [open, defaultValues, form])
 
   const onSubmit = async (data: EventFormValues) => {
     setIsLoading(true)
@@ -168,7 +221,7 @@ export function EventFormDialog({
         startTime: startDateTime.toISOString(),
         endTime: endDateTime.toISOString(),
         location: data.location,
-        templateId: template?.id || defaultValues?.templateId,
+        templateId: selectedTemplateId !== 'blank' ? selectedTemplateId : undefined,
       }
 
       let result
@@ -199,26 +252,41 @@ export function EventFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {isEditing ? 'Edit Event' : 'Create Event'}
-            {template && (
-              <Badge variant="secondary" className="gap-1">
-                <Sparkles className="h-3 w-3" />
-                {template.name}
-              </Badge>
-            )}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Event' : 'Create Event'}</DialogTitle>
           <DialogDescription>
             {isEditing
               ? 'Update the event details below.'
-              : template
-              ? `Creating event using the "${template.name}" template.`
               : 'Fill in the details to create a new event.'}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Template Selector - Only show when creating new events */}
+            {!isEditing && templates.length > 0 && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Template</label>
+                <Select value={selectedTemplateId} onValueChange={handleTemplateChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a template..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blank">Blank Event</SelectItem>
+                    {templates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedTemplateId && selectedTemplateId !== 'blank' && (
+                  <p className="text-xs text-muted-foreground">
+                    {templates.find(t => t.id === selectedTemplateId)?.description}
+                  </p>
+                )}
+              </div>
+            )}
+
             <FormField
               control={form.control}
               name="title"
