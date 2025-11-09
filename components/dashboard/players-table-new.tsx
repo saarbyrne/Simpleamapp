@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect, useRef, useCallback, startTransition } from 'react'
 import {
   ColumnDef,
   flexRender,
@@ -13,7 +13,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { createPlayer } from '@/app/actions/players'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import {
   Badge,
   type BadgeProps,
@@ -243,6 +243,9 @@ function normalizeFilter(value: string | null | undefined) {
 
 export function PlayersTable({ players }: PlayersTableProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  
+  // Initialize state with default values (same on server and client)
   const [search, setSearch] = useState('')
   const [positionFilter, setPositionFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -264,6 +267,300 @@ export function PlayersTable({ players }: PlayersTableProps) {
     nationality: '',
     email: '',
   })
+
+  // Track if component has mounted to prevent initial URL update
+  const isMounted = useRef(false)
+  // Track the last URL search string we processed
+  const lastUrlSearchRef = useRef<string>('')
+  // Track the last pathname to detect route changes
+  const lastPathnameRef = useRef<string>('')
+  const STORAGE_KEY = 'players-table-filters'
+
+  // Function to save filters to localStorage
+  const saveFiltersToStorage = useCallback((filters: {
+    search: string
+    position: string
+    status: string
+    nationality: string
+    pageIndex: number
+    pageSize: number
+    sorting: SortingState
+    visibility: VisibilityState
+  }) => {
+    if (typeof window === 'undefined') return
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(filters))
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }, [])
+
+  // Function to load filters from localStorage
+  const loadFiltersFromStorage = useCallback(() => {
+    if (typeof window === 'undefined') return null
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        return JSON.parse(stored)
+      }
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+    return null
+  }, [])
+
+  // Function to read URL params and update state
+  const syncStateFromURL = useCallback(() => {
+    if (typeof window === 'undefined') return
+    
+    const currentSearch = window.location.search
+    const currentPathname = window.location.pathname
+    
+    // If pathname changed, reset the last search ref to force sync
+    if (currentPathname !== lastPathnameRef.current) {
+      lastPathnameRef.current = currentPathname
+      lastUrlSearchRef.current = '' // Force sync on route change
+    }
+    
+    const params = new URLSearchParams(currentSearch)
+    
+    // Read URL params and update state if they exist
+    const urlSearch = params.get('search')
+    const urlPosition = params.get('position')
+    const urlStatus = params.get('status')
+    const urlNationality = params.get('nationality')
+    const urlPage = params.get('page')
+    const urlPageSize = params.get('pageSize')
+    const urlSort = params.get('sort')
+    const urlVisibility = params.get('visibility')
+    
+    // Check if URL has any filter params
+    const hasUrlParams = urlSearch !== null || urlPosition !== null || urlStatus !== null || 
+                         urlNationality !== null || urlPage !== null || urlPageSize !== null ||
+                         urlSort !== null || urlVisibility !== null
+    
+    // Create a signature of current state to compare
+    const currentStateSignature = `${currentSearch}-${hasUrlParams}`
+    
+    // Skip if URL and state signature haven't changed
+    if (currentStateSignature === lastUrlSearchRef.current) return
+    
+    lastUrlSearchRef.current = currentStateSignature
+    
+    // Use startTransition to batch state updates and avoid hydration issues
+    startTransition(() => {
+      // Batch all state updates together to avoid hydration issues
+      if (hasUrlParams) {
+        // Use URL params - batch updates
+        setSearch(urlSearch || '')
+        setPositionFilter(urlPosition || 'all')
+        setStatusFilter(urlStatus || 'all')
+        setNationalityFilter(urlNationality || 'all')
+        
+        const pageNum = urlPage ? parseInt(urlPage, 10) : 0
+        const pageSizeNum = urlPageSize ? parseInt(urlPageSize, 10) : 8
+        setPagination({
+          pageIndex: !isNaN(pageNum) ? pageNum : 0,
+          pageSize: !isNaN(pageSizeNum) ? pageSizeNum : 8,
+        })
+        
+        if (urlSort) {
+          try {
+            setSorting(JSON.parse(urlSort))
+          } catch {
+            setSorting([])
+          }
+        } else {
+          setSorting([])
+        }
+        
+        if (urlVisibility) {
+          try {
+            setColumnVisibility(JSON.parse(urlVisibility))
+          } catch {
+            setColumnVisibility({})
+          }
+        } else {
+          setColumnVisibility({})
+        }
+      } else {
+        // No URL params, try localStorage
+        const stored = loadFiltersFromStorage()
+        if (stored) {
+          // Batch updates from localStorage
+          setSearch(stored.search || '')
+          setPositionFilter(stored.position || 'all')
+          setStatusFilter(stored.status || 'all')
+          setNationalityFilter(stored.nationality || 'all')
+          setPagination({
+            pageIndex: stored.pageIndex || 0,
+            pageSize: stored.pageSize || 8,
+          })
+          setSorting(stored.sorting || [])
+          setColumnVisibility(stored.visibility || {})
+        } else {
+          // No URL params and no localStorage - reset to defaults (only if not already defaults)
+          // Don't update if already at defaults to avoid unnecessary re-renders
+          setSearch('')
+          setPositionFilter('all')
+          setStatusFilter('all')
+          setNationalityFilter('all')
+          setPagination({ pageIndex: 0, pageSize: 8 })
+          setSorting([])
+          setColumnVisibility({})
+        }
+      }
+    })
+  }, [loadFiltersFromStorage])
+
+  // Read URL params on mount and when URL/pathname changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    // Use requestAnimationFrame to ensure we're past hydration
+    const rafId = requestAnimationFrame(() => {
+      lastPathnameRef.current = pathname
+      syncStateFromURL()
+      isMounted.current = true
+    })
+    
+    // Listen for popstate (browser back/forward)
+    const handlePopState = () => {
+      syncStateFromURL()
+    }
+    
+    // Check URL when page becomes visible (handles navigation back)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        syncStateFromURL()
+      }
+    }
+    
+    // Check URL when window gains focus (handles tab switching back)
+    const handleFocus = () => {
+      syncStateFromURL()
+    }
+    
+    // Use a small interval to check for URL changes (handles Next.js navigation)
+    // This is a fallback for cases where events don't fire
+    const intervalId = setInterval(() => {
+      if (typeof window !== 'undefined' && isMounted.current) {
+        const currentSearch = window.location.search
+        const currentPathname = window.location.pathname
+        const params = new URLSearchParams(currentSearch)
+        const hasUrlParams = params.get('search') !== null || params.get('position') !== null || 
+                             params.get('status') !== null || params.get('nationality') !== null ||
+                             params.get('page') !== null || params.get('pageSize') !== null ||
+                             params.get('sort') !== null || params.get('visibility') !== null
+        const currentStateSignature = `${currentSearch}-${hasUrlParams}`
+        
+        if (currentStateSignature !== lastUrlSearchRef.current || currentPathname !== lastPathnameRef.current) {
+          syncStateFromURL()
+        }
+      }
+    }, 100) // Check every 100ms
+    
+    window.addEventListener('popstate', handlePopState)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      cancelAnimationFrame(rafId)
+      clearInterval(intervalId)
+      window.removeEventListener('popstate', handlePopState)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [syncStateFromURL, pathname])
+
+  // Also sync when pathname changes (Next.js route change)
+  useEffect(() => {
+    if (!isMounted.current || typeof window === 'undefined') return
+    if (pathname !== lastPathnameRef.current) {
+      lastPathnameRef.current = pathname
+      // Small delay to ensure URL is updated
+      setTimeout(() => {
+        syncStateFromURL()
+      }, 0)
+    }
+  }, [pathname, syncStateFromURL])
+
+  // Update URL params when filters change (skip initial mount)
+  useEffect(() => {
+    if (!isMounted.current || typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    
+    // Update or remove filter params
+    if (search) {
+      params.set('search', search)
+    } else {
+      params.delete('search')
+    }
+    
+    if (positionFilter !== 'all') {
+      params.set('position', positionFilter)
+    } else {
+      params.delete('position')
+    }
+    
+    if (statusFilter !== 'all') {
+      params.set('status', statusFilter)
+    } else {
+      params.delete('status')
+    }
+    
+    if (nationalityFilter !== 'all') {
+      params.set('nationality', nationalityFilter)
+    } else {
+      params.delete('nationality')
+    }
+    
+    if (pagination.pageIndex > 0) {
+      params.set('page', String(pagination.pageIndex))
+    } else {
+      params.delete('page')
+    }
+    
+    if (pagination.pageSize !== 8) {
+      params.set('pageSize', String(pagination.pageSize))
+    } else {
+      params.delete('pageSize')
+    }
+    
+    if (sorting.length > 0) {
+      params.set('sort', JSON.stringify(sorting))
+    } else {
+      params.delete('sort')
+    }
+    
+    if (Object.keys(columnVisibility).length > 0) {
+      params.set('visibility', JSON.stringify(columnVisibility))
+    } else {
+      params.delete('visibility')
+    }
+    
+    const newURL = params.toString() 
+      ? `${window.location.pathname}?${params.toString()}`
+      : window.location.pathname
+    
+    // Only update if URL actually changed to avoid unnecessary navigation
+    const currentURL = window.location.pathname + window.location.search
+    if (newURL !== currentURL) {
+      router.replace(newURL, { scroll: false })
+    }
+    
+    // Also save to localStorage as backup
+    saveFiltersToStorage({
+      search,
+      position: positionFilter,
+      status: statusFilter,
+      nationality: nationalityFilter,
+      pageIndex: pagination.pageIndex,
+      pageSize: pagination.pageSize,
+      sorting,
+      visibility: columnVisibility,
+    })
+  }, [search, positionFilter, statusFilter, nationalityFilter, pagination.pageIndex, pagination.pageSize, sorting, columnVisibility, router, saveFiltersToStorage])
 
   const handleAddPlayer = async () => {
     if (!newPlayer.firstName || !newPlayer.lastName) {
