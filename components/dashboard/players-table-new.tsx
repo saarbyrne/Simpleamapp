@@ -46,6 +46,7 @@ import {
 } from '@/components/data-table'
 import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/react-table'
 import { NATIONALITIES } from '@/lib/nationalities'
+import { NationalitySelect } from '@/components/ui/nationality-select'
 
 export type PlayerRow = {
   id: string
@@ -57,7 +58,9 @@ export type PlayerRow = {
   tags: string[]
   jerseyNumber: number | null
   email?: string | null
+  phone?: string | null
   photo?: string | null
+  joinedAt?: Date | null
 }
 
 type PlayersTableProps = {
@@ -104,6 +107,9 @@ const createColumns = (players: PlayerRow[]): ColumnDef<PlayerRow>[] => {
   const hasPosition = players.some(p => p.position)
   const hasAge = players.some(p => p.age !== null)
   const hasNationality = players.some(p => p.nationality)
+  const hasEmail = players.some(p => p.email)
+  const hasPhone = players.some(p => p.phone)
+  const hasJoinedAt = players.some(p => p.joinedAt)
   const hasTags = players.some(p => p.tags && p.tags.length > 0)
 
   const columns: ColumnDef<PlayerRow>[] = [
@@ -182,6 +188,69 @@ const createColumns = (players: PlayerRow[]): ColumnDef<PlayerRow>[] => {
       )
     },
   })
+
+  if (hasEmail) {
+    columns.push({
+      accessorKey: 'email',
+      header: 'Email',
+      enableHiding: true,
+      cell: ({ getValue }) => {
+        const email = getValue() as string | null | undefined
+        if (!email) return <span className="text-sm text-muted-foreground">—</span>
+        return (
+          <a
+            href={`mailto:${email}`}
+            className="text-sm text-primary hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {email}
+          </a>
+        )
+      },
+    })
+  }
+
+  if (hasPhone) {
+    columns.push({
+      accessorKey: 'phone',
+      header: 'Phone',
+      enableHiding: true,
+      cell: ({ getValue }) => {
+        const phone = getValue() as string | null | undefined
+        if (!phone) return <span className="text-sm text-muted-foreground">—</span>
+        return (
+          <a
+            href={`tel:${phone}`}
+            className="text-sm text-primary hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {phone}
+          </a>
+        )
+      },
+    })
+  }
+
+  if (hasJoinedAt) {
+    columns.push({
+      accessorKey: 'joinedAt',
+      header: 'Joined',
+      enableHiding: true,
+      cell: ({ getValue }) => {
+        const joinedAt = getValue() as Date | null | undefined
+        if (!joinedAt) return <span className="text-sm text-muted-foreground">—</span>
+        return (
+          <span className="text-sm">
+            {new Date(joinedAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })}
+          </span>
+        )
+      },
+    })
+  }
 
   if (hasTags) {
     columns.push({
@@ -265,6 +334,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
     dateOfBirth: '',
     nationality: '',
     email: '',
+    phone: '',
   })
   const [isBulkUpdating, setIsBulkUpdating] = useState(false)
 
@@ -577,6 +647,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
         firstName: newPlayer.firstName,
         lastName: newPlayer.lastName,
         email: newPlayer.email || undefined,
+        phone: newPlayer.phone || undefined,
         position: newPlayer.position || undefined,
         jerseyNumber: newPlayer.jerseyNumber ? parseInt(newPlayer.jerseyNumber) : undefined,
         dateOfBirth: newPlayer.dateOfBirth || undefined,
@@ -594,6 +665,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
           dateOfBirth: '',
           nationality: '',
           email: '',
+          phone: '',
         })
         setIsAddPlayerOpen(false)
         router.refresh()
@@ -821,6 +893,16 @@ export function PlayersTable({ players }: PlayersTableProps) {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={newPlayer.phone}
+                onChange={(e) => setNewPlayer({ ...newPlayer, phone: e.target.value })}
+                placeholder="+1 (555) 123-4567"
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="position">Position</Label>
               <Input
                 id="position"
@@ -852,11 +934,10 @@ export function PlayersTable({ players }: PlayersTableProps) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="nationality">Nationality</Label>
-              <Input
-                id="nationality"
-                value={newPlayer.nationality}
-                onChange={(e) => setNewPlayer({ ...newPlayer, nationality: e.target.value })}
-                placeholder="e.g. England"
+              <NationalitySelect
+                value={newPlayer.nationality || undefined}
+                onValueChange={(value) => setNewPlayer({ ...newPlayer, nationality: value })}
+                placeholder="Select nationality"
               />
             </div>
           </div>

@@ -20,7 +20,9 @@ export default async function PlayersPage() {
       tags: organization?.tags ?? [],
       jerseyNumber: organization?.jerseyNumber ?? null,
       email: player.email ?? null,
+      phone: player.phone ?? null,
       photo: player.photo ?? null,
+      joinedAt: organization?.joinedAt ?? null,
     }
   })
 
