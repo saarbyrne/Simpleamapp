@@ -28,11 +28,11 @@ interface EventQuickViewProps {
 }
 
 const eventTypeColors: Record<string, string> = {
-  training: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
-  match: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300',
-  medical: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
-  meeting: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300',
-  other: 'bg-muted text-muted-foreground',
+  training: 'bg-primary/20 text-foreground border-primary',
+  match: 'bg-chart-2/20 text-foreground border-chart-2',
+  medical: 'bg-destructive/20 text-foreground border-destructive',
+  meeting: 'bg-accent text-accent-foreground border-accent-foreground',
+  other: 'bg-muted text-foreground border-border',
 }
 
 export function EventQuickView({

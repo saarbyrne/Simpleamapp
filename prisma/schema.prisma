@@ -28,6 +28,7 @@ model Organization {
   persons            PersonOrganization[]
   forms              Form[]
   events             Event[]
+  eventTemplates     EventTemplate[]
   notes              Note[]
   files              File[]
   formTemplates      FormTemplate[]
@@ -213,6 +214,35 @@ model FormResponse {
 // EVENTS & CALENDAR
 // ============================================
 
+// Event Templates for pre-configured workflows
+model EventTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  type        String // training, match, medical, meeting, other
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // What sections are enabled
+  sections    Json  @default("{}") // {spreadsheets: true, notes: true, drawings: true, forms: true, files: true}
+
+  // Pre-configured sections
+  sectionConfigs Json @default("{}") // {spreadsheets: [{name: "Match Stats"}], forms: [{name: "Post-Match Report", trigger: "after", delay: 30}]}
+
+  // Duration defaults (in minutes)
+  defaultDuration Int @default(120)
+
+  isGlobal    Boolean  @default(false) // Global templates available to all orgs
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  events Event[]
+
+  @@map("event_templates")
+}
+
 model Event {
   id             String   @id @default(cuid())
   title          String
@@ -222,9 +252,14 @@ model Event {
   endTime        DateTime
   location       String?
   isRecurring    Boolean  @default(false)
-  recurringRule  Json?
+  recurringRule  String?  // RRule string
+  seriesId       String?  // Links instances of recurring events
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Based on template (optional)
+  templateId String?
+  template   EventTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
 
   // Linked form (e.g., post-training wellness form)
   linkedFormId String?
