@@ -743,7 +743,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
   const { pageIndex, pageSize } = pagination
 
   return (
-    <>
+    <div className="w-full min-w-0 max-w-full">
       <Dialog open={isAddPlayerOpen} onOpenChange={setIsAddPlayerOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -838,16 +838,16 @@ export function PlayersTable({ players }: PlayersTableProps) {
         </DialogContent>
       </Dialog>
 
-      <Card className="rounded-2xl border">
-        <div className="flex items-center justify-between p-6 pb-4">
-          <div className="flex flex-col gap-1">
+      <Card className="w-full max-w-full min-w-0 rounded-2xl border">
+        <div className="flex items-center justify-between p-6 pb-4 min-w-0">
+          <div className="flex flex-col gap-1 min-w-0">
             <CardTitle className="text-2xl">Players</CardTitle>
             <CardDescription>Manage your team roster and player information.</CardDescription>
           </div>
           
           <Button 
             onClick={() => setIsAddPlayerOpen(true)}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
             type="button"
           >
             <UserPlus className="mr-2 h-4 w-4" />
@@ -855,7 +855,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
           </Button>
         </div>
         
-        <CardHeader className="space-y-4 pt-0">
+        <CardHeader className="space-y-4 pt-0 min-w-0 overflow-x-hidden">
           <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
             <DataTableFilters
               filters={filterConfig}
@@ -874,7 +874,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 min-w-0 overflow-x-hidden">
           <DataTable
             data={filteredPlayers}
             columns={columns}
@@ -904,8 +904,8 @@ export function PlayersTable({ players }: PlayersTableProps) {
             emptyMessage="No players match the filters."
           />
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between min-w-0">
+            <div className="flex items-center gap-3 min-w-0">
               <Select
                 value={String(pageSize)}
                 onValueChange={(value) => setPagination({ ...pagination, pageSize: Number(value), pageIndex: 0 })}
@@ -947,6 +947,6 @@ export function PlayersTable({ players }: PlayersTableProps) {
           </div>
         </CardContent>
     </Card>
-    </>
+    </div>
   )
 }

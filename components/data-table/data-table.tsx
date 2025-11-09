@@ -283,8 +283,9 @@ export function DataTable<TData>({
       )}
 
       {/* Table */}
-      <div className="overflow-auto rounded-lg border">
-        <Table>
+      <div className="w-full min-w-0 overflow-x-auto rounded-lg border">
+        <div className="min-w-max">
+          <Table>
           <TableHeader className={headerClassName}>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -431,6 +432,7 @@ export function DataTable<TData>({
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
     </div>
   )
