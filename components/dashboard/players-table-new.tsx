@@ -115,6 +115,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
     {
       accessorKey: 'name',
       header: 'Name',
+      size: 280,
       cell: ({ row }) => {
         const player = row.original
         return (
@@ -136,12 +137,19 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
               >
                 {player.name}
               </button>
-              <span className="text-sm text-muted-foreground">
-                #{player.jerseyNumber ?? '—'}
-              </span>
             </div>
           </div>
         )
+      },
+    },
+    {
+      accessorKey: 'jerseyNumber',
+      header: 'Number',
+      enableHiding: true,
+      size: 100,
+      cell: ({ getValue }) => {
+        const value = getValue() as number | null | undefined
+        return <span className="text-sm">{value ?? '—'}</span>
       },
     },
   ]
@@ -328,7 +336,10 @@ export function PlayersTable({ players }: PlayersTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([])
-  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({
+    name: 280,
+    jerseyNumber: 100,
+  })
   const [grouping, setGrouping] = useState<GroupingState>([])
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
