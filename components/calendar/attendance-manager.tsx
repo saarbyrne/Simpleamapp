@@ -52,27 +52,27 @@ interface AttendanceManagerProps {
 const statusConfig = {
   invited: {
     label: 'Invited',
-    color: 'bg-muted-foreground',
+    color: 'bg-muted',
     icon: Clock,
-    textColor: 'text-muted-foreground'
+    textColor: 'text-foreground'
   },
   attending: {
     label: 'Attending',
-    color: 'bg-chart-2',
+    color: 'bg-chart-2/20 border border-chart-2',
     icon: Check,
-    textColor: 'text-chart-2'
+    textColor: 'text-foreground'
   },
   absent: {
     label: 'Absent',
-    color: 'bg-destructive',
+    color: 'bg-destructive/20 border border-destructive',
     icon: X,
-    textColor: 'text-destructive'
+    textColor: 'text-foreground'
   },
   excused: {
     label: 'Excused',
-    color: 'bg-chart-3',
+    color: 'bg-chart-3/20 border border-chart-3',
     icon: UserX,
-    textColor: 'text-chart-3'
+    textColor: 'text-foreground'
   }
 }
 
@@ -147,23 +147,23 @@ export function AttendanceManager({
           <div className="text-2xl font-bold">{summary.total}</div>
           <div className="text-xs text-muted-foreground">Total</div>
         </div>
-        <div className="rounded-lg border bg-chart-2/10 p-3">
-          <div className="text-2xl font-bold text-chart-2">
+        <div className="rounded-lg border border-chart-2 bg-chart-2/20 p-3">
+          <div className="text-2xl font-bold text-foreground">
             {summary.attending}
           </div>
-          <div className="text-xs text-chart-2/80">Attending</div>
+          <div className="text-xs text-foreground/70">Attending</div>
         </div>
-        <div className="rounded-lg border bg-destructive/10 p-3">
-          <div className="text-2xl font-bold text-destructive">
+        <div className="rounded-lg border border-destructive bg-destructive/20 p-3">
+          <div className="text-2xl font-bold text-foreground">
             {summary.absent}
           </div>
-          <div className="text-xs text-destructive/80">Absent</div>
+          <div className="text-xs text-foreground/70">Absent</div>
         </div>
         <div className="rounded-lg border bg-muted p-3">
-          <div className="text-2xl font-bold text-muted-foreground">
+          <div className="text-2xl font-bold text-foreground">
             {summary.invited}
           </div>
-          <div className="text-xs text-muted-foreground/80">Pending</div>
+          <div className="text-xs text-foreground/70">Pending</div>
         </div>
       </div>
 

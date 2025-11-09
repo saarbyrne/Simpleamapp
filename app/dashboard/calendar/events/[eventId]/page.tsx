@@ -44,11 +44,11 @@ import {
 import { toast } from 'sonner'
 
 const eventTypeColors: Record<string, string> = {
-  training: 'bg-primary/10 text-primary border-primary/20',
-  match: 'bg-chart-2/10 text-chart-2 border-chart-2/20',
-  medical: 'bg-destructive/10 text-destructive border-destructive/20',
-  meeting: 'bg-accent/20 text-accent-foreground border-accent',
-  other: 'bg-muted text-muted-foreground border-muted-foreground/20',
+  training: 'bg-primary/20 text-foreground border-primary',
+  match: 'bg-chart-2/20 text-foreground border-chart-2',
+  medical: 'bg-destructive/20 text-foreground border-destructive',
+  meeting: 'bg-accent text-accent-foreground border-accent-foreground',
+  other: 'bg-muted text-foreground border-border',
 }
 
 export default function EventDetailPage() {

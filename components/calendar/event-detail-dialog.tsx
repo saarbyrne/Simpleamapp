@@ -41,18 +41,18 @@ interface EventDetailDialogProps {
 }
 
 const eventTypeConfig = {
-  training: { label: 'Training', color: 'bg-primary' },
-  match: { label: 'Match', color: 'bg-chart-2' },
-  medical: { label: 'Medical', color: 'bg-destructive' },
-  meeting: { label: 'Meeting', color: 'bg-accent' },
-  other: { label: 'Other', color: 'bg-muted-foreground' },
+  training: { label: 'Training', color: 'bg-primary/20 text-foreground border border-primary' },
+  match: { label: 'Match', color: 'bg-chart-2/20 text-foreground border border-chart-2' },
+  medical: { label: 'Medical', color: 'bg-destructive/20 text-foreground border border-destructive' },
+  meeting: { label: 'Meeting', color: 'bg-accent text-accent-foreground border border-accent-foreground' },
+  other: { label: 'Other', color: 'bg-muted text-foreground border border-border' },
 }
 
 const attendanceStatusConfig = {
-  invited: { label: 'Invited', color: 'bg-muted-foreground' },
-  attending: { label: 'Attending', color: 'bg-chart-2' },
-  absent: { label: 'Absent', color: 'bg-destructive' },
-  excused: { label: 'Excused', color: 'bg-chart-3' },
+  invited: { label: 'Invited', color: 'bg-muted text-foreground border border-border' },
+  attending: { label: 'Attending', color: 'bg-chart-2/20 text-foreground border border-chart-2' },
+  absent: { label: 'Absent', color: 'bg-destructive/20 text-foreground border border-destructive' },
+  excused: { label: 'Excused', color: 'bg-chart-3/20 text-foreground border border-chart-3' },
 }
 
 export function EventDetailDialog({

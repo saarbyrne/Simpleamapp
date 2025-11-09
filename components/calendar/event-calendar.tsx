@@ -42,29 +42,29 @@ interface EventCalendarProps {
 const eventStyleGetter = (event: CalendarEvent) => {
   const typeColors: Record<string, { bg: string; border: string; text: string }> = {
     training: {
-      bg: 'bg-blue-100 dark:bg-blue-950',
-      border: 'border-l-4 border-blue-500',
-      text: 'text-blue-900 dark:text-blue-100'
+      bg: 'bg-primary/20',
+      border: 'border-l-4 border-primary',
+      text: 'text-foreground'
     },
     match: {
-      bg: 'bg-green-100 dark:bg-green-950',
-      border: 'border-l-4 border-green-500',
-      text: 'text-green-900 dark:text-green-100'
+      bg: 'bg-chart-2/20',
+      border: 'border-l-4 border-chart-2',
+      text: 'text-foreground'
     },
     medical: {
-      bg: 'bg-red-100 dark:bg-red-950',
-      border: 'border-l-4 border-red-500',
-      text: 'text-red-900 dark:text-red-100'
+      bg: 'bg-destructive/20',
+      border: 'border-l-4 border-destructive',
+      text: 'text-foreground'
     },
     meeting: {
-      bg: 'bg-purple-100 dark:bg-purple-950',
-      border: 'border-l-4 border-purple-500',
-      text: 'text-purple-900 dark:text-purple-100'
+      bg: 'bg-accent',
+      border: 'border-l-4 border-accent-foreground',
+      text: 'text-accent-foreground'
     },
     other: {
-      bg: 'bg-gray-100 dark:bg-gray-800',
-      border: 'border-l-4 border-gray-500',
-      text: 'text-gray-900 dark:text-gray-100'
+      bg: 'bg-muted',
+      border: 'border-l-4 border-muted-foreground',
+      text: 'text-foreground'
     }
   }
 
