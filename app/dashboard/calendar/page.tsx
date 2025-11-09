@@ -6,7 +6,7 @@ import { EventFormDialog } from '@/components/calendar/event-form-dialog'
 import { EventQuickView } from '@/components/calendar/event-quick-view'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import { getEvents, deleteEvent, deleteEventSeries, type EventWithDetails } from '@/app/actions/events'
+import { getEvents, getEvent, deleteEvent, deleteEventSeries, type EventWithDetails } from '@/app/actions/events'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -65,18 +65,15 @@ export default function CalendarPage() {
 
   // Handle event selection
   const handleSelectEvent = useCallback(async (event: CalendarEvent) => {
-    // Fetch full event details
-    const result = await getEvents()
+    // Fetch full event details directly
+    const result = await getEvent(event.id)
     if ('error' in result) {
       toast.error(result.error)
       return
     }
 
-    const fullEvent = result.events.find((e: any) => e.id === event.id)
-    if (fullEvent) {
-      setSelectedEvent(fullEvent as EventWithDetails)
-      setShowQuickView(true)
-    }
+    setSelectedEvent(result.event)
+    setShowQuickView(true)
   }, [])
 
   // Handle slot selection (create new event)

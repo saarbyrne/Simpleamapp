@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { format } from 'date-fns'
-import { getEvent, updateEvent, deleteEvent, deleteEventSeries, type EventWithDetails } from '@/app/actions/events'
+import { getEvent, deleteEvent, deleteEventSeries, type EventWithDetails } from '@/app/actions/events'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { DashboardHeader } from '@/components/dashboard/header'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,14 +18,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
 import { AttendanceManager } from '@/components/calendar/attendance-manager'
 import { EventFormDialog } from '@/components/calendar/event-form-dialog'
 import {
@@ -163,20 +156,7 @@ export default function EventDetailPage() {
   const totalCount = event.attendance?.length || 0
 
   return (
-    <div className="flex h-full flex-col gap-4">
-      {/* Breadcrumb */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/calendar">Calendar</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{event.title}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
+    <div className="flex h-full flex-col gap-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 space-y-3">
