@@ -626,3 +626,13 @@ BEGIN
     END IF;
 END $$;
 
+-- Performance Indexes
+-- Composite index for events queries by organization and date
+CREATE INDEX IF NOT EXISTS "idx_events_org_date" ON "events"("organizationId", "startTime" DESC);
+
+-- Composite index for person_organizations queries
+CREATE INDEX IF NOT EXISTS "idx_person_org_role_status" ON "person_organizations"("organizationId", "role", "status");
+
+-- Index for event_attendance queries
+CREATE INDEX IF NOT EXISTS "idx_event_attendance_event" ON "event_attendance"("eventId");
+
