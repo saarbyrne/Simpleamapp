@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
@@ -20,7 +20,7 @@ interface CreatePlayerData {
 }
 
 export async function createPlayer(data: CreatePlayerData) {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
@@ -87,7 +87,7 @@ export async function updatePlayer(
   personId: string,
   data: Partial<CreatePlayerData>
 ) {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
@@ -150,7 +150,7 @@ export async function updatePlayer(
 }
 
 export async function deletePlayer(personId: string) {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
@@ -201,7 +201,7 @@ export async function bulkUpdatePlayers(
     nationality?: string | null
   }
 ) {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
@@ -281,17 +281,33 @@ export async function bulkUpdatePlayers(
   }
 }
 
-export async function getPlayers() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated', players: [] }
-  }
-
+export async function getPlayers(page: number = 0, pageSize: number = 20) {
   try {
+    const supabase = await createServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      console.error('Auth error:', authError)
+      return { error: 'Not authenticated', players: [], total: 0, page: 0, pageSize: 20 }
+    }
+
     const dbUser = await ensureUserWithOrganization(user)
 
+    const skip = page * pageSize
+
+    // Get total count
+    const total = await prisma.person.count({
+      where: {
+        organizations: {
+          some: {
+            organizationId: dbUser.organizationId,
+            role: 'player',
+          }
+        }
+      }
+    })
+
+    // Get paginated players
     const players = await prisma.person.findMany({
       where: {
         organizations: {
@@ -317,13 +333,21 @@ export async function getPlayers() {
       },
       orderBy: {
         lastName: 'asc',
-      }
+      },
+      skip,
+      take: pageSize,
     })
 
-    return { players }
+    console.log(`Fetched ${players.length} players for org ${dbUser.organizationId}, total: ${total}`)
+
+    return { players, total, page, pageSize }
   } catch (error) {
     console.error('Error fetching players:', error)
-    return { error: 'Failed to fetch players', players: [] }
+    if (error instanceof Error) {
+      console.error('Error details:', error.message)
+      console.error('Error stack:', error.stack)
+    }
+    return { error: 'Failed to fetch players', players: [], total: 0, page: 0, pageSize: 20 }
   }
 }
 
@@ -331,7 +355,7 @@ export async function getPlayers() {
  * Get a single player by ID with full details
  */
 export async function getPlayer(playerId: string) {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {

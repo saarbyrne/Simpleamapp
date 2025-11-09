@@ -3,7 +3,7 @@
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar'
 import { format, parse, startOfWeek, getDay } from 'date-fns'
 import { enUS } from 'date-fns/locale'
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, memo } from 'react'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -36,6 +36,7 @@ interface EventCalendarProps {
   onSelectEvent?: (event: CalendarEvent) => void
   onSelectSlot?: (slotInfo: { start: Date; end: Date }) => void
   onNavigate?: (date: Date) => void
+  onViewChange?: (view: View) => void
   defaultView?: View
 }
 
@@ -80,11 +81,67 @@ const eventStyleGetter = (event: CalendarEvent) => {
   }
 }
 
+// Memoized toolbar component
+const Toolbar = memo(({ label, onNavigate: navigate, onView, view }: any) => (
+  <div className="mb-4 flex items-center justify-between rounded-lg border bg-card p-4">
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => navigate('PREV')}
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        onClick={() => navigate('TODAY')}
+      >
+        Today
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => navigate('NEXT')}
+      >
+        <ChevronRight className="h-4 w-4" />
+      </Button>
+    </div>
+
+    <h2 className="text-xl font-semibold">{label}</h2>
+
+    <div className="flex gap-2">
+      <Button
+        variant={view === 'month' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => onView('month')}
+      >
+        Month
+      </Button>
+      <Button
+        variant={view === 'week' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => onView('week')}
+      >
+        Week
+      </Button>
+      <Button
+        variant={view === 'day' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => onView('day')}
+      >
+        Day
+      </Button>
+    </div>
+  </div>
+))
+Toolbar.displayName = 'Toolbar'
+
 export function EventCalendar({
   events,
   onSelectEvent,
   onSelectSlot,
   onNavigate,
+  onViewChange,
   defaultView = 'month'
 }: EventCalendarProps) {
   const [view, setView] = useState<View>(defaultView)
@@ -97,63 +154,18 @@ export function EventCalendar({
 
   const handleViewChange = useCallback((newView: View) => {
     setView(newView)
+    onViewChange?.(newView)
+  }, [onViewChange])
+
+  // Memoize event style getter
+  const memoizedEventStyleGetter = useCallback((event: CalendarEvent) => {
+    return eventStyleGetter(event)
   }, [])
 
   const { components, formats } = useMemo(() => {
     return {
       components: {
-        toolbar: ({ label, onNavigate: navigate, onView }: any) => (
-          <div className="mb-4 flex items-center justify-between rounded-lg border bg-card p-4">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => navigate('PREV')}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate('TODAY')}
-              >
-                Today
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => navigate('NEXT')}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <h2 className="text-xl font-semibold">{label}</h2>
-
-            <div className="flex gap-2">
-              <Button
-                variant={view === 'month' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => onView('month')}
-              >
-                Month
-              </Button>
-              <Button
-                variant={view === 'week' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => onView('week')}
-              >
-                Week
-              </Button>
-              <Button
-                variant={view === 'day' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => onView('day')}
-              >
-                Day
-              </Button>
-            </div>
-          </div>
-        ),
+        toolbar: (props: any) => <Toolbar {...props} view={view} />,
       },
       formats: {
         timeGutterFormat: (date: Date) => format(date, 'HH:mm'),
@@ -310,7 +322,7 @@ export function EventCalendar({
         selectable
         popup
         style={{ height: '100%' }}
-        eventPropGetter={eventStyleGetter}
+        eventPropGetter={memoizedEventStyleGetter}
         components={components}
         formats={formats}
         step={30}

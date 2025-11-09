@@ -65,6 +65,7 @@ export type PlayerRow = {
 
 type PlayersTableProps = {
   players: PlayerRow[]
+  total?: number
 }
 
 const statusColors: Record<string, string> = {
@@ -118,11 +119,18 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
       size: 280,
       cell: ({ row }) => {
         const player = row.original
+        const rowIndex = row.index
+        // Priority loading for first 10 rows (above fold)
+        const shouldPriorityLoad = rowIndex < 10
         return (
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
               {player.photo ? (
-                <AvatarImage src={player.photo} alt={player.name} />
+                <AvatarImage 
+                  src={player.photo} 
+                  alt={player.name}
+                  loading={shouldPriorityLoad ? 'eager' : 'lazy'}
+                />
               ) : (
                 <AvatarFallback>{player.name?.charAt(0)}</AvatarFallback>
               )}
@@ -324,7 +332,7 @@ function normalizeFilter(value: string | null | undefined) {
   return value?.toLowerCase().trim() ?? ''
 }
 
-export function PlayersTable({ players }: PlayersTableProps) {
+export function PlayersTable({ players, total: serverTotal }: PlayersTableProps) {
   const router = useRouter()
   const pathname = usePathname()
   
@@ -345,7 +353,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 8,
+    pageSize: 20, // Match server default
   })
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -452,10 +460,10 @@ export function PlayersTable({ players }: PlayersTableProps) {
         setNationalityFilter(urlNationality || 'all')
         
         const pageNum = urlPage ? parseInt(urlPage, 10) : 0
-        const pageSizeNum = urlPageSize ? parseInt(urlPageSize, 10) : 8
+        const pageSizeNum = urlPageSize ? parseInt(urlPageSize, 10) : 20
         setPagination({
           pageIndex: !isNaN(pageNum) ? pageNum : 0,
-          pageSize: !isNaN(pageSizeNum) ? pageSizeNum : 8,
+          pageSize: !isNaN(pageSizeNum) ? pageSizeNum : 20,
         })
         
         if (urlSort) {
@@ -488,7 +496,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
           setNationalityFilter(stored.nationality || 'all')
           setPagination({
             pageIndex: stored.pageIndex || 0,
-            pageSize: stored.pageSize || 8,
+            pageSize: stored.pageSize || 20,
           })
           setSorting(stored.sorting || [])
           setColumnVisibility(stored.visibility || {})
@@ -499,7 +507,7 @@ export function PlayersTable({ players }: PlayersTableProps) {
           setPositionFilter('all')
           setStatusFilter('all')
           setNationalityFilter('all')
-          setPagination({ pageIndex: 0, pageSize: 8 })
+          setPagination({ pageIndex: 0, pageSize: 20 })
           setSorting([])
           setColumnVisibility({})
         }
@@ -514,58 +522,22 @@ export function PlayersTable({ players }: PlayersTableProps) {
     // Mark as mounted first
     isMounted.current = true
     
-    // Use requestAnimationFrame to ensure we're past hydration
-    const rafId = requestAnimationFrame(() => {
+    // Use setTimeout to ensure we're past hydration and render phase
+    const timeoutId = setTimeout(() => {
       lastPathnameRef.current = pathname
       syncStateFromURL()
-    })
+    }, 0)
     
     // Listen for popstate (browser back/forward)
     const handlePopState = () => {
       syncStateFromURL()
     }
     
-    // Check URL when page becomes visible (handles navigation back)
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        syncStateFromURL()
-      }
-    }
-    
-    // Check URL when window gains focus (handles tab switching back)
-    const handleFocus = () => {
-      syncStateFromURL()
-    }
-    
-    // Use a small interval to check for URL changes (handles Next.js navigation)
-    // This is a fallback for cases where events don't fire
-    const intervalId = setInterval(() => {
-      if (typeof window !== 'undefined' && isMounted.current) {
-        const currentSearch = window.location.search
-        const currentPathname = window.location.pathname
-        const params = new URLSearchParams(currentSearch)
-        const hasUrlParams = params.get('search') !== null || params.get('position') !== null || 
-                             params.get('status') !== null || params.get('nationality') !== null ||
-                             params.get('page') !== null || params.get('pageSize') !== null ||
-                             params.get('sort') !== null || params.get('visibility') !== null
-        const currentStateSignature = `${currentSearch}-${hasUrlParams}`
-        
-        if (currentStateSignature !== lastUrlSearchRef.current || currentPathname !== lastPathnameRef.current) {
-          syncStateFromURL()
-        }
-      }
-    }, 100) // Check every 100ms
-    
     window.addEventListener('popstate', handlePopState)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('focus', handleFocus)
     
     return () => {
-      cancelAnimationFrame(rafId)
-      clearInterval(intervalId)
+      clearTimeout(timeoutId)
       window.removeEventListener('popstate', handlePopState)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('focus', handleFocus)
     }
   }, [syncStateFromURL, pathname])
 
@@ -873,6 +845,31 @@ export function PlayersTable({ players }: PlayersTableProps) {
   }, [tableInstance, router, setRowSelection])
 
   const { pageIndex, pageSize } = pagination
+  const totalPlayers = serverTotal ?? filteredPlayers.length
+  const totalPages = Math.ceil(totalPlayers / pageSize)
+
+  // Handle pagination change - navigate to new URL
+  const handlePaginationChange = useCallback((newPagination: PaginationState) => {
+    const params = new URLSearchParams(window.location.search)
+    
+    if (newPagination.pageIndex > 0) {
+      params.set('page', String(newPagination.pageIndex))
+    } else {
+      params.delete('page')
+    }
+    
+    if (newPagination.pageSize !== 20) {
+      params.set('pageSize', String(newPagination.pageSize))
+    } else {
+      params.delete('pageSize')
+    }
+    
+    const newURL = params.toString() 
+      ? `${window.location.pathname}?${params.toString()}`
+      : window.location.pathname
+    
+    router.push(newURL)
+  }, [router])
 
   return (
     <div className="w-full min-w-0 max-w-full">
@@ -1048,13 +1045,13 @@ export function PlayersTable({ players }: PlayersTableProps) {
             <div className="flex items-center gap-3 min-w-0">
               <Select
                 value={String(pageSize)}
-                onValueChange={(value) => setPagination({ ...pagination, pageSize: Number(value), pageIndex: 0 })}
+                onValueChange={(value) => handlePaginationChange({ pageIndex: 0, pageSize: Number(value) })}
               >
                 <SelectTrigger className="h-9 w-[120px]">
                   <SelectValue placeholder="Rows per page" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[5, 8, 12, 20].map((size) => (
+                  {[10, 20, 50, 100].map((size) => (
                     <SelectItem key={size} value={String(size)}>
                       {size} rows
                     </SelectItem>
@@ -1062,15 +1059,15 @@ export function PlayersTable({ players }: PlayersTableProps) {
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground">
-                Showing {filteredPlayers.length} players · Page {pageIndex + 1} of{' '}
-                <strong>{Math.ceil(filteredPlayers.length / pageSize)}</strong>
+                Showing {filteredPlayers.length} of {totalPlayers} players · Page {pageIndex + 1} of{' '}
+                <strong>{totalPages}</strong>
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setPagination({ ...pagination, pageIndex: pageIndex - 1 })}
+                onClick={() => handlePaginationChange({ ...pagination, pageIndex: pageIndex - 1 })}
                 disabled={pageIndex === 0}
               >
                 Previous
@@ -1078,8 +1075,8 @@ export function PlayersTable({ players }: PlayersTableProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setPagination({ ...pagination, pageIndex: pageIndex + 1 })}
-                disabled={pageIndex >= Math.ceil(filteredPlayers.length / pageSize) - 1}
+                onClick={() => handlePaginationChange({ ...pagination, pageIndex: pageIndex + 1 })}
+                disabled={pageIndex >= totalPages - 1}
               >
                 Next
               </Button>

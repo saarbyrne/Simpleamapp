@@ -15,6 +15,47 @@ const nextConfig = {
     },
     instrumentationHook: true,
   },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Optimize client-side bundle splitting
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          // Calendar library chunk
+          calendar: {
+            test: /[\\/]node_modules[\\/]react-big-calendar[\\/]/,
+            name: 'calendar',
+            priority: 20,
+            reuseExistingChunk: true,
+          },
+          // Table library chunk
+          table: {
+            test: /[\\/]node_modules[\\/]@tanstack[\\/]react-table[\\/]/,
+            name: 'table',
+            priority: 20,
+            reuseExistingChunk: true,
+          },
+          // Date utilities chunk
+          dateUtils: {
+            test: /[\\/]node_modules[\\/]date-fns[\\/]/,
+            name: 'date-utils',
+            priority: 15,
+            reuseExistingChunk: true,
+          },
+          // Common vendor chunk
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendor',
+            priority: 10,
+            reuseExistingChunk: true,
+          },
+        },
+      }
+    }
+    return config
+  },
 }
 
 const shouldEnableSentryWebpackPlugin =

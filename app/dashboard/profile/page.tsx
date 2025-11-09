@@ -27,9 +27,17 @@ export default async function ProfilePage() {
     return (
       <div className="container mx-auto p-6">
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
-          <p className="text-sm text-destructive">
-            Failed to load profile. Please try again.
+          <p className="text-sm font-medium text-destructive mb-2">
+            Failed to load profile
           </p>
+          <p className="text-sm text-destructive/80">
+            {profileResult.error || "Please try again."}
+          </p>
+          {profileResult.error?.includes("migrations") && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Run: <code className="px-1 py-0.5 bg-muted rounded">npm run db:migrate</code> or <code className="px-1 py-0.5 bg-muted rounded">npx prisma generate</code>
+            </p>
+          )}
         </div>
       </div>
     );

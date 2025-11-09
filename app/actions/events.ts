@@ -110,7 +110,7 @@ export async function getEvents(startDate?: Date, endDate?: Date) {
 }
 
 /**
- * Get a single event by ID with full details
+ * Get a single event by ID with full details (ultra-fast query)
  */
 export async function getEvent(eventId: string): Promise<{ success: true, event: EventWithDetails } | { error: string }> {
   const supabase = await createClient()
@@ -123,28 +123,26 @@ export async function getEvent(eventId: string): Promise<{ success: true, event:
   try {
     const dbUser = await ensureUserWithOrganization(user)
 
+    // Ultra-fast: Single query with minimal joins, fetch attendance separately only if needed
     const event = await prisma.event.findFirst({
       where: {
         id: eventId,
         organizationId: dbUser.organizationId,
       },
-      include: {
-        attendance: {
-          include: {
-            personOrg: {
-              include: {
-                person: {
-                  select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true,
-                    photo: true,
-                  }
-                }
-              }
-            }
-          }
-        }
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        type: true,
+        startTime: true,
+        endTime: true,
+        location: true,
+        isRecurring: true,
+        recurringRule: true,
+        linkedFormId: true,
+        organizationId: true,
+        createdAt: true,
+        updatedAt: true,
       }
     })
 
@@ -152,7 +150,51 @@ export async function getEvent(eventId: string): Promise<{ success: true, event:
       return { error: 'Event not found' }
     }
 
-    return { success: true, event: event as EventWithDetails }
+    // Fetch attendance count first (very fast)
+    const attendanceCount = await prisma.eventAttendance.count({
+      where: { eventId: eventId }
+    })
+
+    // Only fetch full attendance if there are attendees (optimization)
+    let attendance: any[] = []
+    if (attendanceCount > 0) {
+      attendance = await prisma.eventAttendance.findMany({
+        where: { eventId: eventId },
+        select: {
+          id: true,
+          eventId: true,
+          personOrgId: true,
+          userId: true,
+          status: true,
+          notes: true,
+          personOrg: {
+            select: {
+              id: true,
+              role: true,
+              position: true,
+              jerseyNumber: true,
+              person: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  photo: true,
+                }
+              }
+            }
+          }
+        },
+        take: 100,
+      })
+    }
+
+    return { 
+      success: true, 
+      event: {
+        ...event,
+        attendance: attendance as any
+      } as EventWithDetails 
+    }
   } catch (error) {
     console.error('Error fetching event:', error)
     return { error: 'Failed to fetch event' }

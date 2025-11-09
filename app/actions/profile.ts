@@ -58,10 +58,17 @@ const changePasswordSchema = z.object({
 export async function getCurrentUserProfile() {
   try {
     const supabase = await createServerClient();
-    const { user: authUser } = await ensureUserWithOrganization(supabase);
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !authUser) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    // Ensure user exists in database and has organization
+    const dbUser = await ensureUserWithOrganization(authUser);
 
     const user = await prisma.user.findUnique({
-      where: { id: authUser.id },
+      where: { id: dbUser.id },
       include: {
         organization: {
           select: {
@@ -111,6 +118,32 @@ export async function getCurrentUserProfile() {
     };
   } catch (error) {
     console.error("Error fetching user profile:", error);
+    
+    // Log the full error for debugging
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+      
+      // Check if it's a database connection error
+      if (error.message.includes("does not exist") || error.message.includes("relation")) {
+        return { 
+          success: false, 
+          error: `Database error: ${error.message}. Tables may not exist.` 
+        };
+      }
+      if (error.message.includes("P1001") || error.message.includes("Can't reach database")) {
+        return { 
+          success: false, 
+          error: "Database connection failed. Please check your DATABASE_URL." 
+        };
+      }
+      // Return the actual error message
+      return { 
+        success: false, 
+        error: `Error: ${error.message}` 
+      };
+    }
+    
     return { success: false, error: "Failed to fetch profile" };
   }
 }
@@ -121,15 +154,21 @@ export async function updateProfile(data: z.infer<typeof updateProfileSchema>) {
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0].message,
+        error: validation.error.issues[0].message,
       };
     }
 
     const supabase = await createServerClient();
-    const { user: authUser } = await ensureUserWithOrganization(supabase);
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !authUser) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const dbUser = await ensureUserWithOrganization(authUser);
 
     const updatedUser = await prisma.user.update({
-      where: { id: authUser.id },
+      where: { id: dbUser.id },
       data: {
         name: validation.data.name,
         phone: validation.data.phone,
@@ -157,15 +196,21 @@ export async function updatePreferences(data: z.infer<typeof updatePreferencesSc
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0].message,
+        error: validation.error.issues[0].message,
       };
     }
 
     const supabase = await createServerClient();
-    const { user: authUser } = await ensureUserWithOrganization(supabase);
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !authUser) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const dbUser = await ensureUserWithOrganization(authUser);
 
     const updatedUser = await prisma.user.update({
-      where: { id: authUser.id },
+      where: { id: dbUser.id },
       data: {
         language: validation.data.language,
         timezone: validation.data.timezone,
@@ -196,16 +241,22 @@ export async function updateNotificationSettings(
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0].message,
+        error: validation.error.issues[0].message,
       };
     }
 
     const supabase = await createServerClient();
-    const { user: authUser } = await ensureUserWithOrganization(supabase);
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !authUser) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const dbUser = await ensureUserWithOrganization(authUser);
 
     // Get current notification settings
     const currentUser = await prisma.user.findUnique({
-      where: { id: authUser.id },
+      where: { id: dbUser.id },
       select: { notificationSettings: true },
     });
 
@@ -218,7 +269,7 @@ export async function updateNotificationSettings(
     };
 
     const updatedUser = await prisma.user.update({
-      where: { id: authUser.id },
+      where: { id: dbUser.id },
       data: {
         notificationSettings: mergedSettings,
         updatedAt: new Date(),
@@ -243,7 +294,7 @@ export async function changePassword(data: z.infer<typeof changePasswordSchema>)
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0].message,
+        error: validation.error.issues[0].message,
       };
     }
 
@@ -291,11 +342,17 @@ export async function uploadAvatar(formData: FormData) {
     }
 
     const supabase = await createServerClient();
-    const { user: authUser } = await ensureUserWithOrganization(supabase);
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !authUser) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const dbUser = await ensureUserWithOrganization(authUser);
 
     // Generate unique filename
     const fileExt = file.name.split(".").pop();
-    const fileName = `${authUser.id}-${Date.now()}.${fileExt}`;
+    const fileName = `${dbUser.id}-${Date.now()}.${fileExt}`;
     const filePath = `avatars/${fileName}`;
 
     // Upload to Supabase Storage
@@ -322,7 +379,7 @@ export async function uploadAvatar(formData: FormData) {
 
     // Update user avatar in database
     const updatedUser = await prisma.user.update({
-      where: { id: authUser.id },
+      where: { id: dbUser.id },
       data: {
         avatar: urlData.publicUrl,
         updatedAt: new Date(),

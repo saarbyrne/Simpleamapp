@@ -6,19 +6,21 @@ import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
 import {
   Dialog,
-  DialogContent,
+  DialogPortal,
+  DialogOverlay,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Calendar, Clock, MapPin, Users, ExternalLink, Edit, Trash2, RefreshCw } from 'lucide-react'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
+import { Calendar, Clock, MapPin, Users, ExternalLink, Edit, Trash2, RefreshCw, X } from 'lucide-react'
 import { type EventWithDetails } from '@/app/actions/events'
 import { useRouter } from 'next/navigation'
+import { cn } from '@/lib/utils'
 
 interface EventQuickViewProps {
   event: EventWithDetails | null
@@ -26,6 +28,7 @@ interface EventQuickViewProps {
   onOpenChange: (open: boolean) => void
   onEdit: () => void
   onDelete: () => void
+  isLoadingDetails?: boolean
 }
 
 const eventTypeColors: Record<string, string> = {
@@ -42,6 +45,7 @@ export function EventQuickView({
   onOpenChange,
   onEdit,
   onDelete,
+  isLoadingDetails = false,
 }: EventQuickViewProps) {
   const router = useRouter()
 
@@ -59,9 +63,20 @@ export function EventQuickView({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-0">
-        <DialogTitle className="sr-only">{event.title}</DialogTitle>
-        <Card className="border-0 shadow-none">
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 z-50 bg-black/80" />
+        <DialogPrimitive.Content
+          className={cn(
+            "fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg sm:rounded-lg p-0",
+            "duration-0 data-[state=open]:animate-none data-[state=closed]:animate-none"
+          )}
+        >
+          <DialogTitle className="sr-only">{event.title}</DialogTitle>
+          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+          <Card className="border-0 shadow-none">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 space-y-1">
@@ -105,14 +120,21 @@ export function EventQuickView({
             )}
 
             {/* Attendance */}
-            {totalCount > 0 && (
+            {isLoadingDetails ? (
+              <div className="flex items-start gap-3">
+                <Users className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                <div className="flex-1 text-sm text-muted-foreground">
+                  Loading attendance...
+                </div>
+              </div>
+            ) : totalCount > 0 ? (
               <div className="flex items-start gap-3">
                 <Users className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <div className="flex-1 text-sm">
                   {attendingCount} of {totalCount} attending
                 </div>
               </div>
-            )}
+            ) : null}
 
             {/* Description preview */}
             {event.description && (
@@ -154,7 +176,8 @@ export function EventQuickView({
             </Button>
           </CardFooter>
         </Card>
-      </DialogContent>
+      </DialogPrimitive.Content>
+    </DialogPortal>
     </Dialog>
   )
 }

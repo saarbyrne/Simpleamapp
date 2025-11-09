@@ -2,8 +2,25 @@ import { differenceInYears } from 'date-fns'
 import { PlayersTable, type PlayerRow } from '@/components/dashboard/players-table-new'
 import { getPlayers } from '@/app/actions/players'
 
-export default async function PlayersPage() {
-  const { players = [] } = await getPlayers()
+type PlayersPageProps = {
+  searchParams: {
+    page?: string
+    pageSize?: string
+  }
+}
+
+export default async function PlayersPage({ searchParams }: PlayersPageProps) {
+  const page = searchParams.page ? parseInt(searchParams.page, 10) : 0
+  const pageSize = searchParams.pageSize ? parseInt(searchParams.pageSize, 10) : 20
+  
+  const result = await getPlayers(page, pageSize)
+  
+  // Handle errors
+  if (result.error) {
+    console.error('Error fetching players:', result.error)
+  }
+  
+  const { players = [], total = 0 } = result
 
   const roster: PlayerRow[] = players.map((player) => {
     const organization = player.organizations?.[0]
@@ -26,5 +43,5 @@ export default async function PlayersPage() {
     }
   })
 
-  return <PlayersTable players={roster} />
+  return <PlayersTable players={roster} total={total} />
 }
