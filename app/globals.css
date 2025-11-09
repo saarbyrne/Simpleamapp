@@ -1,6 +1,9 @@
+@import "tailwindcss";
 
 /* Optional animation utilities. Remove if package not installed. */
 /*---break--- */
+@import "tw-animate-css";
+
 @custom-variant dark (&:is(.dark *));
 /*---break--- */
 /*! tailwindcss v4.1.3 | MIT License | https://tailwindcss.com */
@@ -2928,9 +2931,10 @@ html {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
   }
 }
