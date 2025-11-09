@@ -3,20 +3,19 @@
 import { useMemo, useState, useEffect, useRef, useCallback, startTransition } from 'react'
 import {
   ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   SortingState,
   VisibilityState,
+  ColumnOrderState,
+  ColumnSizingState,
+  GroupingState,
+  ExpandedState,
+  RowSelectionState,
   type PaginationState,
-  useReactTable,
 } from '@tanstack/react-table'
 import { createPlayer } from '@/app/actions/players'
 import { useRouter, usePathname } from 'next/navigation'
 import {
   Badge,
-  type BadgeProps,
 } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -33,6 +32,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { MoreHorizontal, UserPlus } from 'lucide-react'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -42,16 +44,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { ChevronDown, MoreHorizontal, UserPlus, Check } from 'lucide-react'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
+  DataTable,
+  DataTableFilters,
+  DataTableColumnManager,
+  DataTableExport,
+  type FilterConfig,
+} from '@/components/data-table'
+import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/react-table'
 
 export type PlayerRow = {
   id: string
@@ -252,6 +251,11 @@ export function PlayersTable({ players }: PlayersTableProps) {
   const [nationalityFilter, setNationalityFilter] = useState('all')
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([])
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
+  const [grouping, setGrouping] = useState<GroupingState>([])
+  const [expanded, setExpanded] = useState<ExpandedState>({})
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 8,
@@ -661,23 +665,82 @@ export function PlayersTable({ players }: PlayersTableProps) {
 
   const columns = useMemo(() => createColumns(players), [players])
 
-  const table = useReactTable({
+  // Prepare filter config for DataTableFilters
+  const filterConfig: FilterConfig[] = useMemo(() => [
+    {
+      key: 'search',
+      label: 'Search',
+      type: 'search',
+      placeholder: 'Filter players...',
+    },
+    {
+      key: 'position',
+      label: 'Position',
+      type: 'select',
+      options: uniquePositions.map((pos) => ({
+        value: pos,
+        label: titleCase(pos),
+      })),
+      placeholder: 'All Positions',
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'select',
+      options: uniqueStatuses.map((status) => ({
+        value: status,
+        label: statusLabel(status),
+      })),
+      placeholder: 'All Statuses',
+    },
+    {
+      key: 'nationality',
+      label: 'Nationality',
+      type: 'select',
+      options: uniqueNationalities.map((country) => ({
+        value: country,
+        label: titleCase(country),
+      })),
+      placeholder: 'All Countries',
+    },
+  ], [uniquePositions, uniqueStatuses, uniqueNationalities])
+
+  const filterValues = useMemo(() => ({
+    search,
+    position: positionFilter,
+    status: statusFilter,
+    nationality: nationalityFilter,
+  }), [search, positionFilter, statusFilter, nationalityFilter])
+
+  const handleFilterChange = useCallback((key: string, value: string) => {
+    if (key === 'search') setSearch(value)
+    else if (key === 'position') setPositionFilter(value)
+    else if (key === 'status') setStatusFilter(value)
+    else if (key === 'nationality') setNationalityFilter(value)
+  }, [])
+
+  // Create a table instance for export/column manager utilities
+  // This needs full row model for export to work correctly
+  const tableInstance = useReactTable({
     data: filteredPlayers,
     columns,
     state: {
       sorting,
       pagination,
       columnVisibility,
+      columnOrder: columnOrder.length > 0 ? columnOrder : undefined,
+      columnSizing: Object.keys(columnSizing).length > 0 ? columnSizing : undefined,
     },
     onSortingChange: setSorting,
     onPaginationChange: setPagination,
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnOrderChange: setColumnOrder,
+    onColumnSizingChange: setColumnSizing,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
   })
 
-  const { pageIndex, pageSize } = table.getState().pagination
+  const { pageIndex, pageSize } = pagination
 
   return (
     <>
@@ -794,194 +857,95 @@ export function PlayersTable({ players }: PlayersTableProps) {
         
         <CardHeader className="space-y-4 pt-0">
           <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
-            <Input
-              placeholder="Filter players..."
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              className="h-10 w-[200px] shrink-0"
+            <DataTableFilters
+              filters={filterConfig}
+              values={filterValues}
+              onFilterChange={handleFilterChange}
             />
-
-            <Select value={positionFilter} onValueChange={setPositionFilter}>
-              <SelectTrigger className="h-10 w-[130px] shrink-0">
-                <SelectValue placeholder="All Positions" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Positions</SelectItem>
-                {uniquePositions.map((position) => (
-                  <SelectItem key={position} value={position}>
-                    {titleCase(position)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-10 w-[130px] shrink-0">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                {uniqueStatuses.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {statusLabel(status)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={nationalityFilter} onValueChange={setNationalityFilter}>
-              <SelectTrigger className="h-10 w-[130px] shrink-0">
-                <SelectValue placeholder="All Countries" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Countries</SelectItem>
-                {uniqueNationalities.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {titleCase(country)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="default" className="h-10 shrink-0">
-                  Columns
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {table
-                  .getAllColumns()
-                  .filter((column) => column.getCanHide() && column.id !== 'name' && column.id !== 'actions')
-                  .map((column) => {
-                    return (
-                      <DropdownMenuItem
-                        key={column.id}
-                        className="flex items-center gap-2 cursor-pointer"
-                        onSelect={(e) => {
-                          e.preventDefault()
-                          column.toggleVisibility(!column.getIsVisible())
-                        }}
-                      >
-                        <div className="flex h-4 w-4 items-center justify-center">
-                          {column.getIsVisible() && <Check className="h-4 w-4" />}
-                        </div>
-                        <span>{typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id}</span>
-                      </DropdownMenuItem>
-                    )
-                  })}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <DataTableColumnManager
+              table={tableInstance}
+              onColumnOrderChange={setColumnOrder}
+            />
+            <DataTableExport
+              table={tableInstance}
+              columns={columns}
+              filename="players"
+            />
           </div>
         </CardHeader>
 
         <CardContent className="space-y-4">
+          <DataTable
+            data={filteredPlayers}
+            columns={columns}
+            sorting={sorting}
+            onSortingChange={setSorting}
+            columnVisibility={columnVisibility}
+            onColumnVisibilityChange={setColumnVisibility}
+            columnOrder={columnOrder}
+            onColumnOrderChange={setColumnOrder}
+            columnSizing={columnSizing}
+            onColumnSizingChange={setColumnSizing}
+            grouping={grouping}
+            onGroupingChange={setGrouping}
+            expanded={expanded}
+            onExpandedChange={setExpanded}
+            rowSelection={rowSelection}
+            onRowSelectionChange={setRowSelection}
+            pagination={pagination}
+            onPaginationChange={setPagination}
+            enableRowSelection={true}
+            enableGrouping={true}
+            enableColumnResizing={true}
+            enableColumnReordering={true}
+            enableColumnVisibility={true}
+            enableBulkActions={true}
+            enableExport={false}
+            emptyMessage="No players match the filters."
+          />
 
-        <div className="overflow-auto rounded-lg border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers
-                    .filter((header) => header.column.getIsVisible() !== false)
-                    .map((header) => (
-                      <TableHead
-                        key={header.id}
-                        className={header.column.id === 'actions' ? 'text-right' : 'text-left'}
-                      >
-                        {header.isPlaceholder ? null : (
-                          <div
-                            {...{
-                              className: header.column.getCanSort()
-                                ? 'flex cursor-pointer items-center gap-2 select-none'
-                                : '',
-                              onClick: header.column.getToggleSortingHandler(),
-                            }}
-                          >
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                            {{
-                              asc: ' ▲',
-                              desc: ' ▼',
-                            }[header.column.getIsSorted() as string] ?? null}
-                          </div>
-                        )}
-                      </TableHead>
-                    ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className={
-                          cell.column.id === 'actions' ? 'text-right align-middle' : 'align-middle'
-                        }
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length}>
-                    <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-                      No players match the filters.
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Select
-              value={String(pageSize)}
-              onValueChange={(value) => table.setPageSize(Number(value))}
-            >
-              <SelectTrigger className="h-9 w-[120px]">
-                <SelectValue placeholder="Rows per page" />
-              </SelectTrigger>
-              <SelectContent>
-                {[5, 8, 12, 20].map((size) => (
-                  <SelectItem key={size} value={String(size)}>
-                    {size} rows
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-sm text-muted-foreground">
-              Showing {filteredPlayers.length} players · Page {pageIndex + 1} of{' '}
-              <strong>{table.getPageCount()}</strong>
-            </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => setPagination({ ...pagination, pageSize: Number(value), pageIndex: 0 })}
+              >
+                <SelectTrigger className="h-9 w-[120px]">
+                  <SelectValue placeholder="Rows per page" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[5, 8, 12, 20].map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {size} rows
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground">
+                Showing {filteredPlayers.length} players · Page {pageIndex + 1} of{' '}
+                <strong>{Math.ceil(filteredPlayers.length / pageSize)}</strong>
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPagination({ ...pagination, pageIndex: pageIndex - 1 })}
+                disabled={pageIndex === 0}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPagination({ ...pagination, pageIndex: pageIndex + 1 })}
+                disabled={pageIndex >= Math.ceil(filteredPlayers.length / pageSize) - 1}
+              >
+                Next
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      </CardContent>
+        </CardContent>
     </Card>
     </>
   )
