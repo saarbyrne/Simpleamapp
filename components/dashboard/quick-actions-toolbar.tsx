@@ -1,9 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { getEnabledQuickActions, QuickActionConfig } from '@/lib/quick-actions-config'
+import { getEnabledQuickActions } from '@/lib/quick-actions-config'
 
 interface QuickActionsToolbarProps {
   /**
@@ -29,9 +27,8 @@ interface QuickActionsToolbarProps {
 /**
  * QuickActionsToolbar
  *
- * Displays a toolbar of quick action buttons in the breadcrumb area.
- * Responsive design: shows individual icon buttons on larger screens,
- * and collapses to a dropdown menu on smaller screens.
+ * Displays a dropdown menu of quick action buttons in the breadcrumb area.
+ * All actions are contained within a "Quick Actions" dropdown menu.
  *
  * @example
  * ```tsx
@@ -53,80 +50,34 @@ export function QuickActionsToolbar({ actionHandlers, className }: QuickActionsT
 
   return (
     <div className={className}>
-      {/* Desktop view: Individual icon buttons with tooltips */}
-      <div className="hidden md:flex items-center gap-1">
-        {enabledActions.map(action => (
-          <QuickActionButton
-            key={action.id}
-            action={action}
-            onClick={actionHandlers[action.id]}
-          />
-        ))}
-      </div>
-
-      {/* Mobile view: Dropdown menu */}
-      <div className="flex md:hidden">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="h-8 w-8"
-              aria-label="Quick actions menu"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {enabledActions.map(action => {
-              const Icon = action.icon
-              return (
-                <DropdownMenuItem
-                  key={action.id}
-                  onClick={actionHandlers[action.id]}
-                >
-                  <Icon className="mr-2 h-4 w-4" />
-                  {action.label}
-                </DropdownMenuItem>
-              )
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8"
+            aria-label="Quick actions menu"
+          >
+            Quick Actions
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {enabledActions.map(action => {
+            const Icon = action.icon
+            return (
+              <DropdownMenuItem
+                key={action.id}
+                onClick={actionHandlers[action.id]}
+              >
+                <Icon className="mr-2 h-4 w-4" />
+                {action.label}
+              </DropdownMenuItem>
+            )
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
-  )
-}
-
-/**
- * Individual quick action button with tooltip
- */
-function QuickActionButton({
-  action,
-  onClick,
-}: {
-  action: QuickActionConfig
-  onClick?: () => void
-}) {
-  const Icon = action.icon
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onClick}
-          aria-label={action.label}
-          className="h-8 w-8"
-        >
-          <Icon className="h-4 w-4" />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom" sideOffset={8}>
-        {action.label}
-      </TooltipContent>
-    </Tooltip>
   )
 }
