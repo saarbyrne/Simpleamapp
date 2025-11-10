@@ -40,7 +40,7 @@ interface ProfileTabsProps {
 export function ProfileTabs({ user }: ProfileTabsProps) {
   return (
     <Tabs defaultValue="profile" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
+      <TabsList>
         <TabsTrigger value="profile">Profile</TabsTrigger>
         <TabsTrigger value="preferences">Preferences</TabsTrigger>
         <TabsTrigger value="notifications">Notifications</TabsTrigger>
