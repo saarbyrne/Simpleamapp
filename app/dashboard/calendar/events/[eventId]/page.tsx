@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { format } from 'date-fns'
 import { getEvent, deleteEvent, deleteEventSeries, type EventWithDetails } from '@/app/actions/events'
+import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { formatDate, formatTime } from '@/lib/date-utils'
 import { useBreadcrumb } from '@/lib/breadcrumb-context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -48,6 +49,7 @@ export default function EventDetailPage() {
   const params = useParams()
   const router = useRouter()
   const eventId = params.eventId as string
+  const { preferences } = useUserPreferences()
   const { setCustomLabel } = useBreadcrumb()
 
   const [event, setEvent] = useState<EventWithDetails | null>(null)
@@ -185,11 +187,11 @@ export default function EventDetailPage() {
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              {format(new Date(event.startTime), 'EEEE, MMMM d, yyyy')}
+              {formatDate(event.startTime, preferences || undefined)}
             </div>
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              {format(new Date(event.startTime), 'h:mm a')} - {format(new Date(event.endTime), 'h:mm a')}
+              {formatTime(event.startTime, preferences || undefined)} - {formatTime(event.endTime, preferences || undefined)}
             </div>
             {event.location && (
               <div className="flex items-center gap-2">

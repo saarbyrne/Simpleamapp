@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { NationalitySelect } from '@/components/ui/nationality-select'
@@ -44,7 +45,7 @@ export function AddPlayerDialog({ open, onOpenChange, onSuccess }: AddPlayerDial
     lastName: '',
     position: '',
     jerseyNumber: '',
-    dateOfBirth: '',
+    dateOfBirth: undefined as Date | undefined,
     nationality: '',
     email: '',
     phone: '',
@@ -65,7 +66,7 @@ export function AddPlayerDialog({ open, onOpenChange, onSuccess }: AddPlayerDial
         phone: newPlayer.phone || undefined,
         position: newPlayer.position || undefined,
         jerseyNumber: newPlayer.jerseyNumber ? parseInt(newPlayer.jerseyNumber) : undefined,
-        dateOfBirth: newPlayer.dateOfBirth || undefined,
+        dateOfBirth: newPlayer.dateOfBirth?.toISOString().split('T')[0] || undefined,
         nationality: newPlayer.nationality || undefined,
       })
 
@@ -78,7 +79,7 @@ export function AddPlayerDialog({ open, onOpenChange, onSuccess }: AddPlayerDial
           lastName: '',
           position: '',
           jerseyNumber: '',
-          dateOfBirth: '',
+          dateOfBirth: undefined,
           nationality: '',
           email: '',
           phone: '',
@@ -173,11 +174,10 @@ export function AddPlayerDialog({ open, onOpenChange, onSuccess }: AddPlayerDial
             </div>
             <div className="space-y-2">
               <Label htmlFor="dateOfBirth">Date of Birth</Label>
-              <Input
-                id="dateOfBirth"
-                type="date"
-                value={newPlayer.dateOfBirth}
-                onChange={(e) => setNewPlayer({ ...newPlayer, dateOfBirth: e.target.value })}
+              <DatePicker
+                date={newPlayer.dateOfBirth}
+                onSelect={(date) => setNewPlayer({ ...newPlayer, dateOfBirth: date })}
+                placeholder="Pick a date"
                 disabled={isSubmitting}
               />
             </div>

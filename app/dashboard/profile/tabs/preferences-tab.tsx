@@ -96,7 +96,24 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
   const { isSubmitting } = form.formState;
 
   async function onSubmit(data: PreferencesFormValues) {
-    const result = await updatePreferences(data);
+    // Convert empty strings to null for optional fields
+    const preferencesData = {
+      language: data.language || null,
+      timezone: data.timezone || null,
+      dateFormat: data.dateFormat || null,
+      timeFormat: data.timeFormat || null,
+    };
+
+    // Store in localStorage immediately for instant UI update
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("user-preferences", JSON.stringify(preferencesData));
+      } catch (error) {
+        console.error("Failed to store preferences in localStorage:", error);
+      }
+    }
+
+    const result = await updatePreferences(preferencesData);
 
     if (result.success) {
       toast.success("Preferences updated successfully");

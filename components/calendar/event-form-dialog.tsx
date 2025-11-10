@@ -32,15 +32,17 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { DatePicker } from '@/components/ui/date-picker'
+import { TimePicker } from '@/components/ui/time-picker'
 import { Checkbox } from '@/components/ui/checkbox'
-import { CalendarIcon, Loader2, RefreshCw } from 'lucide-react'
+import { Loader2, RefreshCw } from 'lucide-react'
 import { format, addMinutes } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { createEvent, updateEvent, type CreateEventData } from '@/app/actions/events'
 import { getEventTemplates } from '@/app/actions/event-templates'
 import { toast } from 'sonner'
+import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { dateToTimeInput } from '@/lib/date-input-utils'
 
 const eventFormSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title is too long'),
@@ -124,6 +126,7 @@ export function EventFormDialog({
   const [templates, setTemplates] = useState<EventTemplate[]>([])
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const isEditing = !!defaultValues?.id
+  const { preferences } = useUserPreferences()
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
@@ -133,11 +136,11 @@ export function EventFormDialog({
       type: defaultValues?.type || 'training',
       startDate: defaultValues?.startTime || new Date(),
       startTime: defaultValues?.startTime
-        ? format(defaultValues.startTime, 'HH:mm')
+        ? dateToTimeInput(defaultValues.startTime, preferences || undefined)
         : '09:00',
       endDate: defaultValues?.endTime || new Date(),
       endTime: defaultValues?.endTime
-        ? format(defaultValues.endTime, 'HH:mm')
+        ? dateToTimeInput(defaultValues.endTime, preferences || undefined)
         : '11:00',
       location: defaultValues?.location || '',
       isRecurring: false,
@@ -184,9 +187,9 @@ export function EventFormDialog({
         description: '',
         type: 'training',
         startDate,
-        startTime: format(startDate, 'HH:mm'),
+        startTime: dateToTimeInput(startDate, preferences || undefined),
         endDate,
-        endTime: format(endDate, 'HH:mm'),
+        endTime: dateToTimeInput(endDate, preferences || undefined),
         location: '',
         isRecurring: false,
         recurrenceFrequency: 'weekly',
@@ -208,9 +211,9 @@ export function EventFormDialog({
           description: template.description || '',
           type: template.type as any,
           startDate,
-          startTime: format(startDate, 'HH:mm'),
+          startTime: dateToTimeInput(startDate, preferences || undefined),
           endDate,
-          endTime: format(endDate, 'HH:mm'),
+          endTime: dateToTimeInput(endDate, preferences || undefined),
           location: '',
           isRecurring: false,
           recurrenceFrequency: 'weekly',
@@ -234,11 +237,11 @@ export function EventFormDialog({
         type: defaultValues?.type || 'training',
         startDate: defaultValues?.startTime || new Date(),
         startTime: defaultValues?.startTime
-          ? format(defaultValues.startTime, 'HH:mm')
+          ? dateToTimeInput(defaultValues.startTime, preferences || undefined)
           : '09:00',
         endDate: defaultValues?.endTime || new Date(),
         endTime: defaultValues?.endTime
-          ? format(defaultValues.endTime, 'HH:mm')
+          ? dateToTimeInput(defaultValues.endTime, preferences || undefined)
           : '11:00',
         location: defaultValues?.location || '',
         isRecurring: false,
@@ -250,7 +253,7 @@ export function EventFormDialog({
         recurrenceDaysOfWeek: [],
       })
     }
-  }, [open, defaultValues, form])
+  }, [open, defaultValues, form, preferences])
 
   const onSubmit = async (data: EventFormValues) => {
     setIsLoading(true)
@@ -417,34 +420,13 @@ export function EventFormDialog({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Start Date *</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              'pl-3 text-left font-normal',
-                              !field.value && 'text-muted-foreground'
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, 'PPP')
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormControl>
+                      <DatePicker
+                        date={field.value}
+                        onSelect={field.onChange}
+                        placeholder="Pick a date"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -457,7 +439,11 @@ export function EventFormDialog({
                   <FormItem>
                     <FormLabel>Start Time *</FormLabel>
                     <FormControl>
-                      <Input type="time" {...field} />
+                      <TimePicker
+                        time={field.value}
+                        onSelect={field.onChange}
+                        placeholder="Pick a time"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -472,34 +458,13 @@ export function EventFormDialog({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>End Date *</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              'pl-3 text-left font-normal',
-                              !field.value && 'text-muted-foreground'
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, 'PPP')
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormControl>
+                      <DatePicker
+                        date={field.value}
+                        onSelect={field.onChange}
+                        placeholder="Pick a date"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -512,7 +477,11 @@ export function EventFormDialog({
                   <FormItem>
                     <FormLabel>End Time *</FormLabel>
                     <FormControl>
-                      <Input type="time" {...field} />
+                      <TimePicker
+                        time={field.value}
+                        onSelect={field.onChange}
+                        placeholder="Pick a time"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -682,34 +651,13 @@ export function EventFormDialog({
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
                           <FormLabel>End Date *</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  className={cn(
-                                    'pl-3 text-left font-normal',
-                                    !field.value && 'text-muted-foreground'
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, 'PPP')
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
+                          <FormControl>
+                            <DatePicker
+                              date={field.value}
+                              onSelect={field.onChange}
+                              placeholder="Pick a date"
+                            />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}

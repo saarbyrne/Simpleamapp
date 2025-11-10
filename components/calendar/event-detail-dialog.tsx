@@ -26,10 +26,11 @@ import {
   ClipboardList,
   FolderOpen,
 } from 'lucide-react'
-import { format } from 'date-fns'
 import { EventWithDetails } from '@/app/actions/events'
 import { cn } from '@/lib/utils'
 import { AttendanceManager } from './attendance-manager'
+import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { formatDate, formatTime } from '@/lib/date-utils'
 
 interface EventDetailDialogProps {
   open: boolean
@@ -64,6 +65,7 @@ export function EventDetailDialog({
   onUpdate,
 }: EventDetailDialogProps) {
   const [activeTab, setActiveTab] = useState('overview')
+  const { preferences } = useUserPreferences()
 
   const typeConfig = useMemo(() => {
     if (!event) return eventTypeConfig.other
@@ -155,15 +157,15 @@ export function EventDetailDialog({
               <div className="flex items-center gap-3 text-sm">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">
-                  {format(new Date(event.startTime), 'EEEE, MMMM d, yyyy')}
+                  {formatDate(event.startTime, preferences || undefined)}
                 </span>
               </div>
 
               <div className="flex items-center gap-3 text-sm">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 <span>
-                  {format(new Date(event.startTime), 'HH:mm')} -{' '}
-                  {format(new Date(event.endTime), 'HH:mm')}
+                  {formatTime(event.startTime, preferences || undefined)} -{' '}
+                  {formatTime(event.endTime, preferences || undefined)}
                 </span>
               </div>
 

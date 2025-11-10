@@ -4,6 +4,8 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { differenceInYears } from 'date-fns'
 import { getPlayer } from '@/app/actions/players'
+import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { formatDate } from '@/lib/date-utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -60,6 +62,7 @@ const titleCase = (value: string | null | undefined) => {
 export default function PlayerProfilePage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const { setCustomLabel } = useBreadcrumb()
+  const { preferences } = useUserPreferences()
   const [player, setPlayer] = React.useState<Awaited<ReturnType<typeof getPlayer>>['player'] | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
 
@@ -186,11 +189,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-muted-foreground">Date of Birth</p>
                     <p className="text-sm">
-                      {new Date(player.dateOfBirth).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
+                      {formatDate(player.dateOfBirth, preferences || undefined)}
                     </p>
                   </div>
                 )}
@@ -234,11 +233,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-muted-foreground">Joined</p>
                     <p className="text-sm">
-                      {new Date(organization.joinedAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
+                      {formatDate(organization.joinedAt, preferences || undefined)}
                     </p>
                   </div>
                 )}

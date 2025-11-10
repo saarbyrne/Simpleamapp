@@ -28,6 +28,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MoreHorizontal, UserPlus } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import {
@@ -47,6 +48,8 @@ import {
 import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/react-table'
 import { NATIONALITIES } from '@/lib/nationalities'
 import { NationalitySelect } from '@/components/ui/nationality-select'
+import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { formatDate } from '@/lib/date-utils'
 
 export type PlayerRow = {
   id: string
@@ -103,7 +106,11 @@ const titleCase = (value: string | null | undefined) => {
     .join(' ')
 }
 
-const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: string) => void): ColumnDef<PlayerRow>[] => {
+const createColumns = (
+  players: PlayerRow[], 
+  onNavigateToProfile: (playerId: string) => void,
+  preferences?: { timezone: string | null; dateFormat: string | null; timeFormat: string | null } | null
+): ColumnDef<PlayerRow>[] => {
   // Check which columns have data
   const hasPosition = players.some(p => p.position)
   const hasAge = players.some(p => p.age !== null)
@@ -260,13 +267,12 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
       cell: ({ getValue }) => {
         const joinedAt = getValue() as Date | null | undefined
         if (!joinedAt) return <span className="text-sm text-muted-foreground">—</span>
+        // Use suppressHydrationWarning because preferences load after mount
+        // Format may differ between server (null preferences) and client (localStorage preferences)
+        // This is expected and will update after hydration
         return (
-          <span className="text-sm">
-            {new Date(joinedAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            })}
+          <span className="text-sm" suppressHydrationWarning>
+            {formatDate(joinedAt, preferences || undefined)}
           </span>
         )
       },
@@ -335,6 +341,7 @@ function normalizeFilter(value: string | null | undefined) {
 export function PlayersTable({ players, total: serverTotal }: PlayersTableProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const { preferences } = useUserPreferences()
   
   // Initialize state with default values (same on server and client)
   const [search, setSearch] = useState('')
@@ -362,7 +369,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     lastName: '',
     position: '',
     jerseyNumber: '',
-    dateOfBirth: '',
+    dateOfBirth: undefined as Date | undefined,
     nationality: '',
     email: '',
     phone: '',
@@ -645,7 +652,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
         phone: newPlayer.phone || undefined,
         position: newPlayer.position || undefined,
         jerseyNumber: newPlayer.jerseyNumber ? parseInt(newPlayer.jerseyNumber) : undefined,
-        dateOfBirth: newPlayer.dateOfBirth || undefined,
+        dateOfBirth: newPlayer.dateOfBirth?.toISOString().split('T')[0] || undefined,
         nationality: newPlayer.nationality || undefined,
       })
 
@@ -657,7 +664,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
           lastName: '',
           position: '',
           jerseyNumber: '',
-          dateOfBirth: '',
+          dateOfBirth: undefined,
           nationality: '',
           email: '',
           phone: '',
@@ -729,7 +736,10 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     })
   }, [players, search, positionFilter, statusFilter, nationalityFilter])
 
-  const columns = useMemo(() => createColumns(players, (playerId) => router.push(`/dashboard/players/${playerId}`)), [players, router])
+  const columns = useMemo(
+    () => createColumns(players, (playerId) => router.push(`/dashboard/players/${playerId}`), preferences || null), 
+    [players, router, preferences]
+  )
 
   // Prepare filter config for DataTableFilters
   const filterConfig: FilterConfig[] = useMemo(() => [
@@ -944,11 +954,10 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
               </div>
               <div className="space-y-2">
                 <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                <Input
-                  id="dateOfBirth"
-                  type="date"
-                  value={newPlayer.dateOfBirth}
-                  onChange={(e) => setNewPlayer({ ...newPlayer, dateOfBirth: e.target.value })}
+                <DatePicker
+                  date={newPlayer.dateOfBirth}
+                  onSelect={(date) => setNewPlayer({ ...newPlayer, dateOfBirth: date })}
+                  placeholder="Pick a date"
                 />
               </div>
             </div>

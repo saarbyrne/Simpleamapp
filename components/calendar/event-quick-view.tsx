@@ -1,6 +1,5 @@
 'use client'
 
-import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,6 +20,8 @@ import { Calendar, Clock, MapPin, Users, ExternalLink, Edit, Trash2, RefreshCw, 
 import { type EventWithDetails } from '@/app/actions/events'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { formatDate, formatTime, formatDateRange } from '@/lib/date-utils'
 
 interface EventQuickViewProps {
   event: EventWithDetails | null
@@ -48,6 +49,7 @@ export function EventQuickView({
   isLoadingDetails = false,
 }: EventQuickViewProps) {
   const router = useRouter()
+  const { preferences } = useUserPreferences()
 
   if (!event) {
     return null
@@ -60,6 +62,10 @@ export function EventQuickView({
 
   const attendingCount = event.attendance?.filter(a => a.status === 'attending').length || 0
   const totalCount = event.attendance?.length || 0
+
+  // Format date and time using user preferences
+  const formattedDate = formatDate(event.startTime, preferences || undefined)
+  const formattedTimeRange = `${formatTime(event.startTime, preferences || undefined)} - ${formatTime(event.endTime, preferences || undefined)}`
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -102,11 +108,11 @@ export function EventQuickView({
               <Calendar className="mt-0.5 h-4 w-4 text-muted-foreground" />
               <div className="flex-1 space-y-0.5 text-sm">
                 <div className="font-medium">
-                  {format(new Date(event.startTime), 'EEEE, MMMM d, yyyy')}
+                  {formattedDate}
                 </div>
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <Clock className="h-3 w-3" />
-                  {format(new Date(event.startTime), 'h:mm a')} - {format(new Date(event.endTime), 'h:mm a')}
+                  {formattedTimeRange}
                 </div>
               </div>
             </div>

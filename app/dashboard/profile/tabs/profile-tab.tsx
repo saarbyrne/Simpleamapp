@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -63,6 +63,11 @@ export function ProfileTab({ user }: ProfileTabProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(user.avatar);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync avatarUrl with user.avatar when user prop changes (e.g., after refresh)
+  useEffect(() => {
+    setAvatarUrl(user.avatar);
+  }, [user.avatar]);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
