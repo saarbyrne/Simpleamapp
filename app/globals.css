@@ -146,6 +146,7 @@
     -webkit-text-decoration: inherit;
     -webkit-text-decoration: inherit;
     text-decoration: inherit;
+    cursor: pointer;
   }
 
   b, strong {
@@ -318,6 +319,11 @@
 
   button, input:where([type="button"], [type="reset"], [type="submit"]) {
     appearance: button;
+    cursor: pointer;
+  }
+
+  [role="button"], [role="link"], [role="tab"], [role="menuitem"], [role="option"] {
+    cursor: pointer;
   }
 
   ::file-selector-button {
@@ -2099,6 +2105,23 @@
 
   .data-\[state\=checked\]\:text-primary-foreground[data-state="checked"] {
     color: var(--primary-foreground);
+  }
+
+  .data-\[state\=active\]\:border-b-primary[data-state="active"] {
+    border-bottom-color: var(--primary);
+  }
+
+  .data-\[state\=active\]\:text-foreground[data-state="active"] {
+    color: var(--foreground);
+  }
+
+  .data-\[state\=active\]\:font-semibold[data-state="active"] {
+    --tw-font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .data-\[state\=active\]\:bg-transparent[data-state="active"] {
+    background-color: #0000;
   }
 
   .data-\[state\=closed\]\:animate-out[data-state="closed"] {
