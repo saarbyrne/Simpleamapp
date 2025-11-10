@@ -2,19 +2,50 @@ const { withSentryConfig } = require('@sentry/nextjs')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Performance: Enable gzip compression
+  compress: true,
+
+  // Performance: Remove X-Powered-By header
+  poweredByHeader: false,
+
+  // Performance: Modern JavaScript optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+
+  // Performance: Image optimization
   images: {
     domains: [
       'api.dicebear.com',
       'hjzcimtmdxafilgrfeye.supabase.co',
       'images.unsplash.com',
     ],
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
   },
+
+  // Performance: Modularize imports for better tree-shaking
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{member}}',
+    },
+    'date-fns': {
+      transform: 'date-fns/{{member}}',
+    },
+  },
+
   experimental: {
     serverActions: {
       allowedOrigins: ['localhost:3000'],
     },
     instrumentationHook: true,
   },
+
+  // Enable React strict mode for better performance warnings
+  reactStrictMode: true,
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Optimize client-side bundle splitting
@@ -52,6 +83,25 @@ const nextConfig = {
             reuseExistingChunk: true,
           },
         },
+      }
+
+      // Performance budgets - warn if bundles get too large
+      config.performance = {
+        maxAssetSize: 244000, // 244KB
+        maxEntrypointSize: 244000,
+        hints: process.env.NODE_ENV === 'production' ? 'warning' : false,
+      }
+
+      // Bundle analyzer (only when ANALYZE=true)
+      if (process.env.ANALYZE === 'true') {
+        const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+        config.plugins.push(
+          new BundleAnalyzerPlugin({
+            analyzerMode: 'static',
+            reportFilename: './analyze.html',
+            openAnalyzer: false,
+          })
+        )
       }
     }
     return config

@@ -1,11 +1,21 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import dynamic from 'next/dynamic'
 import { EventFormDialog } from '@/components/calendar/event-form-dialog'
 import { EventQuickView } from '@/components/calendar/event-quick-view'
-import { EventCalendar } from '@/components/calendar/event-calendar'
+import { CalendarSkeleton } from '@/components/calendar/calendar-skeleton'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
+
+// Lazy load the heavy calendar component to improve initial page load
+const EventCalendar = dynamic(
+  () => import('@/components/calendar/event-calendar').then((mod) => ({ default: mod.EventCalendar })),
+  {
+    loading: () => <CalendarSkeleton />,
+    ssr: false, // Calendar is client-only
+  }
+)
 import { getEvents, getEvent, deleteEvent, deleteEventSeries, type EventWithDetails } from '@/app/actions/events'
 import { toast } from 'sonner'
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, startOfDay, endOfDay, subMonths, addMonths, subWeeks, addWeeks, subDays, addDays } from 'date-fns'

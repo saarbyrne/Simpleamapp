@@ -16,42 +16,52 @@ import posthog from 'posthog-js'
 
 export function AnalyticsProviders({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Only initialize PostHog if API key is provided
+    // Defer PostHog initialization until after page is interactive
     if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-        api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
+      // Use requestIdleCallback to defer initialization, with 2s timeout fallback
+      const initPostHog = () => {
+        posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+          api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
 
-        // FREE TIER SAFEGUARDS
-        // Capture only 100% of events initially - we'll adjust if needed
-        capture_pageview: true,
-        capture_pageleave: true,
+          // FREE TIER SAFEGUARDS
+          // Capture only 100% of events initially - we'll adjust if needed
+          capture_pageview: true,
+          capture_pageleave: true,
 
-        // Session recording (disabled by default to save quota)
-        session_recording: {
-          recordCrossOriginIframes: false,
-        },
+          // Session recording (disabled by default to save quota)
+          session_recording: {
+            recordCrossOriginIframes: false,
+          },
 
-        // Performance monitoring (be conservative)
-        capture_performance: false, // Can enable later if needed
+          // Performance monitoring (be conservative)
+          capture_performance: false, // Can enable later if needed
 
-        // Respect user privacy
-        opt_out_capturing_by_default: false,
-        respect_dnt: true,
+          // Respect user privacy
+          opt_out_capturing_by_default: false,
+          respect_dnt: true,
 
-        // Advanced settings for cost control
-        autocapture: true, // Auto-capture clicks, form submissions
+          // Advanced settings for cost control
+          autocapture: true, // Auto-capture clicks, form submissions
 
-        // Disable features that consume quota quickly
-        disable_session_recording: true, // Can enable selectively later
-        disable_surveys: true,
+          // Disable features that consume quota quickly
+          disable_session_recording: true, // Can enable selectively later
+          disable_surveys: true,
 
-        // Load settings
-        loaded: (posthog) => {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('PostHog initialized')
-          }
-        },
-      })
+          // Load settings
+          loaded: (posthog) => {
+            if (process.env.NODE_ENV === 'development') {
+              console.log('PostHog initialized (deferred)')
+            }
+          },
+        })
+      }
+
+      // Use requestIdleCallback if available, otherwise setTimeout
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(initPostHog, { timeout: 2000 })
+      } else {
+        setTimeout(initPostHog, 1000)
+      }
     }
   }, [])
 
