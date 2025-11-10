@@ -19,6 +19,8 @@ import { PageFrame } from '@/components/dashboard/page-frame'
 import { QuickActionsToolbar } from '@/components/dashboard/quick-actions-toolbar'
 import { AddPlayerDialog } from '@/components/dashboard/add-player-dialog'
 import { EventFormDialog } from '@/components/calendar/event-form-dialog'
+import { FormBuilderDialog } from '@/components/dashboard/form-builder-dialog'
+import { useRouter } from 'next/navigation'
 
 type DashboardLayoutClientProps = {
   userName: string
@@ -140,12 +142,15 @@ export function DashboardLayoutClient({
   children,
   disablePageFrame = false,
 }: DashboardLayoutClientProps) {
+  const router = useRouter()
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false)
   const [isAddEventOpen, setIsAddEventOpen] = useState(false)
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false)
 
   const quickActionHandlers = {
     'add-player': () => setIsAddPlayerOpen(true),
     'add-event': () => setIsAddEventOpen(true),
+    'add-form': () => setIsAddFormOpen(true),
   }
 
   return (
@@ -185,6 +190,13 @@ export function DashboardLayoutClient({
           onOpenChange={setIsAddEventOpen}
           onSuccess={() => {
             // Event created successfully - the EventFormDialog handles the success toast
+          }}
+        />
+        <FormBuilderDialog
+          open={isAddFormOpen}
+          onOpenChange={setIsAddFormOpen}
+          onSuccess={() => {
+            router.refresh()
           }}
         />
       </SidebarProvider>

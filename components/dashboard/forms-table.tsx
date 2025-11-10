@@ -22,7 +22,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Plus, Eye, Copy } from 'lucide-react'
+import { MoreHorizontal, Plus, Eye, Copy, Send, FileText, Edit } from 'lucide-react'
+import { FormBuilderDialog } from '@/components/dashboard/form-builder-dialog'
+import { FormDistributionDialog } from '@/components/dashboard/form-distribution-dialog'
+import { FormPreviewDialog } from '@/components/dashboard/form-preview-dialog'
+import { duplicateForm } from '@/app/actions/forms'
+import { toast } from 'sonner'
 import {
   Select,
   SelectContent,
@@ -81,7 +86,12 @@ const titleCase = (value: string | null | undefined) => {
 
 const createColumns = (
   forms: FormRow[],
-  preferences?: { timezone: string | null; dateFormat: string | null; timeFormat: string | null } | null
+  preferences?: { timezone: string | null; dateFormat: string | null; timeFormat: string | null } | null,
+  onDistribute?: (formId: string, formName: string) => void,
+  onViewResponses?: (formId: string) => void,
+  onPreview?: (formId: string) => void,
+  onEdit?: (formId: string) => void,
+  onDuplicate?: (formId: string) => void
 ): ColumnDef<FormRow>[] => {
   const columns: ColumnDef<FormRow>[] = [
     {
@@ -166,16 +176,28 @@ const createColumns = (
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => onDistribute?.(form.id, form.title)}
+                >
+                  <Send className="mr-2 h-4 w-4" />
+                  Distribute
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onPreview?.(form.id)}>
                   <Eye className="mr-2 h-4 w-4" />
                   Preview form
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onDuplicate?.(form.id)}>
                   <Copy className="mr-2 h-4 w-4" />
                   Duplicate form
                 </DropdownMenuItem>
-                <DropdownMenuItem>View responses</DropdownMenuItem>
-                <DropdownMenuItem>Edit form</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onViewResponses?.(form.id)}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  View responses
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onEdit?.(form.id)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit form
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -215,6 +237,11 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
     pageSize: 20,
   })
   const [isBulkUpdating, setIsBulkUpdating] = useState(false)
+  const [isFormBuilderOpen, setIsFormBuilderOpen] = useState(false)
+  const [editingFormId, setEditingFormId] = useState<string | null>(null)
+  const [previewFormId, setPreviewFormId] = useState<string | null>(null)
+  const [distributionFormId, setDistributionFormId] = useState<string | null>(null)
+  const [distributionFormName, setDistributionFormName] = useState<string>('')
 
   // Track if component has mounted to prevent initial URL update
   const isMounted = useRef(false)
@@ -511,8 +538,38 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
   }, [forms, search, categoryFilter, statusFilter, ownerFilter])
 
   const columns = useMemo(
-    () => createColumns(forms, preferences || null), 
-    [forms, preferences]
+    () => createColumns(
+      forms,
+      preferences || null,
+      (formId, formName) => {
+        setDistributionFormId(formId)
+        setDistributionFormName(formName)
+      },
+      (formId) => {
+        router.push(`/dashboard/forms/${formId}/responses`)
+      },
+      (formId) => {
+        setPreviewFormId(formId)
+      },
+      (formId) => {
+        setEditingFormId(formId)
+      },
+      async (formId) => {
+        try {
+          const result = await duplicateForm(formId)
+          if (result.error) {
+            toast.error(result.error)
+          } else {
+            toast.success('Form duplicated successfully')
+            router.refresh()
+          }
+        } catch (error) {
+          console.error('Error duplicating form:', error)
+          toast.error('Failed to duplicate form')
+        }
+      }
+    ),
+    [forms, preferences, router]
   )
 
   // Prepare filter config for DataTableFilters
@@ -654,11 +711,55 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
 
   return (
     <div className="w-full min-w-0 max-w-full">
+      <FormBuilderDialog
+        open={isFormBuilderOpen && !editingFormId}
+        onOpenChange={(open) => {
+          if (!open) setIsFormBuilderOpen(false)
+        }}
+        onSuccess={() => {
+          router.refresh()
+        }}
+      />
+      <FormBuilderDialog
+        open={!!editingFormId}
+        formId={editingFormId}
+        onOpenChange={(open) => {
+          if (!open) setEditingFormId(null)
+        }}
+        onSuccess={() => {
+          setEditingFormId(null)
+          router.refresh()
+        }}
+      />
+      <FormPreviewDialog
+        open={!!previewFormId}
+        formId={previewFormId}
+        onOpenChange={(open) => {
+          if (!open) setPreviewFormId(null)
+        }}
+      />
+      {distributionFormId && (
+        <FormDistributionDialog
+          open={!!distributionFormId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDistributionFormId(null)
+              setDistributionFormName('')
+            }
+          }}
+          formId={distributionFormId}
+          formName={distributionFormName}
+          onSuccess={() => {
+            router.refresh()
+          }}
+        />
+      )}
       <PageCard
         title="Forms"
         description="Manage your forms and review submissions."
         headerActions={
           <Button 
+            onClick={() => setIsFormBuilderOpen(true)}
             className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
             type="button"
           >
