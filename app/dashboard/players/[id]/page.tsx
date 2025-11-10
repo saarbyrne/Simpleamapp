@@ -144,52 +144,31 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="flex-1 flex flex-col">
-        <TabsList className="h-auto bg-transparent border-b rounded-none w-full justify-start p-0">
-          <TabsTrigger
-            value="overview"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-          >
+        <TabsList>
+          <TabsTrigger value="overview">
             Overview
           </TabsTrigger>
-          <TabsTrigger
-            value="forms"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-          >
+          <TabsTrigger value="forms">
             <FileText className="mr-2 h-4 w-4" />
             Forms
           </TabsTrigger>
-          <TabsTrigger
-            value="events"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-          >
+          <TabsTrigger value="events">
             <Calendar className="mr-2 h-4 w-4" />
             Events
           </TabsTrigger>
-          <TabsTrigger
-            value="performance"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-          >
+          <TabsTrigger value="performance">
             <BarChart3 className="mr-2 h-4 w-4" />
             Performance
           </TabsTrigger>
-          <TabsTrigger
-            value="notes"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-          >
+          <TabsTrigger value="notes">
             <StickyNote className="mr-2 h-4 w-4" />
             Notes
           </TabsTrigger>
-          <TabsTrigger
-            value="files"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-          >
+          <TabsTrigger value="files">
             <FolderOpen className="mr-2 h-4 w-4" />
             Files
           </TabsTrigger>
-          <TabsTrigger
-            value="spreadsheets"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-          >
+          <TabsTrigger value="spreadsheets">
             <Table className="mr-2 h-4 w-4" />
             Spreadsheets
           </TabsTrigger>
