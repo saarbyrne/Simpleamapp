@@ -386,13 +386,13 @@ export default function EventDetailPage() {
             ? {
                 id: event.id,
                 title: event.title,
-                description: event.description,
-                type: event.type,
+                description: event.description ?? undefined,
+                type: event.type as 'training' | 'match' | 'medical' | 'meeting' | 'other',
                 startTime: new Date(event.startTime),
                 endTime: new Date(event.endTime),
-                location: event.location,
+                location: event.location ?? undefined,
               }
-            : null
+            : undefined
         }
       />
 

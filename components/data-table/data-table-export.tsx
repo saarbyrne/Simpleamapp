@@ -18,7 +18,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-interface DataTableExportProps<TData> {
+export interface DataTableExportProps<TData> {
   table: Table<TData>
   filename?: string
   columns: ColumnDef<TData>[]

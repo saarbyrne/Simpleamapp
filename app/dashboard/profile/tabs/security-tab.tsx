@@ -245,7 +245,7 @@ export function SecurityTab({ user }: SecurityTabProps) {
         <CardHeader>
           <CardTitle>Active Sessions</CardTitle>
           <CardDescription>
-            Manage devices where you're currently logged in
+            Manage devices where you&apos;re currently logged in
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -283,7 +283,7 @@ export function SecurityTab({ user }: SecurityTabProps) {
             <li className="flex gap-2">
               <span className="text-amber-600 dark:text-amber-400">•</span>
               <span>
-                Use a unique password that you don't use for other accounts
+                Use a unique password that you don&apos;t use for other accounts
               </span>
             </li>
             <li className="flex gap-2">

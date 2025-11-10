@@ -37,7 +37,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { useState } from 'react'
 
-interface DataTableColumnManagerProps<TData> {
+export interface DataTableColumnManagerProps<TData> {
   table: Table<TData>
   onColumnOrderChange?: (columnOrder: string[]) => void
 }

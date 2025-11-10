@@ -65,16 +65,22 @@ export function EventDetailDialog({
 }: EventDetailDialogProps) {
   const [activeTab, setActiveTab] = useState('overview')
 
+  const typeConfig = useMemo(() => {
+    if (!event) return eventTypeConfig.other
+    return eventTypeConfig[event.type as keyof typeof eventTypeConfig] || eventTypeConfig.other
+  }, [event])
+
+  const attendanceSummary = useMemo(() => {
+    if (!event) return { total: 0, attending: 0, absent: 0, invited: 0 }
+    return {
+      total: event.attendance.length,
+      attending: event.attendance.filter(a => a.status === 'attending').length,
+      absent: event.attendance.filter(a => a.status === 'absent').length,
+      invited: event.attendance.filter(a => a.status === 'invited').length,
+    }
+  }, [event])
+
   if (!event) return null
-
-  const typeConfig = eventTypeConfig[event.type as keyof typeof eventTypeConfig] || eventTypeConfig.other
-
-  const attendanceSummary = useMemo(() => ({
-    total: event.attendance.length,
-    attending: event.attendance.filter(a => a.status === 'attending').length,
-    absent: event.attendance.filter(a => a.status === 'absent').length,
-    invited: event.attendance.filter(a => a.status === 'invited').length,
-  }), [event.attendance])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

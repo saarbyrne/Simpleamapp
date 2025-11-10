@@ -32,6 +32,11 @@ export function InlineBulkActions<TData>({
   // Use state to track selected count, updated in useEffect to avoid state updates during render
   const [selectedCount, setSelectedCount] = useState(0)
   
+  // Extract state values to stable variables for dependency array
+  const rowSelection = table.getState().rowSelection
+  const columnFilters = table.getState().columnFilters
+  const globalFilter = table.getState().globalFilter
+  
   useEffect(() => {
     // Calculate selected count after component mounts to avoid SSR/hydration issues
     // Use setTimeout to ensure this runs after render phase
@@ -41,18 +46,12 @@ export function InlineBulkActions<TData>({
         setSelectedCount(selectedRows.length)
       } catch (error) {
         // Fallback: count selected rows from state only (safe, doesn't trigger updates)
-        const rowSelection = table.getState().rowSelection
         setSelectedCount(Object.keys(rowSelection).length)
       }
     }, 0)
     
     return () => clearTimeout(timer)
-  }, [
-    // Use JSON.stringify to create stable dependency strings
-    JSON.stringify(table.getState().rowSelection),
-    JSON.stringify(table.getState().columnFilters),
-    table.getState().globalFilter,
-  ])
+  }, [table, rowSelection, columnFilters, globalFilter])
 
   const fields: BulkField[] = []
 
@@ -70,12 +69,13 @@ export function InlineBulkActions<TData>({
     })
   }
 
-  // Add status field
+  // Add status field (required - cannot be cleared)
   fields.push({
     id: 'status',
     type: 'select',
     placeholder: 'Status',
     width: 'w-[130px]',
+    allowClear: false, // Status is required, cannot be cleared
     options: [
       { value: 'active', label: 'Active' },
       { value: 'injured', label: 'Injured' },
@@ -105,18 +105,31 @@ export function InlineBulkActions<TData>({
   const handleSave = async (values: Record<string, string | null>) => {
     const updates: {
       position?: string | null
-      status?: 'active' | 'injured' | 'inactive' | null
+      status?: 'active' | 'injured' | 'inactive'
       nationality?: string | null
     } = {}
 
-    if (values.position !== undefined) {
+    if (values.position !== undefined && values.position !== null && values.position !== '') {
       updates.position = values.position
+    } else if (values.position === '') {
+      // Allow clearing position (it's nullable in schema)
+      updates.position = null
     }
-    if (values.status !== undefined) {
-      updates.status = (values.status as 'active' | 'injured' | 'inactive') || null
+
+    // Status is required - only include if a valid value is provided
+    // Don't allow clearing/nullifying status
+    if (values.status !== undefined && values.status !== null && values.status !== '') {
+      const statusValue = values.status as 'active' | 'injured' | 'inactive'
+      if (['active', 'injured', 'inactive'].includes(statusValue)) {
+        updates.status = statusValue
+      }
     }
-    if (values.nationality !== undefined) {
+
+    if (values.nationality !== undefined && values.nationality !== null && values.nationality !== '') {
       updates.nationality = values.nationality
+    } else if (values.nationality === '') {
+      // Allow clearing nationality (it's nullable in schema)
+      updates.nationality = null
     }
 
     await onSave(updates)

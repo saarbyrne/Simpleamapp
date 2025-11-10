@@ -126,7 +126,7 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
                   <FormLabel>Display Language</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -158,7 +158,7 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
                   <FormLabel>Timezone</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -190,7 +190,7 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
                   <FormLabel>Date Format</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -226,7 +226,7 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
                   <FormLabel>Time Format</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>

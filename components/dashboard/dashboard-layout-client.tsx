@@ -23,6 +23,7 @@ import { EventFormDialog } from '@/components/calendar/event-form-dialog'
 type DashboardLayoutClientProps = {
   userName: string
   userEmail: string | null
+  userAvatar?: string | null
   children: React.ReactNode
   /**
    * Set to true to disable the PageFrame wrapper (no padding/spacing).
@@ -135,6 +136,7 @@ function DashboardBreadcrumb() {
 export function DashboardLayoutClient({
   userName,
   userEmail,
+  userAvatar,
   children,
   disablePageFrame = false,
 }: DashboardLayoutClientProps) {
@@ -149,7 +151,7 @@ export function DashboardLayoutClient({
   return (
     <BreadcrumbProvider>
       <SidebarProvider>
-        <AppSidebar userName={userName} userEmail={userEmail} />
+        <AppSidebar userName={userName} userEmail={userEmail} userAvatar={userAvatar} />
         <SidebarInset className="flex flex-col">
           <div className="sticky top-0 z-10 shrink-0 w-full overflow-x-hidden bg-background">
             <header className="flex h-16 items-center gap-2 border-b px-4">
@@ -181,7 +183,7 @@ export function DashboardLayoutClient({
         <EventFormDialog
           open={isAddEventOpen}
           onOpenChange={setIsAddEventOpen}
-          onEventCreated={() => {
+          onSuccess={() => {
             // Event created successfully - the EventFormDialog handles the success toast
           }}
         />

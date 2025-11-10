@@ -129,6 +129,9 @@ export function DataTable<TData>({
                 const isExpanded = enableGrouping && row.getIsExpanded()
 
                 if (isGrouped) {
+                  // Get the grouping column ID from the row
+                  const groupingColumnId = row.groupingColumnId || ''
+                  const groupingValue = groupingColumnId ? row.getGroupingValue(groupingColumnId) : row.id
                   return (
                     <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                       <TableCell
@@ -146,7 +149,7 @@ export function DataTable<TData>({
                               <ChevronRight className="h-4 w-4" />
                             )}
                           </button>
-                          {flexRender(row.getGroupingValue(), row.getContext())} (
+                          {String(groupingValue)} (
                           {row.subRows.length} {row.subRows.length === 1 ? 'item' : 'items'})
                         </div>
                       </TableCell>

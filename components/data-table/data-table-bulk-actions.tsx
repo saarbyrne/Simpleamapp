@@ -20,7 +20,7 @@ export interface BulkAction {
   disabled?: (selectedRows: any[]) => boolean
 }
 
-interface DataTableBulkActionsProps<TData> {
+export interface DataTableBulkActionsProps<TData> {
   table: Table<TData>
   actions?: BulkAction[]
   onDelete?: (selectedRows: TData[]) => void | Promise<void>

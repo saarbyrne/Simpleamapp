@@ -10,7 +10,7 @@ export interface FilterConfig {
   placeholder?: string
 }
 
-interface DataTableFiltersProps {
+export interface DataTableFiltersProps {
   filters: FilterConfig[]
   values: Record<string, string>
   onFilterChange: (key: string, value: string) => void

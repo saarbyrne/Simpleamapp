@@ -31,7 +31,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,6 +64,7 @@ const settingsItems = [
 type AppSidebarProps = {
   userName: string
   userEmail?: string | null
+  userAvatar?: string | null
 }
 
 function LogoBadge() {
@@ -83,7 +84,7 @@ function LogoBadge() {
   )
 }
 
-export function AppSidebar({ userName, userEmail }: AppSidebarProps) {
+export function AppSidebar({ userName, userEmail, userAvatar }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -158,6 +159,7 @@ export function AppSidebar({ userName, userEmail }: AppSidebarProps) {
                   tooltip={userName}
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={userAvatar || undefined} alt={userName} />
                     <AvatarFallback className="rounded-lg">
                       {userName?.[0]?.toUpperCase() ?? 'U'}
                     </AvatarFallback>

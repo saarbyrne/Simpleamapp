@@ -263,10 +263,11 @@ export async function createEvent(data: CreateEventData) {
 
         // Add attendees to all events in parallel if provided
         if (data.attendeeIds && data.attendeeIds.length > 0) {
+          const attendeeIds = data.attendeeIds
           await Promise.all(
             events.map(async (event) => {
               return await tx.eventAttendance.createMany({
-                data: data.attendeeIds.map(personOrgId => ({
+                data: attendeeIds.map(personOrgId => ({
                   eventId: event.id,
                   personOrgId,
                   status: 'invited',
@@ -311,8 +312,9 @@ export async function createEvent(data: CreateEventData) {
 
         // Add attendees if provided
         if (data.attendeeIds && data.attendeeIds.length > 0) {
+          const attendeeIds = data.attendeeIds
           await tx.eventAttendance.createMany({
-            data: data.attendeeIds.map(personOrgId => ({
+            data: attendeeIds.map(personOrgId => ({
               eventId: event.id,
               personOrgId,
               status: 'invited',
@@ -396,9 +398,10 @@ export async function updateEvent(eventId: string, data: UpdateEventData) {
         })
 
         // Add new attendees
-        if (data.attendeeIds.length > 0) {
+        const attendeeIds = data.attendeeIds
+        if (attendeeIds.length > 0) {
           await tx.eventAttendance.createMany({
-            data: data.attendeeIds.map(personOrgId => ({
+            data: attendeeIds.map(personOrgId => ({
               eventId: event.id,
               personOrgId,
               status: 'invited',

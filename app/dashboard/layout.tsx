@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getCurrentUserProfile } from '@/app/actions/profile'
 
 import { DashboardLayoutClient } from '@/components/dashboard/dashboard-layout-client'
 
@@ -17,15 +18,27 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     redirect('/login')
   }
 
-  const userName =
-    user?.user_metadata?.full_name ||
-    user?.user_metadata?.name ||
-    user?.user_metadata?.preferred_username ||
-    user?.email?.split('@')[0] ||
-    'Team member'
+  // Fetch user profile to get avatar and name from database
+  const profileResult = await getCurrentUserProfile()
+  
+  const userName = profileResult.success && profileResult.data
+    ? profileResult.data.name
+    : user?.user_metadata?.full_name ||
+      user?.user_metadata?.name ||
+      user?.user_metadata?.preferred_username ||
+      user?.email?.split('@')[0] ||
+      'Team member'
+
+  const userAvatar = profileResult.success && profileResult.data
+    ? profileResult.data.avatar
+    : null
 
   return (
-    <DashboardLayoutClient userName={userName} userEmail={user?.email ?? null}>
+    <DashboardLayoutClient 
+      userName={userName} 
+      userEmail={user?.email ?? null}
+      userAvatar={userAvatar}
+    >
       {children}
     </DashboardLayoutClient>
   )

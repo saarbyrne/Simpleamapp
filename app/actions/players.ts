@@ -234,15 +234,24 @@ export async function bulkUpdatePlayers(
       // Update position and/or status in PersonOrganization table if provided
       const personOrgUpdates: {
         position?: string | null
-        status?: 'active' | 'injured' | 'inactive' | null
+        status?: string
       } = {}
 
       if (updates.position !== undefined) {
         personOrgUpdates.position = updates.position || null
       }
 
+      // Status is required in schema - validate and provide clear error if null
       if (updates.status !== undefined) {
-        personOrgUpdates.status = updates.status || null
+        if (updates.status === null) {
+          throw new Error('Status is required and cannot be cleared. Please select a valid status (active, injured, or inactive).')
+        }
+        // Validate status value
+        const validStatuses = ['active', 'injured', 'inactive']
+        if (!validStatuses.includes(updates.status)) {
+          throw new Error(`Invalid status value: ${updates.status}. Must be one of: ${validStatuses.join(', ')}`)
+        }
+        personOrgUpdates.status = updates.status
       }
 
       if (Object.keys(personOrgUpdates).length > 0) {

@@ -115,7 +115,7 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
             <div className="space-y-0.5">
               <Label>Form assigned to you</Label>
               <p className="text-sm text-muted-foreground">
-                When you're assigned a form to complete
+                When you&apos;re assigned a form to complete
               </p>
             </div>
             <Switch
@@ -183,7 +183,7 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
             <div className="space-y-0.5">
               <Label>Weekly digest</Label>
               <p className="text-sm text-muted-foreground">
-                Summary of the week's activity
+                Summary of the week&apos;s activity
               </p>
             </div>
             <Switch

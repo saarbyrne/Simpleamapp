@@ -51,7 +51,7 @@ const eventFormSchema = z.object({
   endDate: z.date(),
   endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format'),
   location: z.string().optional(),
-  isRecurring: z.boolean().default(false),
+  isRecurring: z.boolean(),
   recurrenceFrequency: z.enum(['daily', 'weekly', 'monthly']).optional(),
   recurrenceInterval: z.number().min(1).max(99).optional(),
   recurrenceEndType: z.enum(['never', 'until', 'count']).optional(),

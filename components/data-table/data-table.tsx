@@ -19,6 +19,7 @@ import {
   PaginationState,
   useReactTable,
   Table as TanStackTable,
+  OnChangeFn,
 } from '@tanstack/react-table'
 import {
   Table,
@@ -43,21 +44,21 @@ export interface DataTableProps<TData> {
   columns: ColumnDef<TData>[]
   // State props
   sorting?: SortingState
-  onSortingChange?: (sorting: SortingState) => void
+  onSortingChange?: OnChangeFn<SortingState>
   columnVisibility?: VisibilityState
-  onColumnVisibilityChange?: (visibility: VisibilityState) => void
+  onColumnVisibilityChange?: OnChangeFn<VisibilityState>
   columnOrder?: ColumnOrderState
-  onColumnOrderChange?: (order: ColumnOrderState) => void
+  onColumnOrderChange?: OnChangeFn<ColumnOrderState>
   columnSizing?: ColumnSizingState
-  onColumnSizingChange?: (sizing: ColumnSizingState) => void
+  onColumnSizingChange?: OnChangeFn<ColumnSizingState>
   grouping?: GroupingState
-  onGroupingChange?: (grouping: GroupingState) => void
+  onGroupingChange?: OnChangeFn<GroupingState>
   expanded?: ExpandedState
-  onExpandedChange?: (expanded: ExpandedState) => void
+  onExpandedChange?: OnChangeFn<ExpandedState>
   rowSelection?: RowSelectionState
-  onRowSelectionChange?: (selection: RowSelectionState) => void
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>
   pagination?: PaginationState
-  onPaginationChange?: (pagination: PaginationState) => void
+  onPaginationChange?: OnChangeFn<PaginationState>
   // Feature flags
   enableRowSelection?: boolean
   enableGrouping?: boolean
@@ -67,7 +68,7 @@ export interface DataTableProps<TData> {
   enableBulkActions?: boolean
   enableExport?: boolean
   // Customization
-  bulkActions?: BulkAction<TData>[]
+  bulkActions?: BulkAction[]
   onBulkDelete?: (selectedRows: TData[]) => void | Promise<void>
   onBulkCopy?: (selectedRows: TData[]) => void | Promise<void>
   onBulkExport?: (selectedRows: TData[]) => void | Promise<void>
@@ -146,21 +147,21 @@ export function DataTable<TData>({
 
   // Use controlled or internal state
   const sorting = controlledSorting ?? internalSorting
-  const setSorting = setControlledSorting ?? setInternalSorting
+  const setSorting = (setControlledSorting ?? setInternalSorting) as OnChangeFn<SortingState>
   const columnVisibility = controlledColumnVisibility ?? internalColumnVisibility
-  const setColumnVisibility = setControlledColumnVisibility ?? setInternalColumnVisibility
+  const setColumnVisibility = (setControlledColumnVisibility ?? setInternalColumnVisibility) as OnChangeFn<VisibilityState>
   const columnOrder = controlledColumnOrder ?? internalColumnOrder
-  const setColumnOrder = setControlledColumnOrder ?? setInternalColumnOrder
+  const setColumnOrder = (setControlledColumnOrder ?? setInternalColumnOrder) as OnChangeFn<ColumnOrderState>
   const columnSizing = controlledColumnSizing ?? internalColumnSizing
-  const setColumnSizing = setControlledColumnSizing ?? setInternalColumnSizing
+  const setColumnSizing = (setControlledColumnSizing ?? setInternalColumnSizing) as OnChangeFn<ColumnSizingState>
   const grouping = controlledGrouping ?? internalGrouping
-  const setGrouping = setControlledGrouping ?? setInternalGrouping
+  const setGrouping = (setControlledGrouping ?? setInternalGrouping) as OnChangeFn<GroupingState>
   const expanded = controlledExpanded ?? internalExpanded
-  const setExpanded = setControlledExpanded ?? setInternalExpanded
+  const setExpanded = (setControlledExpanded ?? setInternalExpanded) as OnChangeFn<ExpandedState>
   const rowSelection = controlledRowSelection ?? internalRowSelection
-  const setRowSelection = setControlledRowSelection ?? setInternalRowSelection
+  const setRowSelection = (setControlledRowSelection ?? setInternalRowSelection) as OnChangeFn<RowSelectionState>
   const pagination = controlledPagination ?? internalPagination
-  const setPagination = setControlledPagination ?? setInternalPagination
+  const setPagination = (setControlledPagination ?? setInternalPagination) as OnChangeFn<PaginationState>
 
   // Add selection column if enabled
   const columnsWithSelection = useMemo(() => {
@@ -199,7 +200,7 @@ export function DataTable<TData>({
     const getAllColumnIds = (cols: ColumnDef<TData>[]) => {
       return cols.map((col) => {
         if (col.id) return col.id
-        if (typeof col.accessorKey === 'string') return col.accessorKey
+        if ('accessorKey' in col && typeof col.accessorKey === 'string') return col.accessorKey
         return ''
       }).filter(Boolean)
     }
@@ -262,7 +263,6 @@ export function DataTable<TData>({
       rowSelection: enableRowSelection ? rowSelection : undefined,
       pagination,
     },
-    defaultColumnOrder: enableColumnReordering && normalizedColumnOrder ? normalizedColumnOrder : undefined,
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnOrderChange: setColumnOrder,
