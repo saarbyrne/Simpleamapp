@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { AppSidebar } from '@/components/dashboard/app-sidebar'
@@ -15,6 +16,9 @@ import {
 } from '@/components/ui/breadcrumb'
 import { BreadcrumbProvider, useBreadcrumb } from '@/lib/breadcrumb-context'
 import { PageFrame } from '@/components/dashboard/page-frame'
+import { QuickActionsToolbar } from '@/components/dashboard/quick-actions-toolbar'
+import { AddPlayerDialog } from '@/components/dashboard/add-player-dialog'
+import { EventFormDialog } from '@/components/calendar/event-form-dialog'
 
 type DashboardLayoutClientProps = {
   userName: string
@@ -134,6 +138,14 @@ export function DashboardLayoutClient({
   children,
   disablePageFrame = false,
 }: DashboardLayoutClientProps) {
+  const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false)
+  const [isAddEventOpen, setIsAddEventOpen] = useState(false)
+
+  const quickActionHandlers = {
+    'add-player': () => setIsAddPlayerOpen(true),
+    'add-event': () => setIsAddEventOpen(true),
+  }
+
   return (
     <BreadcrumbProvider>
       <SidebarProvider>
@@ -146,6 +158,10 @@ export function DashboardLayoutClient({
               <div className="flex-1 min-w-0">
                 <DashboardBreadcrumb />
               </div>
+              <QuickActionsToolbar
+                actionHandlers={quickActionHandlers}
+                className="ml-auto shrink-0"
+              />
             </header>
           </div>
           {disablePageFrame ? (
@@ -156,6 +172,19 @@ export function DashboardLayoutClient({
             <PageFrame>{children}</PageFrame>
           )}
         </SidebarInset>
+
+        {/* Quick Action Dialogs */}
+        <AddPlayerDialog
+          open={isAddPlayerOpen}
+          onOpenChange={setIsAddPlayerOpen}
+        />
+        <EventFormDialog
+          open={isAddEventOpen}
+          onOpenChange={setIsAddEventOpen}
+          onEventCreated={() => {
+            // Event created successfully - the EventFormDialog handles the success toast
+          }}
+        />
       </SidebarProvider>
     </BreadcrumbProvider>
   )
