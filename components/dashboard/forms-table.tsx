@@ -37,6 +37,7 @@ import {
   DataTableExport,
   type FilterConfig,
 } from '@/components/data-table'
+import { BulkActionsBar, type BulkField } from '@/components/ui/bulk-actions-bar'
 import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/react-table'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { formatDate } from '@/lib/date-utils'
@@ -213,6 +214,7 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
     pageIndex: 0,
     pageSize: 20,
   })
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false)
 
   // Track if component has mounted to prevent initial URL update
   const isMounted = useRef(false)
@@ -588,7 +590,40 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     enableRowSelection: true,
+    autoResetPageIndex: false, // Prevent auto-reset pagination during render
   })
+
+  // Handle bulk update (using InlineBulkActions component)
+  const handleBulkUpdate = useCallback(async (updates: {
+    status?: 'Active' | 'Draft' | 'Archived' | null
+    category?: string | null
+  }) => {
+    setIsBulkUpdating(true)
+    try {
+      // Get selected form IDs from the table instance
+      const selectedRows = tableInstance.getFilteredSelectedRowModel().rows
+      const selectedIds = selectedRows.map((row) => row.original.id)
+
+      if (selectedIds.length === 0) {
+        alert('No forms selected')
+        setIsBulkUpdating(false)
+        return
+      }
+
+      // TODO: Implement bulk update when forms actions are available
+      console.log('Bulk update forms:', selectedIds, updates)
+      // await bulkUpdateForms(selectedIds, updates)
+      
+      // Clear selection and refresh
+      setRowSelection({})
+      router.refresh()
+    } catch (error) {
+      console.error('Error updating forms:', error)
+      alert('Failed to update forms')
+    } finally {
+      setIsBulkUpdating(false)
+    }
+  }, [tableInstance, router, setRowSelection])
 
   const { pageIndex, pageSize } = pagination
   const totalForms = serverTotal ?? filteredForms.length
@@ -650,6 +685,56 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
           </div>
         }
       >
+          {/* Inline bulk actions using BulkActionsBar directly */}
+          {Object.keys(rowSelection).length > 0 && (
+            <BulkActionsBar
+              selectedCount={Object.keys(rowSelection).length}
+              fields={[
+                ...(uniqueCategories.length > 0 ? [{
+                  id: 'category',
+                  type: 'select' as const,
+                  placeholder: 'Category',
+                  width: 'w-[160px]',
+                  options: uniqueCategories.map((cat) => ({
+                    value: cat,
+                    label: cat,
+                  })),
+                }] : []),
+                {
+                  id: 'status',
+                  type: 'select' as const,
+                  placeholder: 'Status',
+                  width: 'w-[130px]',
+                  allowClear: false,
+                  options: [
+                    { value: 'Active', label: 'Active' },
+                    { value: 'Draft', label: 'Draft' },
+                    { value: 'Archived', label: 'Archived' },
+                  ],
+                },
+              ]}
+              onSave={async (values) => {
+                const updates: {
+                  status?: 'Active' | 'Draft' | 'Archived' | null
+                  category?: string | null
+                } = {}
+                
+                if (values.status && ['Active', 'Draft', 'Archived'].includes(values.status)) {
+                  updates.status = values.status as 'Active' | 'Draft' | 'Archived'
+                }
+                
+                if (values.category !== undefined) {
+                  updates.category = values.category || null
+                }
+                
+                await handleBulkUpdate(updates)
+              }}
+              onClear={() => setRowSelection({})}
+              isLoading={isBulkUpdating}
+              itemLabel="form"
+            />
+          )}
+
           <DataTable
             data={filteredForms}
             columns={columns}

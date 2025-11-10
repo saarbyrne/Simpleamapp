@@ -281,6 +281,7 @@ export function DataTable<TData>({
     columnResizeMode: enableColumnResizing ? 'onChange' : undefined,
     enableGrouping: enableGrouping,
     enableRowSelection: enableRowSelection,
+    autoResetPageIndex: false, // Prevent auto-reset pagination during render
   })
 
   return (

@@ -457,7 +457,11 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     lastUrlSearchRef.current = currentStateSignature
     
     // Use startTransition to batch state updates and avoid hydration issues
+    // Double-check mounted state inside the transition to prevent updates after unmount
     startTransition(() => {
+      // Ensure component is still mounted before updating state
+      if (!isMounted.current) return
+      
       // Batch all state updates together to avoid hydration issues
       if (hasUrlParams) {
         // Use URL params - batch updates
@@ -529,21 +533,33 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     // Mark as mounted first
     isMounted.current = true
     
-    // Use setTimeout to ensure we're past hydration and render phase
+    // Use requestAnimationFrame to ensure we're past hydration and render phase
+    // This ensures the component is fully mounted before updating state
+    let rafId: number | null = null
     const timeoutId = setTimeout(() => {
-      lastPathnameRef.current = pathname
-      syncStateFromURL()
+      rafId = requestAnimationFrame(() => {
+        if (isMounted.current) {
+          lastPathnameRef.current = pathname
+          syncStateFromURL()
+        }
+      })
     }, 0)
     
     // Listen for popstate (browser back/forward)
     const handlePopState = () => {
-      syncStateFromURL()
+      if (isMounted.current) {
+        syncStateFromURL()
+      }
     }
     
     window.addEventListener('popstate', handlePopState)
     
     return () => {
+      isMounted.current = false
       clearTimeout(timeoutId)
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
       window.removeEventListener('popstate', handlePopState)
     }
   }, [syncStateFromURL, pathname])
@@ -553,10 +569,15 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     if (!isMounted.current || typeof window === 'undefined') return
     if (pathname !== lastPathnameRef.current) {
       lastPathnameRef.current = pathname
-      // Small delay to ensure URL is updated
-      setTimeout(() => {
-        syncStateFromURL()
-      }, 0)
+      // Use requestAnimationFrame to ensure URL is updated and component is mounted
+      const rafId = requestAnimationFrame(() => {
+        if (isMounted.current) {
+          syncStateFromURL()
+        }
+      })
+      return () => {
+        cancelAnimationFrame(rafId)
+      }
     }
   }, [pathname, syncStateFromURL])
 
@@ -817,6 +838,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     enableRowSelection: true,
+    autoResetPageIndex: false, // Prevent auto-reset pagination during render
   })
 
   // Handle bulk update
