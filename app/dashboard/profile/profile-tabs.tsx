@@ -40,11 +40,31 @@ interface ProfileTabsProps {
 export function ProfileTabs({ user }: ProfileTabsProps) {
   return (
     <Tabs defaultValue="profile" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="profile">Profile</TabsTrigger>
-        <TabsTrigger value="preferences">Preferences</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger>
-        <TabsTrigger value="security">Security</TabsTrigger>
+      <TabsList className="h-auto bg-transparent border-b rounded-none w-full justify-start p-0">
+        <TabsTrigger
+          value="profile"
+          className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+        >
+          Profile
+        </TabsTrigger>
+        <TabsTrigger
+          value="preferences"
+          className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+        >
+          Preferences
+        </TabsTrigger>
+        <TabsTrigger
+          value="notifications"
+          className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+        >
+          Notifications
+        </TabsTrigger>
+        <TabsTrigger
+          value="security"
+          className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+        >
+          Security
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="profile" className="mt-6">
