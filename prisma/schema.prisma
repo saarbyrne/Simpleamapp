@@ -34,6 +34,7 @@ model Organization {
   files              File[]
   formTemplates      FormTemplate[]
   spreadsheets       Spreadsheet[]
+  spreadsheetTemplates SpreadsheetTemplate[]
   canvasBoards       CanvasBoard[]
   plans              Plan[]
   subscriptions      Subscription[]
@@ -367,19 +368,70 @@ model File {
 // SPREADSHEETS
 // ============================================
 
+model SpreadsheetTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String // performance, wellness, injury, match, attendance, gps
+  schema      Json // Column definitions
+  sampleData  Json? // Optional sample rows
+  isPublic    Boolean  @default(false) // Global templates available to all orgs
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  spreadsheets Spreadsheet[]
+
+  @@map("spreadsheet_templates")
+}
+
 model Spreadsheet {
   id             String   @id @default(cuid())
   name           String
   description    String?
   schema         Json // Column definitions
   data           Json // Row data
+
+  // Template reference
+  templateId String?
+  template   SpreadsheetTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  // Organization
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Creator
+  createdById String?
+
+  // Versioning
+  version Int @default(1)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  versions SpreadsheetVersion[]
+
   @@map("spreadsheets")
+}
+
+model SpreadsheetVersion {
+  id             String   @id @default(cuid())
+  spreadsheetId  String
+  spreadsheet    Spreadsheet @relation(fields: [spreadsheetId], references: [id], onDelete: Cascade)
+
+  version        Int
+  schema         Json // Column definitions at this version
+  data           Json // Row data at this version
+
+  // Who made this change
+  createdById String?
+  changeNote  String? // Optional description of what changed
+
+  createdAt DateTime @default(now())
+
+  @@map("spreadsheet_versions")
 }
 
 // ============================================
