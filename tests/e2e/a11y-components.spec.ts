@@ -228,9 +228,9 @@ test.describe('Accessibility Utilities @a11y', () => {
     expect(hasFocusIndicator).toBeTruthy();
   });
 
-  test('Reduced motion is respected', async ({ page, context }) => {
+  test('Reduced motion is respected', async ({ page }) => {
     // Set reduced motion preference
-    await context.emulateMedia({ reducedMotion: 'reduce' });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
 
     await page.goto('http://localhost:6006/iframe.html?id=foundation-animations--entrance-animations');
     await page.waitForLoadState('networkidle');

@@ -135,11 +135,9 @@ describe("Date Formatting Utilities", () => {
     it("should format dates in different languages", () => {
       const spanishPrefs: UserPreferences = { 
         dateFormat: "DD/MM/YYYY",
-        language: "es"
       };
       const frenchPrefs: UserPreferences = { 
         dateFormat: "DD/MM/YYYY",
-        language: "fr"
       };
       
       const spanishResult = formatDate(testDate, spanishPrefs);
@@ -153,7 +151,6 @@ describe("Date Formatting Utilities", () => {
     it("should format times in different languages", () => {
       const spanishPrefs: UserPreferences = { 
         timeFormat: "12",
-        language: "es"
       };
       
       const result = formatTime(testDate, spanishPrefs);
@@ -182,7 +179,6 @@ describe("Date Formatting Utilities", () => {
         dateFormat: null,
         timeFormat: null,
         timezone: null,
-        language: null
       };
       
       const dateResult = formatDate(testDate, preferences);
