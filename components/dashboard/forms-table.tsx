@@ -13,6 +13,7 @@ import {
   type PaginationState,
 } from '@tanstack/react-table'
 import { useRouter, usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { PageCard } from '@/components/ui/page-card'
@@ -68,12 +69,12 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'outline' | 'dest
   Archived: 'outline',
 }
 
-const statusLabel = (value: string) => {
+const statusLabel = (value: string, t: ReturnType<typeof useTranslations>) => {
   const normalized = value?.toLowerCase()
-  if (normalized === 'active') return 'Active'
-  if (normalized === 'draft') return 'Draft'
-  if (normalized === 'archived') return 'Archived'
-  return value ? value.replace(/(^|\s)\S/g, (c) => c.toUpperCase()) : 'Unknown'
+  if (normalized === 'active') return t('forms.statuses.active')
+  if (normalized === 'draft') return t('forms.statuses.draft')
+  if (normalized === 'archived') return t('forms.statuses.archived')
+  return value ? value.replace(/(^|\s)\S/g, (c) => c.toUpperCase()) : t('forms.statuses.unknown')
 }
 
 const titleCase = (value: string | null | undefined) => {
@@ -86,6 +87,7 @@ const titleCase = (value: string | null | undefined) => {
 
 const createColumns = (
   forms: FormRow[],
+  t: ReturnType<typeof useTranslations>,
   preferences?: { timezone: string | null; dateFormat: string | null; timeFormat: string | null } | null,
   onDistribute?: (formId: string, formName: string) => void,
   onViewResponses?: (formId: string) => void,
@@ -96,7 +98,7 @@ const createColumns = (
   const columns: ColumnDef<FormRow>[] = [
     {
       accessorKey: 'title',
-      header: 'Form',
+      header: t('forms.form'),
       size: 280,
       cell: ({ row }) => {
         const form = row.original
@@ -110,7 +112,7 @@ const createColumns = (
     },
     {
       accessorKey: 'category',
-      header: 'Category',
+      header: t('forms.category'),
       enableHiding: true,
       cell: ({ getValue }) => (
         <span>{titleCase(getValue() as string | null) || '—'}</span>
@@ -118,21 +120,21 @@ const createColumns = (
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: t('forms.status'),
       enableHiding: true,
       cell: ({ getValue }) => {
         const status = (getValue() as string) ?? ''
         const variant = statusVariants[status] ?? 'default'
         return (
           <Badge variant={variant}>
-            {statusLabel(status)}
+            {statusLabel(status, t)}
           </Badge>
         )
       },
     },
     {
       accessorKey: 'responses',
-      header: 'Responses',
+      header: t('forms.responses'),
       enableHiding: true,
       cell: ({ getValue }) => {
         const value = getValue() as number | null | undefined
@@ -141,7 +143,7 @@ const createColumns = (
     },
     {
       accessorKey: 'updated',
-      header: 'Last updated',
+      header: t('forms.lastUpdated'),
       enableHiding: true,
       cell: ({ getValue }) => {
         const updated = getValue() as Date | string | null | undefined
@@ -156,7 +158,7 @@ const createColumns = (
     },
     {
       accessorKey: 'owner',
-      header: 'Owner',
+      header: t('forms.owner'),
       enableHiding: true,
       cell: ({ getValue }) => (
         <span>{getValue() as string || '—'}</span>
@@ -164,7 +166,7 @@ const createColumns = (
     },
     {
       id: 'actions',
-      header: () => <span className="sr-only">Actions</span>,
+      header: () => <span className="sr-only">{t('forms.actions')}</span>,
       cell: ({ row }) => {
         const form = row.original
         return (
@@ -180,23 +182,23 @@ const createColumns = (
                   onClick={() => onDistribute?.(form.id, form.title)}
                 >
                   <Send className="me-2 h-4 w-4" />
-                  Distribute
+                  {t('forms.distribute')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onPreview?.(form.id)}>
                   <Eye className="me-2 h-4 w-4" />
-                  Preview form
+                  {t('forms.previewForm')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onDuplicate?.(form.id)}>
                   <Copy className="me-2 h-4 w-4" />
-                  Duplicate form
+                  {t('forms.duplicateForm')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onViewResponses?.(form.id)}>
                   <FileText className="me-2 h-4 w-4" />
-                  View responses
+                  {t('forms.viewResponses')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onEdit?.(form.id)}>
                   <Edit className="me-2 h-4 w-4" />
-                  Edit form
+                  {t('forms.editForm')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -216,6 +218,7 @@ function normalizeFilter(value: string | null | undefined) {
 export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const t = useTranslations()
   const { preferences } = useUserPreferences()
   
   // Initialize state with default values
@@ -540,6 +543,7 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
   const columns = useMemo(
     () => createColumns(
       forms,
+      t,
       preferences || null,
       (formId, formName) => {
         setDistributionFormId(formId)
@@ -560,57 +564,57 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
           if (result.error) {
             toast.error(result.error)
           } else {
-            toast.success('Form duplicated successfully')
+            toast.success(t('forms.duplicatedSuccess'))
             router.refresh()
           }
         } catch (error) {
           console.error('Error duplicating form:', error)
-          toast.error('Failed to duplicate form')
+          toast.error(t('forms.duplicateFailed'))
         }
       }
     ),
-    [forms, preferences, router]
+    [forms, t, preferences, router]
   )
 
   // Prepare filter config for DataTableFilters
   const filterConfig: FilterConfig[] = useMemo(() => [
     {
       key: 'search',
-      label: 'Search',
+      label: t('common.search'),
       type: 'search',
-      placeholder: 'Search forms...',
+      placeholder: t('forms.searchForms'),
     },
     {
       key: 'category',
-      label: 'Category',
+      label: t('forms.category'),
       type: 'select',
       options: uniqueCategories.map((cat) => ({
         value: cat,
         label: titleCase(cat),
       })),
-      placeholder: 'All Categories',
+      placeholder: t('forms.allCategories'),
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('forms.status'),
       type: 'select',
       options: uniqueStatuses.map((status) => ({
         value: status,
-        label: statusLabel(status),
+        label: statusLabel(status, t),
       })),
-      placeholder: 'All Statuses',
+      placeholder: t('forms.allStatuses'),
     },
     {
       key: 'owner',
-      label: 'Owner',
+      label: t('forms.owner'),
       type: 'select',
       options: uniqueOwners.map((owner) => ({
         value: owner,
         label: owner,
       })),
-      placeholder: 'All Owners',
+      placeholder: t('forms.allOwners'),
     },
-  ], [uniqueCategories, uniqueStatuses, uniqueOwners])
+  ], [uniqueCategories, uniqueStatuses, uniqueOwners, t])
 
   const filterValues = useMemo(() => ({
     search,
@@ -662,7 +666,7 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
       const selectedIds = selectedRows.map((row) => row.original.id)
 
       if (selectedIds.length === 0) {
-        alert('No forms selected')
+        toast.error(t('common.noFormsSelected'))
         setIsBulkUpdating(false)
         return
       }
@@ -676,11 +680,11 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
       router.refresh()
     } catch (error) {
       console.error('Error updating forms:', error)
-      alert('Failed to update forms')
+      toast.error(t('common.failedToUpdateForms'))
     } finally {
       setIsBulkUpdating(false)
     }
-  }, [tableInstance, router, setRowSelection])
+  }, [tableInstance, router, setRowSelection, t])
 
   const { pageIndex, pageSize } = pagination
   const totalForms = serverTotal ?? filteredForms.length
@@ -755,8 +759,8 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
         />
       )}
       <PageCard
-        title="Forms"
-        description="Manage your forms and review submissions."
+        title={t('forms.title')}
+        description={t('forms.manageDescription')}
         headerActions={
           <Button 
             onClick={() => setIsFormBuilderOpen(true)}
@@ -764,7 +768,7 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
             type="button"
           >
             <Plus className="me-2 h-4 w-4" />
-            Create form
+            {t('forms.createForm')}
           </Button>
         }
         toolbar={
@@ -794,7 +798,7 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
                 ...(uniqueCategories.length > 0 ? [{
                   id: 'category',
                   type: 'select' as const,
-                  placeholder: 'Category',
+                  placeholder: t('forms.category'),
                   width: 'w-[160px]',
                   options: uniqueCategories.map((cat) => ({
                     value: cat,
@@ -804,13 +808,13 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
                 {
                   id: 'status',
                   type: 'select' as const,
-                  placeholder: 'Status',
+                  placeholder: t('forms.status'),
                   width: 'w-[130px]',
                   allowClear: false,
                   options: [
-                    { value: 'Active', label: 'Active' },
-                    { value: 'Draft', label: 'Draft' },
-                    { value: 'Archived', label: 'Archived' },
+                    { value: 'Active', label: t('forms.statuses.active') },
+                    { value: 'Draft', label: t('forms.statuses.draft') },
+                    { value: 'Archived', label: t('forms.statuses.archived') },
                   ],
                 },
               ]}
@@ -832,7 +836,7 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
               }}
               onClear={() => setRowSelection({})}
               isLoading={isBulkUpdating}
-              itemLabel="form"
+              itemLabel={t('forms.itemLabel')}
             />
           )}
 
@@ -872,18 +876,18 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
                 onValueChange={(value) => handlePaginationChange({ pageIndex: 0, pageSize: Number(value) })}
               >
                 <SelectTrigger className="h-9 w-[120px]">
-                  <SelectValue placeholder="Rows per page" />
+                  <SelectValue placeholder={t('common.rowsPerPage')} />
                 </SelectTrigger>
                 <SelectContent>
                   {[10, 20, 50, 100].map((size) => (
                     <SelectItem key={size} value={String(size)}>
-                      {size} rows
+                      {size} {t('common.rows')}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground">
-                Showing {filteredForms.length} of {totalForms} forms · Page {pageIndex + 1} of{' '}
+                {t('common.showing')} {filteredForms.length} {t('common.of')} {totalForms} {t('forms.forms')} · {t('common.page')} {pageIndex + 1} {t('common.of')}{' '}
                 <strong>{totalPages}</strong>
               </p>
             </div>
@@ -894,7 +898,7 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
                 onClick={() => handlePaginationChange({ ...pagination, pageIndex: pageIndex - 1 })}
                 disabled={pageIndex === 0}
               >
-                Previous
+                {t('common.previous')}
               </Button>
               <Button
                 variant="ghost"
@@ -902,7 +906,7 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
                 onClick={() => handlePaginationChange({ ...pagination, pageIndex: pageIndex + 1 })}
                 disabled={pageIndex >= totalPages - 1}
               >
-                Next
+                {t('common.next')}
               </Button>
             </div>
           </div>

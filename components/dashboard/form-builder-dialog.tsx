@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -35,27 +36,28 @@ interface FormBuilderDialogProps {
 }
 
 const FIELD_TYPES = [
-  { value: 'text', label: 'Text' },
-  { value: 'textarea', label: 'Text Area' },
-  { value: 'number', label: 'Number' },
-  { value: 'rating', label: 'Rating' },
-  { value: 'select', label: 'Select' },
-  { value: 'checkbox', label: 'Checkbox' },
-  { value: 'date', label: 'Date' },
-  { value: 'time', label: 'Time' },
+  { value: 'text', labelKey: 'forms.fieldTypes.text' },
+  { value: 'textarea', labelKey: 'forms.fieldTypes.textarea' },
+  { value: 'number', labelKey: 'forms.fieldTypes.number' },
+  { value: 'rating', labelKey: 'forms.fieldTypes.rating' },
+  { value: 'select', labelKey: 'forms.fieldTypes.select' },
+  { value: 'checkbox', labelKey: 'forms.fieldTypes.checkbox' },
+  { value: 'date', labelKey: 'forms.fieldTypes.date' },
+  { value: 'time', labelKey: 'forms.fieldTypes.time' },
 ] as const
 
 const CATEGORIES = [
-  'Health & Recovery',
-  'Coaching',
-  'Medical',
-  'Education',
-  'Performance',
-  'General',
+  { value: 'Health & Recovery', key: 'forms.categories.healthRecovery' },
+  { value: 'Coaching', key: 'forms.categories.coaching' },
+  { value: 'Medical', key: 'forms.categories.medical' },
+  { value: 'Education', key: 'forms.categories.education' },
+  { value: 'Performance', key: 'forms.categories.performance' },
+  { value: 'General', key: 'forms.categories.general' },
 ] as const
 
 export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: FormBuilderDialogProps) {
   const router = useRouter()
+  const t = useTranslations()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [formName, setFormName] = useState('')
@@ -71,7 +73,7 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
     try {
       const result = await getForm(formId)
       if (result.error || !result.success) {
-        toast.error(result.error || 'Failed to load form')
+        toast.error(result.error || t('forms.builder.failedToLoad'))
         onOpenChange(false)
       } else {
         const form = result.form
@@ -83,12 +85,12 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
       }
     } catch (error) {
       console.error('Error loading form:', error)
-      toast.error('Failed to load form')
+      toast.error(t('forms.builder.failedToLoad'))
       onOpenChange(false)
     } finally {
       setIsLoading(false)
     }
-  }, [formId, onOpenChange])
+  }, [formId, onOpenChange, t])
 
   useEffect(() => {
     if (open && formId) {
@@ -131,19 +133,19 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
 
   const handleSubmit = async () => {
     if (!formName.trim()) {
-      toast.error('Form name is required')
+      toast.error(t('forms.builder.formNameRequiredError'))
       return
     }
 
     if (fields.length === 0) {
-      toast.error('Please add at least one field')
+      toast.error(t('forms.builder.addAtLeastOneField'))
       return
     }
 
     // Validate all fields have labels
     const invalidFields = fields.filter(f => !f.label.trim())
     if (invalidFields.length > 0) {
-      toast.error('All fields must have a label')
+      toast.error(t('forms.builder.allFieldsMustHaveLabel'))
       return
     }
 
@@ -164,7 +166,7 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
         if (result.error) {
           toast.error(result.error)
         } else {
-          toast.success('Form updated successfully')
+          toast.success(t('forms.builder.formSaved'))
           onOpenChange(false)
           router.refresh()
           onSuccess?.()
@@ -181,7 +183,7 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
         if (result.error) {
           toast.error(result.error)
         } else {
-          toast.success('Form created successfully')
+          toast.success(t('forms.builder.formSaved'))
           // Reset form
           setFormName('')
           setFormDescription('')
@@ -195,7 +197,7 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
       }
     } catch (error) {
       console.error('Error saving form:', error)
-      toast.error(`Failed to ${formId ? 'update' : 'create'} form`)
+      toast.error(t('forms.builder.failedToSave'))
     } finally {
       setIsSubmitting(false)
     }
@@ -216,49 +218,49 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{formId ? 'Edit Form' : 'Create New Form'}</DialogTitle>
+          <DialogTitle>{formId ? t('forms.builder.editForm') : t('forms.builder.createNewForm')}</DialogTitle>
           <DialogDescription>
             {formId
-              ? 'Update your form fields and settings.'
-              : "Build a custom form by adding fields. Configure each field's type, label, and options."}
+              ? t('forms.builder.updateDescription')
+              : t('forms.builder.buildDescription')}
           </DialogDescription>
         </DialogHeader>
 
         {isLoading ? (
-          <div className="py-8 text-center text-muted-foreground">Loading form...</div>
+          <div className="py-8 text-center text-muted-foreground">{t('forms.builder.loadingForm')}</div>
         ) : (
           <div className="space-y-6 py-4">
             {/* Form Basic Info */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="formName">Form Name *</Label>
+                <Label htmlFor="formName">{t('forms.builder.formNameRequired')}</Label>
                 <Input
                   id="formName"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  placeholder="e.g. Wellness Check Survey"
+                  placeholder={t('forms.builder.formNamePlaceholder')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="formDescription">Description</Label>
+                <Label htmlFor="formDescription">{t('forms.builder.description')}</Label>
                 <Textarea
                   id="formDescription"
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="Optional description of what this form is for..."
+                  placeholder={t('forms.builder.descriptionPlaceholder')}
                   rows={2}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
+                <Label htmlFor="category">{t('forms.category')}</Label>
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger id="category">
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={t('forms.builder.selectCategory')} />
                   </SelectTrigger>
                   <SelectContent>
                     {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {t(cat.key)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -269,17 +271,17 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
             {/* Fields List */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label>Fields</Label>
+                <Label>{t('forms.builder.fields')}</Label>
                 <Button type="button" variant="outline" size="sm" onClick={handleAddField}>
                   <Plus className="me-2 h-4 w-4" />
-                  Add Field
+                  {t('forms.builder.addField')}
                 </Button>
               </div>
 
               {fields.length === 0 ? (
                 <Card>
                   <CardContent className="py-8 text-center text-muted-foreground">
-                    No fields added yet. Click &quot;Add Field&quot; to get started.
+                    {t('forms.builder.noFieldsAdded')}
                   </CardContent>
                 </Card>
               ) : (
@@ -291,16 +293,16 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
                         <div className="flex items-center gap-2">
                           <GripVertical className="h-4 w-4 text-muted-foreground" />
                           <CardTitle className="text-sm">
-                            Field {index + 1}
+                            {t('forms.builder.field')} {index + 1}
                             {field.label && `: ${field.label}`}
                           </CardTitle>
                           {field.required && (
                             <Badge variant="secondary" className="text-xs">
-                              Required
+                              {t('forms.builder.required')}
                             </Badge>
                           )}
                           <Badge variant="outline" className="text-xs">
-                            {FIELD_TYPES.find(t => t.value === field.type)?.label || field.type}
+                            {FIELD_TYPES.find(type => type.value === field.type) ? t(FIELD_TYPES.find(type => type.value === field.type)!.labelKey) : field.type}
                           </Badge>
                         </div>
                         <Button
@@ -316,7 +318,7 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
                     <CardContent className="space-y-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-2">
-                          <Label>Field Type</Label>
+                          <Label>{t('forms.builder.fieldType')}</Label>
                           <Select
                             value={field.type}
                             onValueChange={(value) =>
@@ -333,35 +335,35 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
                             <SelectContent>
                               {FIELD_TYPES.map((type) => (
                                 <SelectItem key={type.value} value={type.value}>
-                                  {type.label}
+                                  {t(type.labelKey)}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label>Label *</Label>
+                          <Label>{t('forms.builder.labelRequired')}</Label>
                           <Input
                             value={field.label}
                             onChange={(e) => handleUpdateField(index, { label: e.target.value })}
-                            placeholder="Field label"
+                            placeholder={t('forms.builder.labelPlaceholder')}
                           />
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label>Placeholder</Label>
+                        <Label>{t('forms.builder.placeholder')}</Label>
                         <Input
                           value={field.placeholder || ''}
                           onChange={(e) => handleUpdateField(index, { placeholder: e.target.value })}
-                          placeholder="Optional placeholder text"
+                          placeholder={t('forms.builder.placeholderPlaceholder')}
                         />
                       </div>
 
                       {/* Options for select/checkbox */}
                       {['select', 'checkbox'].includes(field.type) && (
                         <div className="space-y-2">
-                          <Label>Options (one per line)</Label>
+                          <Label>{t('forms.builder.options')}</Label>
                           <Textarea
                             value={field.options?.join('\n') || ''}
                             onChange={(e) => {
@@ -371,7 +373,7 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
                                 .filter(Boolean)
                               handleUpdateField(index, { options: options.length > 0 ? options : undefined })
                             }}
-                            placeholder="Option 1&#10;Option 2&#10;Option 3"
+                            placeholder={t('forms.builder.optionsPlaceholder')}
                             rows={3}
                           />
                         </div>
@@ -381,7 +383,7 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
                       {['number', 'rating'].includes(field.type) && (
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-2">
-                            <Label>Min</Label>
+                            <Label>{t('forms.builder.min')}</Label>
                             <Input
                               type="number"
                               value={field.min ?? ''}
@@ -390,11 +392,11 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
                                   min: e.target.value ? Number(e.target.value) : undefined,
                                 })
                               }
-                              placeholder="Minimum"
+                              placeholder={t('forms.builder.min')}
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label>Max</Label>
+                            <Label>{t('forms.builder.max')}</Label>
                             <Input
                               type="number"
                               value={field.max ?? ''}
@@ -403,7 +405,7 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
                                   max: e.target.value ? Number(e.target.value) : undefined,
                                 })
                               }
-                              placeholder="Maximum"
+                              placeholder={t('forms.builder.max')}
                             />
                           </div>
                         </div>
@@ -418,7 +420,7 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
                           className="h-4 w-4 rounded border-gray-300"
                         />
                         <Label htmlFor={`required-${index}`} className="text-sm font-normal cursor-pointer">
-                          Required field
+                          {t('forms.builder.required')}
                         </Label>
                       </div>
                     </CardContent>
@@ -432,10 +434,10 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
 
       <DialogFooter>
           <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
-            Cancel
+            {t('forms.builder.cancel')}
           </Button>
           <Button type="button" onClick={handleSubmit} disabled={isSubmitting || isLoading}>
-            {isSubmitting ? (formId ? 'Updating...' : 'Creating...') : formId ? 'Update Form' : 'Create Form'}
+            {isSubmitting ? (formId ? t('forms.builder.updating') : t('forms.builder.creating')) : formId ? t('forms.builder.updateForm') : t('forms.builder.createForm')}
           </Button>
         </DialogFooter>
       </DialogContent>

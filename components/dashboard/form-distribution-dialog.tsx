@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -51,6 +52,7 @@ export function FormDistributionDialog({
   onSuccess,
 }: FormDistributionDialogProps) {
   const router = useRouter()
+  const t = useTranslations()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoadingPlayers, setIsLoadingPlayers] = useState(false)
   const [players, setPlayers] = useState<PlayerOption[]>([])
@@ -91,7 +93,7 @@ export function FormDistributionDialog({
       }
     } catch (error) {
       console.error('Error loading players:', error)
-      toast.error('Failed to load players')
+      toast.error(t('forms.distribution.failedToLoadPlayers'))
     } finally {
       setIsLoadingPlayers(false)
     }
@@ -115,12 +117,12 @@ export function FormDistributionDialog({
 
   const handleSubmit = async () => {
     if (targetType === 'specific' && selectedPlayerIds.length === 0) {
-      toast.error('Please select at least one player')
+      toast.error(t('forms.distribution.selectAtLeastOnePlayer'))
       return
     }
 
     if (scheduleType !== 'one_time' && !scheduledDate) {
-      toast.error('Please select a date for scheduled distribution')
+      toast.error(t('forms.distribution.selectDateForSchedule'))
       return
     }
 
@@ -149,14 +151,14 @@ export function FormDistributionDialog({
       if (result.error) {
         toast.error(result.error)
       } else {
-        toast.success('Form distribution updated successfully')
+        toast.success(t('forms.distribution.formDistributed'))
         onOpenChange(false)
         router.refresh()
         onSuccess?.()
       }
     } catch (error) {
       console.error('Error updating form distribution:', error)
-      toast.error('Failed to update form distribution')
+      toast.error(t('forms.distribution.failedToDistribute'))
     } finally {
       setIsSubmitting(false)
     }
@@ -166,9 +168,9 @@ export function FormDistributionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Distribute Form: {formName}</DialogTitle>
+          <DialogTitle>{t('forms.distribution.title')}: {formName}</DialogTitle>
           <DialogDescription>
-            Choose who should receive this form and when to send it.
+            {t('forms.distribution.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -176,14 +178,14 @@ export function FormDistributionDialog({
           {/* Target Selection */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Send To</Label>
+              <Label>{t('forms.distribution.sendTo')}</Label>
               <Select value={targetType} onValueChange={(value: 'all' | 'specific') => setTargetType(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Players</SelectItem>
-                  <SelectItem value="specific">Specific Players</SelectItem>
+                  <SelectItem value="all">{t('forms.distribution.allPlayers')}</SelectItem>
+                  <SelectItem value="specific">{t('forms.distribution.specificPlayers')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -191,21 +193,21 @@ export function FormDistributionDialog({
             {targetType === 'specific' && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>Select Players</Label>
+                  <Label>{t('forms.distribution.selectPlayers')}</Label>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={handleSelectAll}
                   >
-                    {selectedPlayerIds.length === players.length ? 'Deselect All' : 'Select All'}
+                    {selectedPlayerIds.length === players.length ? t('common.deselectAll') : t('common.selectAll')}
                   </Button>
                 </div>
                 <ScrollArea className="h-[200px] border rounded-md p-4">
                   {isLoadingPlayers ? (
-                    <div className="text-center text-muted-foreground py-4">Loading players...</div>
+                    <div className="text-center text-muted-foreground py-4">{t('common.loading')}</div>
                   ) : players.length === 0 ? (
-                    <div className="text-center text-muted-foreground py-4">No players found</div>
+                    <div className="text-center text-muted-foreground py-4">{t('players.noPlayersFound')}</div>
                   ) : (
                     <div className="space-y-2">
                       {players.map((player) => (
@@ -233,7 +235,7 @@ export function FormDistributionDialog({
                 </ScrollArea>
                 {selectedPlayerIds.length > 0 && (
                   <p className="text-sm text-muted-foreground">
-                    {selectedPlayerIds.length} player{selectedPlayerIds.length !== 1 ? 's' : ''} selected
+                    {selectedPlayerIds.length} {selectedPlayerIds.length === 1 ? t('players.player') : t('players.players')} {t('common.selected')}
                   </p>
                 )}
               </div>
@@ -243,7 +245,7 @@ export function FormDistributionDialog({
           {/* Schedule Selection */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Schedule</Label>
+              <Label>{t('forms.distribution.schedule')}</Label>
               <Select
                 value={scheduleType}
                 onValueChange={(value: 'one_time' | 'daily' | 'weekly' | 'monthly') => setScheduleType(value)}
@@ -252,10 +254,10 @@ export function FormDistributionDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="one_time">Send Now (One-time)</SelectItem>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="one_time">{t('forms.distribution.oneTime')}</SelectItem>
+                  <SelectItem value="daily">{t('forms.distribution.daily')}</SelectItem>
+                  <SelectItem value="weekly">{t('forms.distribution.weekly')}</SelectItem>
+                  <SelectItem value="monthly">{t('forms.distribution.monthly')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -263,19 +265,19 @@ export function FormDistributionDialog({
             {scheduleType !== 'one_time' && (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Start Date</Label>
+                  <Label>{t('forms.distribution.selectDate')}</Label>
                   <DatePicker
                     date={scheduledDate}
                     onSelect={setScheduledDate}
-                    placeholder="Pick a date"
+                    placeholder={t('forms.distribution.selectDate')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Time</Label>
+                  <Label>{t('forms.distribution.selectTime')}</Label>
                   <TimePicker
                     time={scheduledTime}
                     onSelect={setScheduledTime}
-                    placeholder="Select time"
+                    placeholder={t('forms.distribution.selectTime')}
                   />
                 </div>
               </div>
@@ -285,10 +287,10 @@ export function FormDistributionDialog({
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-            Cancel
+            {t('forms.distribution.cancel')}
           </Button>
           <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : 'Save Distribution'}
+            {isSubmitting ? t('common.saving') : t('forms.distribution.distribute')}
           </Button>
         </DialogFooter>
       </DialogContent>

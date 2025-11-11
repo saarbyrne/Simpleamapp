@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -84,6 +85,7 @@ const LANGUAGES = [
 
 export function PreferencesTab({ user }: PreferencesTabProps) {
   const router = useRouter();
+  const t = useTranslations();
 
   const form = useForm<PreferencesFormValues>({
     resolver: zodResolver(preferencesFormSchema),
@@ -118,19 +120,19 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
     const result = await updatePreferences(preferencesData);
 
     if (result.success) {
-      toast.success("Preferences updated successfully");
+      toast.success(t('profile.preferencesUpdated'));
       router.refresh();
     } else {
-      toast.error(result.error || "Failed to update preferences");
+      toast.error(result.error || t('profile.failedToUpdatePreferences'));
     }
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Preferences</CardTitle>
+        <CardTitle>{t('profile.preferences')}</CardTitle>
         <CardDescription>
-          Customize how dates, times, and language appear throughout the application
+          {t('profile.preferencesDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -142,14 +144,14 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
               name="language"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Display Language</FormLabel>
+                  <FormLabel>{t('profile.displayLanguage')}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a language" />
+                        <SelectValue placeholder={t('profile.selectLanguage')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -161,7 +163,7 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Choose your preferred language for the interface
+                    {t('profile.languageDescription')}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -174,26 +176,26 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
               name="timezone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Timezone</FormLabel>
+                  <FormLabel>{t('profile.timezone')}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a timezone" />
+                        <SelectValue placeholder={t('profile.selectTimezone')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {TIMEZONES.map((tz) => (
                         <SelectItem key={tz.value} value={tz.value}>
-                          {tz.label}
+                          {t(`profile.timezones.${tz.value.replace(/\//g, '_')}`) || tz.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    All times will be displayed in your selected timezone
+                    {t('profile.timezoneDescription')}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -206,30 +208,30 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
               name="dateFormat"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Date Format</FormLabel>
+                  <FormLabel>{t('profile.dateFormat')}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select date format" />
+                        <SelectValue placeholder={t('profile.selectDateFormat')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="DD/MM/YYYY">
-                        DD/MM/YYYY (31/12/2024)
+                        DD/MM/YYYY ({t('profile.dateFormatExample.ddmmyyyy')})
                       </SelectItem>
                       <SelectItem value="MM/DD/YYYY">
-                        MM/DD/YYYY (12/31/2024)
+                        MM/DD/YYYY ({t('profile.dateFormatExample.mmddyyyy')})
                       </SelectItem>
                       <SelectItem value="YYYY-MM-DD">
-                        YYYY-MM-DD (2024-12-31)
+                        YYYY-MM-DD ({t('profile.dateFormatExample.yyyymmdd')})
                       </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    How dates are displayed throughout the app
+                    {t('profile.dateFormatDescription')}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -242,23 +244,23 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
               name="timeFormat"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Time Format</FormLabel>
+                  <FormLabel>{t('profile.timeFormat')}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select time format" />
+                        <SelectValue placeholder={t('profile.selectTimeFormat')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="12">12-hour (3:00 PM)</SelectItem>
-                      <SelectItem value="24">24-hour (15:00)</SelectItem>
+                      <SelectItem value="12">{t('profile.timeFormat12')}</SelectItem>
+                      <SelectItem value="24">{t('profile.timeFormat24')}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Choose between 12-hour or 24-hour time format
+                    {t('profile.timeFormatDescription')}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -269,10 +271,10 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
               {isSubmitting ? (
                 <>
                   <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  {t('common.saving')}
                 </>
               ) : (
-                "Save Preferences"
+                t('profile.savePreferences')
               )}
             </Button>
           </form>

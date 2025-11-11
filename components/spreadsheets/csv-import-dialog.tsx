@@ -17,6 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Upload, AlertCircle, CheckCircle2, FileText } from 'lucide-react'
 import { importFromCSV } from '@/lib/utils/spreadsheet-csv'
 import { ColumnDefinition, SpreadsheetRow } from '@/lib/types/spreadsheet'
+import { useTranslations } from 'next-intl'
 
 interface CSVImportDialogProps {
   open: boolean
@@ -31,6 +32,8 @@ export function CSVImportDialog({
   onImport,
   currentSchema,
 }: CSVImportDialogProps) {
+  const t = useTranslations('spreadsheets.csvImport')
+  const tCommon = useTranslations('common')
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<{
     data: SpreadsheetRow[]
@@ -59,13 +62,13 @@ export function CSVImportDialog({
         console.error('Error processing CSV:', error)
         setPreview({
           data: [],
-          errors: ['Failed to process CSV file'],
+          errors: [t('failedToProcessCsv')],
         })
       } finally {
         setIsProcessing(false)
       }
     },
-    [currentSchema]
+    [currentSchema, t]
   )
 
   const handleImport = useCallback(() => {
@@ -89,16 +92,16 @@ export function CSVImportDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>Import CSV</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>
-            Upload a CSV file to import data into your spreadsheet. The first row should contain column headers.
+            {t('description')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* File Upload */}
           <div className="space-y-2">
-            <Label htmlFor="csv-file">CSV File</Label>
+            <Label htmlFor="csv-file">{t('csvFile')}</Label>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -106,7 +109,7 @@ export function CSVImportDialog({
                 onClick={() => document.getElementById('csv-file')?.click()}
               >
                 <Upload className="h-4 w-4 me-2" />
-                {file ? file.name : 'Choose CSV file...'}
+                {file ? file.name : t('chooseCsvFile')}
               </Button>
               <input
                 id="csv-file"
@@ -122,7 +125,7 @@ export function CSVImportDialog({
           {isProcessing && (
             <Alert>
               <FileText className="h-4 w-4" />
-              <AlertDescription>Processing CSV file...</AlertDescription>
+              <AlertDescription>{t('processingCsv')}</AlertDescription>
             </Alert>
           )}
 
@@ -131,7 +134,7 @@ export function CSVImportDialog({
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                <div className="font-semibold mb-1">Errors found:</div>
+                <div className="font-semibold mb-1">{t('errorsFound')}</div>
                 <ul className="list-disc list-inside space-y-1">
                   {preview.errors.map((error, index) => (
                     <li key={index}>{error}</li>
@@ -147,15 +150,15 @@ export function CSVImportDialog({
               <Alert>
                 <CheckCircle2 className="h-4 w-4" />
                 <AlertDescription>
-                  Successfully parsed {preview.data.length} rows
-                  {preview.schema && ` with ${preview.schema.length} columns`}
+                  {t('successfullyParsed', { rows: preview.data.length })}
+                  {preview.schema && t('withColumns', { columns: preview.schema.length })}
                 </AlertDescription>
               </Alert>
 
               {/* Schema Preview */}
               {preview.schema && (
                 <div className="space-y-2">
-                  <Label>Detected Columns</Label>
+                  <Label>{t('detectedColumns')}</Label>
                   <div className="flex flex-wrap gap-2">
                     {preview.schema.map((col) => (
                       <Badge key={col.id} variant="secondary">
@@ -168,7 +171,7 @@ export function CSVImportDialog({
 
               {/* Data Preview */}
               <div className="space-y-2">
-                <Label>Data Preview (first 5 rows)</Label>
+                <Label>{t('dataPreview')}</Label>
                 <ScrollArea className="h-[200px] w-full border rounded-md">
                   <table className="w-full text-sm">
                     <thead className="bg-muted sticky top-0">
@@ -200,13 +203,13 @@ export function CSVImportDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <Button
             onClick={handleImport}
             disabled={!preview || preview.data.length === 0 || (preview.errors && preview.errors.length > 0)}
           >
-            Import {preview?.data.length || 0} Rows
+            {t('importRows', { count: preview?.data.length || 0 })}
           </Button>
         </DialogFooter>
       </DialogContent>

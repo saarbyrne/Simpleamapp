@@ -4,13 +4,18 @@ import { createServerClient } from "@/lib/supabase/server";
 import { getCurrentUserProfile } from "@/app/actions/profile";
 import { ProfileTabs } from "./profile-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = {
-  title: "Profile Settings",
-  description: "Manage your profile, preferences, and notification settings",
-};
+export async function generateMetadata() {
+  const t = await getTranslations('profile');
+  return {
+    title: t('title'),
+    description: t('description'),
+  };
+}
 
 export default async function ProfilePage() {
+  const t = await getTranslations('profile');
   const supabase = await createServerClient();
 
   const {
@@ -28,14 +33,14 @@ export default async function ProfilePage() {
       <div className="container mx-auto p-6">
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
           <p className="text-sm font-medium text-destructive mb-2">
-            Failed to load profile
+            {t('failedToLoadProfile')}
           </p>
           <p className="text-sm text-destructive/80">
-            {profileResult.error || "Please try again."}
+            {profileResult.error || t('pleaseTryAgain')}
           </p>
           {profileResult.error?.includes("migrations") && (
             <p className="text-xs text-muted-foreground mt-2">
-              Run: <code className="px-1 py-0.5 bg-muted rounded">npm run db:migrate</code> or <code className="px-1 py-0.5 bg-muted rounded">npx prisma generate</code>
+              {t('runMigrations')} <code className="px-1 py-0.5 bg-muted rounded">npm run db:migrate</code> or <code className="px-1 py-0.5 bg-muted rounded">npx prisma generate</code>
             </p>
           )}
         </div>
@@ -46,9 +51,9 @@ export default async function ProfilePage() {
   return (
     <div className="container mx-auto max-w-5xl p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Profile Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <p className="mt-2 text-muted-foreground">
-          Manage your personal information, preferences, and security settings
+          {t('description')}
         </p>
       </div>
 

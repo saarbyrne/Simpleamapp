@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles, Loader2, Lightbulb } from 'lucide-react'
 import { ColumnDefinition, SpreadsheetRow } from '@/lib/types/spreadsheet'
+import { useTranslations } from 'next-intl'
 
 interface AIAssistantDialogProps {
   open: boolean
@@ -29,14 +30,6 @@ interface AIAssistantDialogProps {
   currentData?: SpreadsheetRow[]
 }
 
-const SUGGESTIONS = [
-  'Create a load tracking sheet for all first team players for this week',
-  'Add a weekly average column to my data',
-  'Clean up this data and fix any inconsistencies',
-  'Generate a wellness tracking sheet with standard metrics',
-  'Add calculated columns for total load and workload ratio',
-]
-
 export function AIAssistantDialog({
   open,
   onOpenChange,
@@ -44,8 +37,19 @@ export function AIAssistantDialog({
   currentSchema,
   currentData,
 }: AIAssistantDialogProps) {
+  const t = useTranslations('spreadsheets.aiAssistant')
+  const tCommon = useTranslations('common')
+  const tSpreadsheets = useTranslations('spreadsheets')
   const [prompt, setPrompt] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
+
+  const suggestions = [
+    t('suggestion1'),
+    t('suggestion2'),
+    t('suggestion3'),
+    t('suggestion4'),
+    t('suggestion5'),
+  ]
 
   const handleSubmit = async () => {
     if (!prompt.trim()) return
@@ -91,20 +95,20 @@ export function AIAssistantDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            AI Assistant
+            {t('title')}
           </DialogTitle>
           <DialogDescription>
-            Describe what you want to do with your spreadsheet, and AI will help you.
+            {t('description')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Prompt Input */}
           <div className="space-y-2">
-            <Label htmlFor="ai-prompt">What would you like help with?</Label>
+            <Label htmlFor="ai-prompt">{t('whatWouldYouLikeHelp')}</Label>
             <Textarea
               id="ai-prompt"
-              placeholder="e.g., Create a load tracking sheet for all players, add weekly averages, clean up data..."
+              placeholder={t('placeholder')}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               rows={4}
@@ -114,9 +118,9 @@ export function AIAssistantDialog({
 
           {/* Suggestions */}
           <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Suggestions:</Label>
+            <Label className="text-xs text-muted-foreground">{t('suggestions')}</Label>
             <div className="flex flex-wrap gap-2">
-              {SUGGESTIONS.map((suggestion, index) => (
+              {suggestions.map((suggestion, index) => (
                 <Badge
                   key={index}
                   variant="outline"
@@ -134,12 +138,12 @@ export function AIAssistantDialog({
             <Lightbulb className="h-4 w-4" />
             <AlertDescription>
               <div className="space-y-2">
-                <div className="font-semibold">AI can help you:</div>
+                <div className="font-semibold">{t('aiCanHelp')}</div>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>Generate spreadsheets with pre-populated data</li>
-                  <li>Add calculated columns and formulas</li>
-                  <li>Clean and optimize existing data</li>
-                  <li>Suggest improvements and best practices</li>
+                  <li>{t('generateSpreadsheets')}</li>
+                  <li>{t('addCalculatedColumns')}</li>
+                  <li>{t('cleanOptimizeData')}</li>
+                  <li>{t('suggestImprovements')}</li>
                 </ul>
               </div>
             </AlertDescription>
@@ -148,10 +152,10 @@ export function AIAssistantDialog({
           {/* Current Context */}
           {(currentSchema || currentData) && (
             <div className="text-sm text-muted-foreground">
-              <div className="font-medium mb-1">Current spreadsheet:</div>
+              <div className="font-medium mb-1">{t('currentSpreadsheet')}</div>
               <div className="flex gap-4">
-                {currentSchema && <span>{currentSchema.length} columns</span>}
-                {currentData && <span>{currentData.length} rows</span>}
+                {currentSchema && <span>{currentSchema.length} {tSpreadsheets('columns')}</span>}
+                {currentData && <span>{currentData.length} {tSpreadsheets('rows')}</span>}
               </div>
             </div>
           )}
@@ -159,18 +163,18 @@ export function AIAssistantDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isProcessing}>
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <Button onClick={handleSubmit} disabled={!prompt.trim() || isProcessing}>
             {isProcessing ? (
               <>
                 <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                Processing...
+                {t('processing')}
               </>
             ) : (
               <>
                 <Sparkles className="h-4 w-4 me-2" />
-                Apply AI Suggestion
+                {t('applyAiSuggestion')}
               </>
             )}
           </Button>

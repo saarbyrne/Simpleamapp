@@ -36,6 +36,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 const eventTypeColors: Record<string, string> = {
   training: 'bg-primary/20 text-foreground border-primary',
@@ -51,6 +52,7 @@ export default function EventDetailPage() {
   const eventId = params.eventId as string
   const { preferences } = useUserPreferences()
   const { setCustomLabel } = useBreadcrumb()
+  const t = useTranslations()
 
   const [event, setEvent] = useState<EventWithDetails | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -72,12 +74,12 @@ export default function EventDetailPage() {
         setCustomLabel(eventId, result.event.title)
       }
     } catch (error) {
-      toast.error('Failed to load event')
+      toast.error(t('calendar.failedToLoadEvent'))
       router.push('/dashboard/calendar')
     } finally {
       setIsLoading(false)
     }
-  }, [eventId, setCustomLabel, router])
+  }, [eventId, setCustomLabel, router, t])
 
   useEffect(() => {
     loadEvent()
@@ -125,11 +127,11 @@ export default function EventDetailPage() {
         if ('error' in result) {
           toast.error(result.error)
         } else {
-          toast.success('All event instances deleted successfully')
+          toast.success(t('calendar.allEventInstancesDeleted'))
           router.push('/dashboard/calendar')
         }
       } catch (error) {
-        toast.error('Failed to delete event series')
+        toast.error(t('calendar.failedToDeleteEventSeries'))
       }
     }
   }
@@ -142,18 +144,18 @@ export default function EventDetailPage() {
       if ('error' in result) {
         toast.error(result.error)
       } else {
-        toast.success('Event deleted successfully')
+        toast.success(t('calendar.eventDeleted'))
         router.push('/dashboard/calendar')
       }
     } catch (error) {
-      toast.error('Failed to delete event')
+      toast.error(t('calendar.failedToDeleteEvent'))
     }
   }
 
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="text-muted-foreground">Loading event...</div>
+        <div className="text-muted-foreground">{t('calendar.loadingEvent')}</div>
       </div>
     )
   }
@@ -179,7 +181,7 @@ export default function EventDetailPage() {
             {event.isRecurring && (
               <Badge variant="outline" className="flex items-center gap-1">
                 <RefreshCw className="h-3 w-3" />
-                Recurring Event
+                {t('calendar.recurringEvent')}
               </Badge>
             )}
           </div>
@@ -202,7 +204,7 @@ export default function EventDetailPage() {
             {totalCount > 0 && (
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                {attendingCount} of {totalCount} attending
+                {t('calendar.attendingCount', { attending: attendingCount, total: totalCount })}
               </div>
             )}
           </div>
@@ -211,11 +213,11 @@ export default function EventDetailPage() {
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleEdit}>
             <Edit className="me-2 h-4 w-4" />
-            Edit
+            {t('common.edit')}
           </Button>
           <Button variant="outline" onClick={handleDelete}>
             <Trash2 className="me-2 h-4 w-4" />
-            Delete
+            {t('common.delete')}
           </Button>
         </div>
       </div>
@@ -224,31 +226,31 @@ export default function EventDetailPage() {
       <Tabs defaultValue="overview" className="flex-1 flex flex-col">
         <TabsList>
           <TabsTrigger value="overview">
-            Overview
+            {t('calendar.tabs.overview')}
           </TabsTrigger>
           <TabsTrigger value="attendance">
             <Users className="me-2 h-4 w-4" />
-            Attendance
+            {t('calendar.tabs.attendance')}
           </TabsTrigger>
           <TabsTrigger value="spreadsheets">
             <Table className="me-2 h-4 w-4" />
-            Spreadsheets
+            {t('calendar.tabs.spreadsheets')}
           </TabsTrigger>
           <TabsTrigger value="notes">
             <FileText className="me-2 h-4 w-4" />
-            Notes
+            {t('calendar.tabs.notes')}
           </TabsTrigger>
           <TabsTrigger value="drawings">
             <PenTool className="me-2 h-4 w-4" />
-            Canvas
+            {t('calendar.tabs.canvas')}
           </TabsTrigger>
           <TabsTrigger value="forms">
             <ClipboardList className="me-2 h-4 w-4" />
-            Forms
+            {t('calendar.tabs.forms')}
           </TabsTrigger>
           <TabsTrigger value="files">
             <FolderOpen className="me-2 h-4 w-4" />
-            Files
+            {t('calendar.tabs.files')}
           </TabsTrigger>
         </TabsList>
 
@@ -257,7 +259,7 @@ export default function EventDetailPage() {
               <div className="space-y-6">
                 {event.description && (
                   <div>
-                    <h3 className="mb-2 text-sm font-semibold">Description</h3>
+                    <h3 className="mb-2 text-sm font-semibold">{t('calendar.descriptionLabel')}</h3>
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                       {event.description}
                     </p>
@@ -267,13 +269,13 @@ export default function EventDetailPage() {
                 {!event.description && (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <Calendar className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <h3 className="mb-2 text-lg font-semibold">No description</h3>
+                    <h3 className="mb-2 text-lg font-semibold">{t('calendar.noDescription')}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Add a description to provide more details about this event
+                      {t('calendar.addDescriptionHint')}
                     </p>
                     <Button variant="outline" className="mt-4" onClick={handleEdit}>
                       <Edit className="me-2 h-4 w-4" />
-                      Add Description
+                      {t('calendar.addDescription')}
                     </Button>
                   </div>
                 )}
@@ -291,15 +293,14 @@ export default function EventDetailPage() {
             <TabsContent value="spreadsheets" className="mt-0">
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <Table className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-lg font-semibold">Event Spreadsheets</h3>
+                <h3 className="mb-2 text-lg font-semibold">{t('calendar.tabs.eventSpreadsheets')}</h3>
                 <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                  Link spreadsheet modules to track performance data, stats, and metrics for this event.
-                  Data will sync automatically when spreadsheets are created.
+                  {t('calendar.tabs.spreadsheetsDescription')}
                 </p>
                 <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
-                  <p className="text-sm font-medium">Integration Ready</p>
+                  <p className="text-sm font-medium">{t('calendar.integrationReady')}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Complete the Spreadsheets module to enable this feature
+                    {t('calendar.completeSpreadsheetsModule')}
                   </p>
                 </div>
               </div>
@@ -308,15 +309,14 @@ export default function EventDetailPage() {
             <TabsContent value="notes" className="mt-0">
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-lg font-semibold">Event Notes</h3>
+                <h3 className="mb-2 text-lg font-semibold">{t('calendar.tabs.eventNotes')}</h3>
                 <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                  Link note modules for coach observations, medical notes, and other documentation.
-                  Notes will appear here when the Notes module is implemented.
+                  {t('calendar.tabs.notesDescription')}
                 </p>
                 <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
-                  <p className="text-sm font-medium">Integration Ready</p>
+                  <p className="text-sm font-medium">{t('calendar.integrationReady')}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Complete the Notes module to enable this feature
+                    {t('calendar.completeNotesModule')}
                   </p>
                 </div>
               </div>
@@ -325,15 +325,14 @@ export default function EventDetailPage() {
             <TabsContent value="drawings" className="mt-0">
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <PenTool className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-lg font-semibold">Event Canvas</h3>
+                <h3 className="mb-2 text-lg font-semibold">{t('calendar.tabs.eventCanvas')}</h3>
                 <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                  Link canvas modules for formations, tactics, and session plans.
-                  Canvas content will appear here when the Canvas module is implemented.
+                  {t('calendar.tabs.canvasDescription')}
                 </p>
                 <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
-                  <p className="text-sm font-medium">Integration Ready</p>
+                  <p className="text-sm font-medium">{t('calendar.integrationReady')}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Complete the Canvas module to enable this feature
+                    {t('calendar.completeCanvasModule')}
                   </p>
                 </div>
               </div>
@@ -342,15 +341,14 @@ export default function EventDetailPage() {
             <TabsContent value="forms" className="mt-0">
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <ClipboardList className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-lg font-semibold">Event Forms</h3>
+                <h3 className="mb-2 text-lg font-semibold">{t('calendar.tabs.eventForms')}</h3>
                 <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                  Link form modules to distribute wellness checks, post-event surveys, and assessments.
-                  Forms linked to this event will appear here automatically.
+                  {t('calendar.tabs.formsDescription')}
                 </p>
                 <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
-                  <p className="text-sm font-medium">Integration Ready</p>
+                  <p className="text-sm font-medium">{t('calendar.integrationReady')}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    The Forms module exists - integration can be enabled when needed
+                    {t('calendar.formsModuleExists')}
                   </p>
                 </div>
               </div>
@@ -359,15 +357,14 @@ export default function EventDetailPage() {
             <TabsContent value="files" className="mt-0">
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-lg font-semibold">Event Files</h3>
+                <h3 className="mb-2 text-lg font-semibold">{t('calendar.tabs.eventFiles')}</h3>
                 <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                  Link file modules for scouting reports, videos, and other documents.
-                  Files will appear here when the Files module is implemented.
+                  {t('calendar.tabs.filesDescription')}
                 </p>
                 <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
-                  <p className="text-sm font-medium">Integration Ready</p>
+                  <p className="text-sm font-medium">{t('calendar.integrationReady')}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Complete the Files module to enable this feature
+                    {t('calendar.completeFilesModule')}
                   </p>
                 </div>
               </div>
@@ -402,16 +399,16 @@ export default function EventDetailPage() {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Event</AlertDialogTitle>
+            <AlertDialogTitle>{t('calendar.deleteEvent')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this event? This action cannot be undone.
+              {t('calendar.deleteEventConfirmation')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
-              Cancel
+              {t('common.cancel')}
             </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete}>{t('common.delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -421,24 +418,24 @@ export default function EventDetailPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {recurringAction === 'edit' ? 'Edit Recurring Event' : 'Delete Recurring Event'}
+              {recurringAction === 'edit' ? t('calendar.editRecurringEvent') : t('calendar.deleteRecurringEvent')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This is a recurring event. What would you like to {recurringAction}?
+              {t('calendar.recurringEventActionPrompt', { action: recurringAction })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="sm:flex-col sm:space-x-0 sm:space-y-2">
             <AlertDialogCancel onClick={() => setShowRecurringActionDialog(false)}>
-              Cancel
+              {t('common.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRecurringThisOnly}
               className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
             >
-              This event only
+              {t('calendar.thisEventOnly')}
             </AlertDialogAction>
             <AlertDialogAction onClick={handleRecurringAllInstances}>
-              All events in series
+              {t('calendar.allEventsInSeries')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

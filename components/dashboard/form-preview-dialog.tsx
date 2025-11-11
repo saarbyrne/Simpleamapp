@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ interface FormPreviewDialogProps {
 }
 
 export function FormPreviewDialog({ open, onOpenChange, formId }: FormPreviewDialogProps) {
+  const t = useTranslations()
   const [form, setForm] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -54,7 +56,7 @@ export function FormPreviewDialog({ open, onOpenChange, formId }: FormPreviewDia
     console.log('Form preview submission:', data)
     setTimeout(() => {
       setIsSubmitting(false)
-      alert('This is a preview. Form data would be submitted in the actual form.')
+      alert(t('forms.preview.previewMessage'))
     }, 500)
   }
 
@@ -65,34 +67,34 @@ export function FormPreviewDialog({ open, onOpenChange, formId }: FormPreviewDia
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Preview: {form?.name || 'Form'}</DialogTitle>
+          <DialogTitle>{t('forms.preview.title')}: {form?.name || t('forms.form')}</DialogTitle>
           <DialogDescription>
-            This is how the form will appear to users. You can fill it out to test the fields.
+            {t('forms.preview.description')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-4">
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading form...</div>
+            <div className="text-center py-8 text-muted-foreground">{t('forms.preview.loadingForm')}</div>
           ) : !form ? (
-            <div className="text-center py-8 text-muted-foreground">Form not found</div>
+            <div className="text-center py-8 text-muted-foreground">{t('forms.preview.formNotFound')}</div>
           ) : fields.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              This form has no fields yet.
+              {t('forms.preview.noFields')}
             </div>
           ) : (
             <FormRenderer
               fields={fields as FormField[]}
               onSubmit={handleSubmit}
               isLoading={isSubmitting}
-              submitLabel="Submit (Preview)"
+              submitLabel={t('forms.preview.submitPreview')}
             />
           )}
         </div>
 
         <div className="flex justify-end gap-2 pt-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
+            {t('forms.preview.close')}
           </Button>
         </div>
       </DialogContent>

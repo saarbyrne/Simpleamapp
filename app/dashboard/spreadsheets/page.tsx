@@ -41,9 +41,11 @@ import { getSpreadsheets, getSpreadsheetTemplates, createSpreadsheet, deleteSpre
 import { SpreadsheetData, SpreadsheetTemplate, ColumnDefinition } from '@/lib/types/spreadsheet'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 export default function SpreadsheetsPage() {
   const router = useRouter()
+  const t = useTranslations('spreadsheets')
   const [spreadsheets, setSpreadsheets] = useState<SpreadsheetData[]>([])
   const [templates, setTemplates] = useState<SpreadsheetTemplate[]>([])
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
@@ -71,7 +73,7 @@ export default function SpreadsheetsPage() {
       }
     } catch (error) {
       console.error('Error loading data:', error)
-      toast.error('Failed to load spreadsheets')
+      toast.error(t('failedToLoadSpreadsheets'))
     } finally {
       setIsLoading(false)
     }
@@ -80,24 +82,24 @@ export default function SpreadsheetsPage() {
   const handleCreateBlank = async () => {
     try {
       const result = await createSpreadsheet({
-        name: 'Untitled Spreadsheet',
+        name: t('untitledSpreadsheet'),
         description: '',
         schema: [
-          { id: 'col1', name: 'Column 1', type: 'text' },
-          { id: 'col2', name: 'Column 2', type: 'text' },
+          { id: 'col1', name: t('column1'), type: 'text' },
+          { id: 'col2', name: t('column2'), type: 'text' },
         ],
         data: [],
       })
 
       if (result.success && result.spreadsheet) {
-        toast.success('Spreadsheet created')
+        toast.success(t('spreadsheetCreated'))
         router.push(`/dashboard/spreadsheets/${result.spreadsheet.id}`)
       } else {
-        toast.error(result.error || 'Failed to create spreadsheet')
+        toast.error(result.error || t('failedToCreateSpreadsheet'))
       }
     } catch (error) {
       console.error('Error creating spreadsheet:', error)
-      toast.error('Failed to create spreadsheet')
+      toast.error(t('failedToCreateSpreadsheet'))
     }
   }
 
@@ -112,32 +114,32 @@ export default function SpreadsheetsPage() {
       })
 
       if (result.success && result.spreadsheet) {
-        toast.success('Spreadsheet created from template')
+        toast.success(t('spreadsheetCreatedFromTemplate'))
         router.push(`/dashboard/spreadsheets/${result.spreadsheet.id}`)
       } else {
-        toast.error(result.error || 'Failed to create spreadsheet')
+        toast.error(result.error || t('failedToCreateSpreadsheet'))
       }
     } catch (error) {
       console.error('Error creating from template:', error)
-      toast.error('Failed to create spreadsheet')
+      toast.error(t('failedToCreateSpreadsheet'))
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this spreadsheet?')) return
+    if (!confirm(t('deleteConfirmation'))) return
 
     try {
       const result = await deleteSpreadsheet(id)
 
       if (result.success) {
-        toast.success('Spreadsheet deleted')
+        toast.success(t('spreadsheetDeleted'))
         loadData()
       } else {
-        toast.error(result.error || 'Failed to delete spreadsheet')
+        toast.error(result.error || t('failedToDeleteSpreadsheet'))
       }
     } catch (error) {
       console.error('Error deleting spreadsheet:', error)
-      toast.error('Failed to delete spreadsheet')
+      toast.error(t('failedToDeleteSpreadsheet'))
     }
   }
 
@@ -146,7 +148,7 @@ export default function SpreadsheetsPage() {
       <div className="flex items-center justify-center h-[600px]">
         <div className="text-center">
           <FileSpreadsheet className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading spreadsheets...</p>
+          <p className="text-muted-foreground">{t('loadingSpreadsheets')}</p>
         </div>
       </div>
     )
@@ -157,20 +159,20 @@ export default function SpreadsheetsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Spreadsheets</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">
-            Track custom data tables with templates, player links, and AI assistance
+            {t('description')}
           </p>
         </div>
 
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setShowTemplateDialog(true)}>
             <Sparkles className="h-4 w-4 me-2" />
-            Use Template
+            {t('useTemplate')}
           </Button>
           <Button onClick={handleCreateBlank}>
             <Plus className="h-4 w-4 me-2" />
-            New Spreadsheet
+            {t('newSpreadsheet')}
           </Button>
         </div>
       </div>
@@ -180,18 +182,18 @@ export default function SpreadsheetsPage() {
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <FileSpreadsheet className="h-16 w-16 text-muted-foreground mb-4" />
-            <h3 className="font-semibold text-lg mb-2">No spreadsheets yet</h3>
+            <h3 className="font-semibold text-lg mb-2">{t('noSpreadsheets')}</h3>
             <p className="text-muted-foreground text-center mb-6 max-w-sm">
-              Create your first spreadsheet to start tracking custom data. Use a template or start from scratch.
+              {t('noSpreadsheetsDescription')}
             </p>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setShowTemplateDialog(true)}>
                 <Sparkles className="h-4 w-4 me-2" />
-                Browse Templates
+                {t('browseTemplates')}
               </Button>
               <Button onClick={handleCreateBlank}>
                 <Plus className="h-4 w-4 me-2" />
-                Create Blank
+                {t('createBlank')}
               </Button>
             </div>
           </CardContent>
@@ -222,14 +224,14 @@ export default function SpreadsheetsPage() {
                         router.push(`/dashboard/spreadsheets/${sheet.id}`)
                       }}>
                         <Edit className="h-4 w-4 me-2" />
-                        Edit
+                        {t('edit')}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={(e) => {
                         e.stopPropagation()
                         // TODO: Implement duplicate
                       }}>
                         <Copy className="h-4 w-4 me-2" />
-                        Duplicate
+                        {t('duplicate')}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -240,7 +242,7 @@ export default function SpreadsheetsPage() {
                         }}
                       >
                         <Trash2 className="h-4 w-4 me-2" />
-                        Delete
+                        {t('delete')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -254,8 +256,8 @@ export default function SpreadsheetsPage() {
               </CardHeader>
               <CardFooter className="flex flex-col items-start gap-2">
                 <div className="flex items-center gap-4 text-sm text-muted-foreground w-full">
-                  <span>{sheet.schema?.length || 0} columns</span>
-                  <span>{sheet.data?.length || 0} rows</span>
+                  <span>{sheet.schema?.length || 0} {t('columns')}</span>
+                  <span>{sheet.data?.length || 0} {t('rows')}</span>
                   {sheet.version > 1 && (
                     <Badge variant="outline" className="text-xs">
                       v{sheet.version}
@@ -276,9 +278,9 @@ export default function SpreadsheetsPage() {
       <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
         <DialogContent className="max-w-6xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>Spreadsheet Templates</DialogTitle>
+            <DialogTitle>{t('templates.title')}</DialogTitle>
             <DialogDescription>
-              Choose from pre-built templates or start with a blank spreadsheet
+              {t('templates.description')}
             </DialogDescription>
           </DialogHeader>
           <TemplateGallery

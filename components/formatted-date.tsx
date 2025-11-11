@@ -2,6 +2,7 @@
 
 import { useUserPreferences } from "@/hooks/use-user-preferences";
 import { formatDate, formatTime, formatDateTime, formatDateRange, type UserPreferences } from "@/lib/date-utils";
+import { useTranslations } from "next-intl";
 
 interface FormattedDateProps {
   date: Date | string;
@@ -15,6 +16,7 @@ interface FormattedDateProps {
  */
 export function FormattedDate({ date, preferences: providedPreferences, fallback = "—" }: FormattedDateProps) {
   const { preferences: hookPreferences } = useUserPreferences();
+  const t = useTranslations();
   const preferences = providedPreferences || hookPreferences;
   
   if (!date) return <span>{fallback}</span>;
@@ -22,7 +24,7 @@ export function FormattedDate({ date, preferences: providedPreferences, fallback
   try {
     return <span>{formatDate(date, preferences || undefined)}</span>;
   } catch (error) {
-    console.error("Error formatting date:", error);
+    console.error(t('common.errorFormattingDate'), error);
     return <span>{fallback}</span>;
   }
 }
@@ -38,6 +40,7 @@ interface FormattedTimeProps {
  */
 export function FormattedTime({ date, preferences: providedPreferences, fallback = "—" }: FormattedTimeProps) {
   const { preferences: hookPreferences } = useUserPreferences();
+  const t = useTranslations();
   const preferences = providedPreferences || hookPreferences;
   
   if (!date) return <span>{fallback}</span>;
@@ -45,7 +48,7 @@ export function FormattedTime({ date, preferences: providedPreferences, fallback
   try {
     return <span>{formatTime(date, preferences || undefined)}</span>;
   } catch (error) {
-    console.error("Error formatting time:", error);
+    console.error(t('common.errorFormattingTime'), error);
     return <span>{fallback}</span>;
   }
 }
@@ -61,6 +64,7 @@ interface FormattedDateTimeProps {
  */
 export function FormattedDateTime({ date, preferences: providedPreferences, fallback = "—" }: FormattedDateTimeProps) {
   const { preferences: hookPreferences } = useUserPreferences();
+  const t = useTranslations();
   const preferences = providedPreferences || hookPreferences;
   
   if (!date) return <span>{fallback}</span>;
@@ -68,7 +72,7 @@ export function FormattedDateTime({ date, preferences: providedPreferences, fall
   try {
     return <span>{formatDateTime(date, preferences || undefined)}</span>;
   } catch (error) {
-    console.error("Error formatting date/time:", error);
+    console.error(t('common.errorFormattingDateTime'), error);
     return <span>{fallback}</span>;
   }
 }
@@ -90,6 +94,7 @@ export function FormattedDateRange({
   fallback = "—" 
 }: FormattedDateRangeProps) {
   const { preferences: hookPreferences } = useUserPreferences();
+  const t = useTranslations();
   const preferences = providedPreferences || hookPreferences;
   
   if (!startDate || !endDate) return <span>{fallback}</span>;
@@ -97,7 +102,7 @@ export function FormattedDateRange({
   try {
     return <span>{formatDateRange(startDate, endDate, preferences || undefined)}</span>;
   } catch (error) {
-    console.error("Error formatting date range:", error);
+    console.error(t('common.errorFormattingDateRange'), error);
     return <span>{fallback}</span>;
   }
 }

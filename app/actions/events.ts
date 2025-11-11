@@ -7,6 +7,7 @@ import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
 import type { Prisma } from '@prisma/client'
 import { RRule, rrulestr } from 'rrule'
 import { randomUUID } from 'crypto'
+import { getTranslations } from 'next-intl/server'
 
 export interface CreateEventData {
   title: string
@@ -64,7 +65,8 @@ export async function getEvents(startDate?: Date, endDate?: Date) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    const t = await getTranslations('errors')
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -105,7 +107,8 @@ export async function getEvents(startDate?: Date, endDate?: Date) {
     return { success: true, events }
   } catch (error) {
     console.error('Error fetching events:', error)
-    return { error: 'Failed to fetch events' }
+    const t = await getTranslations('errors')
+    return { error: t('failedToFetchEvents') }
   }
 }
 
@@ -115,9 +118,10 @@ export async function getEvents(startDate?: Date, endDate?: Date) {
 export async function getEvent(eventId: string): Promise<{ success: true, event: EventWithDetails } | { error: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const t = await getTranslations('errors')
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -147,7 +151,7 @@ export async function getEvent(eventId: string): Promise<{ success: true, event:
     })
 
     if (!event) {
-      return { error: 'Event not found' }
+      return { error: t('eventNotFound') }
     }
 
     // Fetch attendance count first (very fast)
@@ -197,7 +201,8 @@ export async function getEvent(eventId: string): Promise<{ success: true, event:
     }
   } catch (error) {
     console.error('Error fetching event:', error)
-    return { error: 'Failed to fetch event' }
+    const t = await getTranslations('errors')
+    return { error: t('failedToFetchEvent') }
   }
 }
 
@@ -207,9 +212,10 @@ export async function getEvent(eventId: string): Promise<{ success: true, event:
 export async function createEvent(data: CreateEventData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const t = await getTranslations('errors')
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -233,7 +239,7 @@ export async function createEvent(data: CreateEventData) {
         const occurrences = rule.all((date, i) => i < 500)
 
         if (occurrences.length === 0) {
-          throw new Error('No occurrences generated from recurrence rule')
+          throw new Error(t('noOccurrencesGenerated'))
         }
 
         // Create all event instances in parallel for better performance
@@ -344,7 +350,11 @@ export async function createEvent(data: CreateEventData) {
     return { success: true, event: result }
   } catch (error) {
     console.error('Error creating event:', error)
-    return { error: 'Failed to create event' }
+    const t = await getTranslations('errors')
+    if (error instanceof Error && error.message === t('noOccurrencesGenerated')) {
+      return { error: error.message }
+    }
+    return { error: t('failedToCreateEvent') }
   }
 }
 
@@ -354,9 +364,10 @@ export async function createEvent(data: CreateEventData) {
 export async function updateEvent(eventId: string, data: UpdateEventData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const t = await getTranslations('errors')
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -372,7 +383,7 @@ export async function updateEvent(eventId: string, data: UpdateEventData) {
       })
 
       if (!existingEvent) {
-        throw new Error('Event not found')
+        throw new Error(t('eventNotFound'))
       }
 
       // Update event
@@ -430,7 +441,11 @@ export async function updateEvent(eventId: string, data: UpdateEventData) {
     return { success: true, event: result }
   } catch (error) {
     console.error('Error updating event:', error)
-    return { error: 'Failed to update event' }
+    const t = await getTranslations('errors')
+    if (error instanceof Error && error.message === t('eventNotFound')) {
+      return { error: error.message }
+    }
+    return { error: t('failedToUpdateEvent') }
   }
 }
 
@@ -440,9 +455,10 @@ export async function updateEvent(eventId: string, data: UpdateEventData) {
 export async function deleteEvent(eventId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const t = await getTranslations('errors')
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -458,7 +474,7 @@ export async function deleteEvent(eventId: string) {
       })
 
       if (!event) {
-        throw new Error('Event not found')
+        throw new Error(t('eventNotFound'))
       }
 
       // Delete event (cascade will handle attendance)
@@ -484,7 +500,11 @@ export async function deleteEvent(eventId: string) {
     return { success: true }
   } catch (error) {
     console.error('Error deleting event:', error)
-    return { error: 'Failed to delete event' }
+    const t = await getTranslations('errors')
+    if (error instanceof Error && error.message === t('eventNotFound')) {
+      return { error: error.message }
+    }
+    return { error: t('failedToDeleteEvent') }
   }
 }
 
@@ -494,9 +514,10 @@ export async function deleteEvent(eventId: string) {
 export async function deleteEventSeries(eventId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const t = await getTranslations('errors')
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -512,11 +533,11 @@ export async function deleteEventSeries(eventId: string) {
       })
 
       if (!event) {
-        throw new Error('Event not found')
+        throw new Error(t('eventNotFound'))
       }
 
       if (!event.seriesId) {
-        throw new Error('Event is not part of a recurring series')
+        throw new Error(t('eventNotPartOfSeries'))
       }
 
       // Delete all events in the series
@@ -546,7 +567,14 @@ export async function deleteEventSeries(eventId: string) {
     return { success: true }
   } catch (error) {
     console.error('Error deleting event series:', error)
-    return { error: 'Failed to delete event series' }
+    const t = await getTranslations('errors')
+    if (error instanceof Error) {
+      const errorMsg = error.message
+      if (errorMsg === t('eventNotFound') || errorMsg === t('eventNotPartOfSeries')) {
+        return { error: errorMsg }
+      }
+    }
+    return { error: t('failedToDeleteEventSeries') }
   }
 }
 
@@ -556,9 +584,10 @@ export async function deleteEventSeries(eventId: string) {
 export async function updateEventSeries(eventId: string, data: UpdateEventData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const t = await getTranslations('errors')
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -574,11 +603,11 @@ export async function updateEventSeries(eventId: string, data: UpdateEventData) 
       })
 
       if (!event) {
-        throw new Error('Event not found')
+        throw new Error(t('eventNotFound'))
       }
 
       if (!event.seriesId) {
-        throw new Error('Event is not part of a recurring series')
+        throw new Error(t('eventNotPartOfSeries'))
       }
 
       // Build update data (exclude time fields as they're specific to each instance)
@@ -617,7 +646,14 @@ export async function updateEventSeries(eventId: string, data: UpdateEventData) 
     return { success: true }
   } catch (error) {
     console.error('Error updating event series:', error)
-    return { error: 'Failed to update event series' }
+    const t = await getTranslations('errors')
+    if (error instanceof Error) {
+      const errorMsg = error.message
+      if (errorMsg === t('eventNotFound') || errorMsg === t('eventNotPartOfSeries')) {
+        return { error: errorMsg }
+      }
+    }
+    return { error: t('failedToUpdateEventSeries') }
   }
 }
 
@@ -632,9 +668,10 @@ export async function updateAttendance(
 ) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const t = await getTranslations('errors')
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -649,7 +686,7 @@ export async function updateAttendance(
     })
 
     if (!event) {
-      return { error: 'Event not found' }
+      return { error: t('eventNotFound') }
     }
 
     // Upsert attendance
@@ -679,7 +716,12 @@ export async function updateAttendance(
     return { success: true, attendance }
   } catch (error) {
     console.error('Error updating attendance:', error)
-    return { error: 'Failed to update attendance' }
+    const t = await getTranslations('errors')
+    if (error instanceof Error && error.message === t('eventNotFound')) {
+      return { error: error.message }
+    }
+    const tCalendar = await getTranslations('calendar.attendance')
+    return { error: tCalendar('failedToUpdate') }
   }
 }
 
@@ -689,9 +731,10 @@ export async function updateAttendance(
 export async function getOrganizationPlayers() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const t = await getTranslations('errors')
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -721,6 +764,7 @@ export async function getOrganizationPlayers() {
     return { success: true, players }
   } catch (error) {
     console.error('Error fetching players:', error)
-    return { error: 'Failed to fetch players' }
+    const t = await getTranslations('errors')
+    return { error: t('failedToFetchPlayers') }
   }
 }
