@@ -4,6 +4,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { Prisma } from '@prisma/client'
 
 // Types
 export interface ColumnDefinition {
@@ -52,8 +53,8 @@ export async function createSpreadsheet(data: CreateSpreadsheetData) {
       data: {
         name: data.name,
         description: data.description,
-        schema: data.schema,
-        data: data.data || [],
+        schema: data.schema as unknown as Prisma.InputJsonValue,
+        data: (data.data || []) as unknown as Prisma.InputJsonValue,
         templateId: data.templateId,
         organizationId: dbUser.organizationId,
         createdById: user.id,
@@ -66,8 +67,8 @@ export async function createSpreadsheet(data: CreateSpreadsheetData) {
       data: {
         spreadsheetId: spreadsheet.id,
         version: 1,
-        schema: data.schema,
-        data: data.data || [],
+        schema: data.schema as unknown as Prisma.InputJsonValue,
+        data: (data.data || []) as unknown as Prisma.InputJsonValue,
         createdById: user.id,
         changeNote: 'Initial version',
       },
@@ -108,13 +109,16 @@ export async function updateSpreadsheet(
 
     const result = await prisma.$transaction(async (tx) => {
       // Update spreadsheet
+      const updatedSchema = data.schema ?? current.schema
+      const updatedData = data.data ?? current.data
+      
       const spreadsheet = await tx.spreadsheet.update({
         where: { id: spreadsheetId },
         data: {
           name: data.name ?? current.name,
           description: data.description ?? current.description,
-          schema: data.schema ?? current.schema,
-          data: data.data ?? current.data,
+          schema: updatedSchema === null ? Prisma.JsonNull : (updatedSchema as unknown as Prisma.InputJsonValue),
+          data: updatedData === null ? Prisma.JsonNull : (updatedData as unknown as Prisma.InputJsonValue),
           version: current.version + 1,
         },
       })
@@ -125,8 +129,8 @@ export async function updateSpreadsheet(
           data: {
             spreadsheetId: spreadsheet.id,
             version: spreadsheet.version,
-            schema: data.schema ?? current.schema,
-            data: data.data ?? current.data,
+            schema: updatedSchema === null ? Prisma.JsonNull : (updatedSchema as unknown as Prisma.InputJsonValue),
+            data: updatedData === null ? Prisma.JsonNull : (updatedData as unknown as Prisma.InputJsonValue),
             createdById: user.id,
             changeNote: data.changeNote || `Updated to version ${spreadsheet.version}`,
           },
@@ -299,8 +303,8 @@ export async function createSpreadsheetTemplate(data: {
         name: data.name,
         description: data.description,
         category: data.category,
-        schema: data.schema,
-        sampleData: data.sampleData || [],
+        schema: data.schema as unknown as Prisma.InputJsonValue,
+        sampleData: (data.sampleData || []) as unknown as Prisma.InputJsonValue,
         isPublic: data.isPublic || false,
         organizationId: dbUser.organizationId,
       },
@@ -347,8 +351,8 @@ export async function restoreSpreadsheetVersion(
     }
 
     const result = await updateSpreadsheet(spreadsheetId, {
-      schema: version.schema as ColumnDefinition[],
-      data: version.data as SpreadsheetRow[],
+      schema: version.schema as unknown as ColumnDefinition[],
+      data: version.data as unknown as SpreadsheetRow[],
       changeNote: `Restored version ${version.version}`,
     })
 

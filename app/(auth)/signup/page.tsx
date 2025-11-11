@@ -48,7 +48,7 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="flex min-h-screen items-center justify-center bg-page-background px-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-2xl">Check your email</CardTitle>
@@ -67,7 +67,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center bg-page-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Create your account</CardTitle>

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
 import { SPREADSHEET_TEMPLATES } from '../lib/data/spreadsheet-templates'
 
 const prisma = new PrismaClient()
@@ -25,8 +25,8 @@ async function main() {
           name: template.name,
           description: template.description,
           category: template.category,
-          schema: template.schema,
-          sampleData: template.sampleData,
+          schema: template.schema as unknown as Prisma.InputJsonValue,
+          sampleData: template.sampleData as unknown as Prisma.InputJsonValue,
           isPublic: true,
           organizationId: null, // Global templates
         },

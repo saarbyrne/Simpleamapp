@@ -175,7 +175,7 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
       <SidebarProvider>
         <AppSidebar userName={userName} userEmail={userEmail} userAvatar={userAvatar} />
         <SidebarInset className="flex flex-col">
-          <div className="sticky top-0 z-10 shrink-0 w-full overflow-x-hidden bg-background">
+          <div className="sticky top-0 z-10 shrink-0 w-full overflow-x-hidden bg-nav-background">
             <header className="flex h-16 items-center gap-2 border-b px-4">
               <SidebarTrigger className="-ms-1 shrink-0" />
               <Separator orientation="vertical" className="me-2 h-4 shrink-0" />
@@ -192,7 +192,7 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
             </header>
           </div>
           {disablePageFrame ? (
-            <div className="flex flex-1 flex-col bg-background overflow-y-auto overflow-x-hidden">
+            <div className="flex flex-1 flex-col bg-page-background overflow-y-auto overflow-x-hidden">
               {children}
             </div>
           ) : (

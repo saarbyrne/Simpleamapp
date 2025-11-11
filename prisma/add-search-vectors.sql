@@ -274,17 +274,26 @@ CREATE TRIGGER plan_search_vector_update
 -- ============================================
 
 -- Update existing rows to populate search vectors
+-- For tables with updatedAt, trigger the update via updatedAt
 UPDATE persons SET "updatedAt" = "updatedAt";
 UPDATE notes SET "updatedAt" = "updatedAt";
 UPDATE events SET "updatedAt" = "updatedAt";
 UPDATE forms SET "updatedAt" = "updatedAt";
-UPDATE form_templates SET "updatedAt" = "updatedAt";
-UPDATE files SET "updatedAt" = "updatedAt";
 UPDATE spreadsheets SET "updatedAt" = "updatedAt";
 UPDATE spreadsheet_templates SET "updatedAt" = "updatedAt";
 UPDATE event_templates SET "updatedAt" = "updatedAt";
 UPDATE canvas_boards SET "updatedAt" = "updatedAt";
 UPDATE plans SET "updatedAt" = "updatedAt";
+
+-- For tables without updatedAt, directly set the search_vector
+UPDATE form_templates SET search_vector =
+  setweight(to_tsvector('english', coalesce(name, '')), 'A') ||
+  setweight(to_tsvector('english', coalesce(description, '')), 'B') ||
+  setweight(to_tsvector('english', coalesce(category, '')), 'C');
+
+UPDATE files SET search_vector =
+  setweight(to_tsvector('english', coalesce(name, '')), 'A') ||
+  setweight(to_tsvector('english', coalesce(array_to_string(tags, ' '), '')), 'B');
 
 -- ============================================
 -- Migration Complete

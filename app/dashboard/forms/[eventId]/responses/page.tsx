@@ -35,7 +35,13 @@ export default async function FormResponsesPage({ params, searchParams }: FormRe
   }
 
   const { form } = formResult
-  const { responses, total } = responsesResult
+  const { responses: rawResponses, total } = responsesResult
+
+  // Transform responses to match FormResponse type, handling null JsonValue
+  const responses = rawResponses.map(response => ({
+    ...response,
+    responses: (response.responses as unknown as Record<string, any>) || {},
+  }))
 
   return (
     <FormResponsesTable

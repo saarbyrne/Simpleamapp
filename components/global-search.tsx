@@ -169,7 +169,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   }
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
+    <CommandDialog open={open} onOpenChange={onOpenChange} className="max-w-2xl" shouldFilter={false}>
       <CommandInput
         placeholder="Search players, events, notes, forms..."
         value={query}
@@ -206,68 +206,6 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                 </div>
               </div>
             )}
-
-            <div>
-              <p className="text-xs font-medium text-muted-foreground mb-2 text-start">
-                Quick access
-              </p>
-              <div className="grid grid-cols-3 gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/dashboard/players')}
-                  className="flex flex-col h-auto py-3"
-                >
-                  <Users className="h-4 w-4 mb-1" />
-                  <span className="text-xs">Players</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/dashboard/calendar')}
-                  className="flex flex-col h-auto py-3"
-                >
-                  <Calendar className="h-4 w-4 mb-1" />
-                  <span className="text-xs">Events</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/dashboard/notes')}
-                  className="flex flex-col h-auto py-3"
-                >
-                  <FileText className="h-4 w-4 mb-1" />
-                  <span className="text-xs">Notes</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/dashboard/forms')}
-                  className="flex flex-col h-auto py-3"
-                >
-                  <ClipboardList className="h-4 w-4 mb-1" />
-                  <span className="text-xs">Forms</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/dashboard/spreadsheets')}
-                  className="flex flex-col h-auto py-3"
-                >
-                  <Table2 className="h-4 w-4 mb-1" />
-                  <span className="text-xs">Data</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/dashboard/files')}
-                  className="flex flex-col h-auto py-3"
-                >
-                  <File className="h-4 w-4 mb-1" />
-                  <span className="text-xs">Files</span>
-                </Button>
-              </div>
-            </div>
           </div>
         )}
 
@@ -348,10 +286,9 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
         {/* Results State */}
         {!loading && !error && results.length > 0 && (
           <>
-            <div className="px-2 py-2 text-xs text-muted-foreground">
+            <div className="px-2 py-2 text-xs text-muted-foreground border-b">
               {results.length} result{results.length === 1 ? '' : 's'} found
             </div>
-
             {Object.entries(groupedResults).map(([type, groupResults], index) => {
               const Icon = entityIcons[type as SearchEntityType]
               const label = entityLabels[type as SearchEntityType]
@@ -363,11 +300,11 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                     {groupResults.map((result) => (
                       <CommandItem
                         key={result.id}
-                        value={`${result.type}-${result.id}`}
+                        value={`${result.type}-${result.id}-${result.title}`}
                         onSelect={() => handleSelect(result)}
                         className="cursor-pointer"
                       >
-                        <Icon className="h-4 w-4 text-muted-foreground" />
+                        <Icon className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="font-medium truncate">{result.title}</span>
@@ -385,7 +322,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                             )}
                           </div>
                           {(result.description || result.excerpt) && (
-                            <p className="text-xs text-muted-foreground truncate">
+                            <p className="text-xs text-muted-foreground truncate mt-0.5">
                               {result.description || result.excerpt}
                             </p>
                           )}
@@ -399,17 +336,17 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                             </div>
                           )}
                           {result.type === 'event' && result.metadata.location && (
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground mt-0.5">
                               {result.metadata.location}
                             </p>
                           )}
                           {result.type === 'note' && result.metadata.author && (
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground mt-0.5">
                               by {result.metadata.author}
                             </p>
                           )}
                         </div>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground opacity-50" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground opacity-50 ml-2 flex-shrink-0" />
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -451,14 +388,11 @@ export function SearchTrigger({ onClick }: { onClick: () => void }) {
   return (
     <Button
       variant="outline"
-      className="relative h-9 w-full justify-start text-sm text-muted-foreground sm:pe-12 lg:w-64"
+      className="relative h-9 w-56 md:w-64 lg:w-72 justify-start text-sm text-muted-foreground"
       onClick={onClick}
     >
       <Search className="me-2 h-4 w-4" />
       <span className="inline-flex">Search...</span>
-      <Kbd className="pointer-events-none absolute end-1.5 top-1.5 hidden sm:flex">
-        /
-      </Kbd>
     </Button>
   )
 }

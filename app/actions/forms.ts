@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { Prisma } from '@prisma/client'
 
 export interface FormField {
   id: string
@@ -474,12 +475,12 @@ export async function duplicateForm(formId: string) {
       data: {
         name: `${originalForm.name} (Copy)`,
         description: originalForm.description,
-        schema: originalForm.schema,
+        schema: originalForm.schema === null ? Prisma.JsonNull : originalForm.schema,
         organizationId: dbUser.organizationId,
         templateId: originalForm.templateId,
         scheduleType: originalForm.scheduleType,
         scheduledAt: originalForm.scheduledAt,
-        recurringRule: originalForm.recurringRule,
+        recurringRule: originalForm.recurringRule === null ? Prisma.JsonNull : originalForm.recurringRule,
         targetType: originalForm.targetType,
         targetIds: originalForm.targetIds,
         isActive: false, // Set to draft by default
