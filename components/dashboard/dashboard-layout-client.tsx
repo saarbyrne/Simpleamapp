@@ -21,6 +21,7 @@ import { QuickActionsToolbar } from '@/components/dashboard/quick-actions-toolba
 import { AddPlayerDialog } from '@/components/dashboard/add-player-dialog'
 import { EventFormDialog } from '@/components/calendar/event-form-dialog'
 import { FormBuilderDialog } from '@/components/dashboard/form-builder-dialog'
+import { GlobalSearch, SearchTrigger, useSearchShortcut } from '@/components/global-search'
 
 type DashboardLayoutClientProps = {
   userName: string
@@ -150,6 +151,10 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false)
   const [isAddEventOpen, setIsAddEventOpen] = useState(false)
   const [isAddFormOpen, setIsAddFormOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+
+  // Enable keyboard shortcut for search (/ or Cmd/Ctrl+K)
+  useSearchShortcut(() => setIsSearchOpen(true))
 
   const quickActionHandlers = useMemo(() => ({
     'add-player': () => setIsAddPlayerOpen(true),
@@ -176,6 +181,9 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
               <Separator orientation="vertical" className="me-2 h-4 shrink-0" />
               <div className="flex-1 min-w-0">
                 <DashboardBreadcrumb />
+              </div>
+              <div className="hidden md:block shrink-0 mx-2">
+                <SearchTrigger onClick={() => setIsSearchOpen(true)} />
               </div>
               <QuickActionsToolbar
                 actionHandlers={quickActionHandlers}
@@ -206,6 +214,10 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
           open={isAddFormOpen}
           onOpenChange={setIsAddFormOpen}
           onSuccess={handleFormBuilderSuccess}
+        />
+        <GlobalSearch
+          open={isSearchOpen}
+          onOpenChange={setIsSearchOpen}
         />
       </SidebarProvider>
     </BreadcrumbProvider>
