@@ -1,0 +1,126 @@
+{
+  "nav": {
+    "players": "Joueurs",
+    "forms": "Formulaires",
+    "reports": "Rapports",
+    "calendar": "Calendrier",
+    "notes": "Notes",
+    "spreadsheets": "Feuilles de calcul",
+    "canvas": "Toile",
+    "files": "Fichiers",
+    "planner": "Planificateur"
+  },
+  "settings": {
+    "profile": "Profil",
+    "dataManagement": "Gestion des données",
+    "systemSettings": "Paramètres système"
+  },
+  "profile": {
+    "title": "Paramètres du profil",
+    "personalInfo": "Informations personnelles",
+    "preferences": "Préférences",
+    "notifications": "Notifications",
+    "security": "Sécurité",
+    "name": "Nom",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "avatar": "Avatar",
+    "language": "Langue",
+    "timezone": "Fuseau horaire",
+    "dateFormat": "Format de date",
+    "timeFormat": "Format d'heure",
+    "save": "Enregistrer les modifications",
+    "cancel": "Annuler",
+    "saved": "Paramètres enregistrés avec succès",
+    "error": "Échec de l'enregistrement des paramètres"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "search": "Rechercher",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "success": "Succès",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Soumettre",
+    "reset": "Réinitialiser",
+    "clear": "Effacer",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "import": "Importer",
+    "refresh": "Actualiser"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Béenvenue",
+    "quickActions": "Actions rapides",
+    "recentActivity": "Activité récente"
+  },
+  "players": {
+    "title": "Joueurs",
+    "description": "Gérez votre effectif et les informations des joueurs",
+    "addPlayer": "Ajouter un joueur",
+    "search": "Rechercher des joueurs...",
+    "noPlayers": "Aucun joueur trouvé",
+    "name": "Nom",
+    "position": "Position",
+    "age": "Âge",
+    "nationality": "Nationalité",
+    "status": "Statut",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "joined": "Rejoint",
+    "tags": "Étiquettes"
+  },
+  "calendar": {
+    "title": "Calendrier",
+    "description": "Gérez vos événements, matchs et séances d'entraînement",
+    "newEvent": "Nouvel événement",
+    "month": "Mois",
+    "week": "Semaine",
+    "day": "Jour",
+    "today": "Aujourd'hui",
+    "noEvents": "Aucun événement programmé"
+  },
+  "forms": {
+    "title": "Formulaires",
+    "description": "Créer et gérer des formulaires",
+    "newForm": "Nouveau formulaire",
+    "noForms": "Aucun formulaire trouvé"
+  },
+  "reports": {
+    "title": "Rapports",
+    "description": "Visualisations, exportations et instantanés de performance",
+    "noReports": "Aucun rapport disponible"
+  },
+  "notes": {
+    "title": "Notes",
+    "description": "Créer et gérer des notes",
+    "newNote": "Nouvelle note",
+    "noNotes": "Aucune note trouvée"
+  },
+  "spreadsheets": {
+    "title": "Feuilles de calcul",
+    "description": "Suivez des tableaux de données personnalisés avec des modèles, des liens de joueurs et une assistance IA",
+    "newSpreadsheet": "Nouvelle feuille de calcul",
+    "useTemplate": "Utiliser un modèle",
+    "noSpreadsheets": "Aucune feuille de calcul pour le moment"
+  },
+  "breadcrumb": {
+    "dashboard": "Tableau de bord",
+    "home": "Accueil"
+  },
+  "errors": {
+    "notFound": "Page non trouvée",
+    "unauthorized": "Vous n'êtes pas autorisé à accéder à cette page",
+    "serverError": "Une erreur serveur s'est produite",
+    "networkError": "Erreur réseau. Veuillez vérifier votre connexion."
+  }
+}

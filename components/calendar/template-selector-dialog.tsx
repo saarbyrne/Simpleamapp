@@ -127,7 +127,7 @@ export function TemplateSelectorDialog({
           </div>
         ) : (
           <>
-            <ScrollArea className="max-h-[400px] pr-4">
+            <ScrollArea className="max-h-[400px] pe-4">
               <div className="grid gap-3">
                 {templates.map((template) => {
                   const typeConfig = eventTypeConfig[template.type as keyof typeof eventTypeConfig] || eventTypeConfig.other
@@ -140,7 +140,7 @@ export function TemplateSelectorDialog({
                       key={template.id}
                       onClick={() => setSelectedTemplate(template)}
                       className={cn(
-                        'group relative flex items-start gap-4 rounded-lg border-2 p-4 text-left transition-all hover:border-primary/50',
+                        'group relative flex items-start gap-4 rounded-lg border-2 p-4 text-start transition-all hover:border-primary/50',
                         isSelected
                           ? 'border-primary bg-primary/5'
                           : 'border-border bg-card'
@@ -186,7 +186,7 @@ export function TemplateSelectorDialog({
                           )}
                           {template.isGlobal && (
                             <Badge variant="secondary">
-                              <Sparkles className="mr-1 h-3 w-3" />
+                              <Sparkles className="me-1 h-3 w-3" />
                               Global
                             </Badge>
                           )}

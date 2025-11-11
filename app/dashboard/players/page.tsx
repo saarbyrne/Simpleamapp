@@ -1,6 +1,8 @@
+import { Suspense } from 'react'
 import { differenceInYears } from 'date-fns'
 import { PlayersTable, type PlayerRow } from '@/components/dashboard/players-table-new'
 import { getPlayers } from '@/app/actions/players'
+import PlayersLoading from './loading'
 
 type PlayersPageProps = {
   searchParams: {
@@ -9,10 +11,7 @@ type PlayersPageProps = {
   }
 }
 
-export default async function PlayersPage({ searchParams }: PlayersPageProps) {
-  const page = searchParams.page ? parseInt(searchParams.page, 10) : 0
-  const pageSize = searchParams.pageSize ? parseInt(searchParams.pageSize, 10) : 20
-  
+async function PlayersData({ page, pageSize }: { page: number; pageSize: number }) {
   const result = await getPlayers(page, pageSize)
   
   // Handle errors
@@ -44,4 +43,15 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
   })
 
   return <PlayersTable players={roster} total={total} />
+}
+
+export default async function PlayersPage({ searchParams }: PlayersPageProps) {
+  const page = searchParams.page ? parseInt(searchParams.page, 10) : 0
+  const pageSize = searchParams.pageSize ? parseInt(searchParams.pageSize, 10) : 20
+  
+  return (
+    <Suspense fallback={<PlayersLoading />}>
+      <PlayersData page={page} pageSize={pageSize} />
+    </Suspense>
+  )
 }

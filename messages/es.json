@@ -1,0 +1,126 @@
+{
+  "nav": {
+    "players": "Jugadores",
+    "forms": "Formularios",
+    "reports": "Informes",
+    "calendar": "Calendario",
+    "notes": "Notas",
+    "spreadsheets": "Hojas de cálculo",
+    "canvas": "Lienzo",
+    "files": "Archivos",
+    "planner": "Planificador"
+  },
+  "settings": {
+    "profile": "Perfil",
+    "dataManagement": "Gestión de datos",
+    "systemSettings": "Configuración del sistema"
+  },
+  "profile": {
+    "title": "Configuración de perfil",
+    "personalInfo": "Información personal",
+    "preferences": "Preferencias",
+    "notifications": "Notificaciones",
+    "security": "Seguridad",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "avatar": "Avatar",
+    "language": "Idioma",
+    "timezone": "Zona horaria",
+    "dateFormat": "Formato de fecha",
+    "timeFormat": "Formato de hora",
+    "save": "Guardar cambios",
+    "cancel": "Cancelar",
+    "saved": "Configuración guardada exitosamente",
+    "error": "Error al guardar la configuración"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "search": "Buscar",
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "reset": "Restablecer",
+    "clear": "Limpiar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "refresh": "Actualizar"
+  },
+  "dashboard": {
+    "title": "Panel de control",
+    "welcome": "Bienvenido",
+    "quickActions": "Acciones rápidas",
+    "recentActivity": "Actividad reciente"
+  },
+  "players": {
+    "title": "Jugadores",
+    "description": "Gestiona tu plantilla e información de jugadores",
+    "addPlayer": "Agregar jugador",
+    "search": "Buscar jugadores...",
+    "noPlayers": "No se encontraron jugadores",
+    "name": "Nombre",
+    "position": "Posición",
+    "age": "Edad",
+    "nationality": "Nacionalidad",
+    "status": "Estado",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "joined": "Se unió",
+    "tags": "Etiquetas"
+  },
+  "calendar": {
+    "title": "Calendario",
+    "description": "Gestiona tus eventos, partidos y sesiones de entrenamiento",
+    "newEvent": "Nuevo evento",
+    "month": "Mes",
+    "week": "Semana",
+    "day": "Día",
+    "today": "Hoy",
+    "noEvents": "No hay eventos programados"
+  },
+  "forms": {
+    "title": "Formularios",
+    "description": "Crear y gestionar formularios",
+    "newForm": "Nuevo formulario",
+    "noForms": "No se encontraron formularios"
+  },
+  "reports": {
+    "title": "Informes",
+    "description": "Visualizaciones, exportaciones y capturas de rendimiento",
+    "noReports": "No hay informes disponibles"
+  },
+  "notes": {
+    "title": "Notas",
+    "description": "Crear y gestionar notas",
+    "newNote": "Nueva nota",
+    "noNotes": "No se encontraron notas"
+  },
+  "spreadsheets": {
+    "title": "Hojas de cálculo",
+    "description": "Rastrea tablas de datos personalizadas con plantillas, enlaces de jugadores y asistencia de IA",
+    "newSpreadsheet": "Nueva hoja de cálculo",
+    "useTemplate": "Usar plantilla",
+    "noSpreadsheets": "Aún no hay hojas de cálculo"
+  },
+  "breadcrumb": {
+    "dashboard": "Panel de control",
+    "home": "Inicio"
+  },
+  "errors": {
+    "notFound": "Página no encontrada",
+    "unauthorized": "No estás autorizado para acceder a esta página",
+    "serverError": "Ocurrió un error del servidor",
+    "networkError": "Error de red. Por favor verifica tu conexión."
+  }
+}

@@ -148,14 +148,14 @@ export function BulkActionsBar({
         })}
 
         {/* Actions */}
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-2 ms-auto">
           <Button
             size="sm"
             onClick={handleSave}
             disabled={!hasChanges || isLoading}
             className="h-10"
           >
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="h-4 w-4 me-2" />
             {isLoading ? 'Saving...' : 'Save'}
           </Button>
           <Button
@@ -165,7 +165,7 @@ export function BulkActionsBar({
             disabled={isLoading}
             className="h-10"
           >
-            <X className="h-4 w-4 mr-2" />
+            <X className="h-4 w-4 me-2" />
             Clear
           </Button>
         </div>

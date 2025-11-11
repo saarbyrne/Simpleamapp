@@ -1,0 +1,127 @@
+{
+  "nav": {
+    "players": "Players",
+    "forms": "Forms",
+    "reports": "Reports",
+    "calendar": "Calendar",
+    "notes": "Notes",
+    "spreadsheets": "Spreadsheets",
+    "canvas": "Canvas",
+    "files": "Files",
+    "planner": "Planner"
+  },
+  "settings": {
+    "profile": "Profile",
+    "dataManagement": "Data Management",
+    "systemSettings": "System Settings"
+  },
+  "profile": {
+    "title": "Profile Settings",
+    "personalInfo": "Personal Information",
+    "preferences": "Preferences",
+    "notifications": "Notifications",
+    "security": "Security",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "avatar": "Avatar",
+    "language": "Language",
+    "timezone": "Timezone",
+    "dateFormat": "Date Format",
+    "timeFormat": "Time Format",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "saved": "Settings saved successfully",
+    "error": "Failed to save settings"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "reset": "Reset",
+    "clear": "Clear",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "refresh": "Refresh",
+    "signOut": "Sign Out"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "quickActions": "Quick Actions",
+    "recentActivity": "Recent Activity"
+  },
+  "players": {
+    "title": "Players",
+    "description": "Manage your team roster and player information",
+    "addPlayer": "Add Player",
+    "search": "Search players...",
+    "noPlayers": "No players found",
+    "name": "Name",
+    "position": "Position",
+    "age": "Age",
+    "nationality": "Nationality",
+    "status": "Status",
+    "email": "Email",
+    "phone": "Phone",
+    "joined": "Joined",
+    "tags": "Tags"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "description": "Manage your events, matches, and training sessions",
+    "newEvent": "New Event",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "today": "Today",
+    "noEvents": "No events scheduled"
+  },
+  "forms": {
+    "title": "Forms",
+    "description": "Create and manage forms",
+    "newForm": "New Form",
+    "noForms": "No forms found"
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "Visualizations, exports, and performance snapshots",
+    "noReports": "No reports available"
+  },
+  "notes": {
+    "title": "Notes",
+    "description": "Create and manage notes",
+    "newNote": "New Note",
+    "noNotes": "No notes found"
+  },
+  "spreadsheets": {
+    "title": "Spreadsheets",
+    "description": "Track custom data tables with templates, player links, and AI assistance",
+    "newSpreadsheet": "New Spreadsheet",
+    "useTemplate": "Use Template",
+    "noSpreadsheets": "No spreadsheets yet"
+  },
+  "breadcrumb": {
+    "dashboard": "Dashboard",
+    "home": "Home"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "unauthorized": "You are not authorized to access this page",
+    "serverError": "A server error occurred",
+    "networkError": "Network error. Please check your connection."
+  }
+}

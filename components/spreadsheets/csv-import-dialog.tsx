@@ -105,7 +105,7 @@ export function CSVImportDialog({
                 className="w-full"
                 onClick={() => document.getElementById('csv-file')?.click()}
               >
-                <Upload className="h-4 w-4 mr-2" />
+                <Upload className="h-4 w-4 me-2" />
                 {file ? file.name : 'Choose CSV file...'}
               </Button>
               <input
@@ -174,7 +174,7 @@ export function CSVImportDialog({
                     <thead className="bg-muted sticky top-0">
                       <tr>
                         {(preview.schema || Object.keys(preview.data[0])).map((col: any) => (
-                          <th key={typeof col === 'string' ? col : col.id} className="p-2 text-left font-medium">
+                          <th key={typeof col === 'string' ? col : col.id} className="p-2 text-start font-medium">
                             {typeof col === 'string' ? col : col.name}
                           </th>
                         ))}

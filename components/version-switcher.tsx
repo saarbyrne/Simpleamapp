@@ -38,7 +38,7 @@ export function VersionSwitcher({
                 <span className="font-semibold">Documentation</span>
                 <span className="">v{selectedVersion}</span>
               </div>
-              <ChevronsUpDown className="ml-auto" />
+              <ChevronsUpDown className="ms-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -51,7 +51,7 @@ export function VersionSwitcher({
                 onSelect={() => setSelectedVersion(version)}
               >
                 v{version}{" "}
-                {version === selectedVersion && <Check className="ml-auto" />}
+                {version === selectedVersion && <Check className="ms-auto" />}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

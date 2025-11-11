@@ -1,0 +1,126 @@
+{
+  "nav": {
+    "players": "Jogadores",
+    "forms": "Formulários",
+    "reports": "Relatórios",
+    "calendar": "Calendário",
+    "notes": "Notas",
+    "spreadsheets": "Planilhas",
+    "canvas": "Tela",
+    "files": "Arquivos",
+    "planner": "Planejador"
+  },
+  "settings": {
+    "profile": "Perfil",
+    "dataManagement": "Gerenciamento de dados",
+    "systemSettings": "Configurações do sistema"
+  },
+  "profile": {
+    "title": "Configurações do perfil",
+    "personalInfo": "Informações pessoais",
+    "preferences": "Preferências",
+    "notifications": "Notificações",
+    "security": "Segurança",
+    "name": "Nome",
+    "email": "E-mail",
+    "phone": "Telefone",
+    "avatar": "Avatar",
+    "language": "Idioma",
+    "timezone": "Fuso horário",
+    "dateFormat": "Formato de data",
+    "timeFormat": "Formato de hora",
+    "save": "Salvar alterações",
+    "cancel": "Cancelar",
+    "saved": "Configurações salvas com sucesso",
+    "error": "Falha ao salvar configurações"
+  },
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "create": "Criar",
+    "search": "Pesquisar",
+    "loading": "Carregando...",
+    "error": "Ocorreu um erro",
+    "success": "Sucesso",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "reset": "Redefinir",
+    "clear": "Limpar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "refresh": "Atualizar"
+  },
+  "dashboard": {
+    "title": "Painel",
+    "welcome": "Bem-vindo",
+    "quickActions": "Ações rápidas",
+    "recentActivity": "Atividade recente"
+  },
+  "players": {
+    "title": "Jogadores",
+    "description": "Gerencie seu elenco e informações dos jogadores",
+    "addPlayer": "Adicionar jogador",
+    "search": "Pesquisar jogadores...",
+    "noPlayers": "Nenhum jogador encontrado",
+    "name": "Nome",
+    "position": "Posição",
+    "age": "Idade",
+    "nationality": "Nacionalidade",
+    "status": "Status",
+    "email": "E-mail",
+    "phone": "Telefone",
+    "joined": "Ingressou",
+    "tags": "Tags"
+  },
+  "calendar": {
+    "title": "Calendário",
+    "description": "Gerencie seus eventos, jogos e sessões de treinamento",
+    "newEvent": "Novo evento",
+    "month": "Mês",
+    "week": "Semana",
+    "day": "Dia",
+    "today": "Hoje",
+    "noEvents": "Nenhum evento agendado"
+  },
+  "forms": {
+    "title": "Formulários",
+    "description": "Criar e gerenciar formulários",
+    "newForm": "Novo formulário",
+    "noForms": "Nenhum formulário encontrado"
+  },
+  "reports": {
+    "title": "Relatórios",
+    "description": "Visualizações, exportações e instantâneos de desempenho",
+    "noReports": "Nenhum relatório disponível"
+  },
+  "notes": {
+    "title": "Notas",
+    "description": "Criar e gerenciar notas",
+    "newNote": "Nova nota",
+    "noNotes": "Nenhuma nota encontrada"
+  },
+  "spreadsheets": {
+    "title": "Planilhas",
+    "description": "Rastreie tabelas de dados personalizadas com modelos, links de jogadores e assistência de IA",
+    "newSpreadsheet": "Nova planilha",
+    "useTemplate": "Usar modelo",
+    "noSpreadsheets": "Ainda não há planilhas"
+  },
+  "breadcrumb": {
+    "dashboard": "Painel",
+    "home": "Início"
+  },
+  "errors": {
+    "notFound": "Página não encontrada",
+    "unauthorized": "Você não está autorizado a acessar esta página",
+    "serverError": "Ocorreu um erro no servidor",
+    "networkError": "Erro de rede. Por favor, verifique sua conexão."
+  }
+}

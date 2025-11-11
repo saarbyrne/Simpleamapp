@@ -71,7 +71,7 @@ export function QuickActionsToolbar({ actionHandlers, className }: QuickActionsT
                 key={action.id}
                 onClick={actionHandlers[action.id]}
               >
-                <Icon className="mr-2 h-4 w-4" />
+                <Icon className="me-2 h-4 w-4" />
                 {action.label}
               </DropdownMenuItem>
             )

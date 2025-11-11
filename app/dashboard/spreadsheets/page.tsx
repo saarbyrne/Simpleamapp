@@ -165,11 +165,11 @@ export default function SpreadsheetsPage() {
 
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setShowTemplateDialog(true)}>
-            <Sparkles className="h-4 w-4 mr-2" />
+            <Sparkles className="h-4 w-4 me-2" />
             Use Template
           </Button>
           <Button onClick={handleCreateBlank}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 me-2" />
             New Spreadsheet
           </Button>
         </div>
@@ -186,11 +186,11 @@ export default function SpreadsheetsPage() {
             </p>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setShowTemplateDialog(true)}>
-                <Sparkles className="h-4 w-4 mr-2" />
+                <Sparkles className="h-4 w-4 me-2" />
                 Browse Templates
               </Button>
               <Button onClick={handleCreateBlank}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 me-2" />
                 Create Blank
               </Button>
             </div>
@@ -221,14 +221,14 @@ export default function SpreadsheetsPage() {
                         e.stopPropagation()
                         router.push(`/dashboard/spreadsheets/${sheet.id}`)
                       }}>
-                        <Edit className="h-4 w-4 mr-2" />
+                        <Edit className="h-4 w-4 me-2" />
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={(e) => {
                         e.stopPropagation()
                         // TODO: Implement duplicate
                       }}>
-                        <Copy className="h-4 w-4 mr-2" />
+                        <Copy className="h-4 w-4 me-2" />
                         Duplicate
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -239,7 +239,7 @@ export default function SpreadsheetsPage() {
                           handleDelete(sheet.id)
                         }}
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="h-4 w-4 me-2" />
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -263,7 +263,7 @@ export default function SpreadsheetsPage() {
                   )}
                 </div>
                 <div className="flex items-center text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3 mr-1" />
+                  <Clock className="h-3 w-3 me-1" />
                   {format(new Date(sheet.updatedAt), 'MMM d, yyyy')}
                 </div>
               </CardFooter>

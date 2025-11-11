@@ -175,12 +175,12 @@ export function ProfileTab({ user }: ProfileTabProps) {
             >
               {isUploading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   Uploading...
                 </>
               ) : (
                 <>
-                  <Upload className="mr-2 h-4 w-4" />
+                  <Upload className="me-2 h-4 w-4" />
                   Upload Photo
                 </>
               )}
@@ -257,7 +257,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
                     Saving...
                   </>
                 ) : (
@@ -308,7 +308,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
                   <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
                     View Permissions
                   </summary>
-                  <ul className="mt-2 space-y-1 pl-4">
+                  <ul className="mt-2 space-y-1 ps-4">
                     {user.roles.flatMap((role) =>
                       role.permissions.map((permission, idx) => (
                         <li

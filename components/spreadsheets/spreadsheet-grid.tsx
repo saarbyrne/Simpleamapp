@@ -157,7 +157,7 @@ export function SpreadsheetGrid({
       <div className="flex items-center justify-between gap-4 p-4 border-b">
         <div className="flex items-center gap-2">
           <Button size="sm" variant="outline" onClick={handleAddRow}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 me-2" />
             Add Row
           </Button>
 
@@ -167,7 +167,7 @@ export function SpreadsheetGrid({
             onClick={handleDeleteSelected}
             disabled={true}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
+            <Trash2 className="h-4 w-4 me-2" />
             Delete Selected
           </Button>
 
@@ -175,14 +175,14 @@ export function SpreadsheetGrid({
 
           {onImport && (
             <Button size="sm" variant="outline" onClick={onImport}>
-              <Upload className="h-4 w-4 mr-2" />
+              <Upload className="h-4 w-4 me-2" />
               Import CSV
             </Button>
           )}
 
           {onExport && (
             <Button size="sm" variant="outline" onClick={onExport}>
-              <Download className="h-4 w-4 mr-2" />
+              <Download className="h-4 w-4 me-2" />
               Export CSV
             </Button>
           )}
@@ -191,7 +191,7 @@ export function SpreadsheetGrid({
             <>
               <Separator orientation="vertical" className="h-6" />
               <Button size="sm" variant="outline" onClick={onAIAssist}>
-                <Sparkles className="h-4 w-4 mr-2" />
+                <Sparkles className="h-4 w-4 me-2" />
                 AI Assist
               </Button>
             </>
@@ -208,7 +208,7 @@ export function SpreadsheetGrid({
 
           {onSave && (
             <Button size="sm" onClick={onSave} disabled={isSaved}>
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="h-4 w-4 me-2" />
               Save to Database
             </Button>
           )}

@@ -271,7 +271,7 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
               <div className="flex items-center justify-between">
                 <Label>Fields</Label>
                 <Button type="button" variant="outline" size="sm" onClick={handleAddField}>
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="me-2 h-4 w-4" />
                   Add Field
                 </Button>
               </div>

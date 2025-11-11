@@ -1,0 +1,127 @@
+{
+  "nav": {
+    "players": "اللاعبون",
+    "forms": "النماذج",
+    "reports": "التقارير",
+    "calendar": "التقويم",
+    "notes": "الملاحظات",
+    "spreadsheets": "جداول البيانات",
+    "canvas": "اللوحة",
+    "files": "الملفات",
+    "planner": "المخطط"
+  },
+  "settings": {
+    "profile": "الملف الشخصي",
+    "dataManagement": "إدارة البيانات",
+    "systemSettings": "إعدادات النظام"
+  },
+  "profile": {
+    "title": "إعدادات الملف الشخصي",
+    "personalInfo": "المعلومات الشخصية",
+    "preferences": "التفضيلات",
+    "notifications": "الإشعارات",
+    "security": "الأمان",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "avatar": "الصورة الرمزية",
+    "language": "اللغة",
+    "timezone": "المنطقة الزمنية",
+    "dateFormat": "تنسيق التاريخ",
+    "timeFormat": "تنسيق الوقت",
+    "save": "حفظ التغييرات",
+    "cancel": "إلغاء",
+    "saved": "تم حفظ الإعدادات بنجاح",
+    "error": "فشل حفظ الإعدادات"
+  },
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "search": "بحث",
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "success": "نجح",
+    "confirm": "تأكيد",
+    "close": "إغلاق",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "submit": "إرسال",
+    "reset": "إعادة تعيين",
+    "clear": "مسح",
+    "filter": "تصفية",
+    "export": "تصدير",
+    "import": "استيراد",
+    "refresh": "تحديث",
+    "signOut": "تسجيل الخروج"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "welcome": "مرحباً",
+    "quickActions": "إجراءات سريعة",
+    "recentActivity": "النشاط الأخير"
+  },
+  "players": {
+    "title": "اللاعبون",
+    "description": "إدارة قائمة الفريق ومعلومات اللاعبين",
+    "addPlayer": "إضافة لاعب",
+    "search": "بحث عن اللاعبين...",
+    "noPlayers": "لم يتم العثور على لاعبين",
+    "name": "الاسم",
+    "position": "المركز",
+    "age": "العمر",
+    "nationality": "الجنسية",
+    "status": "الحالة",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "joined": "انضم",
+    "tags": "العلامات"
+  },
+  "calendar": {
+    "title": "التقويم",
+    "description": "إدارة الأحداث والمباريات وجلسات التدريب",
+    "newEvent": "حدث جديد",
+    "month": "شهر",
+    "week": "أسبوع",
+    "day": "يوم",
+    "today": "اليوم",
+    "noEvents": "لا توجد أحداث مجدولة"
+  },
+  "forms": {
+    "title": "النماذج",
+    "description": "إنشاء وإدارة النماذج",
+    "newForm": "نموذج جديد",
+    "noForms": "لم يتم العثور على نماذج"
+  },
+  "reports": {
+    "title": "التقارير",
+    "description": "الرسوم البيانية والتصدير ولقطات الأداء",
+    "noReports": "لا توجد تقارير متاحة"
+  },
+  "notes": {
+    "title": "الملاحظات",
+    "description": "إنشاء وإدارة الملاحظات",
+    "newNote": "ملاحظة جديدة",
+    "noNotes": "لم يتم العثور على ملاحظات"
+  },
+  "spreadsheets": {
+    "title": "جداول البيانات",
+    "description": "تتبع جداول البيانات المخصصة مع القوالب وروابط اللاعبين والمساعدة بالذكاء الاصطناعي",
+    "newSpreadsheet": "جدول بيانات جديد",
+    "useTemplate": "استخدام قالب",
+    "noSpreadsheets": "لا توجد جداول بيانات بعد"
+  },
+  "breadcrumb": {
+    "dashboard": "لوحة التحكم",
+    "home": "الرئيسية"
+  },
+  "errors": {
+    "notFound": "الصفحة غير موجودة",
+    "unauthorized": "ليس لديك صلاحية للوصول إلى هذه الصفحة",
+    "serverError": "حدث خطأ في الخادم",
+    "networkError": "خطأ في الشبكة. يرجى التحقق من اتصالك."
+  }
+}

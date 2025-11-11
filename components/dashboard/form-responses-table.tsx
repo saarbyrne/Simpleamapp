@@ -101,7 +101,7 @@ export function FormResponsesTable({
         }
         headerActions={
           <div className="flex items-center gap-4">
-            <div className="text-right">
+            <div className="text-end">
               <div className="text-sm text-muted-foreground">Total Responses</div>
               <div className="text-2xl font-semibold">{total}</div>
             </div>
@@ -113,7 +113,7 @@ export function FormResponsesTable({
                 alert('Send reminders functionality will be implemented with email integration (Resend)')
               }}
             >
-              <Mail className="mr-2 h-4 w-4" />
+              <Mail className="me-2 h-4 w-4" />
               Send Reminders
             </Button>
           </div>

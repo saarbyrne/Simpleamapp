@@ -220,7 +220,7 @@ export default function SpreadsheetDetailPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4 me-2" />
             Back
           </Button>
 
@@ -270,7 +270,7 @@ export default function SpreadsheetDetailPage() {
           <Sheet open={showVersionHistory} onOpenChange={setShowVersionHistory}>
             <SheetTrigger asChild>
               <Button variant="outline" size="sm">
-                <History className="h-4 w-4 mr-2" />
+                <History className="h-4 w-4 me-2" />
                 History
               </Button>
             </SheetTrigger>
@@ -291,7 +291,7 @@ export default function SpreadsheetDetailPage() {
                           {version.changeNote || 'No description'}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          <Clock className="h-3 w-3 inline mr-1" />
+                          <Clock className="h-3 w-3 inline me-1" />
                           {format(new Date(version.createdAt), 'MMM d, yyyy HH:mm')}
                         </div>
                       </div>

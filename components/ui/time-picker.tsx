@@ -221,7 +221,7 @@ export function TimePicker({
         placeholder={displayPlaceholder}
         disabled={disabled}
         className={cn(
-          "w-full pr-10",
+          "w-full pe-10",
           !isValid && "border-destructive focus-visible:ring-destructive",
           className
         )}
@@ -233,7 +233,7 @@ export function TimePicker({
             type="button"
             variant="ghost"
             size="icon"
-            className="absolute right-0 h-full px-3 hover:bg-transparent"
+            className="absolute end-0 h-full px-3 hover:bg-transparent"
             disabled={disabled}
             onClick={(e) => {
               e.preventDefault();

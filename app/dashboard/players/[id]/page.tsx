@@ -140,7 +140,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
           </div>
         </div>
         <Button variant="outline">
-          <Edit className="mr-2 h-4 w-4" />
+          <Edit className="me-2 h-4 w-4" />
           Edit Profile
         </Button>
       </div>
@@ -152,27 +152,27 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
             Overview
           </TabsTrigger>
           <TabsTrigger value="forms">
-            <FileText className="mr-2 h-4 w-4" />
+            <FileText className="me-2 h-4 w-4" />
             Forms
           </TabsTrigger>
           <TabsTrigger value="events">
-            <Calendar className="mr-2 h-4 w-4" />
+            <Calendar className="me-2 h-4 w-4" />
             Events
           </TabsTrigger>
           <TabsTrigger value="performance">
-            <BarChart3 className="mr-2 h-4 w-4" />
+            <BarChart3 className="me-2 h-4 w-4" />
             Performance
           </TabsTrigger>
           <TabsTrigger value="notes">
-            <StickyNote className="mr-2 h-4 w-4" />
+            <StickyNote className="me-2 h-4 w-4" />
             Notes
           </TabsTrigger>
           <TabsTrigger value="files">
-            <FolderOpen className="mr-2 h-4 w-4" />
+            <FolderOpen className="me-2 h-4 w-4" />
             Files
           </TabsTrigger>
           <TabsTrigger value="spreadsheets">
-            <Table className="mr-2 h-4 w-4" />
+            <Table className="me-2 h-4 w-4" />
             Spreadsheets
           </TabsTrigger>
         </TabsList>
