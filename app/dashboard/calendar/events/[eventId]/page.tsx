@@ -210,11 +210,11 @@ export default function EventDetailPage() {
 
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleEdit}>
-            <Edit className="mr-2 h-4 w-4" />
+            <Edit className="me-2 h-4 w-4" />
             Edit
           </Button>
           <Button variant="outline" onClick={handleDelete}>
-            <Trash2 className="mr-2 h-4 w-4" />
+            <Trash2 className="me-2 h-4 w-4" />
             Delete
           </Button>
         </div>
@@ -227,27 +227,27 @@ export default function EventDetailPage() {
             Overview
           </TabsTrigger>
           <TabsTrigger value="attendance">
-            <Users className="mr-2 h-4 w-4" />
+            <Users className="me-2 h-4 w-4" />
             Attendance
           </TabsTrigger>
           <TabsTrigger value="spreadsheets">
-            <Table className="mr-2 h-4 w-4" />
+            <Table className="me-2 h-4 w-4" />
             Spreadsheets
           </TabsTrigger>
           <TabsTrigger value="notes">
-            <FileText className="mr-2 h-4 w-4" />
+            <FileText className="me-2 h-4 w-4" />
             Notes
           </TabsTrigger>
           <TabsTrigger value="drawings">
-            <PenTool className="mr-2 h-4 w-4" />
+            <PenTool className="me-2 h-4 w-4" />
             Canvas
           </TabsTrigger>
           <TabsTrigger value="forms">
-            <ClipboardList className="mr-2 h-4 w-4" />
+            <ClipboardList className="me-2 h-4 w-4" />
             Forms
           </TabsTrigger>
           <TabsTrigger value="files">
-            <FolderOpen className="mr-2 h-4 w-4" />
+            <FolderOpen className="me-2 h-4 w-4" />
             Files
           </TabsTrigger>
         </TabsList>
@@ -272,7 +272,7 @@ export default function EventDetailPage() {
                       Add a description to provide more details about this event
                     </p>
                     <Button variant="outline" className="mt-4" onClick={handleEdit}>
-                      <Edit className="mr-2 h-4 w-4" />
+                      <Edit className="me-2 h-4 w-4" />
                       Add Description
                     </Button>
                   </div>

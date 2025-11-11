@@ -25,12 +25,12 @@ export function DateCell({ value, onChange, disabled }: DateCellProps) {
         <Button
           variant="ghost"
           className={cn(
-            'h-full w-full justify-start text-left font-normal px-2 hover:bg-transparent',
+            'h-full w-full justify-start text-start font-normal px-2 hover:bg-transparent',
             !dateValue && 'text-muted-foreground'
           )}
           disabled={disabled}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIcon className="me-2 h-4 w-4" />
           {dateValue ? format(dateValue, 'PPP') : <span>Pick a date</span>}
         </Button>
       </PopoverTrigger>

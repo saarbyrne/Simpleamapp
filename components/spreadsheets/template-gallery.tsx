@@ -107,7 +107,7 @@ export function TemplateGallery({
         </TabsList>
 
         <TabsContent value={selectedCategory} className="mt-6">
-          <ScrollArea className="h-[600px] pr-4">
+          <ScrollArea className="h-[600px] pe-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredTemplates.map((template) => {
                 const Icon = categoryIcons[template.category] || FileSpreadsheet

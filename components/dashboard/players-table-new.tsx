@@ -148,7 +148,7 @@ const createColumns = (
                   e.stopPropagation()
                   onNavigateToProfile(player.id)
                 }}
-                className="font-medium text-foreground hover:text-primary hover:underline text-left"
+                className="font-medium text-foreground hover:text-primary hover:underline text-start"
               >
                 {player.name}
               </button>
@@ -1016,7 +1016,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
             className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
             type="button"
           >
-            <UserPlus className="mr-2 h-4 w-4" />
+            <UserPlus className="me-2 h-4 w-4" />
             Add Player
           </Button>
         }

@@ -164,12 +164,12 @@ export function AIAssistantDialog({
           <Button onClick={handleSubmit} disabled={!prompt.trim() || isProcessing}>
             {isProcessing ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 Processing...
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4 mr-2" />
+                <Sparkles className="h-4 w-4 me-2" />
                 Apply AI Suggestion
               </>
             )}

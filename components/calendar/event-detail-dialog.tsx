@@ -122,31 +122,31 @@ export function EventDetailDialog({
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
           <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">
-              <Calendar className="mr-2 h-4 w-4" />
+              <Calendar className="me-2 h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
             <TabsTrigger value="spreadsheets">
-              <Table className="mr-2 h-4 w-4" />
+              <Table className="me-2 h-4 w-4" />
               <span className="hidden sm:inline">Data</span>
             </TabsTrigger>
             <TabsTrigger value="notes">
-              <FileText className="mr-2 h-4 w-4" />
+              <FileText className="me-2 h-4 w-4" />
               <span className="hidden sm:inline">Notes</span>
             </TabsTrigger>
             <TabsTrigger value="drawings">
-              <PenTool className="mr-2 h-4 w-4" />
+              <PenTool className="me-2 h-4 w-4" />
               <span className="hidden sm:inline">Canvas</span>
             </TabsTrigger>
             <TabsTrigger value="forms">
-              <ClipboardList className="mr-2 h-4 w-4" />
+              <ClipboardList className="me-2 h-4 w-4" />
               <span className="hidden sm:inline">Forms</span>
             </TabsTrigger>
             <TabsTrigger value="files">
-              <FolderOpen className="mr-2 h-4 w-4" />
+              <FolderOpen className="me-2 h-4 w-4" />
               <span className="hidden sm:inline">Files</span>
             </TabsTrigger>
             <TabsTrigger value="attendance">
-              <Users className="mr-2 h-4 w-4" />
+              <Users className="me-2 h-4 w-4" />
               <span className="hidden sm:inline">Attendance</span>
             </TabsTrigger>
           </TabsList>

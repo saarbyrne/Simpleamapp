@@ -180,7 +180,7 @@ export function DataTableColumnManager<TData>({
             columns.forEach((column) => column.toggleVisibility(true))
           }}
         >
-          <Check className="mr-2 h-4 w-4" />
+          <Check className="me-2 h-4 w-4" />
           Show all
         </DropdownMenuItem>
         <DropdownMenuItem

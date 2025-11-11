@@ -169,13 +169,13 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
                       {userName?.[0]?.toUpperCase() ?? 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+                  <div className="grid flex-1 text-start text-sm leading-tight group-data-[collapsible=icon]:hidden">
                     <span className="truncate font-semibold">{userName}</span>
                     <span className="truncate text-xs text-sidebar-foreground/70">
                       {userEmail ?? 'Team member'}
                     </span>
                   </div>
-                  <ChevronsUpDown className="ml-auto h-4 w-4 group-data-[collapsible=icon]:hidden" />
+                  <ChevronsUpDown className="ms-auto h-4 w-4 group-data-[collapsible=icon]:hidden" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -195,7 +195,7 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard/profile" className="cursor-pointer">
-                    <UserCircle className="mr-2 h-4 w-4" />
+                    <UserCircle className="me-2 h-4 w-4" />
                     {t('settings.profile')}
                   </Link>
                 </DropdownMenuItem>
@@ -204,7 +204,7 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
                   onClick={handleSignOut}
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <LogOut className="me-2 h-4 w-4" />
                   {t('common.signOut', { default: 'Sign Out' })}
                 </DropdownMenuItem>
               </DropdownMenuContent>

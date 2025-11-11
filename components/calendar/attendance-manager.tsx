@@ -273,7 +273,7 @@ export function AttendanceManager({
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={isUpdating}>
-              {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isUpdating && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
               Save
             </Button>
           </DialogFooter>

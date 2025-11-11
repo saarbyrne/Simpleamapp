@@ -42,12 +42,12 @@ export default function Error({
           )}
           <div className="flex flex-col gap-2">
             <Button onClick={reset} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
+              <RefreshCw className="me-2 h-4 w-4" aria-hidden="true" />
               Try Again
             </Button>
             <Button variant="outline" asChild className="w-full">
               <Link href="/dashboard">
-                <Home className="mr-2 h-4 w-4" aria-hidden="true" />
+                <Home className="me-2 h-4 w-4" aria-hidden="true" />
                 Go to Dashboard
               </Link>
             </Button>

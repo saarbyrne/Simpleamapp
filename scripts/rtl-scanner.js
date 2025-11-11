@@ -231,6 +231,12 @@ function applyFixes(result, dryRun = true) {
   
   // Group fixes by file
   for (const issue of result.allIssues) {
+    // Skip complex positioning that might need manual review
+    if (issue.original.includes('[50%]') || issue.original.includes('calc(')) {
+      console.log(`⏭️  Skipping complex positioning: ${issue.original} in ${issue.file}:${issue.line}`)
+      continue
+    }
+    
     if (!filesToFix.has(issue.file)) {
       filesToFix.set(issue.file, [])
     }
@@ -240,6 +246,7 @@ function applyFixes(result, dryRun = true) {
   for (const [file, issues] of filesToFix.entries()) {
     let content = fs.readFileSync(file, 'utf-8')
     let fileFixed = 0
+    const originalContent = content
     
     // Sort issues by line number (descending) to avoid offset issues
     const sortedIssues = [...issues].sort((a, b) => b.line - a.line)
@@ -251,14 +258,19 @@ function applyFixes(result, dryRun = true) {
       if (lineIndex >= 0 && lineIndex < lines.length) {
         const line = lines[lineIndex]
         
+        // Double-check the original is still there (safety check)
         if (line.includes(issue.original)) {
-          // Escape special regex characters
+          // Use word boundaries to avoid partial replacements
           const escaped = issue.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
           const regex = new RegExp(`\\b${escaped}\\b`, 'g')
           const newLine = line.replace(regex, issue.replacement)
-          lines[lineIndex] = newLine
-          content = lines.join('\n')
-          fileFixed++
+          
+          // Verify the replacement makes sense
+          if (newLine !== line && !newLine.includes(issue.original)) {
+            lines[lineIndex] = newLine
+            content = lines.join('\n')
+            fileFixed++
+          }
         }
       }
     }
@@ -266,6 +278,8 @@ function applyFixes(result, dryRun = true) {
     if (fileFixed > 0) {
       totalFixed += fileFixed
       if (!dryRun) {
+        // Write backup first (optional - you might want to use git instead)
+        // fs.writeFileSync(file + '.bak', originalContent, 'utf-8')
         fs.writeFileSync(file, content, 'utf-8')
         console.log(`✅ Fixed ${fileFixed} issue(s) in ${file.replace(process.cwd() + path.sep, '')}`)
       } else {
@@ -275,6 +289,14 @@ function applyFixes(result, dryRun = true) {
   }
   
   console.log(`\n${dryRun ? 'Would fix' : 'Fixed'} ${totalFixed} total issue(s)`)
+  
+  if (!dryRun && totalFixed > 0) {
+    console.log('\n💡 Next steps:')
+    console.log('   1. Run: npm run typecheck')
+    console.log('   2. Run: npm run lint')
+    console.log('   3. Test the app in browser')
+    console.log('   4. Switch to Arabic locale and verify RTL works')
+  }
 }
 
 // Main execution

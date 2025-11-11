@@ -179,23 +179,23 @@ const createColumns = (
                 <DropdownMenuItem
                   onClick={() => onDistribute?.(form.id, form.title)}
                 >
-                  <Send className="mr-2 h-4 w-4" />
+                  <Send className="me-2 h-4 w-4" />
                   Distribute
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onPreview?.(form.id)}>
-                  <Eye className="mr-2 h-4 w-4" />
+                  <Eye className="me-2 h-4 w-4" />
                   Preview form
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onDuplicate?.(form.id)}>
-                  <Copy className="mr-2 h-4 w-4" />
+                  <Copy className="me-2 h-4 w-4" />
                   Duplicate form
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onViewResponses?.(form.id)}>
-                  <FileText className="mr-2 h-4 w-4" />
+                  <FileText className="me-2 h-4 w-4" />
                   View responses
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onEdit?.(form.id)}>
-                  <Edit className="mr-2 h-4 w-4" />
+                  <Edit className="me-2 h-4 w-4" />
                   Edit form
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -763,7 +763,7 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
             className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
             type="button"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="me-2 h-4 w-4" />
             Create form
           </Button>
         }
