@@ -88,9 +88,9 @@ export default function SpreadsheetDetailPage() {
         const sheet = result.spreadsheet
         setName(sheet.name)
         setDescription(sheet.description || '')
-        setSchema(sheet.schema as ColumnDefinition[])
-        setData(sheet.data as SpreadsheetRow[])
-        setVersions((sheet.versions || []) as SpreadsheetVersion[])
+        setSchema(sheet.schema as unknown as ColumnDefinition[])
+        setData(sheet.data as unknown as SpreadsheetRow[])
+        setVersions((sheet.versions || []) as unknown as SpreadsheetVersion[])
         setCurrentVersion(sheet.version)
         setIsSaved(true)
       } else {

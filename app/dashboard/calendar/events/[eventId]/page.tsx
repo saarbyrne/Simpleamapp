@@ -421,7 +421,7 @@ export default function EventDetailPage() {
               {recurringAction === 'edit' ? t('calendar.editRecurringEvent') : t('calendar.deleteRecurringEvent')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t('calendar.recurringEventActionPrompt', { action: recurringAction })}
+              {t('calendar.recurringEventActionPrompt', { action: recurringAction || 'edit' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="sm:flex-col sm:space-x-0 sm:space-y-2">

@@ -54,15 +54,16 @@ interface ProfileTabProps {
   user: User;
 }
 
-function createProfileFormSchema(t: (key: string) => string) {
+function createProfileFormSchema(t: (key: string) => string, tCommon: (key: string) => string) {
   return z.object({
-    name: z.string().min(1, t('name') + ' ' + t('isRequired', { ns: 'common' })).max(100, t('name') + ' ' + t('isTooLong', { ns: 'common' })),
+    name: z.string().min(1, t('name') + ' ' + tCommon('isRequired')).max(100, t('name') + ' ' + tCommon('isTooLong')),
     phone: z.string().optional(),
   });
 }
 
 export function ProfileTab({ user }: ProfileTabProps) {
   const t = useTranslations('profile');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(user.avatar);
@@ -73,7 +74,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
     setAvatarUrl(user.avatar);
   }, [user.avatar]);
 
-  const profileFormSchema = useMemo(() => createProfileFormSchema(t), [t]);
+  const profileFormSchema = useMemo(() => createProfileFormSchema(t, tCommon), [t, tCommon]);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),

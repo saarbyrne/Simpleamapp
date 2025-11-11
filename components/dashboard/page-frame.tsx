@@ -67,7 +67,7 @@ export function PageFrame({
   return (
     <div
       className={cn(
-        'flex flex-1 flex-col bg-background overflow-y-auto overflow-x-hidden',
+        'flex flex-1 flex-col bg-page-background overflow-y-auto overflow-x-hidden',
         paddingMap[padding],
         gapMap[gap],
         className

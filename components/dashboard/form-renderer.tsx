@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/form'
 import { type FormField as FormFieldType } from '@/app/actions/forms'
 import { useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface FormRendererProps {
   fields: FormFieldType[]
@@ -61,13 +62,14 @@ export function FormRenderer({
           break
         case 'number':
         case 'rating':
-          fieldSchema = z.number()
+          let numberSchema = z.number()
           if (field.min !== undefined) {
-            fieldSchema = fieldSchema.min(field.min)
+            numberSchema = numberSchema.min(field.min)
           }
           if (field.max !== undefined) {
-            fieldSchema = fieldSchema.max(field.max)
+            numberSchema = numberSchema.max(field.max)
           }
+          fieldSchema = numberSchema
           break
         case 'select':
           fieldSchema = z.string()
@@ -92,7 +94,9 @@ export function FormRenderer({
         fieldSchema = fieldSchema.optional()
       } else {
         if (field.type === 'text' || field.type === 'textarea') {
-          fieldSchema = fieldSchema.min(1, `${field.label} is required`)
+          // TypeScript needs explicit narrowing for string schema
+          const stringSchema = fieldSchema as z.ZodString
+          fieldSchema = stringSchema.min(1, `${field.label} is required`)
         }
       }
       

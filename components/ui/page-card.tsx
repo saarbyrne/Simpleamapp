@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { cn } from '@/components/ui/utils'
 
 export interface PageCardProps {
-  title: string
+  title: ReactNode
   description?: string
   headerActions?: ReactNode
   toolbar?: ReactNode

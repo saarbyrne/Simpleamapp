@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PageCard } from '@/components/ui/page-card'
 import { useBreadcrumb } from '@/lib/breadcrumb-context'
 import { 
   FileText, 
@@ -97,21 +98,20 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
   const playerName = `${player.firstName} ${player.lastName}`
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 md:p-8">
-      {/* Header with Avatar and Edit button */}
-      <div className="flex items-start justify-between gap-4">
+    <PageCard
+      title={
         <div className="flex items-center gap-4">
-          <Avatar className="h-24 w-24">
+          <Avatar className="h-16 w-16">
             {player.photo ? (
               <AvatarImage src={player.photo} alt={playerName} />
             ) : (
-              <AvatarFallback className="text-2xl">
+              <AvatarFallback className="text-xl">
                 {player.firstName?.charAt(0)}{player.lastName?.charAt(0)}
               </AvatarFallback>
             )}
           </Avatar>
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold">{playerName}</h1>
+            <h1 className="text-2xl font-semibold">{playerName}</h1>
             <div className="flex items-center gap-3 text-muted-foreground">
               {organization?.jerseyNumber && (
                 <span>#{organization.jerseyNumber}</span>
@@ -139,12 +139,14 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
             </div>
           </div>
         </div>
+      }
+      headerActions={
         <Button variant="outline">
           <Edit className="me-2 h-4 w-4" />
           Edit Profile
         </Button>
-      </div>
-
+      }
+    >
       {/* Tabs */}
       <Tabs defaultValue="overview" className="flex-1 flex flex-col">
         <TabsList>
@@ -344,6 +346,6 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageCard>
   )
 }

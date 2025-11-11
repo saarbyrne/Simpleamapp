@@ -83,9 +83,30 @@ export function useUserPreferences() {
           setPreferences(newPreferences);
           // Store in localStorage for next time
           storePreferences(newPreferences);
+        } else if (isMountedRef.current && result.success === false) {
+          // Server action returned an error, but we can still use localStorage
+          // Don't log connection errors as they're expected in some scenarios
+          if (!result.error?.includes("connection") && !result.error?.includes("refused")) {
+            console.warn("Failed to fetch user preferences:", result.error);
+          }
         }
       } catch (error) {
-        console.error("Failed to fetch user preferences:", error);
+        // Handle network errors gracefully - these can happen when:
+        // 1. Server isn't running
+        // 2. Calling server action from a route that doesn't support POST
+        // 3. Network connectivity issues
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const isConnectionError = 
+          errorMessage.includes("Failed to fetch") ||
+          errorMessage.includes("ERR_CONNECTION_REFUSED") ||
+          errorMessage.includes("NetworkError") ||
+          errorMessage.includes("fetch");
+        
+        // Only log non-connection errors
+        if (!isConnectionError) {
+          console.error("Failed to fetch user preferences:", error);
+        }
+        // Silently fall back to localStorage preferences
       } finally {
         // Only update loading state if component is still mounted
         if (isMountedRef.current) {

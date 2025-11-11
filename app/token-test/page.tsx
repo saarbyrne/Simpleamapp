@@ -18,7 +18,7 @@
 
 export default function TokenTestPage() {
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-page-background p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <header>
           <h1 className="text-3xl font-bold mb-4">Design System Token Test</h1>
