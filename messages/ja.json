@@ -1,0 +1,127 @@
+{
+  "nav": {
+    "players": "選手",
+    "forms": "フォーム",
+    "reports": "レポート",
+    "calendar": "カレンダー",
+    "notes": "ノート",
+    "spreadsheets": "スプレッドシート",
+    "canvas": "キャンバス",
+    "files": "ファイル",
+    "planner": "プランナー"
+  },
+  "settings": {
+    "profile": "プロフィール",
+    "dataManagement": "データ管理",
+    "systemSettings": "システム設定"
+  },
+  "profile": {
+    "title": "プロフィール設定",
+    "personalInfo": "個人情報",
+    "preferences": "設定",
+    "notifications": "通知",
+    "security": "セキュリティ",
+    "name": "名前",
+    "email": "メール",
+    "phone": "電話",
+    "avatar": "アバター",
+    "language": "言語",
+    "timezone": "タイムゾーン",
+    "dateFormat": "日付形式",
+    "timeFormat": "時刻形式",
+    "save": "変更を保存",
+    "cancel": "キャンセル",
+    "saved": "設定が正常に保存されました",
+    "error": "設定の保存に失敗しました"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "search": "検索",
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "success": "成功",
+    "confirm": "確認",
+    "close": "閉じる",
+    "back": "戻る",
+    "next": "次へ",
+    "previous": "前へ",
+    "submit": "送信",
+    "reset": "リセット",
+    "clear": "クリア",
+    "filter": "フィルター",
+    "export": "エクスポート",
+    "import": "インポート",
+    "refresh": "更新",
+    "signOut": "サインアウト"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "welcome": "ようこそ",
+    "quickActions": "クイックアクション",
+    "recentActivity": "最近のアクティビティ"
+  },
+  "players": {
+    "title": "選手",
+    "description": "チームの名簿と選手情報を管理",
+    "addPlayer": "選手を追加",
+    "search": "選手を検索...",
+    "noPlayers": "選手が見つかりません",
+    "name": "名前",
+    "position": "ポジション",
+    "age": "年齢",
+    "nationality": "国籍",
+    "status": "ステータス",
+    "email": "メール",
+    "phone": "電話",
+    "joined": "加入",
+    "tags": "タグ"
+  },
+  "calendar": {
+    "title": "カレンダー",
+    "description": "イベント、試合、トレーニングセッションを管理",
+    "newEvent": "新しいイベント",
+    "month": "月",
+    "week": "週",
+    "day": "日",
+    "today": "今日",
+    "noEvents": "予定されたイベントはありません"
+  },
+  "forms": {
+    "title": "フォーム",
+    "description": "フォームの作成と管理",
+    "newForm": "新しいフォーム",
+    "noForms": "フォームが見つかりません"
+  },
+  "reports": {
+    "title": "レポート",
+    "description": "視覚化、エクスポート、パフォーマンススナップショット",
+    "noReports": "レポートがありません"
+  },
+  "notes": {
+    "title": "ノート",
+    "description": "ノートの作成と管理",
+    "newNote": "新しいノート",
+    "noNotes": "ノートが見つかりません"
+  },
+  "spreadsheets": {
+    "title": "スプレッドシート",
+    "description": "テンプレート、選手リンク、AIアシスタンスを使用してカスタムデータテーブルを追跡",
+    "newSpreadsheet": "新しいスプレッドシート",
+    "useTemplate": "テンプレートを使用",
+    "noSpreadsheets": "まだスプレッドシートがありません"
+  },
+  "breadcrumb": {
+    "dashboard": "ダッシュボード",
+    "home": "ホーム"
+  },
+  "errors": {
+    "notFound": "ページが見つかりません",
+    "unauthorized": "このページにアクセスする権限がありません",
+    "serverError": "サーバーエラーが発生しました",
+    "networkError": "ネットワークエラー。接続を確認してください。"
+  }
+}

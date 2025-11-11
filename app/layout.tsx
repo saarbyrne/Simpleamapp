@@ -35,9 +35,18 @@ export default async function RootLayout({
   // These will use the request config which reads from user preferences
   const locale = await getLocale()
   const messages = await getMessages()
+  
+  // RTL languages
+  const rtlLocales = ['ar', 'he', 'fa', 'ur']
+  const isRTL = rtlLocales.includes(locale)
 
   return (
-    <html lang={locale} suppressHydrationWarning className={plusJakartaSans.variable}>
+    <html 
+      lang={locale} 
+      dir={isRTL ? 'rtl' : 'ltr'}
+      suppressHydrationWarning 
+      className={plusJakartaSans.variable}
+    >
       <body className={plusJakartaSans.className}>
         <ErrorBoundary>
           <NextIntlClientProvider locale={locale} messages={messages}>
