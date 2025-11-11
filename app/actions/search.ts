@@ -384,7 +384,6 @@ async function searchForms(
       f.id,
       f.name,
       f.description,
-      f.category,
       f."isActive",
       f."scheduleType",
       f."createdAt",
@@ -406,7 +405,6 @@ async function searchForms(
     title: row.name,
     description: row.description || undefined,
     metadata: {
-      category: row.category,
       isActive: row.isActive,
       scheduleType: row.scheduleType,
       responseCount: row.responseCount,
@@ -513,7 +511,6 @@ async function searchSpreadsheets(
       s.id,
       s.name,
       s.description,
-      s.category,
       s."createdAt",
       s."updatedAt",
       ts_rank(s.search_vector, to_tsquery('english', ${searchQuery})) as rank
@@ -529,9 +526,7 @@ async function searchSpreadsheets(
     type: 'spreadsheet' as const,
     title: row.name,
     description: row.description || undefined,
-    metadata: {
-      category: row.category,
-    },
+    metadata: {},
     url: `/dashboard/spreadsheets/${row.id}`,
     relevance: parseFloat(row.rank) || 0,
     createdAt: row.createdAt,

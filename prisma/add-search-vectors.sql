@@ -104,8 +104,7 @@ RETURNS trigger AS $$
 BEGIN
   NEW.search_vector :=
     setweight(to_tsvector('english', coalesce(NEW.name, '')), 'A') ||
-    setweight(to_tsvector('english', coalesce(NEW.description, '')), 'B') ||
-    setweight(to_tsvector('english', coalesce(NEW.category, '')), 'C');
+    setweight(to_tsvector('english', coalesce(NEW.description, '')), 'B');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -139,8 +138,7 @@ RETURNS trigger AS $$
 BEGIN
   NEW.search_vector :=
     setweight(to_tsvector('english', coalesce(NEW.name, '')), 'A') ||
-    setweight(to_tsvector('english', coalesce(NEW.description, '')), 'B') ||
-    setweight(to_tsvector('english', coalesce(NEW.category, '')), 'C');
+    setweight(to_tsvector('english', coalesce(NEW.description, '')), 'B');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
