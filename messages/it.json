@@ -1,0 +1,126 @@
+{
+  "nav": {
+    "players": "Giocatori",
+    "forms": "Moduli",
+    "reports": "Rapporti",
+    "calendar": "Calendario",
+    "notes": "Note",
+    "spreadsheets": "Fogli di calcolo",
+    "canvas": "Tela",
+    "files": "File",
+    "planner": "Pianificatore"
+  },
+  "settings": {
+    "profile": "Profilo",
+    "dataManagement": "Gestione dati",
+    "systemSettings": "Impostazioni di sistema"
+  },
+  "profile": {
+    "title": "Impostazioni profilo",
+    "personalInfo": "Informazioni personali",
+    "preferences": "Preferenze",
+    "notifications": "Notifiche",
+    "security": "Sicurezza",
+    "name": "Nome",
+    "email": "Email",
+    "phone": "Telefono",
+    "avatar": "Avatar",
+    "language": "Lingua",
+    "timezone": "Fuso orario",
+    "dateFormat": "Formato data",
+    "timeFormat": "Formato ora",
+    "save": "Salva modifiche",
+    "cancel": "Annulla",
+    "saved": "Impostazioni salvate con successo",
+    "error": "Impossibile salvare le impostazioni"
+  },
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "create": "Crea",
+    "search": "Cerca",
+    "loading": "Caricamento...",
+    "error": "Si è verificato un errore",
+    "success": "Successo",
+    "confirm": "Conferma",
+    "close": "Chiudi",
+    "back": "Indietro",
+    "next": "Avanti",
+    "previous": "Precedente",
+    "submit": "Invia",
+    "reset": "Reimposta",
+    "clear": "Cancella",
+    "filter": "Filtra",
+    "export": "Esporta",
+    "import": "Importa",
+    "refresh": "Aggiorna"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Benvenuto",
+    "quickActions": "Azioni rapide",
+    "recentActivity": "Attività recente"
+  },
+  "players": {
+    "title": "Giocatori",
+    "description": "Gestisci la tua rosa e le informazioni dei giocatori",
+    "addPlayer": "Aggiungi giocatore",
+    "search": "Cerca giocatori...",
+    "noPlayers": "Nessun giocatore trovato",
+    "name": "Nome",
+    "position": "Posizione",
+    "age": "Età",
+    "nationality": "Nazionalità",
+    "status": "Stato",
+    "email": "Email",
+    "phone": "Telefono",
+    "joined": "Unito",
+    "tags": "Tag"
+  },
+  "calendar": {
+    "title": "Calendario",
+    "description": "Gestisci i tuoi eventi, partite e sessioni di allenamento",
+    "newEvent": "Nuovo evento",
+    "month": "Mese",
+    "week": "Settimana",
+    "day": "Giorno",
+    "today": "Oggi",
+    "noEvents": "Nessun evento programmato"
+  },
+  "forms": {
+    "title": "Moduli",
+    "description": "Crea e gestisci moduli",
+    "newForm": "Nuovo modulo",
+    "noForms": "Nessun modulo trovato"
+  },
+  "reports": {
+    "title": "Rapporti",
+    "description": "Visualizzazioni, esportazioni e snapshot delle prestazioni",
+    "noReports": "Nessun rapporto disponibile"
+  },
+  "notes": {
+    "title": "Note",
+    "description": "Crea e gestisci note",
+    "newNote": "Nuova nota",
+    "noNotes": "Nessuna nota trovata"
+  },
+  "spreadsheets": {
+    "title": "Fogli di calcolo",
+    "description": "Traccia tabelle di dati personalizzate con modelli, collegamenti ai giocatori e assistenza AI",
+    "newSpreadsheet": "Nuovo foglio di calcolo",
+    "useTemplate": "Usa modello",
+    "noSpreadsheets": "Ancora nessun foglio di calcolo"
+  },
+  "breadcrumb": {
+    "dashboard": "Dashboard",
+    "home": "Home"
+  },
+  "errors": {
+    "notFound": "Pagina non trovata",
+    "unauthorized": "Non sei autorizzato ad accedere a questa pagina",
+    "serverError": "Si è verificato un errore del server",
+    "networkError": "Errore di rete. Controlla la tua connessione."
+  }
+}

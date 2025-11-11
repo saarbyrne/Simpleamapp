@@ -1,4 +1,7 @@
 const { withSentryConfig } = require('@sentry/nextjs')
+const createNextIntlPlugin = require('next-intl/plugin')
+
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -78,6 +81,8 @@ const sentryWebpackPluginOptions = {
   automaticVercelMonitors: true,
 }
 
+let config = withNextIntl(nextConfig)
+
 module.exports = shouldEnableSentryWebpackPlugin
-  ? withSentryConfig(nextConfig, sentryWebpackPluginOptions)
-  : nextConfig
+  ? withSentryConfig(config, sentryWebpackPluginOptions)
+  : config

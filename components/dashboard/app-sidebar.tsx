@@ -3,6 +3,7 @@
 import { memo } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   BarChart3,
   Calendar,
@@ -44,24 +45,6 @@ import {
 import { signOut } from '@/app/actions/profile'
 import { toast } from 'sonner'
 
-const navItems = [
-  { label: 'Players', href: '/dashboard/players', icon: Users },
-  { label: 'Forms', href: '/dashboard/forms', icon: FileText },
-  { label: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
-  { label: 'Calendar', href: '/dashboard/calendar', icon: Calendar },
-  { label: 'Notes', href: '/dashboard/notes', icon: StickyNote },
-  { label: 'Spreadsheets', href: '/dashboard/spreadsheets', icon: Table },
-  { label: 'Canvas', href: '/dashboard/canvas', icon: Palette },
-  { label: 'Files', href: '/dashboard/files', icon: Folder },
-  { label: 'Planner', href: '/dashboard/planner', icon: CalendarCheck },
-]
-
-const settingsItems = [
-  { label: 'Profile', href: '/dashboard/profile', icon: UserCircle },
-  { label: 'Data Management', href: '/dashboard/data-management', icon: Database },
-  { label: 'System Settings', href: '/dashboard/system-settings', icon: Settings },
-]
-
 type AppSidebarProps = {
   userName: string
   userEmail?: string | null
@@ -88,14 +71,33 @@ function LogoBadge() {
 export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAvatar }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const t = useTranslations()
+
+  const navItems = [
+    { labelKey: 'nav.players', href: '/dashboard/players', icon: Users },
+    { labelKey: 'nav.forms', href: '/dashboard/forms', icon: FileText },
+    { labelKey: 'nav.reports', href: '/dashboard/reports', icon: BarChart3 },
+    { labelKey: 'nav.calendar', href: '/dashboard/calendar', icon: Calendar },
+    { labelKey: 'nav.notes', href: '/dashboard/notes', icon: StickyNote },
+    { labelKey: 'nav.spreadsheets', href: '/dashboard/spreadsheets', icon: Table },
+    { labelKey: 'nav.canvas', href: '/dashboard/canvas', icon: Palette },
+    { labelKey: 'nav.files', href: '/dashboard/files', icon: Folder },
+    { labelKey: 'nav.planner', href: '/dashboard/planner', icon: CalendarCheck },
+  ]
+
+  const settingsItems = [
+    { labelKey: 'settings.profile', href: '/dashboard/profile', icon: UserCircle },
+    { labelKey: 'settings.dataManagement', href: '/dashboard/data-management', icon: Database },
+    { labelKey: 'settings.systemSettings', href: '/dashboard/system-settings', icon: Settings },
+  ]
 
   async function handleSignOut() {
     const result = await signOut()
     if (result.success) {
-      toast.success('Signed out successfully')
+      toast.success(t('common.success'))
       router.push('/login')
     } else {
-      toast.error(result.error || 'Failed to sign out')
+      toast.error(result.error || t('common.error'))
     }
   }
 
@@ -112,12 +114,13 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
             <SidebarMenu>
               {navItems.map((item) => {
                 const isActive = pathname?.startsWith(item.href)
+                const label = t(item.labelKey)
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
                       <Link href={item.href}>
                         <item.icon />
-                        <span>{item.label}</span>
+                        <span>{label}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -133,12 +136,13 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
             <SidebarMenu>
               {settingsItems.map((item) => {
                 const isActive = pathname?.startsWith(item.href)
+                const label = t(item.labelKey)
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
                       <Link href={item.href}>
                         <item.icon />
-                        <span>{item.label}</span>
+                        <span>{label}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -192,7 +196,7 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard/profile" className="cursor-pointer">
                     <UserCircle className="mr-2 h-4 w-4" />
-                    Profile Settings
+                    {t('settings.profile')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -201,7 +205,7 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
+                  {t('common.signOut', { default: 'Sign Out' })}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

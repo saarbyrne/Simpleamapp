@@ -1,6 +1,8 @@
 import * as Sentry from '@sentry/nextjs'
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 
 import '@/app/globals.css'
 import { ThemeProvider } from 'next-themes'
@@ -24,25 +26,32 @@ export function generateMetadata(): Metadata {
   }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // Get locale and messages using next-intl's server functions
+  // These will use the request config which reads from user preferences
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="en" suppressHydrationWarning className={plusJakartaSans.variable}>
+    <html lang={locale} suppressHydrationWarning className={plusJakartaSans.variable}>
       <body className={plusJakartaSans.className}>
         <ErrorBoundary>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange={false}
-          >
-            <AnalyticsProviders>
-              {children}
-            </AnalyticsProviders>
-          </ThemeProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange={false}
+            >
+              <AnalyticsProviders>
+                {children}
+              </AnalyticsProviders>
+            </ThemeProvider>
+          </NextIntlClientProvider>
         </ErrorBoundary>
       </body>
     </html>

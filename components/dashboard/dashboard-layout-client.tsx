@@ -3,6 +3,7 @@
 import { memo, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { AppSidebar } from '@/components/dashboard/app-sidebar'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
@@ -33,26 +34,30 @@ type DashboardLayoutClientProps = {
   disablePageFrame?: boolean
 }
 
-// Map route segments to readable names
-const routeLabels: Record<string, string> = {
-  players: 'Players',
-  forms: 'Forms',
-  reports: 'Reports',
-  calendar: 'Calendar',
-  events: 'Events',
-  notes: 'Notes',
-  spreadsheets: 'Spreadsheets',
-  canvas: 'Canvas',
-  files: 'Files',
-  planner: 'Planner',
-  'data-management': 'Data Management',
-  'system-settings': 'System Settings',
-  setup: 'Setup',
+// Map route segments to readable names - now uses translations
+const getRouteLabel = (segment: string, t: ReturnType<typeof useTranslations>): string => {
+  const translationMap: Record<string, string> = {
+    players: t('nav.players'),
+    forms: t('nav.forms'),
+    reports: t('nav.reports'),
+    calendar: t('nav.calendar'),
+    notes: t('nav.notes'),
+    spreadsheets: t('nav.spreadsheets'),
+    canvas: t('nav.canvas'),
+    files: t('nav.files'),
+    planner: t('nav.planner'),
+    'data-management': t('settings.dataManagement'),
+    'system-settings': t('settings.systemSettings'),
+    profile: t('settings.profile'),
+    setup: 'Setup',
+  }
+  return translationMap[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ')
 }
 
 const DashboardBreadcrumb = memo(function DashboardBreadcrumb() {
   const pathname = usePathname()
   const { customLabels } = useBreadcrumb()
+  const t = useTranslations()
   
   // Split pathname into segments and filter out empty strings
   const segments = pathname?.split('/').filter(Boolean) || []
@@ -72,22 +77,22 @@ const DashboardBreadcrumb = memo(function DashboardBreadcrumb() {
            (segment.length > 20 && /^[a-z0-9-]+$/i.test(segment))
   }
   
-  // Get label for a segment, handling IDs
-  const getSegmentLabel = (segment: string, index: number, allSegments: string[]) => {
-    // Check if there's a custom label for this segment (e.g., event ID)
-    if (customLabels[segment]) {
-      return customLabels[segment]
+    // Get label for a segment, handling IDs
+    const getSegmentLabel = (segment: string, index: number, allSegments: string[]) => {
+      // Check if there's a custom label for this segment (e.g., event ID)
+      if (customLabels[segment]) {
+        return customLabels[segment]
+      }
+      
+      // If it's an ID segment, try to infer label from parent
+      if (isIdSegment(segment)) {
+        const parentSegment = index > 0 ? allSegments[index - 1] : ''
+        if (parentSegment === 'events') return 'Event'
+        if (parentSegment === 'players') return 'Player'
+        return 'Details'
+      }
+      return getRouteLabel(segment, t)
     }
-    
-    // If it's an ID segment, try to infer label from parent
-    if (isIdSegment(segment)) {
-      const parentSegment = index > 0 ? allSegments[index - 1] : ''
-      if (parentSegment === 'events') return 'Event'
-      if (parentSegment === 'players') return 'Player'
-      return 'Details'
-    }
-    return routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ')
-  }
   
   // Generate breadcrumb items from filtered segments
   // Build hrefs by reconstructing the path with 'dashboard' prefix
