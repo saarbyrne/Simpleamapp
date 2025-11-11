@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { memo, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { AppSidebar } from '@/components/dashboard/app-sidebar'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
@@ -20,7 +20,6 @@ import { QuickActionsToolbar } from '@/components/dashboard/quick-actions-toolba
 import { AddPlayerDialog } from '@/components/dashboard/add-player-dialog'
 import { EventFormDialog } from '@/components/calendar/event-form-dialog'
 import { FormBuilderDialog } from '@/components/dashboard/form-builder-dialog'
-import { useRouter } from 'next/navigation'
 
 type DashboardLayoutClientProps = {
   userName: string
@@ -51,7 +50,7 @@ const routeLabels: Record<string, string> = {
   setup: 'Setup',
 }
 
-function DashboardBreadcrumb() {
+const DashboardBreadcrumb = memo(function DashboardBreadcrumb() {
   const pathname = usePathname()
   const { customLabels } = useBreadcrumb()
   
@@ -133,9 +132,9 @@ function DashboardBreadcrumb() {
       </BreadcrumbList>
     </Breadcrumb>
   )
-}
+})
 
-export function DashboardLayoutClient({
+export const DashboardLayoutClient = memo(function DashboardLayoutClient({
   userName,
   userEmail,
   userAvatar,
@@ -147,11 +146,19 @@ export function DashboardLayoutClient({
   const [isAddEventOpen, setIsAddEventOpen] = useState(false)
   const [isAddFormOpen, setIsAddFormOpen] = useState(false)
 
-  const quickActionHandlers = {
+  const quickActionHandlers = useMemo(() => ({
     'add-player': () => setIsAddPlayerOpen(true),
     'add-event': () => setIsAddEventOpen(true),
     'add-form': () => setIsAddFormOpen(true),
-  }
+  }), [])
+  
+  const handleEventFormSuccess = useCallback(() => {
+    // Event created successfully - the EventFormDialog handles the success toast
+  }, [])
+  
+  const handleFormBuilderSuccess = useCallback(() => {
+    router.refresh()
+  }, [router])
 
   return (
     <BreadcrumbProvider>
@@ -188,18 +195,14 @@ export function DashboardLayoutClient({
         <EventFormDialog
           open={isAddEventOpen}
           onOpenChange={setIsAddEventOpen}
-          onSuccess={() => {
-            // Event created successfully - the EventFormDialog handles the success toast
-          }}
+          onSuccess={handleEventFormSuccess}
         />
         <FormBuilderDialog
           open={isAddFormOpen}
           onOpenChange={setIsAddFormOpen}
-          onSuccess={() => {
-            router.refresh()
-          }}
+          onSuccess={handleFormBuilderSuccess}
         />
       </SidebarProvider>
     </BreadcrumbProvider>
   )
-}
+})

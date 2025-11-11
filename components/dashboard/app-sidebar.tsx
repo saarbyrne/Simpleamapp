@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
@@ -84,7 +85,7 @@ function LogoBadge() {
   )
 }
 
-export function AppSidebar({ userName, userEmail, userAvatar }: AppSidebarProps) {
+export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAvatar }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -209,4 +210,4 @@ export function AppSidebar({ userName, userEmail, userAvatar }: AppSidebarProps)
       </SidebarFooter>
     </Sidebar>
   )
-}
+})
