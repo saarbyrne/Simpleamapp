@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Dialog,
   DialogContent,
@@ -42,18 +43,18 @@ interface EventDetailDialogProps {
 }
 
 const eventTypeConfig = {
-  training: { label: 'Training', color: 'bg-primary/20 text-foreground border border-primary' },
-  match: { label: 'Match', color: 'bg-chart-2/20 text-foreground border border-chart-2' },
-  medical: { label: 'Medical', color: 'bg-destructive/20 text-foreground border border-destructive' },
-  meeting: { label: 'Meeting', color: 'bg-accent text-accent-foreground border border-accent-foreground' },
-  other: { label: 'Other', color: 'bg-muted text-foreground border border-border' },
+  training: { labelKey: 'calendar.types.training', color: 'bg-primary/20 text-foreground border border-primary' },
+  match: { labelKey: 'calendar.types.match', color: 'bg-chart-2/20 text-foreground border border-chart-2' },
+  medical: { labelKey: 'calendar.types.medical', color: 'bg-destructive/20 text-foreground border border-destructive' },
+  meeting: { labelKey: 'calendar.types.meeting', color: 'bg-accent text-accent-foreground border border-accent-foreground' },
+  other: { labelKey: 'calendar.types.other', color: 'bg-muted text-foreground border border-border' },
 }
 
 const attendanceStatusConfig = {
-  invited: { label: 'Invited', color: 'bg-muted text-foreground border border-border' },
-  attending: { label: 'Attending', color: 'bg-chart-2/20 text-foreground border border-chart-2' },
-  absent: { label: 'Absent', color: 'bg-destructive/20 text-foreground border border-destructive' },
-  excused: { label: 'Excused', color: 'bg-chart-3/20 text-foreground border border-chart-3' },
+  invited: { labelKey: 'calendar.attendance.invited', color: 'bg-muted text-foreground border border-border' },
+  attending: { labelKey: 'calendar.attendance.attending', color: 'bg-chart-2/20 text-foreground border border-chart-2' },
+  absent: { labelKey: 'calendar.attendance.absent', color: 'bg-destructive/20 text-foreground border border-destructive' },
+  excused: { labelKey: 'calendar.attendance.excused', color: 'bg-chart-3/20 text-foreground border border-chart-3' },
 }
 
 export function EventDetailDialog({
@@ -64,6 +65,7 @@ export function EventDetailDialog({
   onDelete,
   onUpdate,
 }: EventDetailDialogProps) {
+  const t = useTranslations()
   const [activeTab, setActiveTab] = useState('overview')
   const { preferences } = useUserPreferences()
 
@@ -93,10 +95,10 @@ export function EventDetailDialog({
               <DialogTitle className="text-2xl">{event.title}</DialogTitle>
               <div className="mt-2 flex items-center gap-2">
                 <Badge variant="outline" className={cn('text-white', typeConfig.color)}>
-                  {typeConfig.label}
+                  {t(typeConfig.labelKey)}
                 </Badge>
                 {event.isRecurring && (
-                  <Badge variant="outline">Recurring</Badge>
+                  <Badge variant="outline">{t('calendar.recurring')}</Badge>
                 )}
               </div>
             </div>
@@ -123,31 +125,31 @@ export function EventDetailDialog({
           <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">
               <Calendar className="me-2 h-4 w-4" />
-              <span className="hidden sm:inline">Overview</span>
+              <span className="hidden sm:inline">{t('calendar.tabs.overview')}</span>
             </TabsTrigger>
             <TabsTrigger value="spreadsheets">
               <Table className="me-2 h-4 w-4" />
-              <span className="hidden sm:inline">Data</span>
+              <span className="hidden sm:inline">{t('calendar.tabs.data')}</span>
             </TabsTrigger>
             <TabsTrigger value="notes">
               <FileText className="me-2 h-4 w-4" />
-              <span className="hidden sm:inline">Notes</span>
+              <span className="hidden sm:inline">{t('calendar.tabs.notes')}</span>
             </TabsTrigger>
             <TabsTrigger value="drawings">
               <PenTool className="me-2 h-4 w-4" />
-              <span className="hidden sm:inline">Canvas</span>
+              <span className="hidden sm:inline">{t('calendar.tabs.canvas')}</span>
             </TabsTrigger>
             <TabsTrigger value="forms">
               <ClipboardList className="me-2 h-4 w-4" />
-              <span className="hidden sm:inline">Forms</span>
+              <span className="hidden sm:inline">{t('calendar.tabs.forms')}</span>
             </TabsTrigger>
             <TabsTrigger value="files">
               <FolderOpen className="me-2 h-4 w-4" />
-              <span className="hidden sm:inline">Files</span>
+              <span className="hidden sm:inline">{t('calendar.tabs.files')}</span>
             </TabsTrigger>
             <TabsTrigger value="attendance">
               <Users className="me-2 h-4 w-4" />
-              <span className="hidden sm:inline">Attendance</span>
+              <span className="hidden sm:inline">{t('calendar.tabs.attendance')}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -181,7 +183,7 @@ export function EventDetailDialog({
               <>
                 <Separator />
                 <div>
-                  <h3 className="mb-2 font-semibold">Description</h3>
+                  <h3 className="mb-2 font-semibold">{t('calendar.descriptionLabel')}</h3>
                   <p className="text-sm text-muted-foreground">{event.description}</p>
                 </div>
               </>
@@ -191,23 +193,23 @@ export function EventDetailDialog({
 
             {/* Attendance Summary */}
             <div>
-              <h3 className="mb-3 font-semibold">Attendance Summary</h3>
+              <h3 className="mb-3 font-semibold">{t('calendar.attendanceSummary')}</h3>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div className="rounded-lg border bg-card p-3">
                   <div className="text-2xl font-bold">{attendanceSummary.total}</div>
-                  <div className="text-xs text-muted-foreground">Total</div>
+                  <div className="text-xs text-muted-foreground">{t('calendar.attendance.total')}</div>
                 </div>
                 <div className="rounded-lg border bg-card p-3">
                   <div className="text-2xl font-bold text-green-600">{attendanceSummary.attending}</div>
-                  <div className="text-xs text-muted-foreground">Attending</div>
+                  <div className="text-xs text-muted-foreground">{t('calendar.attendance.attending')}</div>
                 </div>
                 <div className="rounded-lg border bg-card p-3">
                   <div className="text-2xl font-bold text-red-600">{attendanceSummary.absent}</div>
-                  <div className="text-xs text-muted-foreground">Absent</div>
+                  <div className="text-xs text-muted-foreground">{t('calendar.attendance.absent')}</div>
                 </div>
                 <div className="rounded-lg border bg-card p-3">
                   <div className="text-2xl font-bold text-gray-600">{attendanceSummary.invited}</div>
-                  <div className="text-xs text-muted-foreground">Invited</div>
+                  <div className="text-xs text-muted-foreground">{t('calendar.attendance.invited')}</div>
                 </div>
               </div>
             </div>
@@ -216,15 +218,14 @@ export function EventDetailDialog({
           <TabsContent value="spreadsheets" className="mt-6">
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Table className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 text-lg font-semibold">Event Spreadsheets</h3>
+              <h3 className="mb-2 text-lg font-semibold">{t('calendar.tabs.eventSpreadsheets')}</h3>
               <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                Link spreadsheet modules to track performance data, stats, and metrics for this event.
-                Data will sync automatically when spreadsheets are created.
+                {t('calendar.tabs.spreadsheetsDescription')}
               </p>
               <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
-                <p className="text-sm font-medium">Integration Ready</p>
+                <p className="text-sm font-medium">{t('calendar.integrationReady')}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Complete the Spreadsheets module to enable this feature
+                  {t('calendar.completeSpreadsheetsModule')}
                 </p>
               </div>
             </div>
@@ -233,15 +234,14 @@ export function EventDetailDialog({
           <TabsContent value="notes" className="mt-6">
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 text-lg font-semibold">Event Notes</h3>
+              <h3 className="mb-2 text-lg font-semibold">{t('calendar.tabs.eventNotes')}</h3>
               <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                Link note modules for coach observations, medical notes, and other documentation.
-                Notes will appear here when the Notes module is implemented.
+                {t('calendar.tabs.notesDescription')}
               </p>
               <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
-                <p className="text-sm font-medium">Integration Ready</p>
+                <p className="text-sm font-medium">{t('calendar.integrationReady')}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Complete the Notes module to enable this feature
+                  {t('calendar.completeNotesModule')}
                 </p>
               </div>
             </div>
@@ -250,15 +250,14 @@ export function EventDetailDialog({
           <TabsContent value="drawings" className="mt-6">
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <PenTool className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 text-lg font-semibold">Event Canvas</h3>
+              <h3 className="mb-2 text-lg font-semibold">{t('calendar.tabs.eventCanvas')}</h3>
               <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                Link canvas modules for formations, tactics, and session plans.
-                Canvas content will appear here when the Canvas module is implemented.
+                {t('calendar.tabs.canvasDescription')}
               </p>
               <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
-                <p className="text-sm font-medium">Integration Ready</p>
+                <p className="text-sm font-medium">{t('calendar.integrationReady')}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Complete the Canvas module to enable this feature
+                  {t('calendar.completeCanvasModule')}
                 </p>
               </div>
             </div>
@@ -267,15 +266,14 @@ export function EventDetailDialog({
           <TabsContent value="forms" className="mt-6">
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <ClipboardList className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 text-lg font-semibold">Event Forms</h3>
+              <h3 className="mb-2 text-lg font-semibold">{t('calendar.tabs.eventForms')}</h3>
               <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                Link form modules to distribute wellness checks, post-event surveys, and assessments.
-                Forms linked to this event will appear here automatically.
+                {t('calendar.tabs.formsDescription')}
               </p>
               <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
-                <p className="text-sm font-medium">Integration Ready</p>
+                <p className="text-sm font-medium">{t('calendar.integrationReady')}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  The Forms module exists - integration can be enabled when needed
+                  {t('calendar.formsModuleExists')}
                 </p>
               </div>
             </div>
@@ -284,15 +282,14 @@ export function EventDetailDialog({
           <TabsContent value="files" className="mt-6">
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 text-lg font-semibold">Event Files</h3>
+              <h3 className="mb-2 text-lg font-semibold">{t('calendar.tabs.eventFiles')}</h3>
               <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                Link file modules for scouting reports, videos, and other documents.
-                Files will appear here when the Files module is implemented.
+                {t('calendar.tabs.filesDescription')}
               </p>
               <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
-                <p className="text-sm font-medium">Integration Ready</p>
+                <p className="text-sm font-medium">{t('calendar.integrationReady')}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Complete the Files module to enable this feature
+                  {t('calendar.completeFilesModule')}
                 </p>
               </div>
             </div>

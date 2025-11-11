@@ -5,6 +5,7 @@ import { ProfileTab } from "./tabs/profile-tab";
 import { PreferencesTab } from "./tabs/preferences-tab";
 import { NotificationsTab } from "./tabs/notifications-tab";
 import { SecurityTab } from "./tabs/security-tab";
+import { useTranslations } from "next-intl";
 
 interface User {
   id: string;
@@ -38,13 +39,15 @@ interface ProfileTabsProps {
 }
 
 export function ProfileTabs({ user }: ProfileTabsProps) {
+  const t = useTranslations('profile');
+  
   return (
     <Tabs defaultValue="profile" className="w-full">
       <TabsList>
-        <TabsTrigger value="profile">Profile</TabsTrigger>
-        <TabsTrigger value="preferences">Preferences</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger>
-        <TabsTrigger value="security">Security</TabsTrigger>
+        <TabsTrigger value="profile">{t('profileTab')}</TabsTrigger>
+        <TabsTrigger value="preferences">{t('preferencesTab')}</TabsTrigger>
+        <TabsTrigger value="notifications">{t('notificationsTab')}</TabsTrigger>
+        <TabsTrigger value="security">{t('securityTab')}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="profile" className="mt-6">

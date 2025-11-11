@@ -4,6 +4,7 @@ import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar'
 import { format, parse, startOfWeek, getDay } from 'date-fns'
 import { enUS } from 'date-fns/locale'
 import { useState, useCallback, useMemo, memo } from 'react'
+import { useTranslations } from 'next-intl'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -82,7 +83,7 @@ const eventStyleGetter = (event: CalendarEvent) => {
 }
 
 // Memoized toolbar component
-const Toolbar = memo(({ label, onNavigate: navigate, onView, view }: any) => (
+const Toolbar = memo(({ label, onNavigate: navigate, onView, view, t }: any) => (
   <div className="mb-4 flex items-center justify-between rounded-lg border bg-card p-4">
     <div className="flex items-center gap-2">
       <Button
@@ -96,7 +97,7 @@ const Toolbar = memo(({ label, onNavigate: navigate, onView, view }: any) => (
         variant="outline"
         onClick={() => navigate('TODAY')}
       >
-        Today
+        {t('calendar.today')}
       </Button>
       <Button
         variant="outline"
@@ -115,21 +116,21 @@ const Toolbar = memo(({ label, onNavigate: navigate, onView, view }: any) => (
         size="sm"
         onClick={() => onView('month')}
       >
-        Month
+        {t('calendar.month')}
       </Button>
       <Button
         variant={view === 'week' ? 'default' : 'outline'}
         size="sm"
         onClick={() => onView('week')}
       >
-        Week
+        {t('calendar.week')}
       </Button>
       <Button
         variant={view === 'day' ? 'default' : 'outline'}
         size="sm"
         onClick={() => onView('day')}
       >
-        Day
+        {t('calendar.day')}
       </Button>
     </div>
   </div>
@@ -144,6 +145,7 @@ export function EventCalendar({
   onViewChange,
   defaultView = 'month'
 }: EventCalendarProps) {
+  const t = useTranslations()
   const [view, setView] = useState<View>(defaultView)
   const [date, setDate] = useState(new Date())
 
@@ -165,7 +167,7 @@ export function EventCalendar({
   const { components, formats } = useMemo(() => {
     return {
       components: {
-        toolbar: (props: any) => <Toolbar {...props} view={view} />,
+        toolbar: (props: any) => <Toolbar {...props} view={view} t={t} />,
       },
       formats: {
         timeGutterFormat: (date: Date) => format(date, 'HH:mm'),
@@ -178,7 +180,7 @@ export function EventCalendar({
           `${format(start, 'MMM dd')} - ${format(end, 'MMM dd')}`,
       }
     }
-  }, [view])
+  }, [view, t])
 
   return (
     <div className="h-full w-full">

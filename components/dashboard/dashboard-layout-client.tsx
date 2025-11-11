@@ -49,7 +49,7 @@ const getRouteLabel = (segment: string, t: ReturnType<typeof useTranslations>): 
     'data-management': t('settings.dataManagement'),
     'system-settings': t('settings.systemSettings'),
     profile: t('settings.profile'),
-    setup: 'Setup',
+    setup: t('common.setup'),
   }
   return translationMap[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ')
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -28,13 +28,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "next-intl";
 
-const profileFormSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name is too long"),
-  phone: z.string().optional(),
-});
-
-type ProfileFormValues = z.infer<typeof profileFormSchema>;
+type ProfileFormValues = z.infer<ReturnType<typeof createProfileFormSchema>>;
 
 interface User {
   id: string;
@@ -58,7 +54,15 @@ interface ProfileTabProps {
   user: User;
 }
 
+function createProfileFormSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(1, t('name') + ' ' + t('isRequired', { ns: 'common' })).max(100, t('name') + ' ' + t('isTooLong', { ns: 'common' })),
+    phone: z.string().optional(),
+  });
+}
+
 export function ProfileTab({ user }: ProfileTabProps) {
+  const t = useTranslations('profile');
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(user.avatar);
@@ -68,6 +72,8 @@ export function ProfileTab({ user }: ProfileTabProps) {
   useEffect(() => {
     setAvatarUrl(user.avatar);
   }, [user.avatar]);
+
+  const profileFormSchema = useMemo(() => createProfileFormSchema(t), [t]);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -87,10 +93,10 @@ export function ProfileTab({ user }: ProfileTabProps) {
     });
 
     if (result.success) {
-      toast.success("Profile updated successfully");
+      toast.success(t('profileUpdated'));
       router.refresh();
     } else {
-      toast.error(result.error || "Failed to update profile");
+      toast.error(result.error || t('failedToUpdateProfile'));
     }
   }
 
@@ -100,13 +106,13 @@ export function ProfileTab({ user }: ProfileTabProps) {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file");
+      toast.error(t('pleaseUploadImage'));
       return;
     }
 
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size must be less than 5MB");
+      toast.error(t('fileSizeTooLarge'));
       return;
     }
 
@@ -120,13 +126,13 @@ export function ProfileTab({ user }: ProfileTabProps) {
 
       if (result.success && result.data?.avatar) {
         setAvatarUrl(result.data.avatar);
-        toast.success("Avatar uploaded successfully");
+        toast.success(t('avatarUploaded'));
         router.refresh();
       } else {
-        toast.error(result.error || "Failed to upload avatar");
+        toast.error(result.error || t('failedToUploadAvatar'));
       }
     } catch (error) {
-      toast.error("Failed to upload avatar");
+      toast.error(t('failedToUploadAvatar'));
     } finally {
       setIsUploading(false);
     }
@@ -146,9 +152,9 @@ export function ProfileTab({ user }: ProfileTabProps) {
       {/* Avatar Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Profile Photo</CardTitle>
+          <CardTitle>{t('profilePhoto')}</CardTitle>
           <CardDescription>
-            Upload a profile picture to personalize your account
+            {t('profilePhotoDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4 sm:flex-row">
@@ -176,17 +182,17 @@ export function ProfileTab({ user }: ProfileTabProps) {
               {isUploading ? (
                 <>
                   <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                  Uploading...
+                  {t('uploading')}
                 </>
               ) : (
                 <>
                   <Upload className="me-2 h-4 w-4" />
-                  Upload Photo
+                  {t('uploadPhoto')}
                 </>
               )}
             </Button>
             <p className="text-xs text-muted-foreground">
-              JPG, PNG or GIF. Max size 5MB.
+              {t('photoFormatHint')}
             </p>
           </div>
         </CardContent>
@@ -195,9 +201,9 @@ export function ProfileTab({ user }: ProfileTabProps) {
       {/* Personal Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
+          <CardTitle>{t('personalInformation')}</CardTitle>
           <CardDescription>
-            Update your personal details and contact information
+            {t('personalInformationDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -208,9 +214,9 @@ export function ProfileTab({ user }: ProfileTabProps) {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>{t('fullName')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input placeholder={t('fullNamePlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -219,7 +225,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Email Address
+                  {t('emailAddress')}
                 </label>
                 <Input
                   type="email"
@@ -228,8 +234,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
                   className="bg-muted"
                 />
                 <p className="text-sm text-muted-foreground">
-                  Email cannot be changed. Contact your administrator if you need
-                  to update your email.
+                  {t('emailCannotBeChanged')}
                 </p>
               </div>
 
@@ -238,16 +243,16 @@ export function ProfileTab({ user }: ProfileTabProps) {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number (Optional)</FormLabel>
+                    <FormLabel>{t('phoneNumberOptional')}</FormLabel>
                     <FormControl>
                       <Input
                         type="tel"
-                        placeholder="+1 (555) 123-4567"
+                        placeholder={t('phonePlaceholder')}
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      Used for SMS notifications and account recovery
+                      {t('phoneDescription')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -258,10 +263,10 @@ export function ProfileTab({ user }: ProfileTabProps) {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                    Saving...
+                    {t('saving')}
                   </>
                 ) : (
-                  "Save Changes"
+                  t('save')
                 )}
               </Button>
             </form>
@@ -272,8 +277,8 @@ export function ProfileTab({ user }: ProfileTabProps) {
       {/* Organization Membership */}
       <Card>
         <CardHeader>
-          <CardTitle>Organization</CardTitle>
-          <CardDescription>Your organization membership and roles</CardDescription>
+          <CardTitle>{t('organization')}</CardTitle>
+          <CardDescription>{t('organizationDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-start gap-4">
@@ -291,7 +296,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
               <div>
                 <h3 className="font-semibold">{user.organization.name}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Organization ID: {user.organization.id}
+                  {t('organizationId')} {user.organization.id}
                 </p>
               </div>
 
@@ -306,7 +311,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
               {user.roles.length > 0 && (
                 <details className="mt-2">
                   <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-                    View Permissions
+                    {t('viewPermissions')}
                   </summary>
                   <ul className="mt-2 space-y-1 ps-4">
                     {user.roles.flatMap((role) =>

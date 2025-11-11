@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { getTranslations } from 'next-intl/server'
 
 export interface FormField {
   id: string
@@ -70,11 +71,12 @@ export interface FormWithDetails {
  */
 export async function getForms(page: number = 0, pageSize: number = 20) {
   try {
+    const t = await getTranslations('errors')
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return { error: 'Not authenticated', forms: [], total: 0, page: 0, pageSize: 20 }
+      return { error: t('notAuthenticated'), forms: [], total: 0, page: 0, pageSize: 20 }
     }
 
     const dbUser = await ensureUserWithOrganization(user)
@@ -123,7 +125,8 @@ export async function getForms(page: number = 0, pageSize: number = 20) {
     return { forms, total, page, pageSize }
   } catch (error) {
     console.error('Error fetching forms:', error)
-    return { error: 'Failed to fetch forms', forms: [], total: 0, page: 0, pageSize: 20 }
+    const t = await getTranslations('errors')
+    return { error: t('failedToFetchForms'), forms: [], total: 0, page: 0, pageSize: 20 }
   }
 }
 
@@ -131,11 +134,12 @@ export async function getForms(page: number = 0, pageSize: number = 20) {
  * Get a single form by ID with full details
  */
 export async function getForm(formId: string) {
+  const t = await getTranslations('errors')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -169,13 +173,13 @@ export async function getForm(formId: string) {
     })
 
     if (!form) {
-      return { error: 'Form not found' }
+      return { error: t('formNotFound') }
     }
 
     return { success: true, form }
   } catch (error) {
     console.error('Error fetching form:', error)
-    return { error: 'Failed to fetch form' }
+    return { error: t('failedToFetchForm') }
   }
 }
 
@@ -183,11 +187,12 @@ export async function getForm(formId: string) {
  * Create a new form
  */
 export async function createForm(data: CreateFormData) {
+  const t = await getTranslations('errors')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -222,7 +227,7 @@ export async function createForm(data: CreateFormData) {
     return { success: true, form }
   } catch (error) {
     console.error('Error creating form:', error)
-    return { error: 'Failed to create form' }
+    return { error: t('failedToCreateForm') }
   }
 }
 
@@ -230,11 +235,12 @@ export async function createForm(data: CreateFormData) {
  * Update an existing form
  */
 export async function updateForm(formId: string, data: UpdateFormData) {
+  const t = await getTranslations('errors')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -249,7 +255,7 @@ export async function updateForm(formId: string, data: UpdateFormData) {
     })
 
     if (!existingForm) {
-      return { error: 'Form not found' }
+      return { error: t('formNotFound') }
     }
 
     const form = await prisma.form.update({
@@ -279,7 +285,7 @@ export async function updateForm(formId: string, data: UpdateFormData) {
     return { success: true, form }
   } catch (error) {
     console.error('Error updating form:', error)
-    return { error: 'Failed to update form' }
+    return { error: t('failedToUpdateForm') }
   }
 }
 
@@ -287,11 +293,12 @@ export async function updateForm(formId: string, data: UpdateFormData) {
  * Delete a form
  */
 export async function deleteForm(formId: string) {
+  const t = await getTranslations('errors')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -306,7 +313,7 @@ export async function deleteForm(formId: string) {
     })
 
     if (!existingForm) {
-      return { error: 'Form not found' }
+      return { error: t('formNotFound') }
     }
 
     await prisma.form.delete({
@@ -317,7 +324,7 @@ export async function deleteForm(formId: string) {
     return { success: true }
   } catch (error) {
     console.error('Error deleting form:', error)
-    return { error: 'Failed to delete form' }
+    return { error: t('failedToDeleteForm') }
   }
 }
 
@@ -331,11 +338,12 @@ export async function bulkUpdateForms(
     category?: string
   }
 ) {
+  const t = await getTranslations('errors')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -350,7 +358,7 @@ export async function bulkUpdateForms(
     })
 
     if (forms.length !== formIds.length) {
-      return { error: 'Some forms not found or not accessible' }
+      return { error: t('someFormsNotFound') }
     }
 
     await prisma.form.updateMany({
@@ -369,7 +377,7 @@ export async function bulkUpdateForms(
     return { success: true }
   } catch (error) {
     console.error('Error bulk updating forms:', error)
-    return { error: 'Failed to bulk update forms' }
+    return { error: t('failedToBulkUpdateForms') }
   }
 }
 
@@ -377,11 +385,12 @@ export async function bulkUpdateForms(
  * Get form responses for a specific form
  */
 export async function getFormResponses(formId: string, page: number = 0, pageSize: number = 20) {
+  const t = await getTranslations('errors')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -396,7 +405,7 @@ export async function getFormResponses(formId: string, page: number = 0, pageSiz
     })
 
     if (!form) {
-      return { error: 'Form not found' }
+      return { error: t('formNotFound') }
     }
 
     const skip = page * pageSize
@@ -439,7 +448,7 @@ export async function getFormResponses(formId: string, page: number = 0, pageSiz
     return { success: true, responses, total, page, pageSize }
   } catch (error) {
     console.error('Error fetching form responses:', error)
-    return { error: 'Failed to fetch form responses' }
+    return { error: t('failedToFetchFormResponses') }
   }
 }
 
@@ -447,11 +456,13 @@ export async function getFormResponses(formId: string, page: number = 0, pageSiz
  * Duplicate a form
  */
 export async function duplicateForm(formId: string) {
+  const tErrors = await getTranslations('errors')
+  const tCommon = await getTranslations('common')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: tErrors('notAuthenticated') }
   }
 
   try {
@@ -466,13 +477,13 @@ export async function duplicateForm(formId: string) {
     })
 
     if (!originalForm) {
-      return { error: 'Form not found' }
+      return { error: tErrors('formNotFound') }
     }
 
     // Create a duplicate
     const duplicatedForm = await prisma.form.create({
       data: {
-        name: `${originalForm.name} (Copy)`,
+        name: `${originalForm.name}${tCommon('copySuffix')}`,
         description: originalForm.description,
         schema: originalForm.schema,
         organizationId: dbUser.organizationId,
@@ -490,7 +501,7 @@ export async function duplicateForm(formId: string) {
     return { success: true, form: duplicatedForm }
   } catch (error) {
     console.error('Error duplicating form:', error)
-    return { error: 'Failed to duplicate form' }
+    return { error: tErrors('failedToDuplicateForm') }
   }
 }
 
@@ -502,11 +513,12 @@ export async function submitFormResponse(
   personOrgId: string,
   responses: Record<string, any>
 ) {
+  const t = await getTranslations('errors')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -521,7 +533,7 @@ export async function submitFormResponse(
     })
 
     if (!form) {
-      return { error: 'Form not found' }
+      return { error: t('formNotFound') }
     }
 
     // Check if response already exists
@@ -559,7 +571,7 @@ export async function submitFormResponse(
     return { success: true, response }
   } catch (error) {
     console.error('Error submitting form response:', error)
-    return { error: 'Failed to submit form response' }
+    return { error: t('failedToSubmitFormResponse') }
   }
 }
 

@@ -23,6 +23,7 @@ import {
 import { getEventTemplates } from '@/app/actions/event-templates'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 interface EventTemplate {
   id: string
@@ -42,11 +43,11 @@ interface TemplateSelectorDialogProps {
 }
 
 const eventTypeConfig = {
-  training: { label: 'Training', color: 'bg-blue-500', icon: Users },
-  match: { label: 'Match', color: 'bg-green-500', icon: Trophy },
-  medical: { label: 'Medical', color: 'bg-red-500', icon: Stethoscope },
-  meeting: { label: 'Meeting', color: 'bg-purple-500', icon: Calendar },
-  other: { label: 'Other', color: 'bg-gray-500', icon: Calendar },
+  training: { labelKey: 'calendar.types.training', color: 'bg-blue-500', icon: Users },
+  match: { labelKey: 'calendar.types.match', color: 'bg-green-500', icon: Trophy },
+  medical: { labelKey: 'calendar.types.medical', color: 'bg-red-500', icon: Stethoscope },
+  meeting: { labelKey: 'calendar.types.meeting', color: 'bg-purple-500', icon: Calendar },
+  other: { labelKey: 'calendar.types.other', color: 'bg-gray-500', icon: Calendar },
 }
 
 export function TemplateSelectorDialog({
@@ -54,6 +55,7 @@ export function TemplateSelectorDialog({
   onOpenChange,
   onSelect,
 }: TemplateSelectorDialogProps) {
+  const t = useTranslations()
   const [templates, setTemplates] = useState<EventTemplate[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedTemplate, setSelectedTemplate] = useState<EventTemplate | null>(null)
@@ -75,7 +77,7 @@ export function TemplateSelectorDialog({
         setTemplates(result.templates as EventTemplate[])
       }
     } catch (error) {
-      toast.error('Failed to load templates')
+      toast.error(t('calendar.templateSelector.failedToLoad'))
       console.error(error)
     } finally {
       setIsLoading(false)
@@ -100,10 +102,10 @@ export function TemplateSelectorDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
-            Choose Event Template
+            {t('calendar.templateSelector.title')}
           </DialogTitle>
           <DialogDescription>
-            Select a pre-configured template to quickly create your event with all necessary sections.
+            {t('calendar.templateSelector.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -111,18 +113,18 @@ export function TemplateSelectorDialog({
           <div className="flex min-h-[300px] items-center justify-center">
             <div className="text-center">
               <div className="mb-2 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-              <p className="text-sm text-muted-foreground">Loading templates...</p>
+              <p className="text-sm text-muted-foreground">{t('calendar.templateSelector.loading')}</p>
             </div>
           </div>
         ) : templates.length === 0 ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
             <Calendar className="mb-4 h-12 w-12 text-muted-foreground" />
-            <h3 className="mb-2 text-lg font-semibold">No Templates Available</h3>
+            <h3 className="mb-2 text-lg font-semibold">{t('calendar.templateSelector.noTemplates')}</h3>
             <p className="mb-4 text-sm text-muted-foreground">
-              Create your first template or use the default templates.
+              {t('calendar.templateSelector.noTemplatesDescription')}
             </p>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Create Without Template
+              {t('calendar.templateSelector.createWithoutTemplate')}
             </Button>
           </div>
         ) : (
@@ -173,21 +175,21 @@ export function TemplateSelectorDialog({
                         {/* Metadata */}
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                           <Badge variant="outline" className={cn('text-white', typeConfig.color)}>
-                            {typeConfig.label}
+                            {t(typeConfig.labelKey)}
                           </Badge>
                           <Badge variant="outline" className="gap-1">
                             <Clock className="h-3 w-3" />
-                            {template.defaultDuration} min
+                            {t('calendar.templateSelector.durationMinutes', { duration: template.defaultDuration })}
                           </Badge>
                           {sectionCount > 0 && (
                             <Badge variant="outline">
-                              {sectionCount} {sectionCount === 1 ? 'section' : 'sections'}
+                              {sectionCount} {sectionCount === 1 ? t('calendar.templateSelector.section') : t('calendar.templateSelector.sections')}
                             </Badge>
                           )}
                           {template.isGlobal && (
                             <Badge variant="secondary">
                               <Sparkles className="me-1 h-3 w-3" />
-                              Global
+                              {t('calendar.templateSelector.global')}
                             </Badge>
                           )}
                         </div>
@@ -208,20 +210,20 @@ export function TemplateSelectorDialog({
                   onOpenChange(false)
                 }}
               >
-                Skip & Create Blank Event
+                {t('calendar.templateSelector.skipAndCreateBlank')}
               </Button>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   onClick={handleSelect}
                   disabled={!selectedTemplate}
                 >
-                  Use Template
+                  {t('calendar.templateSelector.useTemplate')}
                 </Button>
               </div>
             </div>

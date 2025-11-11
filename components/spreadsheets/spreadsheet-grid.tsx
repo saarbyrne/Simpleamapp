@@ -25,6 +25,7 @@ import { ColumnDefinition, SpreadsheetRow } from '@/lib/types/spreadsheet'
 import { PersonCell, Person } from './cells/person-cell'
 import { DateCell } from './cells/date-cell'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 interface SpreadsheetGridProps {
   schema: ColumnDefinition[]
@@ -51,6 +52,8 @@ export function SpreadsheetGrid({
   isSaved = true,
   className,
 }: SpreadsheetGridProps) {
+  const t = useTranslations('spreadsheets.grid')
+  const tSpreadsheets = useTranslations('spreadsheets')
   const [selection, setSelection] = useState<{ min: { row: number; col: number }; max: { row: number; col: number } } | null>(null)
 
   // Convert our schema to DataSheetGrid columns
@@ -158,7 +161,7 @@ export function SpreadsheetGrid({
         <div className="flex items-center gap-2">
           <Button size="sm" variant="outline" onClick={handleAddRow}>
             <Plus className="h-4 w-4 me-2" />
-            Add Row
+            {t('addRow')}
           </Button>
 
           <Button
@@ -168,7 +171,7 @@ export function SpreadsheetGrid({
             disabled={true}
           >
             <Trash2 className="h-4 w-4 me-2" />
-            Delete Selected
+            {t('deleteSelected')}
           </Button>
 
           <Separator orientation="vertical" className="h-6" />
@@ -176,14 +179,14 @@ export function SpreadsheetGrid({
           {onImport && (
             <Button size="sm" variant="outline" onClick={onImport}>
               <Upload className="h-4 w-4 me-2" />
-              Import CSV
+              {t('import')}
             </Button>
           )}
 
           {onExport && (
             <Button size="sm" variant="outline" onClick={onExport}>
               <Download className="h-4 w-4 me-2" />
-              Export CSV
+              {t('export')}
             </Button>
           )}
 
@@ -192,7 +195,7 @@ export function SpreadsheetGrid({
               <Separator orientation="vertical" className="h-6" />
               <Button size="sm" variant="outline" onClick={onAIAssist}>
                 <Sparkles className="h-4 w-4 me-2" />
-                AI Assist
+                {t('aiAssist')}
               </Button>
             </>
           )}
@@ -202,14 +205,14 @@ export function SpreadsheetGrid({
           {!isSaved && (
             <Badge variant="secondary" className="gap-1">
               <Clock className="h-3 w-3" />
-              Unsaved changes
+              {t('unsavedChanges')}
             </Badge>
           )}
 
           {onSave && (
             <Button size="sm" onClick={onSave} disabled={isSaved}>
               <Save className="h-4 w-4 me-2" />
-              Save to Database
+              {t('save')}
             </Button>
           )}
         </div>
@@ -232,7 +235,7 @@ export function SpreadsheetGrid({
       {/* Footer */}
       <div className="flex items-center justify-between gap-4 p-2 border-t text-sm text-muted-foreground">
         <div>
-          {data.length} row{data.length !== 1 ? 's' : ''} · {schema.length} column{schema.length !== 1 ? 's' : ''}
+          {data.length} {tSpreadsheets('rows')} · {schema.length} {tSpreadsheets('columns')}
         </div>
       </div>
     </div>

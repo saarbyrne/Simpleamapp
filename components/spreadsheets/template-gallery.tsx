@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { SpreadsheetTemplate, TEMPLATE_CATEGORIES } from '@/lib/types/spreadsheet'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 interface TemplateGalleryProps {
   templates: SpreadsheetTemplate[]
@@ -49,6 +50,8 @@ export function TemplateGallery({
   onSelectTemplate,
   onCreateBlank,
 }: TemplateGalleryProps) {
+  const t = useTranslations('spreadsheets.templates')
+  const tSpreadsheets = useTranslations('spreadsheets')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   // Group templates by category
@@ -69,9 +72,9 @@ export function TemplateGallery({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Choose a Template</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t('chooseTemplate')}</h2>
         <p className="text-muted-foreground">
-          Start with a pre-built template or create a blank spreadsheet
+          {t('chooseTemplateDescription')}
         </p>
       </div>
 
@@ -83,10 +86,10 @@ export function TemplateGallery({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileSpreadsheet className="h-5 w-5" />
-            Blank Spreadsheet
+            {t('blankSpreadsheet')}
           </CardTitle>
           <CardDescription>
-            Start from scratch and define your own columns and structure
+            {t('blankSpreadsheetDescription')}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -94,13 +97,13 @@ export function TemplateGallery({
       {/* Category Tabs */}
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
         <TabsList className="w-full justify-start flex-wrap h-auto">
-          <TabsTrigger value="all">All Templates</TabsTrigger>
+          <TabsTrigger value="all">{t('allTemplates')}</TabsTrigger>
           {categories.map(category => {
             const Icon = categoryIcons[category] || FileSpreadsheet
             return (
               <TabsTrigger key={category} value={category} className="gap-2">
                 <Icon className="h-4 w-4" />
-                {TEMPLATE_CATEGORIES[category as keyof typeof TEMPLATE_CATEGORIES] || category}
+                {t(`categories.${category}`) || TEMPLATE_CATEGORIES[category as keyof typeof TEMPLATE_CATEGORIES] || category}
               </TabsTrigger>
             )
           })}
@@ -123,7 +126,7 @@ export function TemplateGallery({
                       <div className="flex items-start justify-between">
                         <Icon className="h-8 w-8 text-muted-foreground" />
                         <Badge className={cn('text-xs', colorClass)} variant="secondary">
-                          {TEMPLATE_CATEGORIES[template.category as keyof typeof TEMPLATE_CATEGORIES] || template.category}
+                          {t(`categories.${template.category}`) || TEMPLATE_CATEGORIES[template.category as keyof typeof TEMPLATE_CATEGORIES] || template.category}
                         </Badge>
                       </div>
                       <CardTitle className="text-lg">{template.name}</CardTitle>
@@ -134,11 +137,11 @@ export function TemplateGallery({
                     <CardContent>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">
-                          {template.schema?.length || 0} columns
+                          {template.schema?.length || 0} {tSpreadsheets('columns')}
                         </span>
                         {template.isPublic && (
                           <Badge variant="outline" className="text-xs">
-                            Public
+                            {t('public')}
                           </Badge>
                         )}
                       </div>
@@ -151,11 +154,11 @@ export function TemplateGallery({
             {filteredTemplates.length === 0 && (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <FileSpreadsheet className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-semibold text-lg mb-2">No templates found</h3>
+                <h3 className="font-semibold text-lg mb-2">{t('noTemplatesFound')}</h3>
                 <p className="text-muted-foreground mb-4">
-                  No templates available in this category
+                  {t('noTemplatesInCategory')}
                 </p>
-                <Button onClick={onCreateBlank}>Create Blank Spreadsheet</Button>
+                <Button onClick={onCreateBlank}>{t('createBlankSpreadsheet')}</Button>
               </div>
             )}
           </ScrollArea>

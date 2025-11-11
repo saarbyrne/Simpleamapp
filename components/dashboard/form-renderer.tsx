@@ -45,6 +45,8 @@ export function FormRenderer({
   isLoading = false,
   submitLabel = 'Submit',
 }: FormRendererProps) {
+  const t = useTranslations()
+  const defaultSubmitLabel = submitLabel || t('common.submit')
   // Build Zod schema from fields
   const schema = useMemo(() => {
     const shape: Record<string, z.ZodTypeAny> = {}
@@ -281,7 +283,7 @@ export function FormRenderer({
         ))}
         
         <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading ? 'Submitting...' : submitLabel}
+          {isLoading ? t('common.submitting') : defaultSubmitLabel}
         </Button>
       </form>
     </Form>

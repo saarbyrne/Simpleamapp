@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import { AlertCircle, RefreshCw, Home } from "lucide-react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import * as Sentry from '@sentry/nextjs'
@@ -14,6 +15,8 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const t = useTranslations()
+  
   useEffect(() => {
     // Log the error to Sentry error tracking
     console.error('Application error:', error)
@@ -26,10 +29,10 @@ export default function Error({
         <CardHeader>
           <div className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-destructive" aria-label="Error" />
-            <CardTitle>Something went wrong</CardTitle>
+            <CardTitle>{t('common.anUnexpectedError')}</CardTitle>
           </div>
           <CardDescription>
-            We encountered an unexpected error. Please try again.
+            {t('errors.serverError')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -43,12 +46,12 @@ export default function Error({
           <div className="flex flex-col gap-2">
             <Button onClick={reset} className="w-full">
               <RefreshCw className="me-2 h-4 w-4" aria-hidden="true" />
-              Try Again
+              {t('common.refresh')}
             </Button>
             <Button variant="outline" asChild className="w-full">
               <Link href="/dashboard">
                 <Home className="me-2 h-4 w-4" aria-hidden="true" />
-                Go to Dashboard
+                {t('breadcrumb.dashboard')}
               </Link>
             </Button>
           </div>

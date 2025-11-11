@@ -21,8 +21,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { useTranslations } from 'next-intl'
 
 export function CalendarClient() {
+  const t = useTranslations()
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [selectedEvent, setSelectedEvent] = useState<EventWithDetails | null>(null)
   const [isLoadingDetails, setIsLoadingDetails] = useState(false)
@@ -154,10 +156,10 @@ export function CalendarClient() {
       
       setEvents(filteredEvents)
     } catch (error) {
-      toast.error('Failed to load events')
+      toast.error(t('calendar.failedToLoadEvents'))
       console.error(error)
     }
-  }, [currentDate, currentView, getDisplayDateRange, getFetchDateRange])
+  }, [currentDate, currentView, getDisplayDateRange, getFetchDateRange, t])
 
   const handleCalendarNavigate = useCallback((date: Date) => {
     setCurrentDate(date)
@@ -285,7 +287,7 @@ export function CalendarClient() {
         if ('error' in result) {
           toast.error(result.error)
         } else {
-          toast.success('All event instances deleted successfully')
+          toast.success(t('calendar.allEventInstancesDeleted'))
           setShowQuickView(false)
           setSelectedEvent(null)
           loadedRangesRef.current.clear()
@@ -293,11 +295,11 @@ export function CalendarClient() {
           loadEvents(currentDate, currentView, true)
         }
       } catch (error) {
-        toast.error('Failed to delete event series')
+        toast.error(t('calendar.failedToDeleteEventSeries'))
         console.error(error)
       }
     }
-  }, [selectedEvent, recurringAction, currentDate, currentView, loadEvents])
+  }, [selectedEvent, recurringAction, currentDate, currentView, loadEvents, t])
 
   const confirmDelete = useCallback(async () => {
     if (!eventToDelete) return
@@ -307,7 +309,7 @@ export function CalendarClient() {
       if ('error' in result) {
         toast.error(result.error)
       } else {
-        toast.success('Event deleted successfully')
+        toast.success(t('calendar.eventDeleted'))
         setShowQuickView(false)
         setShowDeleteDialog(false)
         setEventToDelete(null)
@@ -317,19 +319,19 @@ export function CalendarClient() {
         loadEvents(currentDate, currentView, true)
       }
     } catch (error) {
-      toast.error('Failed to delete event')
+      toast.error(t('calendar.failedToDeleteEvent'))
       console.error(error)
     }
-  }, [eventToDelete, currentDate, currentView, loadEvents])
+  }, [eventToDelete, currentDate, currentView, loadEvents, t])
 
   return (
     <div className="flex h-full flex-col gap-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Calendar</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('calendar.title')}</h2>
           <p className="text-muted-foreground">
-            Manage your events, matches, and training sessions
+            {t('calendar.description')}
           </p>
         </div>
         <Button onClick={() => {
@@ -337,7 +339,7 @@ export function CalendarClient() {
           setShowEventForm(true)
         }}>
           <Plus className="me-2 h-4 w-4" />
-          New Event
+          {t('calendar.newEvent')}
         </Button>
       </div>
 
@@ -380,9 +382,9 @@ export function CalendarClient() {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Event</AlertDialogTitle>
+            <AlertDialogTitle>{t('calendar.deleteEvent')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this event? This action cannot be undone.
+              {t('calendar.deleteEventConfirmation')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -390,10 +392,10 @@ export function CalendarClient() {
               setShowDeleteDialog(false)
               setEventToDelete(null)
             }}>
-              Cancel
+              {t('common.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete}>
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -404,10 +406,10 @@ export function CalendarClient() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {recurringAction === 'edit' ? 'Edit Recurring Event' : 'Delete Recurring Event'}
+              {recurringAction === 'edit' ? t('calendar.editRecurringEvent') : t('calendar.deleteRecurringEvent')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This is a recurring event. What would you like to {recurringAction}?
+              {t('calendar.recurringEventActionPrompt', { action: recurringAction === 'edit' ? t('common.edit').toLowerCase() : t('common.delete').toLowerCase() })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="sm:flex-col sm:space-x-0 sm:space-y-2">
@@ -415,13 +417,13 @@ export function CalendarClient() {
               setShowRecurringActionDialog(false)
               setRecurringAction(null)
             }}>
-              Cancel
+              {t('common.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleRecurringThisOnly} className="bg-secondary text-secondary-foreground hover:bg-secondary/80">
-              This event only
+              {t('calendar.thisEventOnly')}
             </AlertDialogAction>
             <AlertDialogAction onClick={handleRecurringAllInstances}>
-              All events in series
+              {t('calendar.allEventsInSeries')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

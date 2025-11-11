@@ -24,6 +24,7 @@ import { Check, X, Clock, UserX, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { updateAttendance } from '@/app/actions/events'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 interface Attendee {
   id: string
@@ -49,42 +50,45 @@ interface AttendanceManagerProps {
   onUpdate?: () => void
 }
 
-const statusConfig = {
+const getStatusConfig = (t: (key: string) => string) => ({
   invited: {
-    label: 'Invited',
+    labelKey: 'calendar.attendance.invited',
     color: 'bg-muted',
     icon: Clock,
     textColor: 'text-foreground'
   },
   attending: {
-    label: 'Attending',
+    labelKey: 'calendar.attendance.attending',
     color: 'bg-chart-2/20 border border-chart-2',
     icon: Check,
     textColor: 'text-foreground'
   },
   absent: {
-    label: 'Absent',
+    labelKey: 'calendar.attendance.absent',
     color: 'bg-destructive/20 border border-destructive',
     icon: X,
     textColor: 'text-foreground'
   },
   excused: {
-    label: 'Excused',
+    labelKey: 'calendar.attendance.excused',
     color: 'bg-chart-3/20 border border-chart-3',
     icon: UserX,
     textColor: 'text-foreground'
   }
-}
+})
 
 export function AttendanceManager({
   eventId,
   attendees,
   onUpdate
 }: AttendanceManagerProps) {
+  const t = useTranslations()
   const [editingAttendee, setEditingAttendee] = useState<Attendee | null>(null)
   const [newStatus, setNewStatus] = useState<string>('')
   const [notes, setNotes] = useState<string>('')
   const [isUpdating, setIsUpdating] = useState(false)
+  
+  const statusConfig = getStatusConfig(t)
 
   const handleEditClick = (attendee: Attendee) => {
     setEditingAttendee(attendee)
@@ -107,12 +111,12 @@ export function AttendanceManager({
       if ('error' in result) {
         toast.error(result.error)
       } else {
-        toast.success('Attendance updated')
+        toast.success(t('calendar.attendance.updated'))
         setEditingAttendee(null)
         onUpdate?.()
       }
     } catch (error) {
-      toast.error('Failed to update attendance')
+      toast.error(t('calendar.attendance.failedToUpdate'))
       console.error(error)
     } finally {
       setIsUpdating(false)
@@ -131,9 +135,9 @@ export function AttendanceManager({
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
         <Clock className="mb-3 h-10 w-10 text-muted-foreground" />
-        <p className="text-sm font-medium">No Attendees</p>
+        <p className="text-sm font-medium">{t('calendar.attendance.noAttendees')}</p>
         <p className="text-xs text-muted-foreground">
-          Add attendees when creating or editing the event
+          {t('calendar.attendance.addAttendeesHint')}
         </p>
       </div>
     )
@@ -145,25 +149,25 @@ export function AttendanceManager({
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-lg border bg-card p-3">
           <div className="text-2xl font-bold">{summary.total}</div>
-          <div className="text-xs text-muted-foreground">Total</div>
+          <div className="text-xs text-muted-foreground">{t('calendar.attendance.total')}</div>
         </div>
         <div className="rounded-lg border border-chart-2 bg-chart-2/20 p-3">
           <div className="text-2xl font-bold text-foreground">
             {summary.attending}
           </div>
-          <div className="text-xs text-foreground/70">Attending</div>
+          <div className="text-xs text-foreground/70">{t('calendar.attendance.attending')}</div>
         </div>
         <div className="rounded-lg border border-destructive bg-destructive/20 p-3">
           <div className="text-2xl font-bold text-foreground">
             {summary.absent}
           </div>
-          <div className="text-xs text-foreground/70">Absent</div>
+          <div className="text-xs text-foreground/70">{t('calendar.attendance.absent')}</div>
         </div>
         <div className="rounded-lg border bg-muted p-3">
           <div className="text-2xl font-bold text-foreground">
             {summary.invited}
           </div>
-          <div className="text-xs text-foreground/70">Pending</div>
+          <div className="text-xs text-foreground/70">{t('calendar.attendance.pending')}</div>
         </div>
       </div>
 
@@ -206,7 +210,7 @@ export function AttendanceManager({
                 <div className="flex items-center gap-1.5">
                   <StatusIcon className={cn('h-4 w-4', config.textColor)} />
                   <span className={cn('text-sm font-medium', config.textColor)}>
-                    {config.label}
+                    {t(config.labelKey)}
                   </span>
                 </div>
                 <Button
@@ -214,7 +218,7 @@ export function AttendanceManager({
                   size="sm"
                   onClick={() => handleEditClick(attendee)}
                 >
-                  Edit
+                  {t('common.edit')}
                 </Button>
               </div>
             </div>
@@ -226,12 +230,13 @@ export function AttendanceManager({
       <Dialog open={!!editingAttendee} onOpenChange={(open) => !open && setEditingAttendee(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Attendance</DialogTitle>
+            <DialogTitle>{t('calendar.attendance.updateAttendance')}</DialogTitle>
             <DialogDescription>
               {editingAttendee && (
                 <>
-                  Update status for {editingAttendee.personOrg.person.firstName}{' '}
-                  {editingAttendee.personOrg.person.lastName}
+                  {t('calendar.attendance.updateStatusFor', {
+                    name: `${editingAttendee.personOrg.person.firstName} ${editingAttendee.personOrg.person.lastName}`
+                  })}
                 </>
               )}
             </DialogDescription>
@@ -239,26 +244,26 @@ export function AttendanceManager({
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Status</label>
+              <label className="text-sm font-medium">{t('calendar.attendance.status')}</label>
               <Select value={newStatus} onValueChange={setNewStatus}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="invited">Invited</SelectItem>
-                  <SelectItem value="attending">Attending</SelectItem>
-                  <SelectItem value="absent">Absent</SelectItem>
-                  <SelectItem value="excused">Excused</SelectItem>
+                  <SelectItem value="invited">{t('calendar.attendance.invited')}</SelectItem>
+                  <SelectItem value="attending">{t('calendar.attendance.attending')}</SelectItem>
+                  <SelectItem value="absent">{t('calendar.attendance.absent')}</SelectItem>
+                  <SelectItem value="excused">{t('calendar.attendance.excused')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Notes (optional)</label>
+              <label className="text-sm font-medium">{t('calendar.attendance.notesOptional')}</label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add any notes about this attendance..."
+                placeholder={t('calendar.attendance.notesPlaceholder')}
                 rows={3}
               />
             </div>
@@ -270,11 +275,11 @@ export function AttendanceManager({
               onClick={() => setEditingAttendee(null)}
               disabled={isUpdating}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleSave} disabled={isUpdating}>
               {isUpdating && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-              Save
+              {t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>

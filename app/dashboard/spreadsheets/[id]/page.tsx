@@ -48,11 +48,13 @@ import { Person } from '@/components/spreadsheets/cells/person-cell'
 import { exportToCSV, downloadCSV } from '@/lib/utils/spreadsheet-csv'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 export default function SpreadsheetDetailPage() {
   const router = useRouter()
   const params = useParams()
   const spreadsheetId = params?.id as string
+  const t = useTranslations('spreadsheets')
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -92,12 +94,12 @@ export default function SpreadsheetDetailPage() {
         setCurrentVersion(sheet.version)
         setIsSaved(true)
       } else {
-        toast.error(result.error || 'Failed to load spreadsheet')
+        toast.error(result.error || t('failedToLoadSpreadsheet'))
         router.push('/dashboard/spreadsheets')
       }
     } catch (error) {
       console.error('Error loading spreadsheet:', error)
-      toast.error('Failed to load spreadsheet')
+      toast.error(t('failedToLoadSpreadsheet'))
       router.push('/dashboard/spreadsheets')
     } finally {
       setIsLoading(false)
@@ -117,19 +119,19 @@ export default function SpreadsheetDetailPage() {
         description,
         schema,
         data,
-        changeNote: 'Manual save',
+        changeNote: t('manualSave'),
       })
 
       if (result.success) {
-        toast.success('Spreadsheet saved')
+        toast.success(t('spreadsheetSaved'))
         setIsSaved(true)
         setCurrentVersion(result.spreadsheet?.version || currentVersion + 1)
       } else {
-        toast.error(result.error || 'Failed to save spreadsheet')
+        toast.error(result.error || t('failedToSaveSpreadsheet'))
       }
     } catch (error) {
       console.error('Error saving spreadsheet:', error)
-      toast.error('Failed to save spreadsheet')
+      toast.error(t('failedToSaveSpreadsheet'))
     } finally {
       setIsSaving(false)
     }
@@ -144,12 +146,12 @@ export default function SpreadsheetDetailPage() {
       })
 
       downloadCSV(name || 'spreadsheet', csv)
-      toast.success('CSV exported')
+      toast.success(t('csvExported'))
     } catch (error) {
       console.error('Error exporting CSV:', error)
-      toast.error('Failed to export CSV')
+      toast.error(t('failedToExportCSV'))
     }
-  }, [schema, data, name])
+  }, [schema, data, name, t])
 
   const handleImport = useCallback(
     (importedData: SpreadsheetRow[], importedSchema?: ColumnDefinition[]) => {
@@ -158,9 +160,9 @@ export default function SpreadsheetDetailPage() {
       }
       setData(importedData)
       setIsSaved(false)
-      toast.success(`Imported ${importedData.length} rows`)
+      toast.success(t('importedRows', { count: importedData.length }))
     },
-    []
+    [t]
   )
 
   const handleAIAssist = useCallback(
@@ -192,14 +194,14 @@ export default function SpreadsheetDetailPage() {
       })
 
       if (result.success) {
-        toast.success('Spreadsheet info updated')
+        toast.success(t('spreadsheetInfoUpdated'))
         setIsEditingInfo(false)
       } else {
-        toast.error(result.error || 'Failed to update info')
+        toast.error(result.error || t('failedToUpdateInfo'))
       }
     } catch (error) {
       console.error('Error updating info:', error)
-      toast.error('Failed to update info')
+      toast.error(t('failedToUpdateInfo'))
     }
   }
 
@@ -208,7 +210,7 @@ export default function SpreadsheetDetailPage() {
       <div className="flex items-center justify-center h-[600px]">
         <div className="text-center">
           <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-pulse" />
-          <p className="text-muted-foreground">Loading spreadsheet...</p>
+          <p className="text-muted-foreground">{t('loadingSpreadsheet')}</p>
         </div>
       </div>
     )
@@ -221,7 +223,7 @@ export default function SpreadsheetDetailPage() {
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => router.back()}>
             <ArrowLeft className="h-4 w-4 me-2" />
-            Back
+            {t('back')}
           </Button>
 
           <Separator orientation="vertical" className="h-6" />
@@ -232,10 +234,10 @@ export default function SpreadsheetDetailPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="text-lg font-semibold"
-                placeholder="Spreadsheet name"
+                placeholder={t('spreadsheetName')}
               />
               <Button size="sm" onClick={handleUpdateInfo}>
-                Save
+                {t('save')}
               </Button>
               <Button
                 size="sm"
@@ -245,7 +247,7 @@ export default function SpreadsheetDetailPage() {
                   loadSpreadsheet()
                 }}
               >
-                Cancel
+                {t('cancel')}
               </Button>
             </div>
           ) : (
@@ -262,7 +264,7 @@ export default function SpreadsheetDetailPage() {
           )}
 
           <Badge variant="outline" className="text-xs">
-            v{currentVersion}
+            {t('version')} {currentVersion}
           </Badge>
         </div>
 
@@ -271,14 +273,14 @@ export default function SpreadsheetDetailPage() {
             <SheetTrigger asChild>
               <Button variant="outline" size="sm">
                 <History className="h-4 w-4 me-2" />
-                History
+                {t('history')}
               </Button>
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle>Version History</SheetTitle>
+                <SheetTitle>{t('versionHistory')}</SheetTitle>
                 <SheetDescription>
-                  View and restore previous versions of this spreadsheet
+                  {t('versionHistoryDescription')}
                 </SheetDescription>
               </SheetHeader>
               <div className="mt-6 space-y-4">
@@ -286,9 +288,9 @@ export default function SpreadsheetDetailPage() {
                   <Card key={version.id} className="p-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="font-semibold">Version {version.version}</div>
+                        <div className="font-semibold">{t('version')} {version.version}</div>
                         <div className="text-sm text-muted-foreground">
-                          {version.changeNote || 'No description'}
+                          {version.changeNote || t('noDescription')}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
                           <Clock className="h-3 w-3 inline me-1" />
@@ -297,7 +299,7 @@ export default function SpreadsheetDetailPage() {
                       </div>
                       {version.version !== currentVersion && (
                         <Button size="sm" variant="outline">
-                          Restore
+                          {t('restore')}
                         </Button>
                       )}
                     </div>
@@ -306,7 +308,7 @@ export default function SpreadsheetDetailPage() {
 
                 {versions.length === 0 && (
                   <p className="text-center text-muted-foreground py-8">
-                    No version history available
+                    {t('noVersionHistory')}
                   </p>
                 )}
               </div>
