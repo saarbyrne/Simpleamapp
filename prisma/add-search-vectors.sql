@@ -7,53 +7,53 @@
 -- ============================================
 
 -- Person (Players/Staff)
-ALTER TABLE "Person" ADD COLUMN IF NOT EXISTS search_vector tsvector;
+ALTER TABLE persons ADD COLUMN IF NOT EXISTS search_vector tsvector;
 
 -- Note
-ALTER TABLE "Note" ADD COLUMN IF NOT EXISTS search_vector tsvector;
+ALTER TABLE notes ADD COLUMN IF NOT EXISTS search_vector tsvector;
 
 -- Event
-ALTER TABLE "Event" ADD COLUMN IF NOT EXISTS search_vector tsvector;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS search_vector tsvector;
 
 -- Form
-ALTER TABLE "Form" ADD COLUMN IF NOT EXISTS search_vector tsvector;
+ALTER TABLE forms ADD COLUMN IF NOT EXISTS search_vector tsvector;
 
 -- FormTemplate
-ALTER TABLE "FormTemplate" ADD COLUMN IF NOT EXISTS search_vector tsvector;
+ALTER TABLE form_templates ADD COLUMN IF NOT EXISTS search_vector tsvector;
 
 -- File
-ALTER TABLE "File" ADD COLUMN IF NOT EXISTS search_vector tsvector;
+ALTER TABLE files ADD COLUMN IF NOT EXISTS search_vector tsvector;
 
 -- Spreadsheet
-ALTER TABLE "Spreadsheet" ADD COLUMN IF NOT EXISTS search_vector tsvector;
+ALTER TABLE spreadsheets ADD COLUMN IF NOT EXISTS search_vector tsvector;
 
 -- SpreadsheetTemplate
-ALTER TABLE "SpreadsheetTemplate" ADD COLUMN IF NOT EXISTS search_vector tsvector;
+ALTER TABLE spreadsheet_templates ADD COLUMN IF NOT EXISTS search_vector tsvector;
 
 -- EventTemplate
-ALTER TABLE "EventTemplate" ADD COLUMN IF NOT EXISTS search_vector tsvector;
+ALTER TABLE event_templates ADD COLUMN IF NOT EXISTS search_vector tsvector;
 
 -- CanvasBoard
-ALTER TABLE "CanvasBoard" ADD COLUMN IF NOT EXISTS search_vector tsvector;
+ALTER TABLE canvas_boards ADD COLUMN IF NOT EXISTS search_vector tsvector;
 
 -- Plan
-ALTER TABLE "Plan" ADD COLUMN IF NOT EXISTS search_vector tsvector;
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS search_vector tsvector;
 
 -- ============================================
 -- 2. Create GIN indexes for fast search
 -- ============================================
 
-CREATE INDEX IF NOT EXISTS person_search_idx ON "Person" USING GIN(search_vector);
-CREATE INDEX IF NOT EXISTS note_search_idx ON "Note" USING GIN(search_vector);
-CREATE INDEX IF NOT EXISTS event_search_idx ON "Event" USING GIN(search_vector);
-CREATE INDEX IF NOT EXISTS form_search_idx ON "Form" USING GIN(search_vector);
-CREATE INDEX IF NOT EXISTS form_template_search_idx ON "FormTemplate" USING GIN(search_vector);
-CREATE INDEX IF NOT EXISTS file_search_idx ON "File" USING GIN(search_vector);
-CREATE INDEX IF NOT EXISTS spreadsheet_search_idx ON "Spreadsheet" USING GIN(search_vector);
-CREATE INDEX IF NOT EXISTS spreadsheet_template_search_idx ON "SpreadsheetTemplate" USING GIN(search_vector);
-CREATE INDEX IF NOT EXISTS event_template_search_idx ON "EventTemplate" USING GIN(search_vector);
-CREATE INDEX IF NOT EXISTS canvas_board_search_idx ON "CanvasBoard" USING GIN(search_vector);
-CREATE INDEX IF NOT EXISTS plan_search_idx ON "Plan" USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS person_search_idx ON persons USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS note_search_idx ON notes USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS event_search_idx ON events USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS form_search_idx ON forms USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS form_template_search_idx ON form_templates USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS file_search_idx ON files USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS spreadsheet_search_idx ON spreadsheets USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS spreadsheet_template_search_idx ON spreadsheet_templates USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS event_template_search_idx ON event_templates USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS canvas_board_search_idx ON canvas_boards USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS plan_search_idx ON plans USING GIN(search_vector);
 
 -- ============================================
 -- 3. Functions to update search vectors
@@ -195,79 +195,79 @@ $$ LANGUAGE plpgsql;
 -- ============================================
 
 -- Person triggers
-DROP TRIGGER IF EXISTS person_search_vector_update ON "Person";
+DROP TRIGGER IF EXISTS person_search_vector_update ON persons;
 CREATE TRIGGER person_search_vector_update
-  BEFORE INSERT OR UPDATE ON "Person"
+  BEFORE INSERT OR UPDATE ON persons
   FOR EACH ROW
   EXECUTE FUNCTION update_person_search_vector();
 
 -- Note triggers
-DROP TRIGGER IF EXISTS note_search_vector_update ON "Note";
+DROP TRIGGER IF EXISTS note_search_vector_update ON notes;
 CREATE TRIGGER note_search_vector_update
-  BEFORE INSERT OR UPDATE ON "Note"
+  BEFORE INSERT OR UPDATE ON notes
   FOR EACH ROW
   EXECUTE FUNCTION update_note_search_vector();
 
 -- Event triggers
-DROP TRIGGER IF EXISTS event_search_vector_update ON "Event";
+DROP TRIGGER IF EXISTS event_search_vector_update ON events;
 CREATE TRIGGER event_search_vector_update
-  BEFORE INSERT OR UPDATE ON "Event"
+  BEFORE INSERT OR UPDATE ON events
   FOR EACH ROW
   EXECUTE FUNCTION update_event_search_vector();
 
 -- Form triggers
-DROP TRIGGER IF EXISTS form_search_vector_update ON "Form";
+DROP TRIGGER IF EXISTS form_search_vector_update ON forms;
 CREATE TRIGGER form_search_vector_update
-  BEFORE INSERT OR UPDATE ON "Form"
+  BEFORE INSERT OR UPDATE ON forms
   FOR EACH ROW
   EXECUTE FUNCTION update_form_search_vector();
 
 -- FormTemplate triggers
-DROP TRIGGER IF EXISTS form_template_search_vector_update ON "FormTemplate";
+DROP TRIGGER IF EXISTS form_template_search_vector_update ON form_templates;
 CREATE TRIGGER form_template_search_vector_update
-  BEFORE INSERT OR UPDATE ON "FormTemplate"
+  BEFORE INSERT OR UPDATE ON form_templates
   FOR EACH ROW
   EXECUTE FUNCTION update_form_template_search_vector();
 
 -- File triggers
-DROP TRIGGER IF EXISTS file_search_vector_update ON "File";
+DROP TRIGGER IF EXISTS file_search_vector_update ON files;
 CREATE TRIGGER file_search_vector_update
-  BEFORE INSERT OR UPDATE ON "File"
+  BEFORE INSERT OR UPDATE ON files
   FOR EACH ROW
   EXECUTE FUNCTION update_file_search_vector();
 
 -- Spreadsheet triggers
-DROP TRIGGER IF EXISTS spreadsheet_search_vector_update ON "Spreadsheet";
+DROP TRIGGER IF EXISTS spreadsheet_search_vector_update ON spreadsheets;
 CREATE TRIGGER spreadsheet_search_vector_update
-  BEFORE INSERT OR UPDATE ON "Spreadsheet"
+  BEFORE INSERT OR UPDATE ON spreadsheets
   FOR EACH ROW
   EXECUTE FUNCTION update_spreadsheet_search_vector();
 
 -- SpreadsheetTemplate triggers
-DROP TRIGGER IF EXISTS spreadsheet_template_search_vector_update ON "SpreadsheetTemplate";
+DROP TRIGGER IF EXISTS spreadsheet_template_search_vector_update ON spreadsheet_templates;
 CREATE TRIGGER spreadsheet_template_search_vector_update
-  BEFORE INSERT OR UPDATE ON "SpreadsheetTemplate"
+  BEFORE INSERT OR UPDATE ON spreadsheet_templates
   FOR EACH ROW
   EXECUTE FUNCTION update_spreadsheet_template_search_vector();
 
 -- EventTemplate triggers
-DROP TRIGGER IF EXISTS event_template_search_vector_update ON "EventTemplate";
+DROP TRIGGER IF EXISTS event_template_search_vector_update ON event_templates;
 CREATE TRIGGER event_template_search_vector_update
-  BEFORE INSERT OR UPDATE ON "EventTemplate"
+  BEFORE INSERT OR UPDATE ON event_templates
   FOR EACH ROW
   EXECUTE FUNCTION update_event_template_search_vector();
 
 -- CanvasBoard triggers
-DROP TRIGGER IF EXISTS canvas_board_search_vector_update ON "CanvasBoard";
+DROP TRIGGER IF EXISTS canvas_board_search_vector_update ON canvas_boards;
 CREATE TRIGGER canvas_board_search_vector_update
-  BEFORE INSERT OR UPDATE ON "CanvasBoard"
+  BEFORE INSERT OR UPDATE ON canvas_boards
   FOR EACH ROW
   EXECUTE FUNCTION update_canvas_board_search_vector();
 
 -- Plan triggers
-DROP TRIGGER IF EXISTS plan_search_vector_update ON "Plan";
+DROP TRIGGER IF EXISTS plan_search_vector_update ON plans;
 CREATE TRIGGER plan_search_vector_update
-  BEFORE INSERT OR UPDATE ON "Plan"
+  BEFORE INSERT OR UPDATE ON plans
   FOR EACH ROW
   EXECUTE FUNCTION update_plan_search_vector();
 
@@ -276,17 +276,17 @@ CREATE TRIGGER plan_search_vector_update
 -- ============================================
 
 -- Update existing rows to populate search vectors
-UPDATE "Person" SET "updatedAt" = "updatedAt";
-UPDATE "Note" SET "updatedAt" = "updatedAt";
-UPDATE "Event" SET "updatedAt" = "updatedAt";
-UPDATE "Form" SET "updatedAt" = "updatedAt";
-UPDATE "FormTemplate" SET "updatedAt" = "updatedAt";
-UPDATE "File" SET "updatedAt" = "updatedAt";
-UPDATE "Spreadsheet" SET "updatedAt" = "updatedAt";
-UPDATE "SpreadsheetTemplate" SET "updatedAt" = "updatedAt";
-UPDATE "EventTemplate" SET "updatedAt" = "updatedAt";
-UPDATE "CanvasBoard" SET "updatedAt" = "updatedAt";
-UPDATE "Plan" SET "updatedAt" = "updatedAt";
+UPDATE persons SET "updatedAt" = "updatedAt";
+UPDATE notes SET "updatedAt" = "updatedAt";
+UPDATE events SET "updatedAt" = "updatedAt";
+UPDATE forms SET "updatedAt" = "updatedAt";
+UPDATE form_templates SET "updatedAt" = "updatedAt";
+UPDATE files SET "updatedAt" = "updatedAt";
+UPDATE spreadsheets SET "updatedAt" = "updatedAt";
+UPDATE spreadsheet_templates SET "updatedAt" = "updatedAt";
+UPDATE event_templates SET "updatedAt" = "updatedAt";
+UPDATE canvas_boards SET "updatedAt" = "updatedAt";
+UPDATE plans SET "updatedAt" = "updatedAt";
 
 -- ============================================
 -- Migration Complete

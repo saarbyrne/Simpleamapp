@@ -199,8 +199,8 @@ async function searchPlayers(
       po.status,
       po.tags,
       ts_rank(p.search_vector, to_tsquery('english', ${searchQuery})) as rank
-    FROM "Person" p
-    INNER JOIN "PersonOrganization" po ON p.id = po."personId"
+    FROM persons p
+    INNER JOIN person_organizations po ON p.id = po."personId"
     WHERE po."organizationId" = ${organizationId}
       AND po.role = 'player'
       AND p.search_vector @@ to_tsquery('english', ${searchQuery})
@@ -272,8 +272,8 @@ async function searchNotes(
       n."updatedAt",
       u.name as "authorName",
       ts_rank(n.search_vector, to_tsquery('english', ${searchQuery})) as rank
-    FROM "Note" n
-    INNER JOIN "User" u ON n."authorId" = u.id
+    FROM notes n
+    INNER JOIN users u ON n."authorId" = u.id
     WHERE n."organizationId" = ${organizationId}
       AND n.search_vector @@ to_tsquery('english', ${searchQuery})
       AND ${Prisma.raw(privacyFilter)}
@@ -345,7 +345,7 @@ async function searchEvents(
       e."createdAt",
       e."updatedAt",
       ts_rank(e.search_vector, to_tsquery('english', ${searchQuery})) as rank
-    FROM "Event" e
+    FROM events e
     WHERE e."organizationId" = ${organizationId}
       AND e.search_vector @@ to_tsquery('english', ${searchQuery})
       ${Prisma.raw(dateFilter)}
@@ -391,8 +391,8 @@ async function searchForms(
       f."updatedAt",
       COUNT(fr.id)::int as "responseCount",
       ts_rank(f.search_vector, to_tsquery('english', ${searchQuery})) as rank
-    FROM "Form" f
-    LEFT JOIN "FormResponse" fr ON f.id = fr."formId"
+    FROM forms f
+    LEFT JOIN form_responses fr ON f.id = fr."formId"
     WHERE f."organizationId" = ${organizationId}
       AND f.search_vector @@ to_tsquery('english', ${searchQuery})
     GROUP BY f.id
@@ -435,7 +435,7 @@ async function searchFormTemplates(
       ft."createdAt",
       ft."updatedAt",
       ts_rank(ft.search_vector, to_tsquery('english', ${searchQuery})) as rank
-    FROM "FormTemplate" ft
+    FROM form_templates ft
     WHERE (ft."organizationId" = ${organizationId} OR ft."isPublic" = true)
       AND ft.search_vector @@ to_tsquery('english', ${searchQuery})
     ORDER BY rank DESC
@@ -476,8 +476,8 @@ async function searchFiles(
       f."updatedAt",
       u.name as "uploaderName",
       ts_rank(f.search_vector, to_tsquery('english', ${searchQuery})) as rank
-    FROM "File" f
-    INNER JOIN "User" u ON f."uploadedById" = u.id
+    FROM files f
+    INNER JOIN users u ON f."uploadedById" = u.id
     WHERE f."organizationId" = ${organizationId}
       AND f.search_vector @@ to_tsquery('english', ${searchQuery})
     ORDER BY rank DESC
@@ -517,7 +517,7 @@ async function searchSpreadsheets(
       s."createdAt",
       s."updatedAt",
       ts_rank(s.search_vector, to_tsquery('english', ${searchQuery})) as rank
-    FROM "Spreadsheet" s
+    FROM spreadsheets s
     WHERE s."organizationId" = ${organizationId}
       AND s.search_vector @@ to_tsquery('english', ${searchQuery})
     ORDER BY rank DESC
@@ -555,7 +555,7 @@ async function searchSpreadsheetTemplates(
       st."createdAt",
       st."updatedAt",
       ts_rank(st.search_vector, to_tsquery('english', ${searchQuery})) as rank
-    FROM "SpreadsheetTemplate" st
+    FROM spreadsheet_templates st
     WHERE st."organizationId" = ${organizationId}
       AND st.search_vector @@ to_tsquery('english', ${searchQuery})
     ORDER BY rank DESC
@@ -594,7 +594,7 @@ async function searchEventTemplates(
       et."createdAt",
       et."updatedAt",
       ts_rank(et.search_vector, to_tsquery('english', ${searchQuery})) as rank
-    FROM "EventTemplate" et
+    FROM event_templates et
     WHERE et."organizationId" = ${organizationId}
       AND et.search_vector @@ to_tsquery('english', ${searchQuery})
     ORDER BY rank DESC
@@ -631,7 +631,7 @@ async function searchCanvasBoards(
       c."createdAt",
       c."updatedAt",
       ts_rank(c.search_vector, to_tsquery('english', ${searchQuery})) as rank
-    FROM "CanvasBoard" c
+    FROM canvas_boards c
     WHERE c."organizationId" = ${organizationId}
       AND c.search_vector @@ to_tsquery('english', ${searchQuery})
     ORDER BY rank DESC
@@ -667,7 +667,7 @@ async function searchPlans(
       p."createdAt",
       p."updatedAt",
       ts_rank(p.search_vector, to_tsquery('english', ${searchQuery})) as rank
-    FROM "Plan" p
+    FROM plans p
     WHERE p."organizationId" = ${organizationId}
       AND p.search_vector @@ to_tsquery('english', ${searchQuery})
     ORDER BY rank DESC
