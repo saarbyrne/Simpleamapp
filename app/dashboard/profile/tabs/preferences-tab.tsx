@@ -78,6 +78,8 @@ const LANGUAGES = [
   { value: "de", label: "Deutsch" },
   { value: "pt", label: "Português" },
   { value: "it", label: "Italiano" },
+  { value: "ja", label: "日本語" },
+  { value: "ar", label: "العربية" },
 ];
 
 export function PreferencesTab({ user }: PreferencesTabProps) {
