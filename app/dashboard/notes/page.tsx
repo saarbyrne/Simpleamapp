@@ -1,10 +1,40 @@
-import { DashboardPlaceholder } from '@/components/dashboard/placeholder'
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import { PageCard } from '@/components/ui/page-card'
+import { NotesList } from '@/components/notes/notes-list'
+import { createClient } from '@/lib/supabase/client'
+import { StickyNote } from 'lucide-react'
 
 export default function NotesPage() {
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>()
+
+  useEffect(() => {
+    async function loadUser() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (user) {
+        // In a real app, you'd fetch the actual user ID from your database
+        // For now, we'll use the auth user ID as a placeholder
+        setCurrentUserId(user.id)
+      }
+    }
+
+    loadUser()
+  }, [])
+
   return (
-    <DashboardPlaceholder
+    <PageCard
       title="Notes"
-      description="Private notes, coach commentary, and annotations pop in here soon."
-    />
+      description="Create and manage notes with rich text formatting, privacy controls, and entity linking"
+      icon={<StickyNote className="h-6 w-6" />}
+    >
+      <NotesList
+        currentUserId={currentUserId}
+        showFilters={true}
+        showCreateButton={true}
+      />
+    </PageCard>
   )
 }

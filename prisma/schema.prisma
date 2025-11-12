@@ -287,6 +287,7 @@ model Event {
   updatedAt DateTime @updatedAt
 
   attendance EventAttendance[]
+  notes      Note[]
 
   @@map("events")
 }
@@ -317,8 +318,11 @@ model EventAttendance {
 model Note {
   id             String   @id @default(cuid())
   title          String?
-  content        Json // Tiptap JSON
-  privacyLevel   String   @default("public") // public, medical, coaching, private
+  content        Json // Tiptap JSON document format
+
+  // Privacy/Visibility
+  visibility     String   @default("public") // public, medical, mental_health, coaches, private
+
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
@@ -327,14 +331,22 @@ model Note {
 
   // Linked entities
   linkedPersonId String?
-  linkedPerson   Person? @relation(fields: [linkedPersonId], references: [id])
+  linkedPerson   Person? @relation(fields: [linkedPersonId], references: [id], onDelete: SetNull)
 
-  linkedEventId String?
+  linkedEventId  String?
+  linkedEvent    Event? @relation(fields: [linkedEventId], references: [id], onDelete: SetNull)
 
+  // Tags for organization
   tags      String[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([organizationId])
+  @@index([authorId])
+  @@index([linkedPersonId])
+  @@index([linkedEventId])
+  @@index([visibility])
   @@map("notes")
 }
 

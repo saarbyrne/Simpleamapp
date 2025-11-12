@@ -21,6 +21,8 @@ import {
 } from '@/components/ui/alert-dialog'
 import { AttendanceManager } from '@/components/calendar/attendance-manager'
 import { EventFormDialog } from '@/components/calendar/event-form-dialog'
+import { NotesList } from '@/components/notes/notes-list'
+import { createClient } from '@/lib/supabase/client'
 import {
   Calendar,
   Clock,
@@ -60,6 +62,7 @@ export default function EventDetailPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showRecurringActionDialog, setShowRecurringActionDialog] = useState(false)
   const [recurringAction, setRecurringAction] = useState<'edit' | 'delete' | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>()
 
   const loadEvent = useCallback(async () => {
     setIsLoading(true)
@@ -83,12 +86,23 @@ export default function EventDetailPage() {
 
   useEffect(() => {
     loadEvent()
-    
+
     // Cleanup: remove custom label when component unmounts or eventId changes
     return () => {
       setCustomLabel(eventId, null)
     }
   }, [eventId, setCustomLabel, loadEvent])
+
+  useEffect(() => {
+    async function loadCurrentUser() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setCurrentUserId(user.id)
+      }
+    }
+    loadCurrentUser()
+  }, [])
 
   const handleEdit = () => {
     if (event?.isRecurring) {
@@ -307,19 +321,12 @@ export default function EventDetailPage() {
             </TabsContent>
 
             <TabsContent value="notes" className="mt-0">
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-lg font-semibold">{t('calendar.tabs.eventNotes')}</h3>
-                <p className="mb-4 max-w-md text-sm text-muted-foreground">
-                  {t('calendar.tabs.notesDescription')}
-                </p>
-                <div className="rounded-lg border border-dashed border-muted-foreground/50 bg-muted/20 p-6">
-                  <p className="text-sm font-medium">{t('calendar.integrationReady')}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {t('calendar.completeNotesModule')}
-                  </p>
-                </div>
-              </div>
+              <NotesList
+                linkedEventId={eventId}
+                currentUserId={currentUserId}
+                showFilters={true}
+                showCreateButton={true}
+              />
             </TabsContent>
 
             <TabsContent value="drawings" className="mt-0">
