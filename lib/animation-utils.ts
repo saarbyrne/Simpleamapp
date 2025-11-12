@@ -347,18 +347,32 @@ export function waitForAnimation(duration: number): Promise<void> {
 export function mockReducedMotion(enabled: boolean): void {
   if (typeof window === 'undefined') return
 
+  // Type guard for jest
+  const jestAvailable = typeof (globalThis as any).jest !== 'undefined'
+  
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: jest.fn().mockImplementation((query: string) => ({
-      matches: query.includes('prefers-reduced-motion') ? enabled : false,
-      media: query,
-      onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    })),
+    value: jestAvailable
+      ? (globalThis as any).jest.fn().mockImplementation((query: string) => ({
+          matches: query.includes('prefers-reduced-motion') ? enabled : false,
+          media: query,
+          onchange: null,
+          addListener: (globalThis as any).jest.fn(),
+          removeListener: (globalThis as any).jest.fn(),
+          addEventListener: (globalThis as any).jest.fn(),
+          removeEventListener: (globalThis as any).jest.fn(),
+          dispatchEvent: (globalThis as any).jest.fn(),
+        }))
+      : (query: string) => ({
+          matches: query.includes('prefers-reduced-motion') ? enabled : false,
+          media: query,
+          onchange: null,
+          addListener: () => {},
+          removeListener: () => {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => true,
+        }),
   })
 }
 

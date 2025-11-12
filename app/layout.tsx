@@ -1,10 +1,13 @@
 import * as Sentry from '@sentry/nextjs'
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 
 import '@/app/globals.css'
 import { ThemeProvider } from 'next-themes'
 import { AnalyticsProviders } from '@/lib/analytics/providers'
+import { ErrorBoundary } from '@/components/error-boundary'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -26,24 +29,42 @@ export function generateMetadata(): Metadata {
   }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // Get locale and messages using next-intl's server functions
+  // These will use the request config which reads from user preferences
+  const locale = await getLocale()
+  const messages = await getMessages()
+  
+  // RTL languages
+  const rtlLocales = ['ar', 'he', 'fa', 'ur']
+  const isRTL = rtlLocales.includes(locale)
+
   return (
-    <html lang="en" suppressHydrationWarning className={plusJakartaSans.variable}>
+    <html 
+      lang={locale} 
+      dir={isRTL ? 'rtl' : 'ltr'}
+      suppressHydrationWarning 
+      className={plusJakartaSans.variable}
+    >
       <body className={plusJakartaSans.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange={false}
-        >
-          <AnalyticsProviders>
-            {children}
-          </AnalyticsProviders>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange={false}
+            >
+              <AnalyticsProviders>
+                {children}
+              </AnalyticsProviders>
+            </ThemeProvider>
+          </NextIntlClientProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )

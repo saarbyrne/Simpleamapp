@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -41,6 +42,7 @@ interface QuickActionsToolbarProps {
  * ```
  */
 export function QuickActionsToolbar({ actionHandlers, className }: QuickActionsToolbarProps) {
+  const t = useTranslations()
   const enabledActions = getEnabledQuickActions()
 
   // Don't render if no actions are enabled
@@ -58,11 +60,11 @@ export function QuickActionsToolbar({ actionHandlers, className }: QuickActionsT
             className="h-8"
             aria-label="Quick actions menu"
           >
-            Quick Actions
+            {t('dashboard.quickActions')}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('dashboard.quickActions')}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {enabledActions.map(action => {
             const Icon = action.icon
@@ -71,7 +73,7 @@ export function QuickActionsToolbar({ actionHandlers, className }: QuickActionsT
                 key={action.id}
                 onClick={actionHandlers[action.id]}
               >
-                <Icon className="mr-2 h-4 w-4" />
+                <Icon className="me-2 h-4 w-4" />
                 {action.label}
               </DropdownMenuItem>
             )

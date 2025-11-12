@@ -65,7 +65,7 @@ export function TableFilters({
               value={values[filter.key] || 'all'}
               onValueChange={(value) => onFilterChange(filter.key, value)}
             >
-              <SelectTrigger className={cn('h-10 shrink-0 [&>span]:text-left [&>span]:justify-start', width)}>
+              <SelectTrigger className={cn('h-10 shrink-0 [&>span]:text-start [&>span]:justify-start', width)}>
                 <SelectValue placeholder={filter.placeholder || filter.label} />
               </SelectTrigger>
               <SelectContent>

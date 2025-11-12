@@ -20,7 +20,7 @@ export interface BulkAction {
   disabled?: (selectedRows: any[]) => boolean
 }
 
-interface DataTableBulkActionsProps<TData> {
+export interface DataTableBulkActionsProps<TData> {
   table: Table<TData>
   actions?: BulkAction[]
   onDelete?: (selectedRows: TData[]) => void | Promise<void>
@@ -86,13 +86,13 @@ export function DataTableBulkActions<TData>({
       <span className="text-sm text-muted-foreground">
         {selectedCount} {selectedCount === 1 ? 'row' : 'rows'} selected
       </span>
-      <div className="flex items-center gap-2 ml-auto">
+      <div className="flex items-center gap-2 ms-auto">
         {allActions.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
                 Actions
-                <MoreHorizontal className="ml-2 h-4 w-4" />
+                <MoreHorizontal className="ms-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -114,7 +114,7 @@ export function DataTableBulkActions<TData>({
                     disabled={isDisabled}
                     className={action.variant === 'destructive' ? 'text-destructive' : ''}
                   >
-                    {action.icon && <span className="mr-2">{action.icon}</span>}
+                    {action.icon && <span className="me-2">{action.icon}</span>}
                     {action.label}
                   </DropdownMenuItem>
                 )

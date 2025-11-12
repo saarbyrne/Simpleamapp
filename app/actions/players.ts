@@ -4,6 +4,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { getTranslations } from 'next-intl/server'
 
 interface CreatePlayerData {
   firstName: string
@@ -20,11 +21,12 @@ interface CreatePlayerData {
 }
 
 export async function createPlayer(data: CreatePlayerData) {
+  const t = await getTranslations('errors')
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -79,7 +81,7 @@ export async function createPlayer(data: CreatePlayerData) {
     return { success: true, player: result.person }
   } catch (error) {
     console.error('Error creating player:', error)
-    return { error: 'Failed to create player' }
+    return { error: t('failedToCreatePlayer') }
   }
 }
 
@@ -87,11 +89,12 @@ export async function updatePlayer(
   personId: string,
   data: Partial<CreatePlayerData>
 ) {
+  const t = await getTranslations('errors')
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -145,16 +148,17 @@ export async function updatePlayer(
     return { success: true, player: result }
   } catch (error) {
     console.error('Error updating player:', error)
-    return { error: 'Failed to update player' }
+    return { error: t('failedToUpdatePlayer') }
   }
 }
 
 export async function deletePlayer(personId: string) {
+  const t = await getTranslations('errors')
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -189,7 +193,7 @@ export async function deletePlayer(personId: string) {
     return { success: true }
   } catch (error) {
     console.error('Error deleting player:', error)
-    return { error: 'Failed to delete player' }
+    return { error: t('failedToDeletePlayer') }
   }
 }
 
@@ -201,15 +205,16 @@ export async function bulkUpdatePlayers(
     nationality?: string | null
   }
 ) {
+  const t = await getTranslations('errors')
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   if (!personIds || personIds.length === 0) {
-    return { error: 'No players selected' }
+    return { error: t('noPlayersSelected') }
   }
 
   try {
@@ -234,15 +239,24 @@ export async function bulkUpdatePlayers(
       // Update position and/or status in PersonOrganization table if provided
       const personOrgUpdates: {
         position?: string | null
-        status?: 'active' | 'injured' | 'inactive' | null
+        status?: string
       } = {}
 
       if (updates.position !== undefined) {
         personOrgUpdates.position = updates.position || null
       }
 
+      // Status is required in schema - validate and provide clear error if null
       if (updates.status !== undefined) {
-        personOrgUpdates.status = updates.status || null
+        if (updates.status === null) {
+          throw new Error(t('statusRequired'))
+        }
+        // Validate status value
+        const validStatuses = ['active', 'injured', 'inactive']
+        if (!validStatuses.includes(updates.status)) {
+          throw new Error(t('invalidStatusValue', { status: updates.status, validStatuses: validStatuses.join(', ') }))
+        }
+        personOrgUpdates.status = updates.status
       }
 
       if (Object.keys(personOrgUpdates).length > 0) {
@@ -277,18 +291,22 @@ export async function bulkUpdatePlayers(
     return { success: true, updatedCount: result }
   } catch (error) {
     console.error('Error bulk updating players:', error)
-    return { error: 'Failed to bulk update players' }
+    if (error instanceof Error) {
+      return { error: error.message }
+    }
+    return { error: t('failedToBulkUpdatePlayers') }
   }
 }
 
 export async function getPlayers(page: number = 0, pageSize: number = 20) {
   try {
+    const t = await getTranslations('errors')
     const supabase = await createServerClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
       console.error('Auth error:', authError)
-      return { error: 'Not authenticated', players: [], total: 0, page: 0, pageSize: 20 }
+      return { error: t('notAuthenticated'), players: [], total: 0, page: 0, pageSize: 20 }
     }
 
     const dbUser = await ensureUserWithOrganization(user)
@@ -347,7 +365,8 @@ export async function getPlayers(page: number = 0, pageSize: number = 20) {
       console.error('Error details:', error.message)
       console.error('Error stack:', error.stack)
     }
-    return { error: 'Failed to fetch players', players: [], total: 0, page: 0, pageSize: 20 }
+    const t = await getTranslations('errors')
+    return { error: t('failedToFetchPlayers'), players: [], total: 0, page: 0, pageSize: 20 }
   }
 }
 
@@ -355,11 +374,12 @@ export async function getPlayers(page: number = 0, pageSize: number = 20) {
  * Get a single player by ID with full details
  */
 export async function getPlayer(playerId: string) {
+  const t = await getTranslations('errors')
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: t('notAuthenticated') }
   }
 
   try {
@@ -393,12 +413,12 @@ export async function getPlayer(playerId: string) {
     })
 
     if (!player) {
-      return { error: 'Player not found' }
+      return { error: t('playerNotFound') }
     }
 
     return { success: true, player }
   } catch (error) {
     console.error('Error fetching player:', error)
-    return { error: 'Failed to fetch player' }
+    return { error: t('failedToFetchPlayer') }
   }
 }

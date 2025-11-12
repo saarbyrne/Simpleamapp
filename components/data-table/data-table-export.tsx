@@ -18,7 +18,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-interface DataTableExportProps<TData> {
+export interface DataTableExportProps<TData> {
   table: Table<TData>
   filename?: string
   columns: ColumnDef<TData>[]
@@ -106,15 +106,15 @@ export function DataTableExport<TData>({
         </Tooltip>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={handleExportCSV}>
-          <FileText className="mr-2 h-4 w-4" />
+          <FileText className="me-2 h-4 w-4" />
           Export as CSV
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleExportJSON}>
-          <FileJson className="mr-2 h-4 w-4" />
+          <FileJson className="me-2 h-4 w-4" />
           Export as JSON
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleExportPDF}>
-          <FileDown className="mr-2 h-4 w-4" />
+          <FileDown className="me-2 h-4 w-4" />
           Export as PDF
         </DropdownMenuItem>
       </DropdownMenuContent>

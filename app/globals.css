@@ -202,7 +202,6 @@
   }
 
   img, svg, video, canvas, audio, iframe, embed, object {
-    vertical-align: middle;
     display: block;
   }
 
@@ -1111,6 +1110,14 @@
 
   .bg-sidebar-border {
     background-color: var(--sidebar-border);
+  }
+
+  .bg-page-background {
+    background-color: var(--page-background);
+  }
+
+  .bg-nav-background {
+    background-color: var(--nav-background);
   }
 
   .bg-transparent {
@@ -2078,6 +2085,7 @@
 
   :is(.\*\:data-\[slot\=select-value\]\:line-clamp-1 > *)[data-slot="select-value"] {
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     display: -webkit-box;
     overflow: hidden;
@@ -2606,7 +2614,7 @@
   --chart-3: oklch(0.646 0.222 41.116);
   --chart-4: oklch(0.553 0.195 38.402);
   --chart-5: oklch(0.47 0.157 37.304);
-  --sidebar: oklch(0.985 0 0);
+  --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.141 0.005 285.823);
   --sidebar-primary: oklch(0.646 0.222 41.116);
   --sidebar-primary-foreground: oklch(0.98 0.016 73.684);
@@ -2614,6 +2622,8 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.75 0.183 55.934);
+  --page-background: oklch(0.97 0.002 286.375);
+  --nav-background: oklch(1 0 0);
 }
 
 .dark {
@@ -2648,6 +2658,8 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.408 0.123 38.172);
+  --page-background: oklch(0.141 0.005 285.823);
+  --nav-background: oklch(0.21 0.006 285.885);
 }
 
 html {
@@ -2960,4 +2972,53 @@ html {
     background-color: var(--background);
     color: var(--foreground);
   }
+}
+
+/* ============================================
+ * React Datasheet Grid Styles
+ * ============================================ */
+
+.dsg-container {
+  font-family: var(--font-family-base);
+  --dsg-border-color: hsl(var(--border));
+  --dsg-background-color: hsl(var(--background));
+  --dsg-cell-background-color: hsl(var(--background));
+  --dsg-cell-color: hsl(var(--foreground));
+  --dsg-header-background-color: hsl(var(--muted));
+  --dsg-header-text-color: hsl(var(--foreground));
+  --dsg-selection-border-color: hsl(var(--primary));
+  --dsg-selection-background-color: hsl(var(--primary) / 0.1);
+}
+
+.dsg-cell {
+  border-color: var(--dsg-border-color);
+  font-size: 0.875rem;
+}
+
+.dsg-cell-header {
+  background-color: var(--dsg-header-background-color);
+  color: var(--dsg-header-text-color);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.dsg-cell-person {
+  padding: 0 !important;
+}
+
+.dsg-input {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  height: 100%;
+  padding: 0.5rem;
+}
+
+.dsg-input:focus {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: -2px;
 }

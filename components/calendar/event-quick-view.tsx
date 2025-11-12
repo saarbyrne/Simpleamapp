@@ -1,6 +1,5 @@
 'use client'
 
-import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,6 +20,9 @@ import { Calendar, Clock, MapPin, Users, ExternalLink, Edit, Trash2, RefreshCw, 
 import { type EventWithDetails } from '@/app/actions/events'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { formatDate, formatTime, formatDateRange } from '@/lib/date-utils'
+import { useTranslations } from 'next-intl'
 
 interface EventQuickViewProps {
   event: EventWithDetails | null
@@ -48,6 +50,8 @@ export function EventQuickView({
   isLoadingDetails = false,
 }: EventQuickViewProps) {
   const router = useRouter()
+  const { preferences } = useUserPreferences()
+  const t = useTranslations()
 
   if (!event) {
     return null
@@ -61,6 +65,10 @@ export function EventQuickView({
   const attendingCount = event.attendance?.filter(a => a.status === 'attending').length || 0
   const totalCount = event.attendance?.length || 0
 
+  // Format date and time using user preferences
+  const formattedDate = formatDate(event.startTime, preferences || undefined)
+  const formattedTimeRange = `${formatTime(event.startTime, preferences || undefined)} - ${formatTime(event.endTime, preferences || undefined)}`
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPortal>
@@ -72,9 +80,9 @@ export function EventQuickView({
           )}
         >
           <DialogTitle className="sr-only">{event.title}</DialogTitle>
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+          <DialogPrimitive.Close className="absolute end-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
             <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{t('common.close')}</span>
           </DialogPrimitive.Close>
           <Card className="border-0 shadow-none">
           <CardHeader className="pb-3">
@@ -83,12 +91,12 @@ export function EventQuickView({
                 <CardTitle className="text-lg leading-tight">{event.title}</CardTitle>
                 <div className="flex items-center gap-2">
                   <Badge className={eventTypeColors[event.type] || eventTypeColors.other}>
-                    {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                    {t(`calendar.types.${event.type}`)}
                   </Badge>
                   {event.isRecurring && (
                     <Badge variant="outline" className="flex items-center gap-1">
                       <RefreshCw className="h-3 w-3" />
-                      Recurring
+                      {t('calendar.recurring')}
                     </Badge>
                   )}
                 </div>
@@ -102,11 +110,11 @@ export function EventQuickView({
               <Calendar className="mt-0.5 h-4 w-4 text-muted-foreground" />
               <div className="flex-1 space-y-0.5 text-sm">
                 <div className="font-medium">
-                  {format(new Date(event.startTime), 'EEEE, MMMM d, yyyy')}
+                  {formattedDate}
                 </div>
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <Clock className="h-3 w-3" />
-                  {format(new Date(event.startTime), 'h:mm a')} - {format(new Date(event.endTime), 'h:mm a')}
+                  {formattedTimeRange}
                 </div>
               </div>
             </div>
@@ -124,14 +132,14 @@ export function EventQuickView({
               <div className="flex items-start gap-3">
                 <Users className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <div className="flex-1 text-sm text-muted-foreground">
-                  Loading attendance...
+                  {t('calendar.loadingAttendance')}
                 </div>
               </div>
             ) : totalCount > 0 ? (
               <div className="flex items-start gap-3">
                 <Users className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <div className="flex-1 text-sm">
-                  {attendingCount} of {totalCount} attending
+                  {t('calendar.attendingCount', { attending: attendingCount, total: totalCount })}
                 </div>
               </div>
             ) : null}
@@ -151,8 +159,8 @@ export function EventQuickView({
               onClick={handleViewDetails}
               className="flex-1"
             >
-              <ExternalLink className="mr-2 h-4 w-4" />
-              View Details
+              <ExternalLink className="me-2 h-4 w-4" />
+              {t('calendar.viewDetails')}
             </Button>
             <Button
               variant="ghost"

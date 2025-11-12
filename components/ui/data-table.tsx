@@ -61,7 +61,7 @@ export function DataTable<TData>({
                       key={header.id}
                       className={cn(
                         'relative',
-                        header.column.id === 'actions' && 'text-right',
+                        header.column.id === 'actions' && 'text-end',
                         header.column.id === 'select' && 'w-10 !px-2 !py-0'
                       )}
                       style={{
@@ -111,7 +111,7 @@ export function DataTable<TData>({
                           onMouseDown={header.getResizeHandler()}
                           onTouchStart={header.getResizeHandler()}
                           className={cn(
-                            'absolute right-0 top-0 h-full w-1 cursor-col-resize touch-none select-none bg-border hover:bg-primary/50',
+                            'absolute end-0 top-0 h-full w-1 cursor-col-resize touch-none select-none bg-border hover:bg-primary/50',
                             header.column.getIsResizing() && 'bg-primary'
                           )}
                         />
@@ -129,6 +129,9 @@ export function DataTable<TData>({
                 const isExpanded = enableGrouping && row.getIsExpanded()
 
                 if (isGrouped) {
+                  // Get the grouping column ID from the row
+                  const groupingColumnId = row.groupingColumnId || ''
+                  const groupingValue = groupingColumnId ? row.getGroupingValue(groupingColumnId) : row.id
                   return (
                     <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                       <TableCell
@@ -146,7 +149,7 @@ export function DataTable<TData>({
                               <ChevronRight className="h-4 w-4" />
                             )}
                           </button>
-                          {flexRender(row.getGroupingValue(), row.getContext())} (
+                          {String(groupingValue)} (
                           {row.subRows.length} {row.subRows.length === 1 ? 'item' : 'items'})
                         </div>
                       </TableCell>
@@ -167,7 +170,7 @@ export function DataTable<TData>({
                       <TableCell
                         key={cell.id}
                         className={cn(
-                          cell.column.id === 'actions' && 'text-right',
+                          cell.column.id === 'actions' && 'text-end',
                           cell.column.id === 'select' && 'w-10 !px-2 !py-0'
                         )}
                         style={{

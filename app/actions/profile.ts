@@ -209,15 +209,33 @@ export async function updatePreferences(data: z.infer<typeof updatePreferencesSc
 
     const dbUser = await ensureUserWithOrganization(authUser);
 
+    // Only update fields that are actually provided (not undefined)
+    const updateData: {
+      language?: string | null;
+      timezone?: string | null;
+      dateFormat?: string | null;
+      timeFormat?: string | null;
+      updatedAt: Date;
+    } = {
+      updatedAt: new Date(),
+    };
+
+    if (validation.data.language !== undefined) {
+      updateData.language = validation.data.language || null;
+    }
+    if (validation.data.timezone !== undefined) {
+      updateData.timezone = validation.data.timezone || null;
+    }
+    if (validation.data.dateFormat !== undefined) {
+      updateData.dateFormat = validation.data.dateFormat || null;
+    }
+    if (validation.data.timeFormat !== undefined) {
+      updateData.timeFormat = validation.data.timeFormat || null;
+    }
+
     const updatedUser = await prisma.user.update({
       where: { id: dbUser.id },
-      data: {
-        language: validation.data.language,
-        timezone: validation.data.timezone,
-        dateFormat: validation.data.dateFormat,
-        timeFormat: validation.data.timeFormat,
-        updatedAt: new Date(),
-      },
+      data: updateData,
     });
 
     revalidatePath("/dashboard/profile");
@@ -355,9 +373,9 @@ export async function uploadAvatar(formData: FormData) {
     const fileName = `${dbUser.id}-${Date.now()}.${fileExt}`;
     const filePath = `avatars/${fileName}`;
 
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage - use people-photos bucket which is already configured
     const { error: uploadError } = await supabase.storage
-      .from("public")
+      .from("people-photos")
       .upload(filePath, file, {
         cacheControl: "3600",
         upsert: true,
@@ -365,12 +383,16 @@ export async function uploadAvatar(formData: FormData) {
 
     if (uploadError) {
       console.error("Storage upload error:", uploadError);
-      return { success: false, error: "Failed to upload file" };
+      // Provide more specific error message
+      if (uploadError.message?.includes("Bucket not found")) {
+        return { success: false, error: "Storage bucket not configured. Please contact support." };
+      }
+      return { success: false, error: `Failed to upload file: ${uploadError.message}` };
     }
 
     // Get public URL
     const { data: urlData } = supabase.storage
-      .from("public")
+      .from("people-photos")
       .getPublicUrl(filePath);
 
     if (!urlData?.publicUrl) {

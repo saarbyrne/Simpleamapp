@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useMemo } from "react";
 import { Loader2, AlertTriangle, Shield, Info } from "lucide-react";
 import { changePassword } from "@/app/actions/profile";
 import { Button } from "@/components/ui/button";
@@ -26,18 +28,12 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 
-const passwordFormSchema = z
-  .object({
-    currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-type PasswordFormValues = z.infer<typeof passwordFormSchema>;
+// Schema will be created inside component to access translations
+type PasswordFormValues = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
 
 interface User {
   authProvider: string;
@@ -49,7 +45,20 @@ interface SecurityTabProps {
 
 export function SecurityTab({ user }: SecurityTabProps) {
   const router = useRouter();
+  const t = useTranslations();
   const isOAuthUser = user.authProvider !== "email";
+
+  // Create schema with translations
+  const passwordFormSchema = useMemo(() => z
+    .object({
+      currentPassword: z.string().min(1, t('profile.security.currentPasswordRequired')),
+      newPassword: z.string().min(8, t('profile.security.passwordMinLength')),
+      confirmPassword: z.string().min(1, t('profile.security.confirmPasswordRequired')),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: t('profile.security.passwordsDontMatch'),
+      path: ["confirmPassword"],
+    }), [t]);
 
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
@@ -66,11 +75,11 @@ export function SecurityTab({ user }: SecurityTabProps) {
     const result = await changePassword(data);
 
     if (result.success) {
-      toast.success("Password changed successfully");
+      toast.success(t('profile.security.passwordChanged'));
       form.reset();
       router.refresh();
     } else {
-      toast.error(result.error || "Failed to change password");
+      toast.error(result.error || t('profile.security.failedToChangePassword'));
     }
   }
 
@@ -88,11 +97,11 @@ export function SecurityTab({ user }: SecurityTabProps) {
     if (/[^a-zA-Z0-9]/.test(password)) strength++;
 
     if (strength <= 2) {
-      return { strength, label: "Weak", color: "text-red-500" };
+      return { strength, label: t('profile.security.passwordStrength.weak'), color: "text-red-500" };
     } else if (strength <= 3) {
-      return { strength, label: "Medium", color: "text-yellow-500" };
+      return { strength, label: t('profile.security.passwordStrength.medium'), color: "text-yellow-500" };
     } else {
-      return { strength, label: "Strong", color: "text-green-500" };
+      return { strength, label: t('profile.security.passwordStrength.strong'), color: "text-green-500" };
     }
   }
 
@@ -106,20 +115,18 @@ export function SecurityTab({ user }: SecurityTabProps) {
       {/* Password Change */}
       <Card>
         <CardHeader>
-          <CardTitle>Change Password</CardTitle>
+          <CardTitle>{t('profile.security.changePassword')}</CardTitle>
           <CardDescription>
-            Update your password to keep your account secure
+            {t('profile.security.changePasswordDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isOAuthUser ? (
             <Alert>
               <Info className="h-4 w-4" />
-              <AlertTitle>OAuth Account</AlertTitle>
+              <AlertTitle>{t('profile.security.oauthAccount')}</AlertTitle>
               <AlertDescription>
-                You signed in using {user.authProvider}. Password management is
-                handled by your OAuth provider. To change your password, please
-                visit your {user.authProvider} account settings.
+                {t('profile.security.oauthAccountDescription', { provider: user.authProvider })}
               </AlertDescription>
             </Alert>
           ) : (
@@ -130,7 +137,7 @@ export function SecurityTab({ user }: SecurityTabProps) {
                   name="currentPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Current Password</FormLabel>
+                      <FormLabel>{t('profile.security.currentPassword')}</FormLabel>
                       <FormControl>
                         <Input type="password" {...field} />
                       </FormControl>
@@ -144,7 +151,7 @@ export function SecurityTab({ user }: SecurityTabProps) {
                   name="newPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>New Password</FormLabel>
+                      <FormLabel>{t('profile.security.newPassword')}</FormLabel>
                       <FormControl>
                         <Input type="password" {...field} />
                       </FormControl>
@@ -174,8 +181,7 @@ export function SecurityTab({ user }: SecurityTabProps) {
                         </div>
                       )}
                       <p className="text-xs text-muted-foreground mt-2">
-                        Password must be at least 8 characters with a mix of
-                        letters, numbers, and symbols
+                        {t('profile.security.passwordRequirements')}
                       </p>
                       <FormMessage />
                     </FormItem>
@@ -187,7 +193,7 @@ export function SecurityTab({ user }: SecurityTabProps) {
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm New Password</FormLabel>
+                      <FormLabel>{t('profile.security.confirmNewPassword')}</FormLabel>
                       <FormControl>
                         <Input type="password" {...field} />
                       </FormControl>
@@ -199,11 +205,11 @@ export function SecurityTab({ user }: SecurityTabProps) {
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Changing Password...
+                      <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                      {t('profile.security.changingPassword')}
                     </>
                   ) : (
-                    "Change Password"
+                    t('profile.security.changePassword')
                   )}
                 </Button>
               </form>
@@ -215,25 +221,24 @@ export function SecurityTab({ user }: SecurityTabProps) {
       {/* Two-Factor Authentication */}
       <Card>
         <CardHeader>
-          <CardTitle>Two-Factor Authentication</CardTitle>
+          <CardTitle>{t('profile.security.twoFactorAuth')}</CardTitle>
           <CardDescription>
-            Add an extra layer of security to your account
+            {t('profile.security.twoFactorAuthDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Alert>
             <Shield className="h-4 w-4" />
-            <AlertTitle>Coming Soon</AlertTitle>
+            <AlertTitle>{t('profile.security.comingSoon')}</AlertTitle>
             <AlertDescription>
-              Two-factor authentication (2FA) is currently in development. This
-              feature will allow you to:
+              {t('profile.security.twoFactorAuthComingSoon')}
               <ul className="mt-2 list-inside list-disc space-y-1 text-sm">
-                <li>Enable TOTP-based 2FA using an authenticator app</li>
-                <li>Generate and store backup codes for account recovery</li>
-                <li>Require 2FA for all login attempts</li>
+                <li>{t('profile.security.twoFactorFeature1')}</li>
+                <li>{t('profile.security.twoFactorFeature2')}</li>
+                <li>{t('profile.security.twoFactorFeature3')}</li>
               </ul>
               <p className="mt-3 text-sm font-medium">
-                Check back soon for this security enhancement!
+                {t('profile.security.checkBackSoon')}
               </p>
             </AlertDescription>
           </Alert>
@@ -243,27 +248,25 @@ export function SecurityTab({ user }: SecurityTabProps) {
       {/* Active Sessions */}
       <Card>
         <CardHeader>
-          <CardTitle>Active Sessions</CardTitle>
+          <CardTitle>{t('profile.security.activeSessions')}</CardTitle>
           <CardDescription>
-            Manage devices where you're currently logged in
+            {t('profile.security.activeSessionsDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Alert>
             <Info className="h-4 w-4" />
-            <AlertTitle>Session Management</AlertTitle>
+            <AlertTitle>{t('profile.security.sessionManagement')}</AlertTitle>
             <AlertDescription>
-              Session management features are currently in development. Future
-              features will include:
+              {t('profile.security.sessionManagementDescription')}
               <ul className="mt-2 list-inside list-disc space-y-1 text-sm">
-                <li>View all active sessions with device and location info</li>
-                <li>Log out from specific devices remotely</li>
-                <li>See last active time for each session</li>
-                <li>Receive alerts for new login attempts</li>
+                <li>{t('profile.security.sessionFeature1')}</li>
+                <li>{t('profile.security.sessionFeature2')}</li>
+                <li>{t('profile.security.sessionFeature3')}</li>
+                <li>{t('profile.security.sessionFeature4')}</li>
               </ul>
               <p className="mt-3 text-sm">
-                Currently, you can sign out from all devices by using the logout
-                button in the sidebar.
+                {t('profile.security.currentLogoutInfo')}
               </p>
             </AlertDescription>
           </Alert>
@@ -275,7 +278,7 @@ export function SecurityTab({ user }: SecurityTabProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            Security Best Practices
+            {t('profile.security.securityBestPractices')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -283,31 +286,31 @@ export function SecurityTab({ user }: SecurityTabProps) {
             <li className="flex gap-2">
               <span className="text-amber-600 dark:text-amber-400">•</span>
               <span>
-                Use a unique password that you don't use for other accounts
+                {t('profile.security.practice1')}
               </span>
             </li>
             <li className="flex gap-2">
               <span className="text-amber-600 dark:text-amber-400">•</span>
               <span>
-                Enable two-factor authentication when it becomes available
+                {t('profile.security.practice2')}
               </span>
             </li>
             <li className="flex gap-2">
               <span className="text-amber-600 dark:text-amber-400">•</span>
               <span>
-                Change your password regularly (every 3-6 months recommended)
+                {t('profile.security.practice3')}
               </span>
             </li>
             <li className="flex gap-2">
               <span className="text-amber-600 dark:text-amber-400">•</span>
               <span>
-                Never share your password or login credentials with anyone
+                {t('profile.security.practice4')}
               </span>
             </li>
             <li className="flex gap-2">
               <span className="text-amber-600 dark:text-amber-400">•</span>
               <span>
-                Log out from shared or public devices after use
+                {t('profile.security.practice5')}
               </span>
             </li>
           </ul>

@@ -26,6 +26,7 @@ export interface BulkField {
   placeholder: string
   options?: BulkFieldOption[]
   width?: string
+  allowClear?: boolean // Whether the field can be cleared (default: true)
 }
 
 export interface BulkActionsBarProps {
@@ -118,7 +119,9 @@ export function BulkActionsBar({
                   <SelectValue placeholder={field.placeholder} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__clear__">Clear</SelectItem>
+                  {field.allowClear !== false && (
+                    <SelectItem value="__clear__">Clear</SelectItem>
+                  )}
                   {field.options.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -145,14 +148,14 @@ export function BulkActionsBar({
         })}
 
         {/* Actions */}
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-2 ms-auto">
           <Button
             size="sm"
             onClick={handleSave}
             disabled={!hasChanges || isLoading}
             className="h-10"
           >
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="h-4 w-4 me-2" />
             {isLoading ? 'Saving...' : 'Save'}
           </Button>
           <Button
@@ -162,7 +165,7 @@ export function BulkActionsBar({
             disabled={isLoading}
             className="h-10"
           >
-            <X className="h-4 w-4 mr-2" />
+            <X className="h-4 w-4 me-2" />
             Clear
           </Button>
         </div>

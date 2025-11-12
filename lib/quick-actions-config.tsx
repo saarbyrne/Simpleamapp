@@ -70,7 +70,7 @@ export const AVAILABLE_QUICK_ACTIONS: QuickActionConfig[] = [
     id: 'add-form',
     label: 'Add Form',
     icon: FileText,
-    enabled: false, // Not yet implemented
+    enabled: true, // Now implemented
     description: 'Create a new form for data collection',
     category: 'content',
   },

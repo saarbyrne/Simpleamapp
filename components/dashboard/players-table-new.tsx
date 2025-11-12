@@ -14,6 +14,7 @@ import {
 } from '@tanstack/react-table'
 import { createPlayer, bulkUpdatePlayers } from '@/app/actions/players'
 import { useRouter, usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   Badge,
 } from '@/components/ui/badge'
@@ -28,6 +29,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MoreHorizontal, UserPlus } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import {
@@ -47,6 +49,9 @@ import {
 import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/react-table'
 import { NATIONALITIES } from '@/lib/nationalities'
 import { NationalitySelect } from '@/components/ui/nationality-select'
+import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { formatDate } from '@/lib/date-utils'
+import { toast } from 'sonner'
 
 export type PlayerRow = {
   id: string
@@ -76,21 +81,21 @@ const statusColors: Record<string, string> = {
   inactive: 'bg-muted text-muted-foreground hover:bg-muted/80',
 }
 
-const statusLabel = (value: string) => {
+const statusLabel = (value: string, t: ReturnType<typeof useTranslations>) => {
   const normalized = value?.toLowerCase()
   if (normalized === 'active' || normalized === 'available') {
-    return 'Available'
+    return t('players.statuses.available')
   }
   if (normalized === 'injured') {
-    return 'Injured'
+    return t('players.statuses.injured')
   }
   if (normalized === 'suspended') {
-    return 'Suspended'
+    return t('players.statuses.suspended')
   }
   if (normalized === 'inactive') {
-    return 'Inactive'
+    return t('players.statuses.inactive')
   }
-  return normalized ? normalized.replace(/(^|\s)\S/g, (c) => c.toUpperCase()) : 'Unknown'
+  return normalized ? normalized.replace(/(^|\s)\S/g, (c) => c.toUpperCase()) : t('players.statuses.unknown')
 }
 
 const titleCase = (value: string | null | undefined) => {
@@ -103,7 +108,12 @@ const titleCase = (value: string | null | undefined) => {
     .join(' ')
 }
 
-const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: string) => void): ColumnDef<PlayerRow>[] => {
+const createColumns = (
+  players: PlayerRow[],
+  t: ReturnType<typeof useTranslations>,
+  onNavigateToProfile: (playerId: string) => void,
+  preferences?: { timezone: string | null; dateFormat: string | null; timeFormat: string | null } | null
+): ColumnDef<PlayerRow>[] => {
   // Check which columns have data
   const hasPosition = players.some(p => p.position)
   const hasAge = players.some(p => p.age !== null)
@@ -115,7 +125,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
   const columns: ColumnDef<PlayerRow>[] = [
     {
       accessorKey: 'name',
-      header: 'Name',
+      header: t('players.name'),
       size: 280,
       cell: ({ row }) => {
         const player = row.original
@@ -141,7 +151,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
                   e.stopPropagation()
                   onNavigateToProfile(player.id)
                 }}
-                className="font-medium text-foreground hover:text-primary hover:underline text-left"
+                className="font-medium text-foreground hover:text-primary hover:underline text-start"
               >
                 {player.name}
               </button>
@@ -152,7 +162,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
     },
     {
       accessorKey: 'jerseyNumber',
-      header: 'Number',
+      header: t('players.number'),
       enableHiding: true,
       size: 100,
       cell: ({ getValue }) => {
@@ -165,7 +175,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
   if (hasPosition) {
     columns.push({
       accessorKey: 'position',
-      header: 'Position',
+      header: t('players.position'),
       enableHiding: true,
       cell: ({ getValue }) => (
         <span>{titleCase(getValue() as string | null) || '—'}</span>
@@ -176,7 +186,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
   if (hasAge) {
     columns.push({
       accessorKey: 'age',
-      header: 'Age',
+      header: t('players.age'),
       enableHiding: true,
       cell: ({ getValue }) => {
         const value = getValue() as number | null | undefined
@@ -188,7 +198,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
   if (hasNationality) {
     columns.push({
       accessorKey: 'nationality',
-      header: 'Nationality',
+      header: t('players.nationality'),
       enableHiding: true,
       cell: ({ getValue }) => (
         <span>{titleCase(getValue() as string | null) || '—'}</span>
@@ -198,7 +208,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
 
   columns.push({
     accessorKey: 'status',
-    header: 'Status',
+    header: t('players.status'),
     enableHiding: true,
     cell: ({ getValue }) => {
       const status = (getValue() as string) ?? ''
@@ -206,7 +216,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
       const colorClass = statusColors[normalized] ?? 'bg-muted text-muted-foreground'
       return (
         <Badge className={colorClass}>
-          {statusLabel(normalized)}
+          {statusLabel(normalized, t)}
         </Badge>
       )
     },
@@ -215,7 +225,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
   if (hasEmail) {
     columns.push({
       accessorKey: 'email',
-      header: 'Email',
+      header: t('players.email'),
       enableHiding: true,
       cell: ({ getValue }) => {
         const email = getValue() as string | null | undefined
@@ -235,7 +245,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
 
   columns.push({
     accessorKey: 'phone',
-    header: 'Phone',
+    header: t('players.phone'),
     enableHiding: true,
     cell: ({ getValue }) => {
       const phone = getValue() as string | null | undefined
@@ -255,18 +265,14 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
   if (hasJoinedAt) {
     columns.push({
       accessorKey: 'joinedAt',
-      header: 'Joined',
+      header: t('players.joined'),
       enableHiding: true,
       cell: ({ getValue }) => {
         const joinedAt = getValue() as Date | null | undefined
         if (!joinedAt) return <span className="text-sm text-muted-foreground">—</span>
         return (
-          <span className="text-sm">
-            {new Date(joinedAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            })}
+          <span className="text-sm" suppressHydrationWarning>
+            {formatDate(joinedAt, preferences || undefined)}
           </span>
         )
       },
@@ -276,7 +282,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
   if (hasTags) {
     columns.push({
       accessorKey: 'tags',
-      header: 'Tags',
+      header: t('players.tags'),
       enableHiding: true,
       enableSorting: false,
       cell: ({ getValue }) => {
@@ -299,7 +305,7 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
 
   columns.push({
     id: 'actions',
-    header: () => <span className="sr-only">Actions</span>,
+    header: () => <span className="sr-only">{t('players.actions')}</span>,
     cell: ({ row }) => {
       const player = row.original
       return (
@@ -314,10 +320,10 @@ const createColumns = (players: PlayerRow[], onNavigateToProfile: (playerId: str
               <DropdownMenuItem
                 onClick={() => onNavigateToProfile(player.id)}
               >
-                View profile
+                {t('players.viewProfile')}
               </DropdownMenuItem>
-              <DropdownMenuItem>Send form</DropdownMenuItem>
-              <DropdownMenuItem>Add note</DropdownMenuItem>
+              <DropdownMenuItem>{t('players.sendForm')}</DropdownMenuItem>
+              <DropdownMenuItem>{t('players.addNote')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -335,6 +341,8 @@ function normalizeFilter(value: string | null | undefined) {
 export function PlayersTable({ players, total: serverTotal }: PlayersTableProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const t = useTranslations()
+  const { preferences } = useUserPreferences()
   
   // Initialize state with default values (same on server and client)
   const [search, setSearch] = useState('')
@@ -362,7 +370,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     lastName: '',
     position: '',
     jerseyNumber: '',
-    dateOfBirth: '',
+    dateOfBirth: undefined as Date | undefined,
     nationality: '',
     email: '',
     phone: '',
@@ -450,7 +458,11 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     lastUrlSearchRef.current = currentStateSignature
     
     // Use startTransition to batch state updates and avoid hydration issues
+    // Double-check mounted state inside the transition to prevent updates after unmount
     startTransition(() => {
+      // Ensure component is still mounted before updating state
+      if (!isMounted.current) return
+      
       // Batch all state updates together to avoid hydration issues
       if (hasUrlParams) {
         // Use URL params - batch updates
@@ -522,21 +534,33 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     // Mark as mounted first
     isMounted.current = true
     
-    // Use setTimeout to ensure we're past hydration and render phase
+    // Use requestAnimationFrame to ensure we're past hydration and render phase
+    // This ensures the component is fully mounted before updating state
+    let rafId: number | null = null
     const timeoutId = setTimeout(() => {
-      lastPathnameRef.current = pathname
-      syncStateFromURL()
+      rafId = requestAnimationFrame(() => {
+        if (isMounted.current) {
+          lastPathnameRef.current = pathname
+          syncStateFromURL()
+        }
+      })
     }, 0)
     
     // Listen for popstate (browser back/forward)
     const handlePopState = () => {
-      syncStateFromURL()
+      if (isMounted.current) {
+        syncStateFromURL()
+      }
     }
     
     window.addEventListener('popstate', handlePopState)
     
     return () => {
+      isMounted.current = false
       clearTimeout(timeoutId)
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
       window.removeEventListener('popstate', handlePopState)
     }
   }, [syncStateFromURL, pathname])
@@ -546,10 +570,15 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     if (!isMounted.current || typeof window === 'undefined') return
     if (pathname !== lastPathnameRef.current) {
       lastPathnameRef.current = pathname
-      // Small delay to ensure URL is updated
-      setTimeout(() => {
-        syncStateFromURL()
-      }, 0)
+      // Use requestAnimationFrame to ensure URL is updated and component is mounted
+      const rafId = requestAnimationFrame(() => {
+        if (isMounted.current) {
+          syncStateFromURL()
+        }
+      })
+      return () => {
+        cancelAnimationFrame(rafId)
+      }
     }
   }, [pathname, syncStateFromURL])
 
@@ -645,7 +674,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
         phone: newPlayer.phone || undefined,
         position: newPlayer.position || undefined,
         jerseyNumber: newPlayer.jerseyNumber ? parseInt(newPlayer.jerseyNumber) : undefined,
-        dateOfBirth: newPlayer.dateOfBirth || undefined,
+        dateOfBirth: newPlayer.dateOfBirth?.toISOString().split('T')[0] || undefined,
         nationality: newPlayer.nationality || undefined,
       })
 
@@ -657,7 +686,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
           lastName: '',
           position: '',
           jerseyNumber: '',
-          dateOfBirth: '',
+          dateOfBirth: undefined,
           nationality: '',
           email: '',
           phone: '',
@@ -729,47 +758,50 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     })
   }, [players, search, positionFilter, statusFilter, nationalityFilter])
 
-  const columns = useMemo(() => createColumns(players, (playerId) => router.push(`/dashboard/players/${playerId}`)), [players, router])
+  const columns = useMemo(
+    () => createColumns(players, t, (playerId) => router.push(`/dashboard/players/${playerId}`), preferences || null),
+    [players, t, router, preferences]
+  )
 
   // Prepare filter config for DataTableFilters
   const filterConfig: FilterConfig[] = useMemo(() => [
     {
       key: 'search',
-      label: 'Search',
+      label: t('common.search'),
       type: 'search',
-      placeholder: 'Filter players...',
+      placeholder: t('players.search'),
     },
     {
       key: 'position',
-      label: 'Position',
+      label: t('players.position'),
       type: 'select',
       options: uniquePositions.map((pos) => ({
         value: pos,
         label: titleCase(pos),
       })),
-      placeholder: 'All Positions',
+      placeholder: t('players.allPositions'),
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('players.status'),
       type: 'select',
       options: uniqueStatuses.map((status) => ({
         value: status,
-        label: statusLabel(status),
+        label: statusLabel(status, t),
       })),
-      placeholder: 'All Statuses',
+      placeholder: t('players.allStatuses'),
     },
     {
       key: 'nationality',
-      label: 'Nationality',
+      label: t('players.nationality'),
       type: 'select',
       options: uniqueNationalities.map((country) => ({
         value: country,
         label: titleCase(country),
       })),
-      placeholder: 'All Countries',
+      placeholder: t('players.allNationalities'),
     },
-  ], [uniquePositions, uniqueStatuses, uniqueNationalities])
+  ], [uniquePositions, uniqueStatuses, uniqueNationalities, t])
 
   const filterValues = useMemo(() => ({
     search,
@@ -807,6 +839,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     enableRowSelection: true,
+    autoResetPageIndex: false, // Prevent auto-reset pagination during render
   })
 
   // Handle bulk update
@@ -822,7 +855,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
       const selectedIds = selectedRows.map((row) => row.original.id)
 
       if (selectedIds.length === 0) {
-        alert('No players selected')
+        toast.error(t('players.noPlayersSelected'))
         setIsBulkUpdating(false)
         return
       }
@@ -830,7 +863,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
       const result = await bulkUpdatePlayers(selectedIds, updates)
 
       if (result.error) {
-        alert(result.error)
+        toast.error(result.error)
       } else {
         // Clear selection and refresh
         setRowSelection({})
@@ -838,11 +871,11 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
       }
     } catch (error) {
       console.error('Error bulk updating players:', error)
-      alert('Failed to update players')
+      toast.error(t('players.failedToUpdatePlayers'))
     } finally {
       setIsBulkUpdating(false)
     }
-  }, [tableInstance, router, setRowSelection])
+  }, [tableInstance, router, setRowSelection, t])
 
   const { pageIndex, pageSize } = pagination
   const totalPlayers = serverTotal ?? filteredPlayers.length
@@ -876,34 +909,34 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
       <Dialog open={isAddPlayerOpen} onOpenChange={setIsAddPlayerOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Add New Player</DialogTitle>
+            <DialogTitle>{t('players.addNewPlayer')}</DialogTitle>
             <DialogDescription>
-              Enter the player details below to add them to your roster.
+              {t('players.enterPlayerDetails')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
+                <Label htmlFor="firstName">{t('players.firstName')}</Label>
                 <Input
                   id="firstName"
                   value={newPlayer.firstName}
                   onChange={(e) => setNewPlayer({ ...newPlayer, firstName: e.target.value })}
-                  placeholder="Enter first name"
+                  placeholder={t('players.enterFirstName')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
+                <Label htmlFor="lastName">{t('players.lastName')}</Label>
                 <Input
                   id="lastName"
                   value={newPlayer.lastName}
                   onChange={(e) => setNewPlayer({ ...newPlayer, lastName: e.target.value })}
-                  placeholder="Enter last name"
+                  placeholder={t('players.enterLastName')}
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('players.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -913,7 +946,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="phone">{t('players.phone')}</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -923,7 +956,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="position">Position</Label>
+              <Label htmlFor="position">{t('players.position')}</Label>
               <Input
                 id="position"
                 value={newPlayer.position}
@@ -933,7 +966,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="jerseyNumber">Jersey Number</Label>
+                <Label htmlFor="jerseyNumber">{t('players.jerseyNumber')}</Label>
                 <Input
                   id="jerseyNumber"
                   type="number"
@@ -943,50 +976,49 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                <Input
-                  id="dateOfBirth"
-                  type="date"
-                  value={newPlayer.dateOfBirth}
-                  onChange={(e) => setNewPlayer({ ...newPlayer, dateOfBirth: e.target.value })}
+                <Label htmlFor="dateOfBirth">{t('players.dateOfBirth')}</Label>
+                <DatePicker
+                  date={newPlayer.dateOfBirth}
+                  onSelect={(date) => setNewPlayer({ ...newPlayer, dateOfBirth: date })}
+                  placeholder="Pick a date"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="nationality">Nationality</Label>
+              <Label htmlFor="nationality">{t('players.nationality')}</Label>
               <NationalitySelect
                 value={newPlayer.nationality || undefined}
                 onValueChange={(value) => setNewPlayer({ ...newPlayer, nationality: value })}
-                placeholder="Select nationality"
+                placeholder={t('players.selectNationality')}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddPlayerOpen(false)} disabled={isSubmitting}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               className="bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={handleAddPlayer}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Adding...' : 'Add Player'}
+              {isSubmitting ? t('players.adding') : t('players.addPlayer')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <PageCard
-        title="Players"
-        description="Manage your team roster and player information."
+        title={t('players.title')}
+        description={t('players.manageDescription')}
         headerActions={
           <Button 
             onClick={() => setIsAddPlayerOpen(true)}
             className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
             type="button"
           >
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add Player
+            <UserPlus className="me-2 h-4 w-4" />
+            {t('players.addPlayer')}
           </Button>
         }
         toolbar={
@@ -1038,7 +1070,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
             bulkUpdatePositionOptions={uniquePositions}
             bulkUpdateNationalityOptions={NATIONALITIES}
             isBulkUpdating={isBulkUpdating}
-            emptyMessage="No players match the filters."
+            emptyMessage={t('players.noPlayersMatchFilters')}
           />
 
           <div className="flex items-center justify-between min-w-0">
@@ -1048,18 +1080,18 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
                 onValueChange={(value) => handlePaginationChange({ pageIndex: 0, pageSize: Number(value) })}
               >
                 <SelectTrigger className="h-9 w-[120px]">
-                  <SelectValue placeholder="Rows per page" />
+                  <SelectValue placeholder={t('common.rowsPerPage')} />
                 </SelectTrigger>
                 <SelectContent>
                   {[10, 20, 50, 100].map((size) => (
                     <SelectItem key={size} value={String(size)}>
-                      {size} rows
+                      {size} {t('common.rows')}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground">
-                Showing {filteredPlayers.length} of {totalPlayers} players · Page {pageIndex + 1} of{' '}
+                {t('common.showing')} {filteredPlayers.length} {t('common.of')} {totalPlayers} {t('players.players')} · {t('common.page')} {pageIndex + 1} {t('common.of')}{' '}
                 <strong>{totalPages}</strong>
               </p>
             </div>
@@ -1070,7 +1102,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
                 onClick={() => handlePaginationChange({ ...pagination, pageIndex: pageIndex - 1 })}
                 disabled={pageIndex === 0}
               >
-                Previous
+                {t('common.previous')}
               </Button>
               <Button
                 variant="ghost"
@@ -1078,7 +1110,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
                 onClick={() => handlePaginationChange({ ...pagination, pageIndex: pageIndex + 1 })}
                 disabled={pageIndex >= totalPages - 1}
               >
-                Next
+                {t('common.next')}
               </Button>
             </div>
           </div>

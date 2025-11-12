@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
+import { useTranslations } from "next-intl";
 
 interface NotificationSettings {
   email?: {
@@ -45,6 +46,7 @@ interface NotificationsTabProps {
 }
 
 export function NotificationsTab({ user }: NotificationsTabProps) {
+  const t = useTranslations('profile');
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -91,10 +93,10 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
     const result = await updateNotificationSettings(settings);
 
     if (result.success) {
-      toast.success("Notification settings updated successfully");
+      toast.success(t('notificationSettingsUpdated'));
       router.refresh();
     } else {
-      toast.error(result.error || "Failed to update notification settings");
+      toast.error(result.error || t('failedToUpdateNotificationSettings'));
     }
 
     setIsSubmitting(false);
@@ -105,17 +107,17 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
       {/* Email Notifications */}
       <Card>
         <CardHeader>
-          <CardTitle>Email Notifications</CardTitle>
+          <CardTitle>{t('emailNotifications')}</CardTitle>
           <CardDescription>
-            Choose what updates you want to receive via email
+            {t('emailNotificationsDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Form assigned to you</Label>
+              <Label>{t('formAssigned')}</Label>
               <p className="text-sm text-muted-foreground">
-                When you're assigned a form to complete
+                {t('formAssignedDescription')}
               </p>
             </div>
             <Switch
@@ -130,9 +132,9 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Event reminders</Label>
+              <Label>{t('eventReminders')}</Label>
               <p className="text-sm text-muted-foreground">
-                Reminders before scheduled events
+                {t('eventRemindersDescription')}
               </p>
             </div>
             <Switch
@@ -147,9 +149,9 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Player updates</Label>
+              <Label>{t('playerUpdates')}</Label>
               <p className="text-sm text-muted-foreground">
-                When players you manage are updated
+                {t('playerUpdatesDescription')}
               </p>
             </div>
             <Switch
@@ -164,9 +166,9 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>AI insights</Label>
+              <Label>{t('aiInsights')}</Label>
               <p className="text-sm text-muted-foreground">
-                When AI detects important patterns
+                {t('aiInsightsDescription')}
               </p>
             </div>
             <Switch
@@ -181,9 +183,9 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Weekly digest</Label>
+              <Label>{t('weeklyDigest')}</Label>
               <p className="text-sm text-muted-foreground">
-                Summary of the week's activity
+                {t('weeklyDigestDescription')}
               </p>
             </div>
             <Switch
@@ -199,17 +201,17 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
       {/* Push Notifications */}
       <Card>
         <CardHeader>
-          <CardTitle>Push Notifications</CardTitle>
+          <CardTitle>{t('pushNotifications')}</CardTitle>
           <CardDescription>
-            Receive instant notifications in your browser or mobile app
+            {t('pushNotificationsDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Form due soon</Label>
+              <Label>{t('formDueSoon')}</Label>
               <p className="text-sm text-muted-foreground">
-                When forms are due within 1 hour
+                {t('formDueSoonDescription')}
               </p>
             </div>
             <Switch
@@ -224,9 +226,9 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Event starting</Label>
+              <Label>{t('eventStarting')}</Label>
               <p className="text-sm text-muted-foreground">
-                15 minutes before events
+                {t('eventStartingDescription')}
               </p>
             </div>
             <Switch
@@ -241,9 +243,9 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Mentions</Label>
+              <Label>{t('mentions')}</Label>
               <p className="text-sm text-muted-foreground">
-                When someone mentions you in a note
+                {t('mentionsDescription')}
               </p>
             </div>
             <Switch
@@ -259,17 +261,17 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
       {/* SMS Notifications */}
       <Card>
         <CardHeader>
-          <CardTitle>SMS Notifications (Optional)</CardTitle>
+          <CardTitle>{t('smsNotifications')}</CardTitle>
           <CardDescription>
-            Receive critical notifications via text message
+            {t('smsNotificationsDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Enable SMS notifications</Label>
+              <Label>{t('enableSmsNotifications')}</Label>
               <p className="text-sm text-muted-foreground">
-                Requires a verified phone number
+                {t('enableSmsDescription')}
               </p>
             </div>
             <Switch
@@ -286,9 +288,9 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Urgent alerts only</Label>
+                  <Label>{t('urgentAlertsOnly')}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Only receive critical notifications
+                    {t('urgentAlertsDescription')}
                   </p>
                 </div>
                 <Switch
@@ -306,11 +308,11 @@ export function NotificationsTab({ user }: NotificationsTabProps) {
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Saving...
+            <Loader2 className="me-2 h-4 w-4 animate-spin" />
+            {t('saving')}
           </>
         ) : (
-          "Save Notification Settings"
+          t('saveNotificationSettings')
         )}
       </Button>
     </form>

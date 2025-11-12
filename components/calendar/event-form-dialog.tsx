@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -32,62 +33,36 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { DatePicker } from '@/components/ui/date-picker'
+import { TimePicker } from '@/components/ui/time-picker'
 import { Checkbox } from '@/components/ui/checkbox'
-import { CalendarIcon, Loader2, RefreshCw } from 'lucide-react'
+import { Loader2, RefreshCw } from 'lucide-react'
 import { format, addMinutes } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { createEvent, updateEvent, type CreateEventData } from '@/app/actions/events'
 import { getEventTemplates } from '@/app/actions/event-templates'
 import { toast } from 'sonner'
+import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { dateToTimeInput } from '@/lib/date-input-utils'
 
-const eventFormSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(100, 'Title is too long'),
-  description: z.string().optional(),
-  type: z.enum(['training', 'match', 'medical', 'meeting', 'other']),
-  startDate: z.date(),
-  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format'),
-  endDate: z.date(),
-  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format'),
-  location: z.string().optional(),
-  isRecurring: z.boolean().default(false),
-  recurrenceFrequency: z.enum(['daily', 'weekly', 'monthly']).optional(),
-  recurrenceInterval: z.number().min(1).max(99).optional(),
-  recurrenceEndType: z.enum(['never', 'until', 'count']).optional(),
-  recurrenceEndDate: z.date().optional(),
-  recurrenceCount: z.number().min(1).max(365).optional(),
-  recurrenceDaysOfWeek: z.array(z.number().min(0).max(6)).optional(),
-}).refine((data) => {
-  const start = new Date(data.startDate)
-  const [startHour, startMin] = data.startTime.split(':').map(Number)
-  start.setHours(startHour, startMin, 0, 0)
-
-  const end = new Date(data.endDate)
-  const [endHour, endMin] = data.endTime.split(':').map(Number)
-  end.setHours(endHour, endMin, 0, 0)
-
-  return end > start
-}, {
-  message: 'End time must be after start time',
-  path: ['endTime'],
-}).refine((data) => {
-  if (!data.isRecurring) return true
-  if (!data.recurrenceFrequency) return false
-  if (!data.recurrenceInterval) return false
-  if (!data.recurrenceEndType) return false
-
-  if (data.recurrenceEndType === 'until' && !data.recurrenceEndDate) return false
-  if (data.recurrenceEndType === 'count' && !data.recurrenceCount) return false
-  if (data.recurrenceFrequency === 'weekly' && (!data.recurrenceDaysOfWeek || data.recurrenceDaysOfWeek.length === 0)) return false
-
-  return true
-}, {
-  message: 'Please complete all recurrence settings',
-  path: ['isRecurring'],
-})
-
-type EventFormValues = z.infer<typeof eventFormSchema>
+// Schema will be created inside component to access translations
+type EventFormValues = {
+  title: string
+  description?: string
+  type: 'training' | 'match' | 'medical' | 'meeting' | 'other'
+  startDate: Date
+  startTime: string
+  endDate: Date
+  endTime: string
+  location?: string
+  isRecurring: boolean
+  recurrenceFrequency?: 'daily' | 'weekly' | 'monthly'
+  recurrenceInterval?: number
+  recurrenceEndType?: 'never' | 'until' | 'count'
+  recurrenceEndDate?: Date
+  recurrenceCount?: number
+  recurrenceDaysOfWeek?: number[]
+}
 
 interface EventTemplate {
   id: string
@@ -120,10 +95,58 @@ export function EventFormDialog({
   onSuccess,
   defaultValues,
 }: EventFormDialogProps) {
+  const t = useTranslations()
   const [isLoading, setIsLoading] = useState(false)
   const [templates, setTemplates] = useState<EventTemplate[]>([])
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const isEditing = !!defaultValues?.id
+  const { preferences } = useUserPreferences()
+
+  // Create schema with translations
+  const eventFormSchema = useMemo(() => z.object({
+    title: z.string().min(1, t('calendar.validation.titleRequired')).max(100, t('calendar.validation.titleTooLong')),
+    description: z.string().optional(),
+    type: z.enum(['training', 'match', 'medical', 'meeting', 'other']),
+    startDate: z.date(),
+    startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, t('calendar.validation.invalidTimeFormat')),
+    endDate: z.date(),
+    endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, t('calendar.validation.invalidTimeFormat')),
+    location: z.string().optional(),
+    isRecurring: z.boolean(),
+    recurrenceFrequency: z.enum(['daily', 'weekly', 'monthly']).optional(),
+    recurrenceInterval: z.number().min(1).max(99).optional(),
+    recurrenceEndType: z.enum(['never', 'until', 'count']).optional(),
+    recurrenceEndDate: z.date().optional(),
+    recurrenceCount: z.number().min(1).max(365).optional(),
+    recurrenceDaysOfWeek: z.array(z.number().min(0).max(6)).optional(),
+  }).refine((data) => {
+    const start = new Date(data.startDate)
+    const [startHour, startMin] = data.startTime.split(':').map(Number)
+    start.setHours(startHour, startMin, 0, 0)
+
+    const end = new Date(data.endDate)
+    const [endHour, endMin] = data.endTime.split(':').map(Number)
+    end.setHours(endHour, endMin, 0, 0)
+
+    return end > start
+  }, {
+    message: t('calendar.validation.endTimeAfterStart'),
+    path: ['endTime'],
+  }).refine((data) => {
+    if (!data.isRecurring) return true
+    if (!data.recurrenceFrequency) return false
+    if (!data.recurrenceInterval) return false
+    if (!data.recurrenceEndType) return false
+
+    if (data.recurrenceEndType === 'until' && !data.recurrenceEndDate) return false
+    if (data.recurrenceEndType === 'count' && !data.recurrenceCount) return false
+    if (data.recurrenceFrequency === 'weekly' && (!data.recurrenceDaysOfWeek || data.recurrenceDaysOfWeek.length === 0)) return false
+
+    return true
+  }, {
+    message: t('calendar.validation.completeRecurrenceSettings'),
+    path: ['isRecurring'],
+  }), [t])
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
@@ -133,11 +156,11 @@ export function EventFormDialog({
       type: defaultValues?.type || 'training',
       startDate: defaultValues?.startTime || new Date(),
       startTime: defaultValues?.startTime
-        ? format(defaultValues.startTime, 'HH:mm')
+        ? dateToTimeInput(defaultValues.startTime, preferences || undefined)
         : '09:00',
       endDate: defaultValues?.endTime || new Date(),
       endTime: defaultValues?.endTime
-        ? format(defaultValues.endTime, 'HH:mm')
+        ? dateToTimeInput(defaultValues.endTime, preferences || undefined)
         : '11:00',
       location: defaultValues?.location || '',
       isRecurring: false,
@@ -184,9 +207,9 @@ export function EventFormDialog({
         description: '',
         type: 'training',
         startDate,
-        startTime: format(startDate, 'HH:mm'),
+        startTime: dateToTimeInput(startDate, preferences || undefined),
         endDate,
-        endTime: format(endDate, 'HH:mm'),
+        endTime: dateToTimeInput(endDate, preferences || undefined),
         location: '',
         isRecurring: false,
         recurrenceFrequency: 'weekly',
@@ -208,9 +231,9 @@ export function EventFormDialog({
           description: template.description || '',
           type: template.type as any,
           startDate,
-          startTime: format(startDate, 'HH:mm'),
+          startTime: dateToTimeInput(startDate, preferences || undefined),
           endDate,
-          endTime: format(endDate, 'HH:mm'),
+          endTime: dateToTimeInput(endDate, preferences || undefined),
           location: '',
           isRecurring: false,
           recurrenceFrequency: 'weekly',
@@ -234,11 +257,11 @@ export function EventFormDialog({
         type: defaultValues?.type || 'training',
         startDate: defaultValues?.startTime || new Date(),
         startTime: defaultValues?.startTime
-          ? format(defaultValues.startTime, 'HH:mm')
+          ? dateToTimeInput(defaultValues.startTime, preferences || undefined)
           : '09:00',
         endDate: defaultValues?.endTime || new Date(),
         endTime: defaultValues?.endTime
-          ? format(defaultValues.endTime, 'HH:mm')
+          ? dateToTimeInput(defaultValues.endTime, preferences || undefined)
           : '11:00',
         location: defaultValues?.location || '',
         isRecurring: false,
@@ -250,7 +273,7 @@ export function EventFormDialog({
         recurrenceDaysOfWeek: [],
       })
     }
-  }, [open, defaultValues, form])
+  }, [open, defaultValues, form, preferences])
 
   const onSubmit = async (data: EventFormValues) => {
     setIsLoading(true)
@@ -319,13 +342,13 @@ export function EventFormDialog({
         toast.error(result.error)
       } else {
         toast.success(
-          isEditing ? 'Event updated successfully' : 'Event created successfully'
+          isEditing ? t('calendar.eventUpdated') : t('calendar.eventCreated')
         )
         onOpenChange(false)
         onSuccess?.()
       }
     } catch (error) {
-      toast.error('Something went wrong')
+      toast.error(t('common.anUnexpectedError'))
       console.error(error)
     } finally {
       setIsLoading(false)
@@ -336,11 +359,11 @@ export function EventFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Event' : 'Create Event'}</DialogTitle>
+          <DialogTitle>{isEditing ? t('calendar.editEvent') : t('calendar.createEvent')}</DialogTitle>
           <DialogDescription>
             {isEditing
-              ? 'Update the event details below.'
-              : 'Fill in the details to create a new event.'}
+              ? t('calendar.updateEventDescription')
+              : t('calendar.createEventDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -349,13 +372,13 @@ export function EventFormDialog({
             {/* Template Selector - Only show when creating new events */}
             {!isEditing && templates.length > 0 && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Template</label>
+                <label className="text-sm font-medium">{t('calendar.template')}</label>
                 <Select value={selectedTemplateId} onValueChange={handleTemplateChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose a template..." />
+                    <SelectValue placeholder={t('calendar.chooseTemplate')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="blank">Blank Event</SelectItem>
+                    <SelectItem value="blank">{t('calendar.blankEvent')}</SelectItem>
                     {templates.map((template) => (
                       <SelectItem key={template.id} value={template.id}>
                         {template.name}
@@ -376,9 +399,9 @@ export function EventFormDialog({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title *</FormLabel>
+                  <FormLabel>{t('calendar.eventTitle')} *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Training Session" {...field} />
+                    <Input placeholder={t('calendar.titlePlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -390,19 +413,19 @@ export function EventFormDialog({
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Event Type *</FormLabel>
+                  <FormLabel>{t('calendar.eventType')} *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select event type" />
+                        <SelectValue placeholder={t('calendar.selectEventType')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="training">Training</SelectItem>
-                      <SelectItem value="match">Match</SelectItem>
-                      <SelectItem value="medical">Medical</SelectItem>
-                      <SelectItem value="meeting">Meeting</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="training">{t('calendar.types.training')}</SelectItem>
+                      <SelectItem value="match">{t('calendar.types.match')}</SelectItem>
+                      <SelectItem value="medical">{t('calendar.types.medical')}</SelectItem>
+                      <SelectItem value="meeting">{t('calendar.types.meeting')}</SelectItem>
+                      <SelectItem value="other">{t('calendar.types.other')}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -416,35 +439,14 @@ export function EventFormDialog({
                 name="startDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Start Date *</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              'pl-3 text-left font-normal',
-                              !field.value && 'text-muted-foreground'
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, 'PPP')
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormLabel>{t('calendar.startDate')} *</FormLabel>
+                    <FormControl>
+                      <DatePicker
+                        date={field.value}
+                        onSelect={field.onChange}
+                        placeholder={t('calendar.pickDate')}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -455,9 +457,13 @@ export function EventFormDialog({
                 name="startTime"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Start Time *</FormLabel>
+                    <FormLabel>{t('calendar.startTime')} *</FormLabel>
                     <FormControl>
-                      <Input type="time" {...field} />
+                      <TimePicker
+                        time={field.value}
+                        onSelect={field.onChange}
+                        placeholder={t('calendar.pickTime')}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -471,35 +477,14 @@ export function EventFormDialog({
                 name="endDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>End Date *</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              'pl-3 text-left font-normal',
-                              !field.value && 'text-muted-foreground'
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, 'PPP')
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormLabel>{t('calendar.endDate')} *</FormLabel>
+                    <FormControl>
+                      <DatePicker
+                        date={field.value}
+                        onSelect={field.onChange}
+                        placeholder={t('calendar.pickDate')}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -510,9 +495,13 @@ export function EventFormDialog({
                 name="endTime"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>End Time *</FormLabel>
+                    <FormLabel>{t('calendar.endTime')} *</FormLabel>
                     <FormControl>
-                      <Input type="time" {...field} />
+                      <TimePicker
+                        time={field.value}
+                        onSelect={field.onChange}
+                        placeholder={t('calendar.pickTime')}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -525,9 +514,9 @@ export function EventFormDialog({
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Location</FormLabel>
+                  <FormLabel>{t('calendar.location')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Training Ground" {...field} />
+                    <Input placeholder={t('calendar.locationPlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -550,10 +539,10 @@ export function EventFormDialog({
                     <div className="space-y-1 leading-none">
                       <FormLabel className="flex items-center gap-2">
                         <RefreshCw className="h-4 w-4" />
-                        Recurring Event
+                        {t('calendar.recurringEvent')}
                       </FormLabel>
                       <FormDescription>
-                        Create multiple instances of this event
+                        {t('calendar.recurringEventDescription')}
                       </FormDescription>
                     </div>
                   </FormItem>
@@ -568,17 +557,17 @@ export function EventFormDialog({
                       name="recurrenceFrequency"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Repeat *</FormLabel>
+                          <FormLabel>{t('calendar.repeat')} *</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select frequency" />
+                                <SelectValue placeholder={t('calendar.selectFrequency')} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="daily">Daily</SelectItem>
-                              <SelectItem value="weekly">Weekly</SelectItem>
-                              <SelectItem value="monthly">Monthly</SelectItem>
+                              <SelectItem value="daily">{t('calendar.daily')}</SelectItem>
+                              <SelectItem value="weekly">{t('calendar.weekly')}</SelectItem>
+                              <SelectItem value="monthly">{t('calendar.monthly')}</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -591,7 +580,7 @@ export function EventFormDialog({
                       name="recurrenceInterval"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Every *</FormLabel>
+                          <FormLabel>{t('calendar.every')} *</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
@@ -603,9 +592,9 @@ export function EventFormDialog({
                             />
                           </FormControl>
                           <FormDescription className="text-xs">
-                            {form.watch('recurrenceFrequency') === 'daily' && 'day(s)'}
-                            {form.watch('recurrenceFrequency') === 'weekly' && 'week(s)'}
-                            {form.watch('recurrenceFrequency') === 'monthly' && 'month(s)'}
+                            {form.watch('recurrenceFrequency') === 'daily' && t('calendar.days')}
+                            {form.watch('recurrenceFrequency') === 'weekly' && t('calendar.weeks')}
+                            {form.watch('recurrenceFrequency') === 'monthly' && t('calendar.months')}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -620,9 +609,9 @@ export function EventFormDialog({
                       name="recurrenceDaysOfWeek"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Repeat On *</FormLabel>
+                          <FormLabel>{t('calendar.repeatOn')} *</FormLabel>
                           <div className="flex gap-2">
-                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => {
+                            {[t('calendar.daysOfWeek.sun'), t('calendar.daysOfWeek.mon'), t('calendar.daysOfWeek.tue'), t('calendar.daysOfWeek.wed'), t('calendar.daysOfWeek.thu'), t('calendar.daysOfWeek.fri'), t('calendar.daysOfWeek.sat')].map((day, index) => {
                               const isSelected = field.value?.includes(index) || false
                               return (
                                 <Button
@@ -657,17 +646,17 @@ export function EventFormDialog({
                     name="recurrenceEndType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Ends *</FormLabel>
+                        <FormLabel>{t('calendar.ends')} *</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select when to end" />
+                              <SelectValue placeholder={t('calendar.selectWhenToEnd')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="never">Never</SelectItem>
-                            <SelectItem value="until">On date</SelectItem>
-                            <SelectItem value="count">After occurrences</SelectItem>
+                            <SelectItem value="never">{t('calendar.never')}</SelectItem>
+                            <SelectItem value="until">{t('calendar.onDate')}</SelectItem>
+                            <SelectItem value="count">{t('calendar.afterOccurrences')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -681,35 +670,14 @@ export function EventFormDialog({
                       name="recurrenceEndDate"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>End Date *</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  className={cn(
-                                    'pl-3 text-left font-normal',
-                                    !field.value && 'text-muted-foreground'
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, 'PPP')
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
+                          <FormLabel>{t('calendar.endDate')} *</FormLabel>
+                          <FormControl>
+                            <DatePicker
+                              date={field.value}
+                              onSelect={field.onChange}
+                              placeholder={t('calendar.pickDate')}
+                            />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -722,7 +690,7 @@ export function EventFormDialog({
                       name="recurrenceCount"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Number of Occurrences *</FormLabel>
+                          <FormLabel>{t('calendar.numberOfOccurrences')} *</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
@@ -747,10 +715,10 @@ export function EventFormDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t('calendar.descriptionLabel')}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Add any additional details about this event..."
+                      placeholder={t('calendar.descriptionPlaceholder')}
                       className="resize-none"
                       rows={3}
                       {...field}
@@ -768,11 +736,11 @@ export function EventFormDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isLoading}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isEditing ? 'Update Event' : 'Create Event'}
+                {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+                {isEditing ? t('calendar.updateEvent') : t('calendar.createEvent')}
               </Button>
             </DialogFooter>
           </form>
