@@ -94,14 +94,19 @@ const nextConfig = {
 
       // Bundle analyzer (only when ANALYZE=true)
       if (process.env.ANALYZE === 'true') {
-        const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
-        config.plugins.push(
-          new BundleAnalyzerPlugin({
-            analyzerMode: 'static',
-            reportFilename: './analyze.html',
-            openAnalyzer: false,
-          })
-        )
+        try {
+          const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+          config.plugins.push(
+            new BundleAnalyzerPlugin({
+              analyzerMode: 'static',
+              reportFilename: './analyze.html',
+              openAnalyzer: false,
+            })
+          )
+          console.log('📊 Bundle analyzer enabled - report will be generated at .next/analyze.html')
+        } catch (e) {
+          console.warn('⚠️  webpack-bundle-analyzer not installed. Run: npm install --save-dev webpack-bundle-analyzer')
+        }
       }
     }
     return config
