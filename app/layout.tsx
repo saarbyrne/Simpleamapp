@@ -11,8 +11,11 @@ import { ErrorBoundary } from '@/components/error-boundary'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '600'], // Reduced from 5 to 2 weights for performance
   variable: '--font-plus-jakarta-sans',
+  display: 'swap', // Prevent invisible text during load
+  preload: true,
+  adjustFontFallback: true,
 })
 
 // Include Sentry trace data in the metadata for request correlation.
