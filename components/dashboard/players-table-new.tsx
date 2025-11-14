@@ -310,7 +310,7 @@ const createColumns = (
       const player = row.original
       return (
         <div className="flex justify-end">
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
                 <MoreHorizontal className="h-4 w-4" />
@@ -379,6 +379,8 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
 
   // Track if component has mounted to prevent initial URL update
   const isMounted = useRef(false)
+  // Track if we're in initial URL sync to prevent triggering URL updates
+  const isInitialUrlSync = useRef(true)
   // Track the last URL search string we processed
   const lastUrlSearchRef = useRef<string>('')
   // Track the last pathname to detect route changes
@@ -422,18 +424,18 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
   const syncStateFromURL = useCallback(() => {
     if (typeof window === 'undefined') return
     if (!isMounted.current) return // Don't update state before mount
-    
+
     const currentSearch = window.location.search
     const currentPathname = window.location.pathname
-    
+
     // If pathname changed, reset the last search ref to force sync
     if (currentPathname !== lastPathnameRef.current) {
       lastPathnameRef.current = currentPathname
       lastUrlSearchRef.current = '' // Force sync on route change
     }
-    
+
     const params = new URLSearchParams(currentSearch)
-    
+
     // Read URL params and update state if they exist
     const urlSearch = params.get('search')
     const urlPosition = params.get('position')
@@ -443,26 +445,34 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     const urlPageSize = params.get('pageSize')
     const urlSort = params.get('sort')
     const urlVisibility = params.get('visibility')
-    
+
     // Check if URL has any filter params
-    const hasUrlParams = urlSearch !== null || urlPosition !== null || urlStatus !== null || 
+    const hasUrlParams = urlSearch !== null || urlPosition !== null || urlStatus !== null ||
                          urlNationality !== null || urlPage !== null || urlPageSize !== null ||
                          urlSort !== null || urlVisibility !== null
-    
+
     // Create a signature of current state to compare
     const currentStateSignature = `${currentSearch}-${hasUrlParams}`
-    
+
     // Skip if URL and state signature haven't changed
-    if (currentStateSignature === lastUrlSearchRef.current) return
-    
+    if (currentStateSignature === lastUrlSearchRef.current) {
+      // Still mark initial sync as complete if this is the first call
+      if (isInitialUrlSync.current) {
+        setTimeout(() => {
+          isInitialUrlSync.current = false
+        }, 0)
+      }
+      return
+    }
+
     lastUrlSearchRef.current = currentStateSignature
-    
+
     // Use startTransition to batch state updates and avoid hydration issues
     // Double-check mounted state inside the transition to prevent updates after unmount
     startTransition(() => {
       // Ensure component is still mounted before updating state
       if (!isMounted.current) return
-      
+
       // Batch all state updates together to avoid hydration issues
       if (hasUrlParams) {
         // Use URL params - batch updates
@@ -470,14 +480,14 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
         setPositionFilter(urlPosition || 'all')
         setStatusFilter(urlStatus || 'all')
         setNationalityFilter(urlNationality || 'all')
-        
+
         const pageNum = urlPage ? parseInt(urlPage, 10) : 0
         const pageSizeNum = urlPageSize ? parseInt(urlPageSize, 10) : 20
         setPagination({
           pageIndex: !isNaN(pageNum) ? pageNum : 0,
           pageSize: !isNaN(pageSizeNum) ? pageSizeNum : 20,
         })
-        
+
         if (urlSort) {
           try {
             setSorting(JSON.parse(urlSort))
@@ -487,7 +497,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
         } else {
           setSorting([])
         }
-        
+
         if (urlVisibility) {
           try {
             setColumnVisibility(JSON.parse(urlVisibility))
@@ -525,6 +535,11 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
         }
       }
     })
+
+    // Mark initial URL sync as complete after a delay to ensure state updates are processed
+    setTimeout(() => {
+      isInitialUrlSync.current = false
+    }, 0)
   }, [loadFiltersFromStorage])
 
   // Read URL params on mount and when URL/pathname changes
@@ -582,9 +597,9 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     }
   }, [pathname, syncStateFromURL])
 
-  // Update URL params when filters change (skip initial mount)
+  // Update URL params when filters change (skip initial mount and initial URL sync)
   useEffect(() => {
-    if (!isMounted.current || typeof window === 'undefined') return
+    if (!isMounted.current || isInitialUrlSync.current || typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
     
     // Update or remove filter params

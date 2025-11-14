@@ -30,7 +30,7 @@
     "attendingCount": "{attending} of {total} attending",
     "blankEvent": "Blank Event",
     "chooseTemplate": "Choose a template...",
-    "completeCanvasModule": "Complete the Canvas module to enable this feature",
+    "completeCanvasModule": "Completa il modulo Lavagna per abilitare questa funzione",
     "completeFilesModule": "Complete the Files module to enable this feature",
     "completeNotesModule": "Complete the Notes module to enable this feature",
     "completeSpreadsheetsModule": "Complete the Spreadsheets module to enable this feature",
@@ -99,10 +99,10 @@
     "startTime": "Start Time",
     "tabs": {
       "attendance": "Attendance",
-      "canvas": "Canvas",
-      "canvasDescription": "Link canvas modules for formations, tactics, and session plans. Canvas content will appear here when the Canvas module is implemented.",
+      "canvas": "Lavagna",
+      "canvasDescription": "Collega moduli di lavagna per formazioni, tattiche e piani di sessione. Il contenuto della lavagna apparirà qui quando il modulo Lavagna sarà implementato.",
       "data": "Data",
-      "eventCanvas": "Event Canvas",
+      "eventCanvas": "Lavagna dell'Evento",
       "eventFiles": "Event Files",
       "eventForms": "Event Forms",
       "eventNotes": "Event Notes",
@@ -389,14 +389,15 @@
   },
   "nav": {
     "calendar": "Calendario",
-    "canvas": "Tela",
+    "canvas": "Lavagna",
     "files": "File",
     "forms": "Moduli",
     "notes": "Note",
     "planner": "Pianificatore",
     "players": "Giocatori",
     "reports": "Rapporti",
-    "spreadsheets": "Fogli di calcolo"
+    "spreadsheets": "Fogli di calcolo",
+    "tactics": "Tattiche"
   },
   "notes": {
     "description": "Crea e gestisci note",

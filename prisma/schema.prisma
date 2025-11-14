@@ -36,6 +36,8 @@ model Organization {
   spreadsheets       Spreadsheet[]
   spreadsheetTemplates SpreadsheetTemplate[]
   canvasBoards       CanvasBoard[]
+  drawings           Drawing[]
+  drawingTemplates   DrawingTemplate[]
   plans              Plan[]
   subscriptions      Subscription[]
   organizationRoles  OrganizationRole[]
@@ -449,6 +451,85 @@ model CanvasBoard {
   updatedAt DateTime @updatedAt
 
   @@map("canvas_boards")
+}
+
+// Tactical drawings/whiteboard templates
+model DrawingTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String // "formation", "drill", "set_piece", "tactics"
+  sport       String   @default("football") // "football", "rugby", "basketball"
+
+  // Template data
+  data        Json // Excalidraw scene data
+  thumbnailUrl String?
+
+  // Global vs organization-specific
+  isGlobal    Boolean @default(false)
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Community features
+  downloads   Int @default(0)
+  rating      Float?
+
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  drawings    Drawing[]
+
+  @@index([isGlobal, category])
+  @@index([organizationId, category])
+  @@index([category, downloads])
+  @@map("drawing_templates")
+}
+
+// Tactical drawings/whiteboard instances
+model Drawing {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+
+  // Type/category
+  type        String? // "formation", "drill", "tactics", "set_piece", "session_plan"
+  tags        String[]
+
+  // Excalidraw data
+  data        Json // Excalidraw scene data
+
+  // Preview image
+  thumbnailUrl String? // PNG preview for library view
+
+  // Linked to entities
+  linkedToType String? // "event", "plan", "note"
+  linkedToId   String?
+
+  // Template reference
+  isTemplate  Boolean @default(false)
+  templateId  String?
+  template    DrawingTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  // Sharing
+  isPublic    Boolean @default(false)
+  shareToken  String? @unique
+
+  // Organization
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([organizationId, updatedAt])
+  @@index([organizationId, type])
+  @@index([organizationId, createdBy])
+  @@index([organizationId, name])
+  @@index([organizationId, description])
+  @@index([organizationId, tags])
+  @@map("drawings")
 }
 
 // ============================================
