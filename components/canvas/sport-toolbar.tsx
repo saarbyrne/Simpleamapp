@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import type { ExcalidrawImperativeAPI } from '@excalidraw/excalidraw/dist/types/excalidraw/types'
+// Using any types for Excalidraw to avoid import issues
+type ExcalidrawImperativeAPI = any
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
@@ -84,119 +85,89 @@ export function SportToolbar({ excalidrawAPI }: SportToolbarProps) {
   }
 
   return (
-    <div className="w-64 border-r bg-background flex flex-col">
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-4">
-          {/* Pitch Templates */}
-          <div>
-            <h3 className="text-sm font-semibold mb-3">Pitch Templates</h3>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addElement('pitch-full')}
-                className="flex flex-col h-auto py-2"
-              >
-                <Map className="h-5 w-5 mb-1" />
-                <span className="text-xs">Full Pitch</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addElement('pitch-half')}
-                className="flex flex-col h-auto py-2"
-              >
-                <Map className="h-5 w-5 mb-1" />
-                <span className="text-xs">Half Pitch</span>
-              </Button>
-            </div>
-          </div>
+    <div className="flex items-center justify-center gap-2 px-4 py-3 bg-background">
+      {/* Selection Tool */}
+      <Button variant="default" size="icon" className="h-9 w-9">
+        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M2 4l12 8-5.5 1.5L6 18l-2-2 4.5-2.5L2 8V4z" />
+        </svg>
+      </Button>
 
-          <Separator />
+      {/* Players */}
+      <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => addElement('player')} title="Add Player">
+        <User className="h-4 w-4" />
+      </Button>
+      <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => addElement('player')} title="Add Player 2">
+        <User className="h-4 w-4" />
+      </Button>
 
-          {/* Players */}
-          <div>
-            <h3 className="text-sm font-semibold mb-3">Players</h3>
-            <div className="flex gap-2 mb-3">
-              <Button
-                variant={selectedTeam === 'team1' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedTeam('team1')}
-                className="flex-1"
-              >
-                <div className="w-3 h-3 rounded-full bg-blue-500 mr-2" />
-                Team 1
-              </Button>
-              <Button
-                variant={selectedTeam === 'team2' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedTeam('team2')}
-                className="flex-1"
-              >
-                <div className="w-3 h-3 rounded-full bg-red-500 mr-2" />
-                Team 2
-              </Button>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => addElement('player')}
-              className="w-full"
-            >
-              <User className="h-4 w-4 mr-2" />
-              Add Player
-            </Button>
-          </div>
+      {/* Arrow */}
+      <Button variant="ghost" size="icon" className="h-9 w-9" title="Draw Arrow">
+        <ArrowRight className="h-4 w-4" />
+      </Button>
 
-          <Separator />
+      {/* Rectangle */}
+      <Button variant="ghost" size="icon" className="h-9 w-9" title="Rectangle">
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" strokeWidth="2" />
+        </svg>
+      </Button>
 
-          {/* Equipment */}
-          <div>
-            <h3 className="text-sm font-semibold mb-3">Equipment</h3>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addElement('cone')}
-                className="flex flex-col h-auto py-2"
-              >
-                <Triangle className="h-5 w-5 mb-1 text-orange-500" />
-                <span className="text-xs">Cone</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addElement('ball')}
-                className="flex flex-col h-auto py-2"
-              >
-                <Ball className="h-5 w-5 mb-1" />
-                <span className="text-xs">Ball</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addElement('goal')}
-                className="flex flex-col h-auto py-2"
-              >
-                <Goal className="h-5 w-5 mb-1" />
-                <span className="text-xs">Goal</span>
-              </Button>
-            </div>
-          </div>
+      {/* Line */}
+      <Button variant="ghost" size="icon" className="h-9 w-9" title="Line">
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <line x1="5" y1="19" x2="19" y2="5" strokeWidth="2" />
+        </svg>
+      </Button>
 
-          <Separator />
+      {/* Pen */}
+      <Button variant="ghost" size="icon" className="h-9 w-9" title="Draw">
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        </svg>
+      </Button>
 
-          {/* Instructions */}
-          <div className="text-xs text-muted-foreground space-y-2">
-            <p className="font-medium">Tips:</p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>Click elements to add to center</li>
-              <li>Use arrow tool for movements</li>
-              <li>Double-click to add labels</li>
-              <li>Hold Shift to draw straight lines</li>
-            </ul>
-          </div>
-        </div>
-      </ScrollArea>
+      {/* Diamond */}
+      <Button variant="ghost" size="icon" className="h-9 w-9" title="Diamond" onClick={() => addElement('cone')}>
+        <Triangle className="h-4 w-4" />
+      </Button>
+
+      {/* Undo */}
+      <Button variant="ghost" size="icon" className="h-9 w-9" title="Undo">
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+        </svg>
+      </Button>
+
+      {/* Redo */}
+      <Button variant="ghost" size="icon" className="h-9 w-9" title="Redo">
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10H11a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" />
+        </svg>
+      </Button>
+
+      <Separator orientation="vertical" className="h-6 mx-2" />
+
+      {/* Full Pitch Button */}
+      <Button variant="outline" size="sm" onClick={() => addElement('pitch-full')} className="h-8">
+        Full Pitch
+      </Button>
+
+      {/* Grid */}
+      <Button variant="ghost" size="icon" className="h-9 w-9" title="Grid">
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+        </svg>
+      </Button>
+
+      {/* More */}
+      <Button variant="ghost" size="icon" className="h-9 w-9" title="More options">
+        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+          <circle cx="10" cy="5" r="1.5" />
+          <circle cx="10" cy="10" r="1.5" />
+          <circle cx="10" cy="15" r="1.5" />
+        </svg>
+      </Button>
     </div>
   )
 }

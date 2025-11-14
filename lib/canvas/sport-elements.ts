@@ -1,5 +1,6 @@
 // Sport-specific element generator for Excalidraw
-import type { ExcalidrawElement } from '@excalidraw/excalidraw/dist/types/excalidraw/element/types'
+// Using any types for Excalidraw to avoid import issues
+type ExcalidrawElement = any
 
 export type SportElementType =
   | 'player'
@@ -77,6 +78,7 @@ export function createPlayerElement(options: SportElementOptions): Partial<Excal
       updated: Date.now(),
       link: null,
       locked: false,
+      groupIds: [],
     } as any,
   ]
 
@@ -110,6 +112,7 @@ export function createPlayerElement(options: SportElementOptions): Partial<Excal
       updated: Date.now(),
       link: null,
       locked: false,
+      groupIds: [],
     } as any)
   }
 
@@ -143,6 +146,7 @@ export function createConeElement(options: SportElementOptions): Partial<Excalid
     updated: Date.now(),
     link: null,
     locked: false,
+      groupIds: [],
   } as any
 }
 
@@ -173,6 +177,7 @@ export function createBallElement(options: SportElementOptions): Partial<Excalid
     updated: Date.now(),
     link: null,
     locked: false,
+      groupIds: [],
   } as any
 }
 
@@ -206,6 +211,7 @@ export function createGoalElement(options: SportElementOptions): Partial<Excalid
       updated: Date.now(),
       link: null,
       locked: false,
+      groupIds: [],
     } as any,
     // Net pattern
     {
@@ -233,6 +239,7 @@ export function createGoalElement(options: SportElementOptions): Partial<Excalid
       updated: Date.now(),
       link: null,
       locked: false,
+      groupIds: [],
     } as any,
   ]
 }
@@ -269,6 +276,7 @@ export function createFootballPitchElement(
     updated: Date.now(),
     link: null,
     locked: false,
+      groupIds: [],
   } as any)
 
   // Center line
@@ -298,6 +306,7 @@ export function createFootballPitchElement(
       updated: Date.now(),
       link: null,
       locked: false,
+      groupIds: [],
     } as any)
 
     // Center circle
@@ -325,6 +334,7 @@ export function createFootballPitchElement(
       updated: Date.now(),
       link: null,
       locked: false,
+      groupIds: [],
     } as any)
   }
 
@@ -358,6 +368,7 @@ export function createFootballPitchElement(
       updated: Date.now(),
       link: null,
       locked: false,
+      groupIds: [],
     } as any)
   }
 
@@ -386,6 +397,7 @@ export function createFootballPitchElement(
     updated: Date.now(),
     link: null,
     locked: false,
+      groupIds: [],
   } as any)
 
   return elements
@@ -424,6 +436,7 @@ export function createMovementArrowElement(
     updated: Date.now(),
     link: null,
     locked: false,
+      groupIds: [],
     startBinding: null,
     endBinding: null,
     lastCommittedPoint: null,

@@ -38,9 +38,9 @@ import {
   Copy,
   Download,
   Trash2,
-  FileText,
   Loader2,
 } from 'lucide-react'
+import { TacticalIcon } from './tactical-icon'
 import { getDrawings, deleteDrawing, duplicateDrawing } from '@/app/actions/drawings'
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
@@ -66,19 +66,36 @@ export function DrawingLibrary() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [drawingToDelete, setDrawingToDelete] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const pageSize = 50
 
   useEffect(() => {
     loadDrawings()
-  }, [typeFilter])
+  }, [typeFilter, page, searchQuery])
 
   const loadDrawings = async () => {
     setLoading(true)
     try {
-      const result = await getDrawings(
-        typeFilter !== 'all' ? { type: typeFilter } : undefined
-      )
+      const filters: any = {
+        page,
+        pageSize,
+      }
+
+      if (typeFilter !== 'all') {
+        filters.type = typeFilter
+      }
+
+      if (searchQuery) {
+        filters.search = searchQuery
+      }
+
+      const result = await getDrawings(filters)
       if (result.success && result.drawings) {
         setDrawings(result.drawings as any)
+        setTotal(result.total || 0)
+        setHasMore(result.hasMore || false)
       } else {
         toast.error(result.error || 'Failed to load drawings')
       }
@@ -125,10 +142,6 @@ export function DrawingLibrary() {
     }
   }
 
-  const filteredDrawings = drawings.filter((drawing) =>
-    drawing.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
   return (
     <div className="space-y-6">
       {/* Toolbar */}
@@ -139,11 +152,20 @@ export function DrawingLibrary() {
             <Input
               placeholder="Search drawings..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setPage(1) // Reset to first page on search
+              }}
               className="pl-9"
             />
           </div>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <Select
+            value={typeFilter}
+            onValueChange={(value) => {
+              setTypeFilter(value)
+              setPage(1) // Reset to first page on filter change
+            }}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
@@ -168,9 +190,9 @@ export function DrawingLibrary() {
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
-      ) : filteredDrawings.length === 0 ? (
+      ) : drawings.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-center">
-          <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+          <TacticalIcon className="h-12 w-12 text-muted-foreground mb-4" size={48} />
           <h3 className="text-lg font-semibold mb-2">No drawings found</h3>
           <p className="text-muted-foreground mb-4">
             {searchQuery
@@ -183,8 +205,9 @@ export function DrawingLibrary() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filteredDrawings.map((drawing) => (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {drawings.map((drawing) => (
             <Card
               key={drawing.id}
               className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
@@ -198,7 +221,7 @@ export function DrawingLibrary() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <FileText className="h-12 w-12 text-muted-foreground" />
+                  <TacticalIcon className="h-12 w-12 text-muted-foreground" size={48} />
                 )}
               </div>
               <CardContent className="p-4">
@@ -268,8 +291,37 @@ export function DrawingLibrary() {
                 Updated {formatDistanceToNow(new Date(drawing.updatedAt))} ago
               </CardFooter>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {total > pageSize && (
+            <div className="flex items-center justify-between border-t pt-4">
+              <div className="text-sm text-muted-foreground">
+                Showing {Math.min((page - 1) * pageSize + 1, total)} to{' '}
+                {Math.min(page * pageSize, total)} of {total} drawings
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1 || loading}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => p + 1)}
+                  disabled={!hasMore || loading}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Create drawing dialog */}

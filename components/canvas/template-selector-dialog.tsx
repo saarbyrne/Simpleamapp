@@ -22,7 +22,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, Plus, FileText, Download } from 'lucide-react'
+import { Loader2, Plus, Download } from 'lucide-react'
+import { TacticalIcon } from './tactical-icon'
 import { toast } from 'sonner'
 import { getDrawingTemplates } from '@/app/actions/drawing-templates'
 import { createDrawing } from '@/app/actions/drawings'
@@ -86,6 +87,8 @@ export function TemplateSelectorDialog({
   }
 
   const handleCreate = async () => {
+    console.log('handleCreate called', { drawingName, drawingType, selectedTemplate })
+    
     if (!drawingName.trim()) {
       toast.error('Please enter a drawing name')
       return
@@ -110,6 +113,14 @@ export function TemplateSelectorDialog({
         }
       }
 
+      console.log('Calling createDrawing with:', {
+        name: drawingName,
+        description: drawingDescription || undefined,
+        type: drawingType || undefined,
+        hasData: !!initialData,
+        templateId: selectedTemplate || undefined,
+      })
+
       const result = await createDrawing({
         name: drawingName,
         description: drawingDescription || undefined,
@@ -118,23 +129,37 @@ export function TemplateSelectorDialog({
         templateId: selectedTemplate || undefined,
       })
 
+      console.log('createDrawing result:', result)
+
       if (result.success && result.drawing) {
         toast.success('Drawing created successfully')
-        router.push(`/dashboard/canvas/${result.drawing.id}`)
+        setCreating(false)
+        // Close dialog and navigate
         onClose()
+        // Navigate to the new drawing
+        router.push(`/dashboard/canvas/${result.drawing.id}`)
       } else {
-        toast.error(result.error || 'Failed to create drawing')
+        const errorMessage = result.error || 'Failed to create drawing'
+        console.error('Failed to create drawing:', errorMessage, result)
+        toast.error(errorMessage)
+        setCreating(false) // Reset creating state on error so user can try again
       }
     } catch (error) {
       console.error('Error creating drawing:', error)
-      toast.error('Failed to create drawing')
-    } finally {
-      setCreating(false)
+      toast.error(error instanceof Error ? error.message : 'Failed to create drawing')
+      setCreating(false) // Reset creating state on error
+    }
+  }
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen && !creating) {
+      // Only allow closing if not currently creating
+      onClose()
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Create New Drawing</DialogTitle>
@@ -241,7 +266,7 @@ export function TemplateSelectorDialog({
                                 className="w-full h-full object-cover rounded"
                               />
                             ) : (
-                              <FileText className="h-8 w-8 text-muted-foreground" />
+                              <TacticalIcon className="h-8 w-8 text-muted-foreground" size={32} />
                             )}
                           </div>
                           <div className="flex items-start justify-between gap-2">
@@ -279,7 +304,15 @@ export function TemplateSelectorDialog({
           <Button variant="outline" onClick={onClose} disabled={creating}>
             Cancel
           </Button>
-          <Button onClick={handleCreate} disabled={creating}>
+          <Button 
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              handleCreate()
+            }} 
+            disabled={creating}
+            type="button"
+          >
             {creating ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

@@ -3022,3 +3022,13 @@ html {
   outline: 2px solid hsl(var(--primary));
   outline-offset: -2px;
 }
+
+/* EMERGENCY FIX: Hide Excalidraw hand tool lock indicator */
+.excalidraw .HintViewer,
+.excalidraw [data-testid="canvas-lock-hint"],
+.excalidraw__canvas-lock-icon {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

@@ -10,7 +10,7 @@ import {
   ClipboardList,
   File,
   Table2,
-  Layout,
+  PencilRuler,
   ListTree,
   Loader2,
   X,
@@ -43,7 +43,7 @@ const entityIcons: Record<SearchEntityType, React.ComponentType<{ className?: st
   spreadsheet: Table2,
   spreadsheet_template: Table2,
   event_template: Calendar,
-  canvas: Layout,
+  canvas: PencilRuler,
   plan: ListTree,
 }
 
@@ -58,7 +58,7 @@ const entityLabels: Record<SearchEntityType, string> = {
   spreadsheet: 'Spreadsheets',
   spreadsheet_template: 'Spreadsheet Templates',
   event_template: 'Event Templates',
-  canvas: 'Canvas Boards',
+  canvas: 'Whiteboards',
   plan: 'Plans',
 }
 

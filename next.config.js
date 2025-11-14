@@ -19,6 +19,12 @@ const nextConfig = {
     instrumentationHook: true,
   },
   webpack: (config, { isServer }) => {
+    // Suppress warnings from dependencies
+    config.ignoreWarnings = [
+      /Critical dependency: the request of a dependency is an expression/,
+      /Critical dependency: require function is used in a way in which dependencies cannot be statically extracted/,
+    ]
+
     if (!isServer) {
       // Optimize client-side bundle splitting
       config.optimization.splitChunks = {

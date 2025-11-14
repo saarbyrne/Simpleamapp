@@ -480,6 +480,9 @@ model DrawingTemplate {
 
   drawings    Drawing[]
 
+  @@index([isGlobal, category])
+  @@index([organizationId, category])
+  @@index([category, downloads])
   @@map("drawing_templates")
 }
 
@@ -520,6 +523,9 @@ model Drawing {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([organizationId, updatedAt])
+  @@index([organizationId, type])
+  @@index([organizationId, createdBy])
   @@map("drawings")
 }
 

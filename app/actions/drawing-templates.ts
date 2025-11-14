@@ -150,6 +150,16 @@ export async function getDrawingTemplate(id: string) {
 }
 
 export async function incrementTemplateDownloads(id: string) {
+  'use server'
+
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    console.error('Auth error in incrementTemplateDownloads:', authError)
+    return { error: 'Unauthorized' }
+  }
+
   try {
     await prisma.drawingTemplate.update({
       where: { id },
@@ -160,67 +170,10 @@ export async function incrementTemplateDownloads(id: string) {
       },
     })
 
+    revalidatePath('/dashboard/canvas')
     return { success: true }
   } catch (error) {
     console.error('Error incrementing downloads:', error)
     return { error: 'Failed to increment downloads' }
   }
-}
-
-// Predefined global templates data
-export const GLOBAL_TEMPLATES = {
-  formations: [
-    {
-      name: '4-3-3 Formation',
-      description: 'Classic 4-3-3 attacking formation',
-      category: 'formation',
-      sport: 'football',
-    },
-    {
-      name: '4-4-2 Formation',
-      description: 'Traditional 4-4-2 balanced formation',
-      category: 'formation',
-      sport: 'football',
-    },
-    {
-      name: '3-5-2 Formation',
-      description: 'Wing-back heavy formation',
-      category: 'formation',
-      sport: 'football',
-    },
-    {
-      name: '4-2-3-1 Formation',
-      description: 'Defensive midfield duo with attacking midfield',
-      category: 'formation',
-      sport: 'football',
-    },
-  ],
-  setPieces: [
-    {
-      name: 'Corner Kick Routine',
-      description: 'Attacking corner kick setup',
-      category: 'set_piece',
-      sport: 'football',
-    },
-    {
-      name: 'Free Kick Wall Setup',
-      description: 'Defensive wall positioning',
-      category: 'set_piece',
-      sport: 'football',
-    },
-  ],
-  drills: [
-    {
-      name: 'Passing Drill (4 stations)',
-      description: '4-corner passing and movement drill',
-      category: 'drill',
-      sport: 'football',
-    },
-    {
-      name: 'Small-Sided Game (4v4)',
-      description: 'Small-sided game layout',
-      category: 'drill',
-      sport: 'football',
-    },
-  ],
 }

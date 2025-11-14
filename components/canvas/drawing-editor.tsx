@@ -1,17 +1,32 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Excalidraw } from '@excalidraw/excalidraw'
-import type { ExcalidrawImperativeAPI } from '@excalidraw/excalidraw/dist/types/excalidraw/types'
-import type { ExcalidrawElement } from '@excalidraw/excalidraw/dist/types/excalidraw/element/types'
+import dynamic from 'next/dynamic'
+import '@excalidraw/excalidraw/index.css'
+
+// Using any types to avoid import issues
+type ExcalidrawImperativeAPI = any
+type ExcalidrawElement = any
+
+// Dynamically import Excalidraw to avoid SSR issues
+const Excalidraw = dynamic(
+  async () => (await import('@excalidraw/excalidraw')).Excalidraw,
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-muted-foreground">Loading canvas...</div>
+      </div>
+    ),
+  }
+)
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Save, Download, Share2, Loader2, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { updateDrawing } from '@/app/actions/drawings'
 import { ExportDialog } from './export-dialog'
-import { SportToolbar } from './sport-toolbar'
-import { AiAssistant } from './ai-assistant'
+import { CanvasErrorBoundary } from './canvas-error-boundary'
 import {
   Sheet,
   SheetContent,
@@ -40,8 +55,27 @@ export function DrawingEditor({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
-  const [showAiAssistant, setShowAiAssistant] = useState(false)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Detect system theme preference - start with undefined to avoid hydration mismatch
+  const [theme, setTheme] = useState<'light' | 'dark' | undefined>(undefined)
+
+  useEffect(() => {
+    // Check if user prefers dark mode (only runs client-side)
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    setTheme(isDark ? 'dark' : 'light')
+
+    // Listen for theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleChange = (e: MediaQueryListEvent) => {
+      setTheme(e.matches ? 'dark' : 'light')
+    }
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
+
+  // Removed problematic updateScene call that was triggering onChange loop
+  // The selection tool is now set via initialData only
 
   // Auto-save functionality
   useEffect(() => {
@@ -64,7 +98,21 @@ export function DrawingEditor({
     }
   }, [hasUnsavedChanges])
 
+  // Track initialization to avoid false "unsaved changes"
+  // Use a more robust approach with timestamp to avoid race conditions
+  const initTimestamp = useRef<number>(Date.now())
+  const changeCountRef = useRef<number>(0)
+
   const handleChange = (elements: readonly ExcalidrawElement[], appState: any) => {
+    changeCountRef.current++
+
+    // Ignore the first 2 onChange calls which happen during initialization
+    // and any changes within the first 500ms after mount
+    const timeSinceInit = Date.now() - initTimestamp.current
+    if (changeCountRef.current <= 2 || timeSinceInit < 500) {
+      return
+    }
+
     setHasUnsavedChanges(true)
   }
 
@@ -82,6 +130,7 @@ export function DrawingEditor({
         appState: {
           viewBackgroundColor: appState.viewBackgroundColor,
           gridSize: appState.gridSize,
+          // Don't save activeTool state - always default to selection on load
         },
         files,
       }
@@ -114,97 +163,90 @@ export function DrawingEditor({
     toast.info('Share functionality coming soon')
   }
 
+  // Properly sanitize initialData while preserving user's viewport and preferences
+  const sanitizedInitialData = initialData ? {
+    elements: initialData.elements || [],
+    appState: {
+      // Preserve all existing appState properties
+      ...(initialData.appState || {}),
+      // Only override activeTool to prevent hand tool lock icon
+      activeTool: {
+        type: 'selection',
+        locked: false,
+        lastActiveTool: null,
+      },
+      // Ensure required properties have defaults if missing
+      currentItemTextAlign: initialData.appState?.currentItemTextAlign || 'left',
+      currentItemFontFamily: initialData.appState?.currentItemFontFamily || 1,
+      viewBackgroundColor: initialData.appState?.viewBackgroundColor || '#ffffff',
+    },
+    files: initialData.files || {},
+  } : {
+    // Empty canvas with selection tool - no blank pitch template
+    elements: [],
+    appState: {
+      activeTool: {
+        type: 'selection',
+        locked: false,
+        lastActiveTool: null,
+      },
+      viewBackgroundColor: '#ffffff',
+    },
+    files: {},
+  }
+
   return (
-    <div className="flex flex-col h-screen">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b bg-background">
-        <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold">{drawingName}</h2>
-          {hasUnsavedChanges && (
-            <Badge variant="secondary">Unsaved changes</Badge>
-          )}
+    <div className="flex flex-col h-screen overflow-hidden bg-background">
+      {/* Minimal Top Bar */}
+      <div className="flex items-center gap-3 px-4 py-2 border-b">
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </Button>
+        <div>
+          <h2 className="text-sm font-semibold">{drawingName}</h2>
+          <p className="text-xs text-muted-foreground">{drawingType || 'Tactical Board'}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2">
+          {hasUnsavedChanges && (
+            <span className="text-xs text-muted-foreground">Unsaved</span>
+          )}
           <Button
             onClick={handleSave}
             disabled={isSaving || !hasUnsavedChanges}
             size="sm"
+            variant="ghost"
           >
-            {isSaving ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save
-              </>
-            )}
+            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           </Button>
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            size="sm"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Export
+          <Button onClick={handleExport} size="sm" variant="ghost">
+            <Download className="h-4 w-4" />
           </Button>
-          <Button
-            variant="outline"
-            onClick={handleShare}
-            size="sm"
-          >
-            <Share2 className="h-4 w-4 mr-2" />
-            Share
-          </Button>
-          <Sheet open={showAiAssistant} onOpenChange={setShowAiAssistant}>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Sparkles className="h-4 w-4 mr-2" />
-                AI Assistant
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-              <SheetHeader>
-                <SheetTitle>AI Tactical Assistant</SheetTitle>
-                <SheetDescription>
-                  Get AI-powered suggestions for your tactical setup
-                </SheetDescription>
-              </SheetHeader>
-              <div className="mt-6">
-                <AiAssistant
-                  drawingData={initialData}
-                  drawingType={drawingType}
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
         </div>
       </div>
 
-      {/* Main editor area */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sport-specific toolbar */}
-        <SportToolbar excalidrawAPI={excalidrawAPI} />
-
-        {/* Excalidraw canvas */}
-        <div className="flex-1">
+      {/* Canvas - Using Excalidraw's native toolbar */}
+      <div className="flex-1 relative overflow-hidden">
+        <CanvasErrorBoundary>
           <Excalidraw
             excalidrawAPI={(api) => setExcalidrawAPI(api)}
-            initialData={initialData}
+            initialData={sanitizedInitialData}
             onChange={handleChange}
+            viewModeEnabled={false}
+            zenModeEnabled={false}
+            theme={theme}
             UIOptions={{
               canvasActions: {
-                changeViewBackgroundColor: true,
-                clearCanvas: true,
-                export: false, // We handle this
+                changeViewBackgroundColor: false,
+                clearCanvas: false,
+                export: { saveFileToDisk: false },
                 loadScene: false,
                 saveAsImage: false,
               },
             }}
           />
-        </div>
+        </CanvasErrorBoundary>
       </div>
 
       {/* Export dialog */}

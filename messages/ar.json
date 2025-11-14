@@ -30,7 +30,7 @@
     "attendingCount": "{attending} of {total} attending",
     "blankEvent": "Blank Event",
     "chooseTemplate": "Choose a template...",
-    "completeCanvasModule": "Complete the Canvas module to enable this feature",
+    "completeCanvasModule": "أكمل وحدة السبورة لتمكين هذه الميزة",
     "completeFilesModule": "Complete the Files module to enable this feature",
     "completeNotesModule": "Complete the Notes module to enable this feature",
     "completeSpreadsheetsModule": "Complete the Spreadsheets module to enable this feature",
@@ -99,10 +99,10 @@
     "startTime": "Start Time",
     "tabs": {
       "attendance": "Attendance",
-      "canvas": "Canvas",
-      "canvasDescription": "Link canvas modules for formations, tactics, and session plans. Canvas content will appear here when the Canvas module is implemented.",
+      "canvas": "السبورة",
+      "canvasDescription": "اربط وحدات السبورة للتشكيلات والتكتيكات وخطط الجلسات. سيظهر محتوى السبورة هنا عند تنفيذ وحدة السبورة.",
       "data": "Data",
-      "eventCanvas": "Event Canvas",
+      "eventCanvas": "سبورة الحدث",
       "eventFiles": "Event Files",
       "eventForms": "Event Forms",
       "eventNotes": "Event Notes",
@@ -389,14 +389,15 @@
   },
   "nav": {
     "calendar": "التقويم",
-    "canvas": "اللوحة",
+    "canvas": "السبورة",
     "files": "الملفات",
     "forms": "النماذج",
     "notes": "الملاحظات",
     "planner": "المخطط",
     "players": "اللاعبون",
     "reports": "التقارير",
-    "spreadsheets": "جداول البيانات"
+    "spreadsheets": "جداول البيانات",
+    "tactics": "التكتيكات"
   },
   "notes": {
     "description": "إنشاء وإدارة الملاحظات",

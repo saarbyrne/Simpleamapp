@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import type { ExcalidrawImperativeAPI } from '@excalidraw/excalidraw/dist/types/excalidraw/types'
+// Using any types for Excalidraw to avoid import issues
+type ExcalidrawImperativeAPI = any
+
 import {
   Dialog,
   DialogContent,
@@ -22,8 +24,6 @@ import {
 } from '@/components/ui/select'
 import { Loader2, Download } from 'lucide-react'
 import { toast } from 'sonner'
-import { exportToCanvas, exportToSvg } from '@excalidraw/excalidraw'
-import jsPDF from 'jspdf'
 
 interface ExportDialogProps {
   excalidrawAPI: ExcalidrawImperativeAPI
@@ -80,8 +80,12 @@ export function ExportDialog({
   }
 
   const exportToPNG = async (options: any, scale: ExportScale) => {
+    const { exportToCanvas } = await import('@excalidraw/excalidraw')
+
     const canvas = await exportToCanvas({
-      ...options,
+      elements: options.elements,
+      appState: options.appState,
+      files: options.files,
       getDimensions: (width: number, height: number) => ({
         width: width * scale,
         height: height * scale,
@@ -89,7 +93,7 @@ export function ExportDialog({
       }),
     })
 
-    canvas.toBlob((blob) => {
+    canvas.toBlob((blob: Blob | null) => {
       if (blob) {
         const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
@@ -102,7 +106,13 @@ export function ExportDialog({
   }
 
   const exportToSVG = async (options: any) => {
-    const svg = await exportToSvg(options)
+    const { exportToSvg } = await import('@excalidraw/excalidraw')
+
+    const svg = await exportToSvg({
+      elements: options.elements,
+      appState: options.appState,
+      files: options.files,
+    })
     const svgString = new XMLSerializer().serializeToString(svg)
     const blob = new Blob([svgString], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
@@ -114,26 +124,54 @@ export function ExportDialog({
   }
 
   const exportToPDF = async (options: any, scale: ExportScale) => {
-    const canvas = await exportToCanvas({
-      ...options,
-      getDimensions: (width: number, height: number) => ({
-        width: width * scale,
-        height: height * scale,
-        scale,
-      }),
-    })
+    try {
+      const { exportToCanvas } = await import('@excalidraw/excalidraw')
 
-    const imgData = canvas.toDataURL('image/png')
+      const canvas = await exportToCanvas({
+        elements: options.elements,
+        appState: options.appState,
+        files: options.files,
+        getDimensions: (width: number, height: number) => ({
+          width: width * scale,
+          height: height * scale,
+          scale,
+        }),
+      })
 
-    // Create PDF with appropriate size
-    const pdf = new jsPDF({
-      orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
-      unit: 'px',
-      format: [canvas.width, canvas.height],
-    })
+      const imgData = canvas.toDataURL('image/png')
 
-    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height)
-    pdf.save(`${drawingName}.pdf`)
+      // Create PDF with appropriate size
+      let jsPDFModule
+      try {
+        jsPDFModule = await import('jspdf')
+      } catch (error) {
+        console.error('Failed to load jsPDF:', error)
+        toast.error('PDF export is not available. Please try PNG or SVG export instead.')
+        throw new Error('jsPDF module failed to load')
+      }
+
+      const JsPDFConstructor = jsPDFModule.jsPDF || jsPDFModule.default
+
+      if (!JsPDFConstructor) {
+        toast.error('PDF export library not properly loaded. Please try PNG or SVG export.')
+        throw new Error('jsPDF constructor not found')
+      }
+
+      const pdf = new JsPDFConstructor({
+        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height],
+      })
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height)
+      pdf.save(`${drawingName}.pdf`)
+    } catch (error) {
+      console.error('PDF export error:', error)
+      if (error instanceof Error && !error.message.includes('jsPDF')) {
+        toast.error('Failed to export PDF. Please try again or use PNG/SVG format.')
+      }
+      throw error
+    }
   }
 
   return (
