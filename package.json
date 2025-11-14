@@ -126,6 +126,7 @@
     "test:a11y": "playwright test --grep \"@a11y\"",
     "test:a11y:audit": "npx tsx scripts/a11y-audit.ts",
     "test:perf": "lhci autorun",
+    "analyze": "ANALYZE=true npm run build",
     "rtl:scan": "node scripts/rtl-scanner.js",
     "rtl:fix": "node scripts/rtl-scanner.js --fix",
     "rtl:fix:apply": "node scripts/rtl-scanner.js --fix --no-dry-run",
