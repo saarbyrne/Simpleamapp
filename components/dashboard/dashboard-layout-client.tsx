@@ -148,10 +148,14 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
   disablePageFrame = false,
 }: DashboardLayoutClientProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false)
   const [isAddEventOpen, setIsAddEventOpen] = useState(false)
   const [isAddFormOpen, setIsAddFormOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+
+  // Auto-disable page frame for canvas pages to allow full height usage
+  const shouldDisablePageFrame = disablePageFrame || pathname?.includes('/canvas/')
 
   // Enable keyboard shortcut for search (/ or Cmd/Ctrl+K)
   useSearchShortcut(() => setIsSearchOpen(true))
@@ -191,7 +195,7 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
               />
             </header>
           </div>
-          {disablePageFrame ? (
+          {shouldDisablePageFrame ? (
             <div className="flex flex-1 flex-col bg-page-background overflow-y-auto overflow-x-hidden">
               {children}
             </div>

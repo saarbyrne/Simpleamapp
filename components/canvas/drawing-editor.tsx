@@ -1,12 +1,57 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import '@excalidraw/excalidraw/index.css'
 
 // Using any types to avoid import issues
 type ExcalidrawImperativeAPI = any
 type ExcalidrawElement = any
+
+// Wrapper component to handle Excalidraw parentNode errors with React 18
+function ExcalidrawWrapper({
+  excalidrawAPI,
+  initialData,
+  onChange,
+  theme,
+}: {
+  excalidrawAPI: (api: ExcalidrawImperativeAPI) => void
+  initialData: any
+  onChange: (elements: readonly ExcalidrawElement[], appState: any) => void
+  theme: 'light' | 'dark' | undefined
+}) {
+  return (
+    <Excalidraw
+      excalidrawAPI={(api) => {
+        try {
+          excalidrawAPI(api)
+        } catch (error) {
+          console.warn('Excalidraw API error:', error)
+        }
+      }}
+      initialData={initialData}
+      onChange={(elements, appState) => {
+        try {
+          onChange(elements, appState)
+        } catch (error) {
+          console.warn('Excalidraw onChange error:', error)
+        }
+      }}
+      viewModeEnabled={false}
+      zenModeEnabled={false}
+      theme={theme}
+      UIOptions={{
+        canvasActions: {
+          changeViewBackgroundColor: false,
+          clearCanvas: false,
+          export: { saveFileToDisk: false },
+          loadScene: false,
+          saveAsImage: false,
+        },
+      }}
+    />
+  )
+}
 
 // Dynamically import Excalidraw to avoid SSR issues
 const Excalidraw = dynamic(
@@ -22,7 +67,7 @@ const Excalidraw = dynamic(
 )
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Save, Download, Share2, Loader2, Sparkles } from 'lucide-react'
+import { Save, Share2, Loader2, Sparkles, Menu, Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { updateDrawing } from '@/app/actions/drawings'
 import { ExportDialog } from './export-dialog'
@@ -35,6 +80,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 interface DrawingEditorProps {
   drawingId: string
@@ -74,37 +125,19 @@ export function DrawingEditor({
     return () => mediaQuery.removeEventListener('change', handleChange)
   }, [])
 
+
   // Removed problematic updateScene call that was triggering onChange loop
   // The selection tool is now set via initialData only
-
-  // Auto-save functionality
-  useEffect(() => {
-    if (hasUnsavedChanges && excalidrawAPI) {
-      // Clear previous timer
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current)
-      }
-
-      // Set new timer for auto-save after 3 seconds of inactivity
-      autoSaveTimerRef.current = setTimeout(() => {
-        handleSave()
-      }, 3000)
-    }
-
-    return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current)
-      }
-    }
-  }, [hasUnsavedChanges])
 
   // Track initialization to avoid false "unsaved changes"
   // Use a more robust approach with timestamp to avoid race conditions
   const initTimestamp = useRef<number>(Date.now())
   const changeCountRef = useRef<number>(0)
+  const lastChangeTimeRef = useRef<number>(0)
 
   const handleChange = (elements: readonly ExcalidrawElement[], appState: any) => {
     changeCountRef.current++
+    lastChangeTimeRef.current = Date.now()
 
     // Ignore the first 2 onChange calls which happen during initialization
     // and any changes within the first 500ms after mount
@@ -116,10 +149,12 @@ export function DrawingEditor({
     setHasUnsavedChanges(true)
   }
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async (showFeedback: boolean = true) => {
     if (!excalidrawAPI) return
 
-    setIsSaving(true)
+    if (showFeedback) {
+      setIsSaving(true)
+    }
     try {
       const elements = excalidrawAPI.getSceneElements()
       const appState = excalidrawAPI.getAppState()
@@ -141,22 +176,59 @@ export function DrawingEditor({
 
       if (result.success) {
         setHasUnsavedChanges(false)
-        toast.success('Drawing saved successfully')
+        if (showFeedback) {
+          toast.success('Drawing saved successfully')
+        }
         onSave?.()
       } else {
-        toast.error(result.error || 'Failed to save drawing')
+        if (showFeedback) {
+          toast.error(result.error || 'Failed to save drawing')
+        } else {
+          console.warn('Save failed:', result.error)
+        }
       }
     } catch (error) {
       console.error('Error saving drawing:', error)
-      toast.error('Failed to save drawing')
+      if (showFeedback) {
+        toast.error('Failed to save drawing')
+      }
     } finally {
-      setIsSaving(false)
+      if (showFeedback) {
+        setIsSaving(false)
+      }
     }
-  }
+  }, [excalidrawAPI, drawingId, onSave])
 
-  const handleExport = () => {
-    setShowExportDialog(true)
-  }
+  // Auto-save function without visual feedback to prevent flickering
+  const performAutoSave = useCallback(async () => {
+    await handleSave(false)
+  }, [handleSave])
+
+  // Auto-save functionality - only save when user has been inactive for 2+ seconds
+  useEffect(() => {
+    if (hasUnsavedChanges && excalidrawAPI) {
+      // Clear previous timer
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current)
+      }
+
+      // Set new timer for auto-save after 10 seconds of inactivity
+      autoSaveTimerRef.current = setTimeout(() => {
+        // Check if user has been inactive for at least 2 seconds before auto-saving
+        const timeSinceLastChange = Date.now() - lastChangeTimeRef.current
+        if (timeSinceLastChange >= 2000) {
+          // Perform auto-save without visual feedback to avoid flickering
+          performAutoSave()
+        }
+      }, 10000)
+    }
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current)
+      }
+    }
+  }, [hasUnsavedChanges, excalidrawAPI, performAutoSave])
 
   const handleShare = () => {
     // TODO: Implement share functionality
@@ -196,55 +268,51 @@ export function DrawingEditor({
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background">
-      {/* Minimal Top Bar */}
-      <div className="flex items-center gap-3 px-4 py-2 border-b">
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </Button>
-        <div>
-          <h2 className="text-sm font-semibold">{drawingName}</h2>
-          <p className="text-xs text-muted-foreground">{drawingType || 'Tactical Board'}</p>
+    <div className="flex flex-col h-full overflow-hidden bg-background">
+      {/* Canvas - Using Excalidraw's native toolbar */}
+      <div className="flex-1 relative overflow-hidden">
+        {/* Canvas Menu */}
+        <div className="fixed top-4 left-4 z-50">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border shadow-lg"
+              >
+                <Menu className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuItem onClick={() => setShowExportDialog(true)}>
+                <Download className="mr-2 h-4 w-4" />
+                Download Canvas
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+
+        {/* Floating Action Bar */}
+        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 bg-background/80 backdrop-blur-sm border rounded-lg px-3 py-2 shadow-lg">
           {hasUnsavedChanges && (
             <span className="text-xs text-muted-foreground">Unsaved</span>
           )}
           <Button
-            onClick={handleSave}
+            onClick={() => handleSave()}
             disabled={isSaving || !hasUnsavedChanges}
             size="sm"
             variant="ghost"
+            className="h-8 w-8 p-0"
           >
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           </Button>
-          <Button onClick={handleExport} size="sm" variant="ghost">
-            <Download className="h-4 w-4" />
-          </Button>
         </div>
-      </div>
-
-      {/* Canvas - Using Excalidraw's native toolbar */}
-      <div className="flex-1 relative overflow-hidden">
         <CanvasErrorBoundary>
-          <Excalidraw
+          <ExcalidrawWrapper
             excalidrawAPI={(api) => setExcalidrawAPI(api)}
             initialData={sanitizedInitialData}
             onChange={handleChange}
-            viewModeEnabled={false}
-            zenModeEnabled={false}
             theme={theme}
-            UIOptions={{
-              canvasActions: {
-                changeViewBackgroundColor: false,
-                clearCanvas: false,
-                export: { saveFileToDisk: false },
-                loadScene: false,
-                saveAsImage: false,
-              },
-            }}
           />
         </CanvasErrorBoundary>
       </div>

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -54,7 +55,50 @@ interface Drawing {
   tags: string[]
   thumbnailUrl: string | null
   createdAt: Date
-  updatedAt: Date
+  updatedAt:   Date
+}
+
+// Lazy loading image component using Next.js Image
+function LazyImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [isInView, setIsInView] = useState(false)
+  const imgRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.1, rootMargin: '50px' }
+    )
+
+    if (imgRef.current) {
+      observer.observe(imgRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
+  if (!isInView) {
+    return <div ref={imgRef} className={className} />
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      className={`${className} object-cover`}
+      onLoad={() => setIsLoaded(true)}
+      style={{
+        opacity: isLoaded ? 1 : 0,
+        transition: 'opacity 0.3s ease-in-out'
+      }}
+    />
+  )
 }
 
 export function DrawingLibrary() {
@@ -62,6 +106,7 @@ export function DrawingLibrary() {
   const [drawings, setDrawings] = useState<Drawing[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -69,17 +114,29 @@ export function DrawingLibrary() {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [hasMore, setHasMore] = useState(false)
-  const pageSize = 50
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const pageSize = 20 // Match server default
 
+  // Debounce search query to avoid too many API calls
   useEffect(() => {
-    loadDrawings()
-  }, [typeFilter, page, searchQuery])
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery)
+    }, 300) // 300ms debounce
 
-  const loadDrawings = async () => {
-    setLoading(true)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  const loadDrawings = useCallback(async (append: boolean = false) => {
+    if (append) {
+      setIsLoadingMore(true)
+    } else {
+      setLoading(true)
+      setPage(1) // Reset to first page when doing fresh load
+    }
+
     try {
       const filters: any = {
-        page,
+        page: append ? page : 1,
         pageSize,
       }
 
@@ -87,25 +144,30 @@ export function DrawingLibrary() {
         filters.type = typeFilter
       }
 
-      if (searchQuery) {
-        filters.search = searchQuery
+      if (debouncedSearchQuery) {
+        filters.search = debouncedSearchQuery
       }
 
       const result = await getDrawings(filters)
-      if (result.success && result.drawings) {
-        setDrawings(result.drawings as any)
+      if ('error' in result) {
+        toast.error(result.error || 'Failed to load drawings')
+      } else if (result.drawings) {
+        if (append) {
+          setDrawings(prev => [...prev, ...(result.drawings as any)])
+        } else {
+          setDrawings(result.drawings as any)
+        }
         setTotal(result.total || 0)
         setHasMore(result.hasMore || false)
-      } else {
-        toast.error(result.error || 'Failed to load drawings')
       }
     } catch (error) {
       console.error('Error loading drawings:', error)
       toast.error('Failed to load drawings')
     } finally {
       setLoading(false)
+      setIsLoadingMore(false)
     }
-  }
+  }, [page, pageSize, typeFilter, debouncedSearchQuery])
 
   const handleDelete = async () => {
     if (!drawingToDelete) return
@@ -142,6 +204,40 @@ export function DrawingLibrary() {
     }
   }
 
+  // Load drawings when filters change
+  useEffect(() => {
+    loadDrawings(false)
+  }, [typeFilter, debouncedSearchQuery, loadDrawings])
+
+  // Infinite scroll handler
+  const loadMoreDrawings = useCallback(() => {
+    if (hasMore && !isLoadingMore && !loading) {
+      setPage(prev => prev + 1)
+      loadDrawings(true)
+    }
+  }, [hasMore, isLoadingMore, loading, loadDrawings])
+
+  // Intersection observer for infinite scroll
+  useEffect(() => {
+    if (!hasMore || isLoadingMore || loading) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMoreDrawings()
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    )
+
+    const sentinel = document.getElementById('infinite-scroll-sentinel')
+    if (sentinel) {
+      observer.observe(sentinel)
+    }
+
+    return () => observer.disconnect()
+  }, [hasMore, isLoadingMore, loading, loadMoreDrawings])
+
   return (
     <div className="space-y-6">
       {/* Toolbar */}
@@ -154,7 +250,7 @@ export function DrawingLibrary() {
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value)
-                setPage(1) // Reset to first page on search
+                // Page will be reset by the debounced effect
               }}
               className="pl-9"
             />
@@ -187,8 +283,26 @@ export function DrawingLibrary() {
 
       {/* Drawing grid */}
       {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {Array.from({ length: pageSize }).map((_, i) => (
+            <Card key={`skeleton-${i}`} className="overflow-hidden">
+              <div className="aspect-video bg-muted animate-pulse" />
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                  <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+                </div>
+                <div className="h-3 bg-muted animate-pulse rounded w-full mb-2" />
+                <div className="flex gap-2">
+                  <div className="h-5 bg-muted animate-pulse rounded w-16" />
+                  <div className="h-5 bg-muted animate-pulse rounded w-12" />
+                </div>
+              </CardContent>
+              <CardFooter className="p-4 pt-0">
+                <div className="h-3 bg-muted animate-pulse rounded w-24" />
+              </CardFooter>
+            </Card>
+          ))}
         </div>
       ) : drawings.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -213,12 +327,12 @@ export function DrawingLibrary() {
               className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
               onClick={() => router.push(`/dashboard/canvas/${drawing.id}`)}
             >
-              <div className="aspect-video bg-muted flex items-center justify-center">
+              <div className="aspect-video bg-muted flex items-center justify-center relative overflow-hidden">
                 {drawing.thumbnailUrl ? (
-                  <img
+                  <LazyImage
                     src={drawing.thumbnailUrl}
                     alt={drawing.name}
-                    className="w-full h-full object-cover"
+                    className="transition-opacity duration-300"
                   />
                 ) : (
                   <TacticalIcon className="h-12 w-12 text-muted-foreground" size={48} />
@@ -294,31 +408,27 @@ export function DrawingLibrary() {
             ))}
           </div>
 
-          {/* Pagination */}
-          {total > pageSize && (
-            <div className="flex items-center justify-between border-t pt-4">
-              <div className="text-sm text-muted-foreground">
-                Showing {Math.min((page - 1) * pageSize + 1, total)} to{' '}
-                {Math.min(page * pageSize, total)} of {total} drawings
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1 || loading}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={!hasMore || loading}
-                >
-                  Next
-                </Button>
-              </div>
+          {/* Infinite scroll sentinel and loading indicator */}
+          {hasMore && (
+            <div id="infinite-scroll-sentinel" className="flex justify-center py-8">
+              {isLoadingMore ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading more drawings...
+                </div>
+              ) : (
+                <div className="h-4" /> // Invisible sentinel element
+              )}
+            </div>
+          )}
+
+          {/* Footer stats */}
+          {!loading && drawings.length > 0 && (
+            <div className="text-center text-sm text-muted-foreground border-t pt-4">
+              Showing {drawings.length} of {total} drawings
+              {!hasMore && total > pageSize && (
+                <span className="block text-xs mt-1">All drawings loaded</span>
+              )}
             </div>
           )}
         </>

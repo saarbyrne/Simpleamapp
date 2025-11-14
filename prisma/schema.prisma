@@ -526,6 +526,9 @@ model Drawing {
   @@index([organizationId, updatedAt])
   @@index([organizationId, type])
   @@index([organizationId, createdBy])
+  @@index([organizationId, name])
+  @@index([organizationId, description])
+  @@index([organizationId, tags])
   @@map("drawings")
 }
 

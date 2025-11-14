@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, unstable_cache } from 'next/cache'
 import { z } from 'zod'
 
 // Excalidraw data validation schema
@@ -246,6 +246,60 @@ export async function deleteDrawing(id: string) {
   }
 }
 
+// Cached version for frequently accessed data (no filters)
+const getCachedDrawings = unstable_cache(
+  async (organizationId: string, page: number, pageSize: number) => {
+    const skip = (page - 1) * pageSize
+
+    const [total, drawings] = await Promise.all([
+      prisma.drawing.count({
+        where: { organizationId },
+      }),
+      prisma.drawing.findMany({
+        where: { organizationId },
+        orderBy: { updatedAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          type: true,
+          tags: true,
+          thumbnailUrl: true,
+          createdAt: true,
+          updatedAt: true,
+          linkedToType: true,
+          linkedToId: true,
+          isTemplate: true,
+          isPublic: true,
+          createdBy: true,
+          organizationId: true,
+          templateId: true,
+          template: {
+            select: {
+              name: true,
+              category: true,
+            },
+          },
+        },
+        skip,
+        take: pageSize,
+      }),
+    ])
+
+    return {
+      success: true,
+      drawings,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+      hasMore: skip + drawings.length < total,
+    }
+  },
+  ['drawings-list'],
+  { revalidate: 60 } // Cache for 60 seconds
+)
+
 export async function getDrawings(filters?: {
   type?: string
   tags?: string[]
@@ -276,10 +330,20 @@ export async function getDrawings(filters?: {
   }
 
   const page = filters?.page || 1
-  const pageSize = filters?.pageSize || 50 // Default to 50 instead of loading all
+  const pageSize = filters?.pageSize || 20 // Default to 20 for better initial load performance
   const skip = (page - 1) * pageSize
 
   try {
+    // Use cached version for simple queries (no filters)
+    const hasFilters = filters?.type || filters?.tags?.length || filters?.linkedToType ||
+                      filters?.linkedToId || filters?.search
+
+    if (!hasFilters) {
+      // Use cached version for better performance
+      return await getCachedDrawings(dbUser.organizationId, page, pageSize)
+    }
+
+    // Build complex query for filtered results
     const where: any = {
       organizationId: dbUser.organizationId,
     }
@@ -302,34 +366,55 @@ export async function getDrawings(filters?: {
       where.linkedToId = filters.linkedToId
     }
 
-    // Add search functionality
+    // Add search functionality - use optimized queries
     if (filters?.search) {
-      where.OR = [
-        { name: { contains: filters.search, mode: 'insensitive' } },
-        { description: { contains: filters.search, mode: 'insensitive' } },
-      ]
+      const searchTerm = filters.search.trim()
+      if (searchTerm) {
+        where.OR = [
+          { name: { contains: searchTerm, mode: 'insensitive' } },
+          { description: { contains: searchTerm, mode: 'insensitive' } },
+          // Search in tags array
+          { tags: { hasSome: [searchTerm] } },
+        ]
+      }
     }
 
-    // Get total count for pagination
-    const total = await prisma.drawing.count({ where })
-
-    // Get paginated drawings
-    const drawings = await prisma.drawing.findMany({
-      where,
-      orderBy: {
-        updatedAt: 'desc',
-      },
-      include: {
-        template: {
-          select: {
-            name: true,
-            category: true,
+    // Get total count and drawings for filtered results
+    const [total, drawings] = await Promise.all([
+      prisma.drawing.count({ where }),
+      prisma.drawing.findMany({
+        where,
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          type: true,
+          tags: true,
+          thumbnailUrl: true,
+          createdAt: true,
+          updatedAt: true,
+          linkedToType: true,
+          linkedToId: true,
+          isTemplate: true,
+          isPublic: true,
+          createdBy: true,
+          organizationId: true,
+          templateId: true,
+          // Exclude the large 'data' field for list view performance
+          template: {
+            select: {
+              name: true,
+              category: true,
+            },
           },
         },
-      },
-      skip,
-      take: pageSize,
-    })
+        skip,
+        take: pageSize,
+      }),
+    ])
 
     return {
       success: true,
