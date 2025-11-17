@@ -1,14 +1,22 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, Suspense, lazy } from 'react'
 import { PageCard } from '@/components/ui/page-card'
-import { NotesList } from '@/components/notes/notes-list'
 import { createClient } from '@/lib/supabase/client'
-import { StickyNote } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent } from '@/components/ui/card'
+
+// Lazy load the NotesList component
+const NotesList = lazy(() => 
+  import('@/components/notes').then(module => ({ default: module.NotesList }))
+)
 
 export default function NotesPage() {
   const [currentUserId, setCurrentUserId] = useState<string | undefined>()
   const [toolbarContent, setToolbarContent] = useState<React.ReactNode>(null)
+  const [onCreateNote, setOnCreateNote] = useState<(() => void) | null>(null)
 
   useEffect(() => {
     async function loadUser() {
@@ -16,8 +24,6 @@ export default function NotesPage() {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user) {
-        // In a real app, you'd fetch the actual user ID from your database
-        // For now, we'll use the auth user ID as a placeholder
         setCurrentUserId(user.id)
       }
     }
@@ -25,18 +31,52 @@ export default function NotesPage() {
     loadUser()
   }, [])
 
+  const handleCreateNoteCallback = useCallback((callback: () => void) => {
+    setOnCreateNote(() => callback)
+  }, [])
+
   return (
     <PageCard
       title="Notes"
       description="Create and manage notes with rich text formatting, privacy controls, and entity linking"
+      headerActions={
+        onCreateNote ? (
+          <Button onClick={onCreateNote}>
+            <Plus className="me-2 h-4 w-4" />
+            Add Note
+          </Button>
+        ) : null
+      }
       toolbar={toolbarContent}
     >
-      <NotesList
-        currentUserId={currentUserId}
-        showFilters={true}
-        showCreateButton={true}
-        onToolbarRender={setToolbarContent}
-      />
+      <Suspense fallback={<NotesListSkeleton />}>
+        <NotesList
+          currentUserId={currentUserId}
+          showFilters={true}
+          showCreateButton={false}
+          onToolbarRender={setToolbarContent}
+          onCreateNoteCallback={handleCreateNoteCallback}
+        />
+      </Suspense>
     </PageCard>
+  )
+}
+
+// Loading skeleton component
+function NotesListSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3].map((i) => (
+        <Card key={i}>
+          <CardContent className="p-6">
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-4 w-1/4" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   )
 }

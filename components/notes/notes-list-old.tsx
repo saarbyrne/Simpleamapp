@@ -3,11 +3,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import { NoteCard } from './note-card'
 import { NoteEditorDialog } from './note-editor-dialog'
-import { NotesBulkActions } from './notes-bulk-actions'
-import { getNotes, deleteNote, getNoteTags, NoteWithAuthor, bulkUpdateNotes, bulkDeleteNotes } from '@/app/actions/notes'
+import { getNotes, deleteNote, getNoteTags, NoteWithAuthor } from '@/app/actions/notes'
 import { Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -31,7 +29,6 @@ interface NotesListProps {
   showFilters?: boolean
   showCreateButton?: boolean
   onToolbarRender?: (toolbar: React.ReactNode) => void
-  onCreateNoteCallback?: (callback: () => void) => void
 }
 
 export function NotesList({
@@ -41,7 +38,6 @@ export function NotesList({
   showFilters = true,
   showCreateButton = true,
   onToolbarRender,
-  onCreateNoteCallback,
 }: NotesListProps) {
   const [notes, setNotes] = useState<NoteWithAuthor[]>([])
   const [filteredNotes, setFilteredNotes] = useState<NoteWithAuthor[]>([])
@@ -50,17 +46,13 @@ export function NotesList({
   const [editingNote, setEditingNote] = useState<NoteWithAuthor | null>(null)
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null)
   const [availableTags, setAvailableTags] = useState<string[]>([])
-  const [selectedNotes, setSelectedNotes] = useState<Set<string>>(new Set())
-  const [isBulkUpdating, setIsBulkUpdating] = useState(false)
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('')
   const [privacyLevelFilter, setPrivacyLevelFilter] = useState<string>('all')
-  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined)
-  const [dateTo, setDateTo] = useState<Date | undefined>(undefined)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
 
-  const hasActiveFilters = searchQuery || privacyLevelFilter !== 'all' || selectedTags.length > 0 || dateFrom !== undefined || dateTo !== undefined
+  const hasActiveFilters = searchQuery || privacyLevelFilter !== 'all' || selectedTags.length > 0
 
   // Optimized filter configuration
   const filterConfig: FilterConfig[] = useMemo(
@@ -73,23 +65,17 @@ export function NotesList({
       },
       {
         key: 'privacyLevel',
-        label: 'Privacy',
+        label: 'Privacy Level',
         type: 'select',
         options: [
-          { value: 'all', label: 'All' },
-          { value: 'public', label: 'Public' },
-          { value: 'medical', label: 'Medical' },
-          { value: 'mental_health', label: 'Mental Health' },
-          { value: 'coaches', label: 'Coaches' },
-          { value: 'my_private', label: 'My Private' },
+          { value: 'all', label: 'All I can see' },
+          { value: 'public', label: 'Public only' },
+          { value: 'medical', label: 'Medical only' },
+          { value: 'mental_health', label: 'Mental Health only' },
+          { value: 'coaches', label: 'Coaches only' },
+          { value: 'my_private', label: 'My private notes' },
         ],
-        placeholder: 'All',
-      },
-      {
-        key: 'dateRange',
-        label: 'Date Range',
-        type: 'dateRange',
-        placeholder: 'Select date range',
+        placeholder: 'All privacy levels',
       },
     ],
     []
@@ -99,9 +85,8 @@ export function NotesList({
     () => ({
       search: searchQuery,
       privacyLevel: privacyLevelFilter,
-      dateRange: dateFrom && dateTo ? { from: dateFrom, to: dateTo } : undefined,
     }),
-    [searchQuery, privacyLevelFilter, dateFrom, dateTo]
+    [searchQuery, privacyLevelFilter]
   )
 
   // Load notes on mount and when linked entities change
@@ -113,7 +98,7 @@ export function NotesList({
   // Apply filters when notes or filter state changes
   useEffect(() => {
     applyFilters()
-  }, [notes, searchQuery, privacyLevelFilter, selectedTags, currentUserId, dateFrom, dateTo])
+  }, [notes, searchQuery, privacyLevelFilter, selectedTags, currentUserId])
 
   const loadNotes = useCallback(async () => {
     setIsLoading(true)
@@ -168,21 +153,6 @@ export function NotesList({
       }
     }
 
-    // Apply date range filter
-    if (dateFrom || dateTo) {
-      filtered = filtered.filter((note) => {
-        const noteDate = new Date(note.createdAt)
-        if (dateFrom && dateTo) {
-          return noteDate >= dateFrom && noteDate <= dateTo
-        } else if (dateFrom) {
-          return noteDate >= dateFrom
-        } else if (dateTo) {
-          return noteDate <= dateTo
-        }
-        return true
-      })
-    }
-
     // Apply tag filter
     if (selectedTags.length > 0) {
       filtered = filtered.filter((note) =>
@@ -191,7 +161,7 @@ export function NotesList({
     }
 
     setFilteredNotes(filtered)
-  }, [notes, searchQuery, privacyLevelFilter, selectedTags, currentUserId, dateFrom, dateTo])
+  }, [notes, searchQuery, privacyLevelFilter, selectedTags, currentUserId])
 
   const handleCreateNote = useCallback(() => {
     setEditingNote(null)
@@ -224,62 +194,6 @@ export function NotesList({
     }
   }, [noteToDelete, handleDeleteNote])
 
-  const handleToggleSelectNote = useCallback((noteId: string) => {
-    setSelectedNotes((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(noteId)) {
-        newSet.delete(noteId)
-      } else {
-        newSet.add(noteId)
-      }
-      return newSet
-    })
-  }, [])
-
-  const handleToggleSelectAll = useCallback(() => {
-    if (selectedNotes.size === filteredNotes.length) {
-      setSelectedNotes(new Set())
-    } else {
-      setSelectedNotes(new Set(filteredNotes.map((note) => note.id)))
-    }
-  }, [selectedNotes.size, filteredNotes])
-
-  const handleBulkUpdate = useCallback(async (updates: any) => {
-    setIsBulkUpdating(true)
-    try {
-      const result = await bulkUpdateNotes(Array.from(selectedNotes), updates)
-      if (result.success) {
-        toast.success(result.message || 'Notes updated successfully')
-        await loadNotes()
-        setSelectedNotes(new Set())
-      } else {
-        toast.error(result.error || 'Failed to update notes')
-      }
-    } catch (error) {
-      toast.error('Failed to update notes')
-    } finally {
-      setIsBulkUpdating(false)
-    }
-  }, [selectedNotes, loadNotes])
-
-  const handleBulkDelete = useCallback(async () => {
-    setIsBulkUpdating(true)
-    try {
-      const result = await bulkDeleteNotes(Array.from(selectedNotes))
-      if (result.success) {
-        toast.success(result.message || 'Notes deleted successfully')
-        await loadNotes()
-        setSelectedNotes(new Set())
-      } else {
-        toast.error(result.error || 'Failed to delete notes')
-      }
-    } catch (error) {
-      toast.error('Failed to delete notes')
-    } finally {
-      setIsBulkUpdating(false)
-    }
-  }, [selectedNotes, loadNotes])
-
   const handleToggleTag = useCallback((tag: string) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
@@ -289,23 +203,12 @@ export function NotesList({
   const clearFilters = useCallback(() => {
     setSearchQuery('')
     setPrivacyLevelFilter('all')
-    setDateFrom(undefined)
-    setDateTo(undefined)
     setSelectedTags([])
   }, [])
 
-  const handleFilterChange = useCallback((key: string, value: any) => {
+  const handleFilterChange = useCallback((key: string, value: string) => {
     if (key === 'search') setSearchQuery(value)
     else if (key === 'privacyLevel') setPrivacyLevelFilter(value)
-    else if (key === 'dateRange') {
-      if (value?.from) {
-        setDateFrom(value.from)
-        setDateTo(value.to) // Can be undefined for single date
-      } else {
-        setDateFrom(undefined)
-        setDateTo(undefined)
-      }
-    }
   }, [])
 
   // Create toolbar content for parent component
@@ -325,17 +228,10 @@ export function NotesList({
 
   // Pass toolbar to parent component
   useEffect(() => {
-    if (onToolbarRender && toolbarContent) {
+    if (onToolbarRender) {
       onToolbarRender(toolbarContent)
     }
   }, [onToolbarRender, toolbarContent])
-
-  // Pass create note callback to parent
-  useEffect(() => {
-    if (onCreateNoteCallback) {
-      onCreateNoteCallback(handleCreateNote)
-    }
-  }, [onCreateNoteCallback, handleCreateNote])
 
   if (isLoading) {
     return (
@@ -357,25 +253,72 @@ export function NotesList({
 
   return (
     <div className="space-y-6">
-      {/* Bulk Actions Bar */}
-      {selectedNotes.size > 0 && (
-        <NotesBulkActions
-          selectedCount={selectedNotes.size}
-          onUpdate={handleBulkUpdate}
-          onDelete={handleBulkDelete}
-          onCancel={() => setSelectedNotes(new Set())}
-          isLoading={isBulkUpdating}
-        />
-      )}
-
-      {/* Header with count */}
-      {hasActiveFilters && (
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-muted-foreground">
-            Showing {filteredNotes.length} of {notes.length} notes
-          </p>
+      {/* Tag filters - only show if there are tags available */}
+      {showFilters && availableTags.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium">Filter by tags</h3>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="text-xs"
+              >
+                Clear all filters
+              </Button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {availableTags.slice(0, 10).map((tag) => (
+              <Badge
+                key={tag}
+                variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+                className="cursor-pointer hover:bg-accent"
+                onClick={() => handleToggleTag(tag)}
+              >
+                {tag}
+              </Badge>
+            ))}
+          </div>
+          {selectedTags.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-muted-foreground">Selected:</span>
+              {selectedTags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="gap-1">
+                  {tag}
+                  <button
+                    onClick={() => handleToggleTag(tag)}
+                    className="ms-1 rounded-full hover:bg-muted"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       )}
+
+      {/* Header with count and create button */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">
+            Notes {filteredNotes.length > 0 && `(${filteredNotes.length})`}
+          </h2>
+          {hasActiveFilters && (
+            <p className="text-sm text-muted-foreground">
+              Showing {filteredNotes.length} of {notes.length} notes
+            </p>
+          )}
+        </div>
+        {showCreateButton && (
+          <Button onClick={handleCreateNote}>
+            <Plus className="me-2 h-4 w-4" />
+            Add Note
+          </Button>
+        )}
+      </div>
 
       {/* Notes list or empty state */}
       {filteredNotes.length === 0 ? (
@@ -390,38 +333,15 @@ export function NotesList({
         </Card>
       ) : (
         <div className="space-y-4">
-          {/* Select all checkbox aligned with note checkboxes */}
-          <div className="flex items-center gap-3">
-            <Checkbox
-              checked={selectedNotes.size === filteredNotes.length && filteredNotes.length > 0}
-              onCheckedChange={handleToggleSelectAll}
-              aria-label="Select all notes"
-              className="mt-0"
-            />
-            <div className="flex-1">
-              <span className="text-sm font-medium text-muted-foreground">Select all</span>
-            </div>
-          </div>
-
-          {/* Individual notes */}
           {filteredNotes.map((note) => (
-            <div key={note.id} className="flex items-start gap-3">
-              <Checkbox
-                checked={selectedNotes.has(note.id)}
-                onCheckedChange={() => handleToggleSelectNote(note.id)}
-                aria-label={`Select note ${note.title || 'Untitled'}`}
-                className="mt-6"
-              />
-              <div className="flex-1">
-                <NoteCard
-                  note={note}
-                  currentUserId={currentUserId}
-                  onEdit={handleEditNote}
-                  onDelete={(id) => setNoteToDelete(id)}
-                  showLinkedEntities={!linkedPersonId && !linkedEventId}
-                />
-              </div>
-            </div>
+            <NoteCard
+              key={note.id}
+              note={note}
+              currentUserId={currentUserId}
+              onEdit={handleEditNote}
+              onDelete={(id) => setNoteToDelete(id)}
+              showLinkedEntities={!linkedPersonId && !linkedEventId}
+            />
           ))}
         </div>
       )}

@@ -21,6 +21,7 @@ import { QuickActionsToolbar } from '@/components/dashboard/quick-actions-toolba
 import { AddPlayerDialog } from '@/components/dashboard/add-player-dialog'
 import { EventFormDialog } from '@/components/calendar/event-form-dialog'
 import { FormBuilderDialog } from '@/components/dashboard/form-builder-dialog'
+import { NoteEditorDialog } from '@/components/notes/note-editor-dialog'
 import { GlobalSearch, SearchTrigger, useSearchShortcut } from '@/components/global-search'
 
 type DashboardLayoutClientProps = {
@@ -151,6 +152,7 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false)
   const [isAddEventOpen, setIsAddEventOpen] = useState(false)
   const [isAddFormOpen, setIsAddFormOpen] = useState(false)
+  const [isAddNoteOpen, setIsAddNoteOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
 
   // Enable keyboard shortcut for search (/ or Cmd/Ctrl+K)
@@ -160,6 +162,7 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
     'add-player': () => setIsAddPlayerOpen(true),
     'add-event': () => setIsAddEventOpen(true),
     'add-form': () => setIsAddFormOpen(true),
+    'add-note': () => setIsAddNoteOpen(true),
   }), [])
   
   const handleEventFormSuccess = useCallback(() => {
@@ -214,6 +217,14 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
           open={isAddFormOpen}
           onOpenChange={setIsAddFormOpen}
           onSuccess={handleFormBuilderSuccess}
+        />
+        <NoteEditorDialog
+          open={isAddNoteOpen}
+          onOpenChange={setIsAddNoteOpen}
+          onSuccess={() => {
+            setIsAddNoteOpen(false)
+            router.refresh()
+          }}
         />
         <GlobalSearch
           open={isSearchOpen}

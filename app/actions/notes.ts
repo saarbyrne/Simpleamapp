@@ -158,12 +158,6 @@ export async function getNotes(filters?: {
             lastName: true,
           },
         },
-        linkedEvent: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -249,12 +243,6 @@ export async function getNote(id: string) {
             lastName: true,
           },
         },
-        linkedEvent: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
       },
     })
 
@@ -334,12 +322,6 @@ export async function createNote(data: {
             id: true,
             firstName: true,
             lastName: true,
-          },
-        },
-        linkedEvent: {
-          select: {
-            id: true,
-            title: true,
           },
         },
       },
@@ -428,12 +410,6 @@ export async function updateNote(
             id: true,
             firstName: true,
             lastName: true,
-          },
-        },
-        linkedEvent: {
-          select: {
-            id: true,
-            title: true,
           },
         },
       },
@@ -557,6 +533,120 @@ export async function getNoteTags() {
     return {
       success: false,
       error: 'Failed to fetch tags',
+    }
+  }
+}
+
+/**
+ * Bulk update notes
+ */
+export async function bulkUpdateNotes(
+  noteIds: string[],
+  updates: {
+    privacyLevel?: NotePrivacyLevel
+    tags?: string[]
+  }
+) {
+  try {
+    const { user } = await getSupabaseUser()
+
+    if (!user) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    const currentUser = await db.user.findUnique({
+      where: { email: user.email! },
+    })
+
+    if (!currentUser) {
+      return { success: false, error: 'User not found' }
+    }
+
+    // Verify user has permission to update these notes (only author can update)
+    const notes = await db.note.findMany({
+      where: {
+        id: { in: noteIds },
+        organizationId: currentUser.organizationId,
+        authorId: currentUser.id, // Only update own notes
+      },
+    })
+
+    if (notes.length !== noteIds.length) {
+      return { success: false, error: 'Some notes not found or unauthorized' }
+    }
+
+    // Prepare update data
+    const updateData: any = {}
+    if (updates.privacyLevel) {
+      updateData.privacyLevel = updates.privacyLevel
+    }
+    if (updates.tags) {
+      updateData.tags = updates.tags
+    }
+
+    // Perform bulk update
+    await db.note.updateMany({
+      where: {
+        id: { in: noteIds },
+        authorId: currentUser.id,
+      },
+      data: updateData,
+    })
+
+    revalidatePath('/dashboard/notes')
+
+    return {
+      success: true,
+      message: `Updated ${noteIds.length} note(s)`,
+    }
+  } catch (error) {
+    console.error('Error bulk updating notes:', error)
+    return {
+      success: false,
+      error: 'Failed to bulk update notes',
+    }
+  }
+}
+
+/**
+ * Bulk delete notes
+ */
+export async function bulkDeleteNotes(noteIds: string[]) {
+  try {
+    const { user } = await getSupabaseUser()
+
+    if (!user) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    const currentUser = await db.user.findUnique({
+      where: { email: user.email! },
+    })
+
+    if (!currentUser) {
+      return { success: false, error: 'User not found' }
+    }
+
+    // Delete notes (only author can delete)
+    await db.note.deleteMany({
+      where: {
+        id: { in: noteIds },
+        organizationId: currentUser.organizationId,
+        authorId: currentUser.id,
+      },
+    })
+
+    revalidatePath('/dashboard/notes')
+
+    return {
+      success: true,
+      message: `Deleted ${noteIds.length} note(s)`,
+    }
+  } catch (error) {
+    console.error('Error bulk deleting notes:', error)
+    return {
+      success: false,
+      error: 'Failed to bulk delete notes',
     }
   }
 }

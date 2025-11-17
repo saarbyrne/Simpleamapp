@@ -329,12 +329,15 @@ model Note {
   authorId String
   author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
-  // Linked entities
+  // Linked entities (deprecated - kept for backward compatibility during migration)
   linkedPersonId String?
   linkedPerson   Person? @relation(fields: [linkedPersonId], references: [id], onDelete: SetNull)
 
   linkedEventId  String?
   linkedEvent    Event? @relation(fields: [linkedEventId], references: [id], onDelete: SetNull)
+
+  // New: Multi-entity linking
+  links NoteLink[]
 
   // Tags for organization
   tags      String[]
@@ -348,6 +351,22 @@ model Note {
   @@index([linkedEventId])
   @@index([privacyLevel])
   @@map("notes")
+}
+
+model NoteLink {
+  id         String @id @default(cuid())
+  noteId     String
+  note       Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  
+  targetType String // "person" or "event"
+  targetId   String
+  
+  createdAt  DateTime @default(now())
+  
+  @@unique([noteId, targetType, targetId])
+  @@index([noteId])
+  @@index([targetType, targetId])
+  @@map("note_links")
 }
 
 // ============================================

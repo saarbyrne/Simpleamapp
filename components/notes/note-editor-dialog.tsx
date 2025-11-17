@@ -37,13 +37,13 @@ interface NoteEditorDialogProps {
 
 const visibilityOptions = [
   { value: 'public', label: 'Public', description: 'Visible to everyone in organization' },
-  { value: 'medical', label: 'Medical Only', description: 'Only visible to medical staff' },
+  { value: 'medical', label: 'Medical', description: 'Only visible to medical staff' },
   {
     value: 'mental_health',
-    label: 'Mental Health Only',
+    label: 'Mental Health',
     description: 'Only visible to mental health staff',
   },
-  { value: 'coaches', label: 'Coaches Only', description: 'Only visible to coaches' },
+  { value: 'coaches', label: 'Coaches', description: 'Only visible to coaches' },
   { value: 'private', label: 'Private', description: 'Only visible to you' },
 ]
 
