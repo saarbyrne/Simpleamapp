@@ -50,6 +50,7 @@ import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/r
 import { NATIONALITIES } from '@/lib/nationalities'
 import { NationalitySelect } from '@/components/ui/nationality-select'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { NoteEditorDialog } from '@/components/notes/note-editor-dialog'
 import { formatDate } from '@/lib/date-utils'
 import { toast } from 'sonner'
 
@@ -112,6 +113,7 @@ const createColumns = (
   players: PlayerRow[],
   t: ReturnType<typeof useTranslations>,
   onNavigateToProfile: (playerId: string) => void,
+  onAddNote: (playerId: string) => void,
   preferences?: { timezone: string | null; dateFormat: string | null; timeFormat: string | null } | null
 ): ColumnDef<PlayerRow>[] => {
   // Check which columns have data
@@ -323,7 +325,9 @@ const createColumns = (
                 {t('players.viewProfile')}
               </DropdownMenuItem>
               <DropdownMenuItem>{t('players.sendForm')}</DropdownMenuItem>
-              <DropdownMenuItem>{t('players.addNote')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAddNote(player.id)}>
+                {t('players.addNote')}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -376,6 +380,8 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     phone: '',
   })
   const [isBulkUpdating, setIsBulkUpdating] = useState(false)
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false)
+  const [selectedPlayerForNote, setSelectedPlayerForNote] = useState<string | undefined>(undefined)
 
   // Track if component has mounted to prevent initial URL update
   const isMounted = useRef(false)
@@ -773,9 +779,20 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     })
   }, [players, search, positionFilter, statusFilter, nationalityFilter])
 
+  const handleAddNote = useCallback((playerId: string) => {
+    setSelectedPlayerForNote(playerId)
+    setNoteDialogOpen(true)
+  }, [])
+
   const columns = useMemo(
-    () => createColumns(players, t, (playerId) => router.push(`/dashboard/players/${playerId}`), preferences || null),
-    [players, t, router, preferences]
+    () => createColumns(
+      players, 
+      t, 
+      (playerId) => router.push(`/dashboard/players/${playerId}`),
+      handleAddNote,
+      preferences || null
+    ),
+    [players, t, router, handleAddNote, preferences]
   )
 
   // Prepare filter config for DataTableFilters
@@ -1130,6 +1147,17 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
             </div>
           </div>
       </PageCard>
+
+      {/* Note Editor Dialog */}
+      <NoteEditorDialog
+        open={noteDialogOpen}
+        onOpenChange={setNoteDialogOpen}
+        linkedPersonId={selectedPlayerForNote}
+        onSuccess={() => {
+          setNoteDialogOpen(false)
+          toast.success('Note added successfully')
+        }}
+      />
     </div>
   )
 }

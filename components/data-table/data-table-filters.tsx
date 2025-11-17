@@ -5,15 +5,15 @@ import { TableFilters, type TableFilter } from '@/components/ui/table-filters'
 export interface FilterConfig {
   key: string
   label: string
-  type: 'search' | 'select'
+  type: 'search' | 'select' | 'dateRange'
   options?: { value: string; label: string }[]
   placeholder?: string
 }
 
 export interface DataTableFiltersProps {
   filters: FilterConfig[]
-  values: Record<string, string>
-  onFilterChange: (key: string, value: string) => void
+  values: Record<string, any>
+  onFilterChange: (key: string, value: any) => void
   searchPlaceholder?: string
   className?: string
 }
