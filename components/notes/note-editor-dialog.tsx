@@ -21,10 +21,20 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { RichTextEditor } from './rich-text-editor'
-import { createNote, updateNote, NotePrivacyLevel, NoteWithAuthor } from '@/app/actions/notes'
+import { 
+  createNote, 
+  updateNote, 
+  NotePrivacyLevel, 
+  NoteWithAuthor,
+  getPlayersForPicker,
+  getEventsForPicker,
+  createNoteLinks,
+} from '@/app/actions/notes'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { X } from 'lucide-react'
+import { EntityMultiSelect, type Entity } from './entity-multi-select'
+import { format } from 'date-fns'
 
 interface NoteEditorDialogProps {
   open: boolean
@@ -62,6 +72,59 @@ export function NoteEditorDialog({
   const [tagInput, setTagInput] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Entity linking state
+  const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([])
+  const [selectedEventIds, setSelectedEventIds] = useState<string[]>([])
+  const [availablePlayers, setAvailablePlayers] = useState<Entity[]>([])
+  const [availableEvents, setAvailableEvents] = useState<Entity[]>([])
+  const [isLoadingEntities, setIsLoadingEntities] = useState(false)
+
+  // Load entities when dialog opens
+  useEffect(() => {
+    if (open) {
+      loadEntities()
+    }
+  }, [open])
+
+  const loadEntities = async () => {
+    setIsLoadingEntities(true)
+    try {
+      const [playersResult, eventsResult] = await Promise.all([
+        getPlayersForPicker(),
+        getEventsForPicker(),
+      ])
+
+      if (playersResult.success && playersResult.players) {
+        setAvailablePlayers(
+          playersResult.players.map((p) => ({
+            id: p.id,
+            name: `${p.firstName} ${p.lastName}`,
+            subtitle: p.position && p.jerseyNumber
+              ? `#${p.jerseyNumber} ${p.position}`
+              : p.position || p.jerseyNumber
+              ? `${p.jerseyNumber || ''}${p.position || ''}`
+              : undefined,
+          }))
+        )
+      }
+
+      if (eventsResult.success && eventsResult.events) {
+        setAvailableEvents(
+          eventsResult.events.map((e) => ({
+            id: e.id,
+            name: e.title,
+            subtitle: `${e.type} - ${format(new Date(e.startTime), 'PPp')}`,
+          }))
+        )
+      }
+    } catch (error) {
+      console.error('Error loading entities:', error)
+      toast.error('Failed to load players and events')
+    } finally {
+      setIsLoadingEntities(false)
+    }
+  }
 
   // Initialize form when dialog opens or note changes
   useEffect(() => {
@@ -71,6 +134,23 @@ export function NoteEditorDialog({
         setContent(existingNote.content)
         setPrivacyLevel(existingNote.privacyLevel as NotePrivacyLevel)
         setTags(existingNote.tags || [])
+        
+        // Load entity links from existing note
+        if (existingNote.links && existingNote.links.length > 0) {
+          const playerIds = existingNote.links
+            .filter((link) => link.targetType === 'person')
+            .map((link) => link.targetId)
+          const eventIds = existingNote.links
+            .filter((link) => link.targetType === 'event')
+            .map((link) => link.targetId)
+          
+          setSelectedPlayerIds(playerIds)
+          setSelectedEventIds(eventIds)
+        } else {
+          // Fallback to legacy fields for backward compatibility
+          setSelectedPlayerIds(existingNote.linkedPersonId ? [existingNote.linkedPersonId] : [])
+          setSelectedEventIds(existingNote.linkedEventId ? [existingNote.linkedEventId] : [])
+        }
       } else {
         setTitle('')
         setContent({
@@ -79,10 +159,14 @@ export function NoteEditorDialog({
         })
         setPrivacyLevel('public')
         setTags([])
+        
+        // Pre-fill from props if provided
+        setSelectedPlayerIds(linkedPersonId ? [linkedPersonId] : [])
+        setSelectedEventIds(linkedEventId ? [linkedEventId] : [])
       }
       setTagInput('')
     }
-  }, [open, existingNote])
+  }, [open, existingNote, linkedPersonId, linkedEventId])
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && tagInput.trim()) {
@@ -147,7 +231,24 @@ export function NoteEditorDialog({
         })
       }
 
-      if (result.success) {
+      if (result.success && result.note) {
+        // Create/update entity links
+        const links = [
+          ...selectedPlayerIds.map((id) => ({ targetType: 'person', targetId: id })),
+          ...selectedEventIds.map((id) => ({ targetType: 'event', targetId: id })),
+        ]
+
+        if (links.length > 0) {
+          const linkResult = await createNoteLinks(result.note.id, links)
+          if (!linkResult.success) {
+            console.error('Failed to create links:', linkResult.error)
+            // Don't fail the whole operation, just log the error
+          }
+        } else {
+          // If no links selected, clear any existing links
+          await createNoteLinks(result.note.id, [])
+        }
+
         toast.success(existingNote ? 'Note updated successfully' : 'Note created successfully')
         onOpenChange(false)
         if (onSuccess) {
@@ -241,6 +342,34 @@ export function NoteEditorDialog({
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Linked Players Section */}
+          <div className="space-y-2">
+            <Label>Linked Players</Label>
+            <EntityMultiSelect
+              entities={availablePlayers}
+              selectedIds={selectedPlayerIds}
+              onChange={setSelectedPlayerIds}
+              placeholder="Select players..."
+              emptyMessage="No players found"
+              entityType="player"
+              isLoading={isLoadingEntities}
+            />
+          </div>
+
+          {/* Linked Events Section */}
+          <div className="space-y-2">
+            <Label>Linked Events</Label>
+            <EntityMultiSelect
+              entities={availableEvents}
+              selectedIds={selectedEventIds}
+              onChange={setSelectedEventIds}
+              placeholder="Select events..."
+              emptyMessage="No events found"
+              entityType="event"
+              isLoading={isLoadingEntities}
+            />
           </div>
 
           <DialogFooter>

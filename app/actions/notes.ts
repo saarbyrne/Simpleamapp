@@ -33,6 +33,11 @@ export type NoteWithAuthor = {
     id: string
     title: string
   } | null
+  links?: Array<{
+    id: string
+    targetType: string
+    targetId: string
+  }>
 }
 
 /**
@@ -158,7 +163,14 @@ export async function getNotes(filters?: {
             lastName: true,
           },
         },
-      },
+        links: {
+          select: {
+            id: true,
+            targetType: true,
+            targetId: true,
+          },
+        },
+      } as any, // Type assertion needed until NoteLink table is created
       orderBy: {
         createdAt: 'desc',
       },
@@ -173,11 +185,11 @@ export async function getNotes(filters?: {
     let filteredNotes = visibleNotes
     if (filters?.search) {
       const searchLower = filters.search.toLowerCase()
-      filteredNotes = visibleNotes.filter((note) => {
+      filteredNotes = visibleNotes.filter((note: any) => {
         const titleMatch = note.title?.toLowerCase().includes(searchLower)
         const contentMatch = JSON.stringify(note.content).toLowerCase().includes(searchLower)
-        const tagsMatch = note.tags.some((tag) => tag.toLowerCase().includes(searchLower))
-        const authorMatch = note.author.name.toLowerCase().includes(searchLower)
+        const tagsMatch = note.tags.some((tag: string) => tag.toLowerCase().includes(searchLower))
+        const authorMatch = note.author?.name?.toLowerCase().includes(searchLower)
         return titleMatch || contentMatch || tagsMatch || authorMatch
       })
     }
@@ -195,7 +207,7 @@ export async function getNotes(filters?: {
 
     return {
       success: true,
-      notes: filteredNotes as NoteWithAuthor[],
+      notes: filteredNotes as unknown as NoteWithAuthor[],
     }
   } catch (error) {
     console.error('Error fetching notes:', error)
@@ -243,7 +255,14 @@ export async function getNote(id: string) {
             lastName: true,
           },
         },
-      },
+        links: {
+          select: {
+            id: true,
+            targetType: true,
+            targetId: true,
+          },
+        },
+      } as any, // Type assertion needed until NoteLink table is created
     })
 
     if (!note) {
@@ -260,7 +279,7 @@ export async function getNote(id: string) {
 
     return {
       success: true,
-      note: note as NoteWithAuthor,
+      note: note as unknown as NoteWithAuthor,
     }
   } catch (error) {
     console.error('Error fetching note:', error)
@@ -647,6 +666,201 @@ export async function bulkDeleteNotes(noteIds: string[]) {
     return {
       success: false,
       error: 'Failed to bulk delete notes',
+    }
+  }
+}
+
+/**
+ * Get players for entity picker (simplified, no pagination)
+ */
+export async function getPlayersForPicker() {
+  try {
+    const { user } = await getSupabaseUser()
+
+    if (!user) {
+      return { success: false, error: 'Unauthorized', players: [] }
+    }
+
+    const currentUser = await db.user.findUnique({
+      where: { email: user.email! },
+    })
+
+    if (!currentUser) {
+      return { success: false, error: 'User not found', players: [] }
+    }
+
+    const players = await db.person.findMany({
+      where: {
+        organizations: {
+          some: {
+            organizationId: currentUser.organizationId,
+            role: 'player',
+          },
+        },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        organizations: {
+          where: {
+            organizationId: currentUser.organizationId,
+          },
+          select: {
+            position: true,
+            jerseyNumber: true,
+          },
+        },
+      },
+      orderBy: [
+        { lastName: 'asc' },
+        { firstName: 'asc' },
+      ],
+    })
+
+    return {
+      success: true,
+      players: players.map((p) => ({
+        id: p.id,
+        firstName: p.firstName,
+        lastName: p.lastName,
+        position: p.organizations[0]?.position || null,
+        jerseyNumber: p.organizations[0]?.jerseyNumber || null,
+      })),
+    }
+  } catch (error) {
+    console.error('Error fetching players for picker:', error)
+    return {
+      success: false,
+      error: 'Failed to fetch players',
+      players: [],
+    }
+  }
+}
+
+/**
+ * Get events for entity picker (future events + recent past)
+ */
+export async function getEventsForPicker() {
+  try {
+    const { user } = await getSupabaseUser()
+
+    if (!user) {
+      return { success: false, error: 'Unauthorized', events: [] }
+    }
+
+    const currentUser = await db.user.findUnique({
+      where: { email: user.email! },
+    })
+
+    if (!currentUser) {
+      return { success: false, error: 'User not found', events: [] }
+    }
+
+    // Get events from 30 days ago onwards
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const events = await db.event.findMany({
+      where: {
+        organizationId: currentUser.organizationId,
+        startTime: {
+          gte: thirtyDaysAgo,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        startTime: true,
+        location: true,
+      },
+      orderBy: {
+        startTime: 'desc',
+      },
+    })
+
+    return {
+      success: true,
+      events,
+    }
+  } catch (error) {
+    console.error('Error fetching events for picker:', error)
+    return {
+      success: false,
+      error: 'Failed to fetch events',
+      events: [],
+    }
+  }
+}
+
+/**
+ * Create/update note links
+ */
+export async function createNoteLinks(
+  noteId: string,
+  links: Array<{ targetType: string; targetId: string }>
+) {
+  try {
+    const { user } = await getSupabaseUser()
+
+    if (!user) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    const currentUser = await db.user.findUnique({
+      where: { email: user.email! },
+    })
+
+    if (!currentUser) {
+      return { success: false, error: 'User not found' }
+    }
+
+    // Verify user owns this note
+    const note = await db.note.findFirst({
+      where: {
+        id: noteId,
+        authorId: currentUser.id,
+        organizationId: currentUser.organizationId,
+      },
+    })
+
+    if (!note) {
+      return { success: false, error: 'Note not found or unauthorized' }
+    }
+
+    // Use transaction to atomically delete old links and create new ones
+    await db.$transaction(async (tx: any) => {
+      // Delete existing links for this note
+      await tx.noteLink.deleteMany({
+        where: {
+          noteId,
+        },
+      })
+
+      // Create new links
+      if (links.length > 0) {
+        await tx.noteLink.createMany({
+          data: links.map((link) => ({
+            noteId,
+            targetType: link.targetType,
+            targetId: link.targetId,
+          })),
+        })
+      }
+    })
+
+    revalidatePath('/dashboard/notes')
+
+    return {
+      success: true,
+      message: 'Links updated successfully',
+    }
+  } catch (error) {
+    console.error('Error creating note links:', error)
+    return {
+      success: false,
+      error: 'Failed to create note links',
     }
   }
 }

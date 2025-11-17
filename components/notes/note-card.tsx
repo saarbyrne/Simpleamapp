@@ -93,27 +93,52 @@ export function NoteCard({
                 <h3 className="font-semibold text-lg leading-tight">{note.title}</h3>
               )}
 
-              {showLinkedEntities && (note.linkedPerson || note.linkedEvent) && (
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  {note.linkedPerson && (
-                    <Link
-                      href={`/dashboard/players/${note.linkedPerson.id}`}
-                      className="flex items-center gap-1 hover:text-primary transition-colors"
-                    >
-                      <User className="h-3 w-3" />
-                      {note.linkedPerson.firstName} {note.linkedPerson.lastName}
-                    </Link>
+              {showLinkedEntities && (
+                <>
+                  {/* Legacy linked entities */}
+                  {(note.linkedPerson || note.linkedEvent) && (
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      {note.linkedPerson && (
+                        <Link
+                          href={`/dashboard/players/${note.linkedPerson.id}`}
+                          className="flex items-center gap-1 hover:text-primary transition-colors"
+                        >
+                          <User className="h-3 w-3" />
+                          {note.linkedPerson.firstName} {note.linkedPerson.lastName}
+                        </Link>
+                      )}
+                      {note.linkedEvent && (
+                        <Link
+                          href={`/dashboard/calendar/events/${note.linkedEvent.id}`}
+                          className="flex items-center gap-1 hover:text-primary transition-colors"
+                        >
+                          <Calendar className="h-3 w-3" />
+                          {note.linkedEvent.title}
+                        </Link>
+                      )}
+                    </div>
                   )}
-                  {note.linkedEvent && (
-                    <Link
-                      href={`/dashboard/calendar/events/${note.linkedEvent.id}`}
-                      className="flex items-center gap-1 hover:text-primary transition-colors"
-                    >
-                      <Calendar className="h-3 w-3" />
-                      {note.linkedEvent.title}
-                    </Link>
+                  
+                  {/* New multi-entity links */}
+                  {note.links && note.links.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {note.links.filter(link => link.targetType === 'person').length > 0 && (
+                        <Badge variant="secondary" className="text-xs gap-1">
+                          <User className="h-3 w-3" />
+                          {note.links.filter(link => link.targetType === 'person').length} 
+                          {note.links.filter(link => link.targetType === 'person').length === 1 ? ' Player' : ' Players'}
+                        </Badge>
+                      )}
+                      {note.links.filter(link => link.targetType === 'event').length > 0 && (
+                        <Badge variant="secondary" className="text-xs gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {note.links.filter(link => link.targetType === 'event').length} 
+                          {note.links.filter(link => link.targetType === 'event').length === 1 ? ' Event' : ' Events'}
+                        </Badge>
+                      )}
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </div>
           </div>
