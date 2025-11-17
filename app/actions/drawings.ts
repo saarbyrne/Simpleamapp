@@ -94,6 +94,18 @@ export async function createDrawing(drawingData: DrawingData) {
   }
 
   try {
+    // Verify Prisma client is properly initialized
+    if (!prisma) {
+      console.error('Prisma client is not initialized')
+      return { error: 'Database connection error. Please try again.' }
+    }
+
+    if (!prisma.drawing) {
+      console.error('Prisma drawing model is not available. Prisma client may need regeneration.')
+      console.error('Available models:', Object.keys(prisma).filter(key => !key.startsWith('_')))
+      return { error: 'Database model error. Please contact support.' }
+    }
+
     console.log('Creating drawing with:', {
       name: drawingData.name,
       organizationId: dbUser.organizationId,
