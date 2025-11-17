@@ -166,9 +166,12 @@ export function RichTextEditor({
       ],
     },
     editable,
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       if (onChange) {
-        onChange(editor.getJSON())
+        // Ensure we return a plain object by serializing/deserializing
+        const jsonContent = editor.getJSON()
+        onChange(JSON.parse(JSON.stringify(jsonContent)))
       }
     },
     editorProps: {

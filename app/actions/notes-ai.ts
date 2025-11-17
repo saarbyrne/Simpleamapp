@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { getNotes, createNote, NoteVisibility } from './notes'
+import { getNotes, createNote, NotePrivacyLevel } from './notes'
 
 /**
  * AI-powered note summarization
@@ -13,7 +13,7 @@ export async function summarizeNotes(params: {
   linkedEventId?: string
   startDate?: Date
   endDate?: Date
-  visibility?: string
+  privacyLevel?: string
 }) {
   try {
     const supabase = await createClient()
@@ -31,8 +31,8 @@ export async function summarizeNotes(params: {
     if (params.linkedEventId) {
       filters.linkedEventId = params.linkedEventId
     }
-    if (params.visibility) {
-      filters.visibility = params.visibility
+    if (params.privacyLevel) {
+      filters.privacyLevel = params.privacyLevel
     }
 
     const result = await getNotes(filters)
@@ -160,7 +160,7 @@ export async function createNoteFromNaturalLanguage(params: {
   prompt: string
   linkedPersonId?: string
   linkedEventId?: string
-  visibility?: NoteVisibility
+  privacyLevel?: NotePrivacyLevel
 }) {
   try {
     const supabase = await createClient()
@@ -173,7 +173,7 @@ export async function createNoteFromNaturalLanguage(params: {
     // In a real implementation, this would use AI to:
     // 1. Parse the natural language prompt
     // 2. Extract title, content, tags
-    // 3. Determine appropriate visibility if not specified
+    // 3. Determine appropriate privacyLevel if not specified
     // 4. Format content properly
 
     // For now, we'll create a basic structured note
@@ -196,7 +196,7 @@ export async function createNoteFromNaturalLanguage(params: {
           },
         ],
       },
-      visibility: params.visibility || 'public',
+      privacyLevel: params.privacyLevel || 'public',
       tags,
       linkedPersonId: params.linkedPersonId,
       linkedEventId: params.linkedEventId,

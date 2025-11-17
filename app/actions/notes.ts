@@ -6,11 +6,13 @@ import { db } from '@/lib/db'
 
 export type NoteVisibility = 'public' | 'medical' | 'mental_health' | 'coaches' | 'private'
 
+export type NotePrivacyLevel = 'public' | 'medical' | 'mental_health' | 'coaches' | 'private'
+
 export type NoteWithAuthor = {
   id: string
   title: string | null
   content: any // Tiptap JSON
-  visibility: string
+  privacyLevel: string
   tags: string[]
   createdAt: Date
   updatedAt: Date
@@ -36,27 +38,27 @@ export type NoteWithAuthor = {
 /**
  * Check if user has permission to view a note based on visibility
  */
-async function canViewNote(note: { visibility: string; authorId: string }, userId: string, userRoles: string[]): Promise<boolean> {
+async function canViewNote(note: { privacyLevel: string; authorId: string }, userId: string, userRoles: string[]): Promise<boolean> {
   // Private notes - only author can view
-  if (note.visibility === 'private') {
+  if (note.privacyLevel === 'private') {
     return note.authorId === userId
   }
 
   // Public notes - everyone can view
-  if (note.visibility === 'public') {
+  if (note.privacyLevel === 'public') {
     return true
   }
 
   // Role-specific notes
-  if (note.visibility === 'medical') {
+  if (note.privacyLevel === 'medical') {
     return userRoles.includes('medical') || userRoles.includes('Medical Staff')
   }
 
-  if (note.visibility === 'mental_health') {
+  if (note.privacyLevel === 'mental_health') {
     return userRoles.includes('mental_health') || userRoles.includes('Mental Health')
   }
 
-  if (note.visibility === 'coaches') {
+  if (note.privacyLevel === 'coaches') {
     return userRoles.includes('coach') || userRoles.includes('Coach')
   }
 
@@ -77,20 +79,26 @@ async function getUserRoles(userId: string): Promise<string[]> {
   return userRoles.map((ur) => ur.role.name)
 }
 
+async function getSupabaseUser() {
+  const supabase = await createClient()
+  const userResponse = await supabase.auth.getUser()
+  const user = userResponse?.data?.user ?? null
+  return { supabase, user }
+}
+
 /**
  * Get all notes visible to the current user with optional filters
  */
 export async function getNotes(filters?: {
   search?: string
   authorId?: string
-  visibility?: string
+  privacyLevel?: string
   linkedPersonId?: string
   linkedEventId?: string
   tags?: string[]
 }) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { user } = await getSupabaseUser()
 
     if (!user) {
       return { success: false, error: 'Unauthorized' }
@@ -180,14 +188,14 @@ export async function getNotes(filters?: {
       })
     }
 
-    // Apply visibility filter if provided
-    if (filters?.visibility) {
-      if (filters.visibility === 'my_private') {
+    // Apply privacyLevel filter if provided
+    if (filters?.privacyLevel) {
+      if (filters.privacyLevel === 'my_private') {
         filteredNotes = filteredNotes.filter(
-          (note) => note.visibility === 'private' && note.authorId === currentUser.id
+          (note) => note.privacyLevel === 'private' && note.authorId === currentUser.id
         )
-      } else if (filters.visibility !== 'all') {
-        filteredNotes = filteredNotes.filter((note) => note.visibility === filters.visibility)
+      } else if (filters.privacyLevel !== 'all') {
+        filteredNotes = filteredNotes.filter((note) => note.privacyLevel === filters.privacyLevel)
       }
     }
 
@@ -209,8 +217,7 @@ export async function getNotes(filters?: {
  */
 export async function getNote(id: string) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { user } = await getSupabaseUser()
 
     if (!user) {
       return { success: false, error: 'Unauthorized' }
@@ -282,14 +289,13 @@ export async function getNote(id: string) {
 export async function createNote(data: {
   title?: string
   content: any
-  visibility: NoteVisibility
+  privacyLevel: NotePrivacyLevel
   tags?: string[]
   linkedPersonId?: string
   linkedEventId?: string
 }) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { user } = await getSupabaseUser()
 
     if (!user) {
       return { success: false, error: 'Unauthorized' }
@@ -307,7 +313,7 @@ export async function createNote(data: {
       data: {
         title: data.title || null,
         content: data.content,
-        visibility: data.visibility,
+        privacyLevel: data.privacyLevel,
         tags: data.tags || [],
         linkedPersonId: data.linkedPersonId || null,
         linkedEventId: data.linkedEventId || null,
@@ -368,13 +374,12 @@ export async function updateNote(
   data: {
     title?: string
     content?: any
-    visibility?: NoteVisibility
+    privacyLevel?: NotePrivacyLevel
     tags?: string[]
   }
 ) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { user } = await getSupabaseUser()
 
     if (!user) {
       return { success: false, error: 'Unauthorized' }
@@ -406,7 +411,7 @@ export async function updateNote(
       data: {
         title: data.title !== undefined ? data.title : undefined,
         content: data.content !== undefined ? data.content : undefined,
-        visibility: data.visibility !== undefined ? data.visibility : undefined,
+        privacyLevel: data.privacyLevel !== undefined ? data.privacyLevel : undefined,
         tags: data.tags !== undefined ? data.tags : undefined,
       },
       include: {
@@ -460,8 +465,7 @@ export async function updateNote(
  */
 export async function deleteNote(id: string) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { user } = await getSupabaseUser()
 
     if (!user) {
       return { success: false, error: 'Unauthorized' }
@@ -517,8 +521,7 @@ export async function deleteNote(id: string) {
  */
 export async function getNoteTags() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { user } = await getSupabaseUser()
 
     if (!user) {
       return { success: false, error: 'Unauthorized' }

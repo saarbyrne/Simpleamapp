@@ -1,22 +1,13 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { NoteCard } from './note-card'
 import { NoteEditorDialog } from './note-editor-dialog'
 import { getNotes, deleteNote, getNoteTags, NoteWithAuthor } from '@/app/actions/notes'
-import { Search, Plus, Filter, X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -30,6 +21,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { DataTableFilters, type FilterConfig } from '@/components/data-table'
 
 interface NotesListProps {
   linkedPersonId?: string
@@ -37,6 +29,7 @@ interface NotesListProps {
   currentUserId?: string
   showFilters?: boolean
   showCreateButton?: boolean
+  onToolbarRender?: (toolbar: React.ReactNode) => void
 }
 
 export function NotesList({
@@ -45,6 +38,7 @@ export function NotesList({
   currentUserId,
   showFilters = true,
   showCreateButton = true,
+  onToolbarRender,
 }: NotesListProps) {
   const router = useRouter()
   const [notes, setNotes] = useState<NoteWithAuthor[]>([])
@@ -57,7 +51,7 @@ export function NotesList({
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('')
-  const [visibilityFilter, setVisibilityFilter] = useState<string>('all')
+  const [privacyLevelFilter, setPrivacyLevelFilter] = useState<string>('all')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
 
   useEffect(() => {
@@ -67,7 +61,7 @@ export function NotesList({
 
   useEffect(() => {
     applyFilters()
-  }, [notes, searchQuery, visibilityFilter, selectedTags])
+  }, [notes, searchQuery, privacyLevelFilter, selectedTags])
 
   const loadNotes = async () => {
     setIsLoading(true)
@@ -107,14 +101,14 @@ export function NotesList({
       })
     }
 
-    // Apply visibility filter
-    if (visibilityFilter !== 'all') {
-      if (visibilityFilter === 'my_private') {
+    // Apply privacyLevel filter
+    if (privacyLevelFilter !== 'all') {
+      if (privacyLevelFilter === 'my_private') {
         filtered = filtered.filter(
-          (note) => note.visibility === 'private' && note.author.id === currentUserId
+          (note) => note.privacyLevel === 'private' && note.author.id === currentUserId
         )
       } else {
-        filtered = filtered.filter((note) => note.visibility === visibilityFilter)
+        filtered = filtered.filter((note) => note.privacyLevel === privacyLevelFilter)
       }
     }
 
@@ -159,11 +153,69 @@ export function NotesList({
 
   const clearFilters = () => {
     setSearchQuery('')
-    setVisibilityFilter('all')
+    setPrivacyLevelFilter('all')
     setSelectedTags([])
   }
 
-  const hasActiveFilters = searchQuery || visibilityFilter !== 'all' || selectedTags.length > 0
+  const hasActiveFilters = searchQuery || privacyLevelFilter !== 'all' || selectedTags.length > 0
+
+  // Filter configuration for DataTableFilters
+  const filterConfig: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: 'search',
+        label: 'Search',
+        type: 'search',
+        placeholder: 'Search notes...',
+      },
+      {
+        key: 'privacyLevel',
+        label: 'Privacy Level',
+        type: 'select',
+        options: [
+          { value: 'all', label: 'All I can see' },
+          { value: 'public', label: 'Public only' },
+          { value: 'medical', label: 'Medical only' },
+          { value: 'mental_health', label: 'Mental Health only' },
+          { value: 'coaches', label: 'Coaches only' },
+          { value: 'my_private', label: 'My private notes' },
+        ],
+        placeholder: 'All privacy levels',
+      },
+    ],
+    []
+  )
+
+  const filterValues = useMemo(
+    () => ({
+      search: searchQuery,
+      privacyLevel: privacyLevelFilter,
+    }),
+    [searchQuery, privacyLevelFilter]
+  )
+
+  const handleFilterChange = useCallback((key: string, value: string) => {
+    if (key === 'search') setSearchQuery(value)
+    else if (key === 'privacyLevel') setPrivacyLevelFilter(value)
+  }, [])
+
+  // Create toolbar content for parent component
+  const toolbarContent = React.useMemo(() => showFilters ? (
+    <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
+      <DataTableFilters
+        filters={filterConfig}
+        values={filterValues}
+        onFilterChange={handleFilterChange}
+      />
+    </div>
+  ) : null, [showFilters, filterConfig, filterValues, handleFilterChange])
+
+  // Pass toolbar to parent component if callback provided
+  React.useEffect(() => {
+    if (onToolbarRender) {
+      onToolbarRender(toolbarContent)
+    }
+  }, [onToolbarRender, toolbarContent])
 
   if (isLoading) {
     return (
@@ -185,97 +237,50 @@ export function NotesList({
 
   return (
     <div className="space-y-6">
-      {showFilters && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-muted-foreground" />
-                <h3 className="font-medium">Filters</h3>
-                {hasActiveFilters && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearFilters}
-                    className="ms-auto text-xs"
+      {showFilters && availableTags.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium">Filter by tags</h3>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="text-xs"
+              >
+                Clear all filters
+              </Button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {availableTags.slice(0, 10).map((tag) => (
+              <Badge
+                key={tag}
+                variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+                className="cursor-pointer"
+                onClick={() => handleToggleTag(tag)}
+              >
+                {tag}
+              </Badge>
+            ))}
+          </div>
+          {selectedTags.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-muted-foreground">Selected:</span>
+              {selectedTags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="gap-1">
+                  {tag}
+                  <button
+                    onClick={() => handleToggleTag(tag)}
+                    className="ms-1 rounded-full hover:bg-muted"
                   >
-                    Clear filters
-                  </Button>
-                )}
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="search">Search</Label>
-                  <div className="relative">
-                    <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="search"
-                      placeholder="Search notes..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="ps-9"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="visibility">Visibility</Label>
-                  <Select value={visibilityFilter} onValueChange={setVisibilityFilter}>
-                    <SelectTrigger id="visibility">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All I can see</SelectItem>
-                      <SelectItem value="public">Public only</SelectItem>
-                      <SelectItem value="medical">Medical only</SelectItem>
-                      <SelectItem value="mental_health">Mental Health only</SelectItem>
-                      <SelectItem value="coaches">Coaches only</SelectItem>
-                      <SelectItem value="my_private">My private notes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Tags</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {availableTags.length > 0 ? (
-                      availableTags.slice(0, 5).map((tag) => (
-                        <Badge
-                          key={tag}
-                          variant={selectedTags.includes(tag) ? 'default' : 'outline'}
-                          className="cursor-pointer"
-                          onClick={() => handleToggleTag(tag)}
-                        >
-                          {tag}
-                        </Badge>
-                      ))
-                    ) : (
-                      <span className="text-sm text-muted-foreground">No tags yet</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {selectedTags.length > 0 && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-muted-foreground">Selected tags:</span>
-                  {selectedTags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="gap-1">
-                      {tag}
-                      <button
-                        onClick={() => handleToggleTag(tag)}
-                        className="ms-1 rounded-full hover:bg-muted"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
       )}
 
       <div className="flex items-center justify-between">
@@ -303,14 +308,8 @@ export function NotesList({
             <p className="text-muted-foreground">
               {hasActiveFilters
                 ? 'No notes match your filters'
-                : 'No notes yet. Create your first note to get started.'}
+                : 'No notes yet. Use the Add Note button above to get started.'}
             </p>
-            {!hasActiveFilters && showCreateButton && (
-              <Button onClick={handleCreateNote} className="mt-4">
-                <Plus className="me-2 h-4 w-4" />
-                Create Note
-              </Button>
-            )}
           </CardContent>
         </Card>
       ) : (

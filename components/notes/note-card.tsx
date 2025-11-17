@@ -56,8 +56,8 @@ export function NoteCard({
   showLinkedEntities = true,
 }: NoteCardProps) {
   const isAuthor = currentUserId === note.author.id
-  const visibilityInfo = visibilityConfig[note.visibility as keyof typeof visibilityConfig] || {
-    label: note.visibility,
+  const visibilityInfo = visibilityConfig[note.privacyLevel as keyof typeof visibilityConfig] || {
+    label: note.privacyLevel,
     color: 'bg-gray-100 text-gray-800',
   }
 

@@ -8,6 +8,7 @@ import { StickyNote } from 'lucide-react'
 
 export default function NotesPage() {
   const [currentUserId, setCurrentUserId] = useState<string | undefined>()
+  const [toolbarContent, setToolbarContent] = useState<React.ReactNode>(null)
 
   useEffect(() => {
     async function loadUser() {
@@ -28,12 +29,13 @@ export default function NotesPage() {
     <PageCard
       title="Notes"
       description="Create and manage notes with rich text formatting, privacy controls, and entity linking"
-      icon={<StickyNote className="h-6 w-6" />}
+      toolbar={toolbarContent}
     >
       <NotesList
         currentUserId={currentUserId}
         showFilters={true}
         showCreateButton={true}
+        onToolbarRender={setToolbarContent}
       />
     </PageCard>
   )

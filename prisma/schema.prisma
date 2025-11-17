@@ -321,7 +321,7 @@ model Note {
   content        Json // Tiptap JSON document format
 
   // Privacy/Visibility
-  visibility     String   @default("public") // public, medical, mental_health, coaches, private
+  privacyLevel   String   @default("public") // public, medical, mental_health, coaches, private
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -346,7 +346,7 @@ model Note {
   @@index([authorId])
   @@index([linkedPersonId])
   @@index([linkedEventId])
-  @@index([visibility])
+  @@index([privacyLevel])
   @@map("notes")
 }
 

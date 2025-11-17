@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { RichTextEditor } from './rich-text-editor'
-import { createNote, updateNote, NoteVisibility, NoteWithAuthor } from '@/app/actions/notes'
+import { createNote, updateNote, NotePrivacyLevel, NoteWithAuthor } from '@/app/actions/notes'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { X } from 'lucide-react'
@@ -58,7 +58,7 @@ export function NoteEditorDialog({
   const router = useRouter()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState<any>(null)
-  const [visibility, setVisibility] = useState<NoteVisibility>('public')
+  const [privacyLevel, setPrivacyLevel] = useState<NotePrivacyLevel>('public')
   const [tagInput, setTagInput] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -69,7 +69,7 @@ export function NoteEditorDialog({
       if (existingNote) {
         setTitle(existingNote.title || '')
         setContent(existingNote.content)
-        setVisibility(existingNote.visibility as NoteVisibility)
+        setPrivacyLevel(existingNote.privacyLevel as NotePrivacyLevel)
         setTags(existingNote.tags || [])
       } else {
         setTitle('')
@@ -77,7 +77,7 @@ export function NoteEditorDialog({
           type: 'doc',
           content: [{ type: 'paragraph' }],
         })
-        setVisibility('public')
+        setPrivacyLevel('public')
         setTags([])
       }
       setTagInput('')
@@ -101,22 +101,46 @@ export function NoteEditorDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate content
+    if (!content || typeof content !== 'object') {
+      console.error('Invalid content:', content)
+      toast.error('Content is invalid')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
+      // Ensure content is a plain object - if it's null/undefined, use default
+      const serializedContent = content || {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: ''
+              }
+            ]
+          }
+        ]
+      }
+
       let result
       if (existingNote) {
         result = await updateNote(existingNote.id, {
           title: title || undefined,
-          content,
-          visibility,
+          content: serializedContent,
+          privacyLevel,
           tags,
         })
       } else {
         result = await createNote({
           title: title || undefined,
-          content,
-          visibility,
+          content: serializedContent,
+          privacyLevel,
           tags,
           linkedPersonId,
           linkedEventId,
@@ -175,7 +199,7 @@ export function NoteEditorDialog({
 
           <div className="space-y-2">
             <Label htmlFor="visibility">Visibility</Label>
-            <Select value={visibility} onValueChange={(v) => setVisibility(v as NoteVisibility)}>
+            <Select value={privacyLevel} onValueChange={(v) => setPrivacyLevel(v as NotePrivacyLevel)}>
               <SelectTrigger id="visibility">
                 <SelectValue />
               </SelectTrigger>
