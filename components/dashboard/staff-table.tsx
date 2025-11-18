@@ -19,7 +19,6 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +27,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { PageCard } from '@/components/ui/page-card'
-import { DataTable } from '@/components/data-table'
+import { DataTable, DataTableFilters } from '@/components/data-table'
 import { DataTableColumnManager } from '@/components/data-table/data-table-column-manager'
 import { DataTableExport } from '@/components/data-table/data-table-export'
 import { BulkActionsBar, type BulkField } from '@/components/ui/bulk-actions-bar'
@@ -36,9 +35,11 @@ import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { toast } from 'sonner'
 import { EditRolesDialog } from './edit-roles-dialog'
 import { EditPermissionsDialog } from './edit-permissions-dialog'
-import { MoreHorizontal, Search } from 'lucide-react'
+import { MoreHorizontal } from 'lucide-react'
 import { exportToCSV } from '@/lib/table-utils'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { PERMISSION_METADATA } from '@/lib/permissions'
+import type { OrganizationRoleSummary } from '@/app/actions/staff'
 
 export type StaffRow = {
   id: string
@@ -55,6 +56,7 @@ export type StaffRow = {
 type StaffTableProps = {
   staff: StaffRow[]
   total?: number
+  organizationRoles: OrganizationRoleSummary[]
 }
 
 const titleCase = (value: string | null | undefined) => {
@@ -106,7 +108,7 @@ const STAFF_EXPORT_COLUMNS = [
   { accessorKey: 'lastLoginAt', header: 'Last Active' },
 ]
 
-export function StaffTable({ staff, total: serverTotal }: StaffTableProps) {
+export function StaffTable({ staff, total: serverTotal, organizationRoles }: StaffTableProps) {
   const router = useRouter()
   const t = useTranslations()
   const translate = useCallback(
@@ -115,7 +117,9 @@ export function StaffTable({ staff, total: serverTotal }: StaffTableProps) {
     [t]
   )
   const { preferences } = useUserPreferences()
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchFilter, setSearchFilter] = useState('')
+  const [roleFilter, setRoleFilter] = useState('all')
+  const [permissionFilter, setPermissionFilter] = useState('all')
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([])
@@ -128,21 +132,57 @@ export function StaffTable({ staff, total: serverTotal }: StaffTableProps) {
 
   const totalCount = serverTotal ?? staff.length
 
+  const roleOptions = useMemo(
+    () =>
+      organizationRoles.map((role) => ({
+        value: role.name,
+        label: titleCase(role.name),
+      })),
+    [organizationRoles]
+  )
+
+  const permissionOptions = useMemo(
+    () =>
+      Object.entries(PERMISSION_METADATA).map(([value, metadata]) => ({
+        value,
+        label: metadata.label,
+        description: metadata.description,
+      })),
+    []
+  )
+
   const filteredStaff = useMemo(() => {
-    if (!searchTerm.trim()) return staff
-    const term = searchTerm.toLowerCase()
+    const normalizedSearch = searchFilter.trim().toLowerCase()
+    const normalizedRoleFilter = roleFilter.toLowerCase()
+
     return staff.filter((member) => {
-      const roleMatch = member.roleNames.some((role) => role.toLowerCase().includes(term))
-      const permissionMatch = member.permissions.some((perm) => perm.toLowerCase().includes(term))
-      return (
-        member.name?.toLowerCase().includes(term) ||
-        member.email?.toLowerCase().includes(term) ||
-        member.phone?.toLowerCase().includes(term) ||
-        roleMatch ||
-        permissionMatch
-      )
+      const searchableSources = [
+        member.name || '',
+        member.email || '',
+        member.phone || '',
+        member.roleNames.join(' '),
+        member.permissions.join(' '),
+      ]
+
+      const matchesSearch = !normalizedSearch
+        ? true
+        : searchableSources.some((value) =>
+            value.toLowerCase().includes(normalizedSearch)
+          )
+
+      const matchesRole =
+        roleFilter === 'all' ||
+        member.roleNames.some(
+          (role) => role.toLowerCase() === normalizedRoleFilter
+        )
+
+      const matchesPermission =
+        permissionFilter === 'all' ||
+        member.permissions.includes(permissionFilter)
+
+      return matchesSearch && matchesRole && matchesPermission
     })
-  }, [staff, searchTerm])
+  }, [staff, searchFilter, roleFilter, permissionFilter])
 
   const onNavigateToProfile = useCallback(
     (staffId: string) => {
@@ -316,6 +356,62 @@ export function StaffTable({ staff, total: serverTotal }: StaffTableProps) {
     },
   ], [translate, onNavigateToProfile, onEditRoles, onEditPermissions, preferences])
 
+  const filterConfig = useMemo(() => {
+    const config = [
+      {
+        key: 'search',
+        label: translate('staff.searchLabel', 'Search'),
+        type: 'search' as const,
+        placeholder: translate('staff.searchPlaceholder', 'Search by name, email, role, or permission'),
+      },
+    ]
+
+    if (roleOptions.length > 0) {
+      config.push({
+        key: 'role',
+        label: translate('staff.columns.roles', 'Roles'),
+        type: 'select' as const,
+        options: roleOptions,
+        placeholder: translate('staff.allRoles', 'All roles'),
+      })
+    }
+
+    if (permissionOptions.length > 0) {
+      config.push({
+        key: 'permission',
+        label: translate('staff.columns.permissions', 'Permissions'),
+        type: 'select' as const,
+        options: permissionOptions.map(({ value, label }) => ({ value, label })),
+        placeholder: translate('staff.allPermissions', 'All permissions'),
+      })
+    }
+
+    return config
+  }, [translate, roleOptions, permissionOptions])
+
+  const filterValues = useMemo(() => ({
+    search: searchFilter,
+    role: roleFilter,
+    permission: permissionFilter,
+  }), [searchFilter, roleFilter, permissionFilter])
+
+  const handleFilterChange = useCallback((key: string, value: string) => {
+    if (key === 'search') {
+      setSearchFilter(value)
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+      return
+    }
+    if (key === 'role') {
+      setRoleFilter(value)
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+      return
+    }
+    if (key === 'permission') {
+      setPermissionFilter(value)
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+    }
+  }, [setPagination])
+
   const tableInstance = useReactTable({
     data: filteredStaff,
     columns,
@@ -364,19 +460,21 @@ export function StaffTable({ staff, total: serverTotal }: StaffTableProps) {
     }
   }
 
-  const parseList = (value: string) =>
-    value
-      .split(/[,\\n]/)
-      .map((item) => item.trim())
-      .filter(Boolean)
+  const handleBulkSave = async (values: Record<string, string | string[] | null>) => {
+    const roleValues = values.roles
+    const permissionValues = values.permissions
+    const roles = Array.isArray(roleValues)
+      ? roleValues
+      : roleValues
+        ? [roleValues]
+        : []
+    const permissions = Array.isArray(permissionValues)
+      ? permissionValues
+      : permissionValues
+        ? [permissionValues]
+        : []
 
-  const handleBulkSave = async (values: Record<string, string | null>) => {
-    const rolesInput = values.roles?.trim()
-    const permissionsInput = values.permissions?.trim()
-    const roles = rolesInput ? parseList(rolesInput) : null
-    const permissions = permissionsInput ? parseList(permissionsInput) : null
-
-    if (!roles && !permissions) {
+    if (!roles.length && !permissions.length) {
       toast.error(translate('staff.bulkMissingValues', 'Add at least one value.'))
       return
     }
@@ -388,16 +486,18 @@ export function StaffTable({ staff, total: serverTotal }: StaffTableProps) {
 
     setIsBulkSaving(true)
     try {
-      for (const member of selectedStaff) {
-        if (roles) {
-          const result = await updateStaffRoles(member.id, roles)
-          if (result.error) throw new Error(result.error)
-        }
-        if (permissions) {
-          const result = await updateStaffPermissions(member.id, permissions)
-          if (result.error) throw new Error(result.error)
-        }
-      }
+      await Promise.all(
+        selectedStaff.map(async (member) => {
+          if (roles.length) {
+            const result = await updateStaffRoles(member.id, roles)
+            if (result.error) throw new Error(result.error)
+          }
+          if (permissions.length) {
+            const result = await updateStaffPermissions(member.id, permissions)
+            if (result.error) throw new Error(result.error)
+          }
+        })
+      )
       toast.success(translate('staff.bulkUpdated', 'Updated selected staff successfully.'))
       tableInstance.resetRowSelection()
       router.refresh()
@@ -426,6 +526,32 @@ export function StaffTable({ staff, total: serverTotal }: StaffTableProps) {
       toast.error(translate('staff.exportFailed', 'Failed to export selection.'))
     }
   }
+
+  const bulkFields = useMemo<BulkField[]>(() => {
+    const fields: BulkField[] = []
+
+    if (roleOptions.length > 0) {
+      fields.push({
+        id: 'roles',
+        type: 'multi-select',
+        placeholder: translate('staff.bulkRolesPlaceholder', 'Assign roles'),
+        width: 'w-[220px]',
+        options: roleOptions,
+      })
+    }
+
+    fields.push({
+      id: 'permissions',
+      type: 'multi-select',
+      placeholder: translate('staff.bulkPermissionsPlaceholder', 'Assign permissions'),
+      width: 'w-[260px]',
+      options: permissionOptions,
+    })
+
+    return fields
+  }, [roleOptions, permissionOptions, translate])
+
+  const hasBulkFields = bulkFields.length > 0
 
   const { pageIndex, pageSize } = pagination
   const startRow = filteredStaff.length === 0 ? 0 : pageIndex * pageSize + 1
@@ -457,21 +583,61 @@ export function StaffTable({ staff, total: serverTotal }: StaffTableProps) {
         description={translate('staff.description', 'Manage team roles, permissions, and contact details.')}
         toolbar={
           <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
-            <div className="relative min-w-[220px] flex-1">
-              <Input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder={translate('staff.searchPlaceholder', 'Search by name, email, role, or permission')}
-                className="ps-9"
-              />
-              <Search className="absolute inset-y-0 start-3 my-auto h-4 w-4 text-muted-foreground" />
-            </div>
+            <DataTableFilters
+              filters={filterConfig}
+              values={filterValues}
+              onFilterChange={handleFilterChange}
+            />
             <DataTableColumnManager table={tableInstance} onColumnOrderChange={setColumnOrder} />
             <DataTableExport table={tableInstance} columns={columns} filename="staff" />
           </div>
         }
       >
         <div className="space-y-4">
+          {hasBulkFields && selectedStaff.length > 0 && (
+            <div className="overflow-hidden rounded-lg border border-border/60 bg-card/60">
+              <BulkActionsBar
+                selectedCount={selectedStaff.length}
+                itemLabel={translate('staff.itemLabel', 'staff member')}
+                fields={bulkFields}
+                onSave={handleBulkSave}
+                onClear={() => tableInstance.resetRowSelection()}
+                isLoading={isBulkSaving}
+                className="border-0 bg-transparent"
+              />
+              <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border/60 bg-card/80 px-4 py-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkExportSelected(selectedStaff)}
+                >
+                  {translate('staff.exportSelection', 'Export selection')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={async () => {
+                    const emails = selectedStaff.map((row) => row.email).filter(Boolean)
+                    if (!emails.length) {
+                      toast.error(translate('staff.noEmailsToCopy', 'None of the selected staff have an email address.'))
+                      return
+                    }
+                    try {
+                      await navigator.clipboard.writeText(emails.join(', '))
+                      toast.success(translate('staff.emailsCopied', 'Copied emails to clipboard.'))
+                    } catch {
+                      toast.error(translate('staff.copyFailed', 'Failed to copy emails.'))
+                    }
+                  }}
+                >
+                  {translate('staff.copyEmails', 'Copy Emails')}
+                </Button>
+              </div>
+            </div>
+          )}
+
           <DataTable
             data={filteredStaff}
             columns={columns}
@@ -494,73 +660,10 @@ export function StaffTable({ staff, total: serverTotal }: StaffTableProps) {
             enableBulkActions={false}
           />
 
-          {selectedStaff.length > 0 && (
-            <div className="rounded-lg border bg-card">
-              <BulkActionsBar
-                selectedCount={selectedStaff.length}
-                itemLabel={translate('staff.itemLabel', 'staff member')}
-                fields={[
-                  {
-                    id: 'roles',
-                    type: 'text',
-                    placeholder: translate('staff.bulkRolesPlaceholder', 'Roles (comma separated)'),
-                    width: 'w-[240px]',
-                  },
-                  {
-                    id: 'permissions',
-                    type: 'text',
-                    placeholder: translate('staff.bulkPermissionsPlaceholder', 'Permissions (comma separated)'),
-                    width: 'w-[260px]',
-                  },
-                ]}
-                onSave={handleBulkSave}
-                onClear={() => tableInstance.resetRowSelection()}
-                isLoading={isBulkSaving}
-              />
-              <div className="flex flex-wrap items-center justify-between gap-2 border-t px-4 py-2">
-                <p className="text-sm text-muted-foreground">
-                  {selectedStaff.length === 1
-                    ? translate('staff.singleSelected', '1 staff member selected')
-                    : translate('staff.multiSelected', '{count} staff members selected', { count: selectedStaff.length })}
-                </p>
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleBulkExportSelected(selectedStaff)}
-                  >
-                    {translate('staff.exportSelection', 'Export selection')}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={async () => {
-                      const emails = selectedStaff.map((row) => row.email).filter(Boolean)
-                      if (!emails.length) {
-                        toast.error(translate('staff.noEmailsToCopy', 'None of the selected staff have an email address.'))
-                        return
-                      }
-                      try {
-                        await navigator.clipboard.writeText(emails.join(', '))
-                        toast.success(translate('staff.emailsCopied', 'Copied emails to clipboard.'))
-                      } catch {
-                        toast.error(translate('staff.copyFailed', 'Failed to copy emails.'))
-                      }
-                    }}
-                  >
-                    {translate('staff.copyEmails', 'Copy Emails')}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between min-w-0">
+          <div className="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3 min-w-0">
               <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                <SelectTrigger className="h-9 w-[130px]">
+                <SelectTrigger className="h-9 w-[120px]">
                   <SelectValue placeholder={translate('staff.rowsPerPage', 'Rows per page')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -609,6 +712,7 @@ export function StaffTable({ staff, total: serverTotal }: StaffTableProps) {
           open={!!editRolesStaff}
           onOpenChange={(open) => !open && setEditRolesStaff(null)}
           onSave={handleSaveRoles}
+          availableRoles={organizationRoles}
         />
       )}
 

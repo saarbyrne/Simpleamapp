@@ -17,6 +17,7 @@ import { updateStaffRoles, updateStaffPermissions } from '@/app/actions/staff'
 import { toast } from 'sonner'
 import type { StaffRow } from './staff-table'
 import { useBreadcrumb } from '@/lib/breadcrumb-context'
+import type { OrganizationRoleSummary } from '@/app/actions/staff'
 
 type StaffProfileProps = {
   staff: any // Full staff member with relations
@@ -25,9 +26,10 @@ type StaffProfileProps = {
     formsCreated: number
     eventsCreated: number
   } | null
+  organizationRoles: OrganizationRoleSummary[]
 }
 
-export function StaffProfile({ staff, stats }: StaffProfileProps) {
+export function StaffProfile({ staff, stats, organizationRoles }: StaffProfileProps) {
   const router = useRouter()
   const { preferences } = useUserPreferences()
   const [editRolesOpen, setEditRolesOpen] = useState(false)
@@ -344,6 +346,7 @@ export function StaffProfile({ staff, stats }: StaffProfileProps) {
           open={editRolesOpen}
           onOpenChange={setEditRolesOpen}
           onSave={handleSaveRoles}
+          availableRoles={organizationRoles}
         />
       )}
 

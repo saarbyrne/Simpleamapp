@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
-import { getStaffMember, getStaffStats } from '@/app/actions/staff'
+import { getStaffMember, getStaffStats, getOrganizationRoles } from '@/app/actions/staff'
 import { StaffProfile } from '@/components/dashboard/staff-profile'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -20,19 +20,23 @@ function StaffProfileLoading() {
 }
 
 async function StaffProfileData({ id }: { id: string }) {
-  const [memberResult, statsResult] = await Promise.all([
+  const [memberResult, statsResult, rolesResult] = await Promise.all([
     getStaffMember(id),
     getStaffStats(id),
+    getOrganizationRoles(),
   ])
 
   if (memberResult.error || !memberResult.staffMember) {
     notFound()
   }
 
+  const organizationRoles = Array.isArray(rolesResult.roles) ? rolesResult.roles : []
+
   return (
     <StaffProfile
       staff={memberResult.staffMember}
       stats={statsResult.stats || null}
+      organizationRoles={organizationRoles}
     />
   )
 }

@@ -12,12 +12,15 @@ import {
 import { Input } from '@/components/ui/input'
 import { Save, X } from 'lucide-react'
 import { cn } from '@/components/ui/utils'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Checkbox } from '@/components/ui/checkbox'
 
-export type BulkFieldType = 'select' | 'text'
+export type BulkFieldType = 'select' | 'text' | 'multi-select'
 
 export interface BulkFieldOption {
   value: string
   label: string | ReactNode
+  description?: string
 }
 
 export interface BulkField {
@@ -32,7 +35,7 @@ export interface BulkField {
 export interface BulkActionsBarProps {
   selectedCount: number
   fields: BulkField[]
-  onSave: (values: Record<string, string | null>) => Promise<void>
+  onSave: (values: Record<string, string | string[] | null>) => Promise<void>
   onClear?: () => void
   isLoading?: boolean
   itemLabel?: string // e.g., "player", "item", "row"
@@ -48,7 +51,7 @@ export function BulkActionsBar({
   itemLabel = 'item',
   className,
 }: BulkActionsBarProps) {
-  const [values, setValues] = useState<Record<string, string>>({})
+  const [values, setValues] = useState<Record<string, string | string[]>>({})
   const [hasChanges, setHasChanges] = useState(false)
 
   // Reset values when selection changes
@@ -61,23 +64,33 @@ export function BulkActionsBar({
 
   // Track changes
   useEffect(() => {
-    const changed = Object.values(values).some((val) => val !== '')
+    const changed = Object.values(values).some((val) =>
+      Array.isArray(val) ? val.length > 0 : val !== ''
+    )
     setHasChanges(changed)
   }, [values])
 
-  const handleFieldChange = (fieldId: string, value: string) => {
+  const handleFieldChange = (fieldId: string, value: string | string[]) => {
     setValues((prev) => ({
       ...prev,
-      [fieldId]: value === '__clear__' ? '' : value,
+      [fieldId]: Array.isArray(value)
+        ? value
+        : value === '__clear__'
+          ? ''
+          : value,
     }))
   }
 
   const handleSave = async () => {
-    const updates: Record<string, string | null> = {}
+    const updates: Record<string, string | string[] | null> = {}
     
     fields.forEach((field) => {
       const value = values[field.id]
-      if (value !== undefined && value !== '') {
+      if (Array.isArray(value)) {
+        if (value.length > 0) {
+          updates[field.id] = value
+        }
+      } else if (value !== undefined && value !== '') {
         updates[field.id] = value.trim() || null
       }
     })
@@ -105,7 +118,9 @@ export function BulkActionsBar({
       {/* Inputs Row */}
       <div className="flex items-center gap-2 flex-wrap">
         {fields.map((field) => {
-          const fieldValue = values[field.id] || ''
+          const storedValue = values[field.id]
+          const fieldValue = typeof storedValue === 'string' ? storedValue : ''
+          const multiValue = Array.isArray(storedValue) ? storedValue : []
           const width = field.width || 'w-[130px]'
 
           if (field.type === 'select' && field.options) {
@@ -129,6 +144,76 @@ export function BulkActionsBar({
                   ))}
                 </SelectContent>
               </Select>
+            )
+          }
+
+          if (field.type === 'multi-select' && field.options) {
+            const selectedLabels = field.options
+              .filter((option) => multiValue.includes(option.value))
+              .map((option) =>
+                typeof option.label === 'string' ? option.label : option.value
+              )
+            const displayLabel = selectedLabels.length > 0
+              ? `${selectedLabels.slice(0, 2).join(', ')}` +
+                (selectedLabels.length > 2 ? ` +${selectedLabels.length - 2}` : '')
+              : field.placeholder
+
+            return (
+              <Popover key={field.id}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={cn('h-10 justify-between gap-2', width)}
+                  >
+                    <span className="truncate text-left">
+                      {displayLabel}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[260px] p-3">
+                  <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">
+                    {field.options.map((option) => {
+                      const isChecked = multiValue.includes(option.value)
+                      return (
+                        <label
+                          key={option.value}
+                          className="flex items-start gap-3 rounded-md border border-border/60 p-2 text-sm"
+                        >
+                          <Checkbox
+                            checked={isChecked}
+                            onCheckedChange={(checked) => {
+                              const nextValues = checked
+                                ? [...multiValue, option.value]
+                                : multiValue.filter((val) => val !== option.value)
+                              handleFieldChange(field.id, nextValues)
+                            }}
+                            className="mt-1"
+                          />
+                          <div className="flex-1 space-y-1">
+                            <span className="font-medium">{option.label}</span>
+                            {option.description && (
+                              <span className="text-xs text-muted-foreground">
+                                {option.description}
+                              </span>
+                            )}
+                          </div>
+                        </label>
+                      )
+                    })}
+                    {field.allowClear !== false && multiValue.length > 0 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleFieldChange(field.id, [])}
+                      >
+                        Clear Selection
+                      </Button>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
             )
           }
 
@@ -178,4 +263,3 @@ export function BulkActionsBar({
     </div>
   )
 }
-

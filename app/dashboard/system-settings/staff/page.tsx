@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { getStaff } from '@/app/actions/staff'
+import { getStaff, getOrganizationRoles } from '@/app/actions/staff'
 import { StaffTable } from '@/components/dashboard/staff-table'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -16,19 +16,22 @@ function StaffLoading() {
 }
 
 async function StaffData() {
-  const result = await getStaff()
+  const [staffResult, rolesResult] = await Promise.all([
+    getStaff(),
+    getOrganizationRoles(),
+  ])
 
-  if (result.error) {
+  if (staffResult.error) {
     return (
       <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
         <p className="text-sm text-destructive">
-          {result.error}
+          {staffResult.error}
         </p>
       </div>
     )
   }
 
-  if (!result.staff || !Array.isArray(result.staff)) {
+  if (!staffResult.staff || !Array.isArray(staffResult.staff)) {
     return (
       <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
         <p className="text-sm text-destructive">
@@ -38,7 +41,22 @@ async function StaffData() {
     )
   }
 
-  return <StaffTable staff={result.staff} total={result.staff.length} />
+  const organizationRoles = Array.isArray(rolesResult.roles) ? rolesResult.roles : []
+
+  return (
+    <div className="space-y-4">
+      {rolesResult.error && (
+        <div className="rounded-md border border-amber-500/40 bg-amber-50 p-3 text-sm text-amber-900">
+          {rolesResult.error}
+        </div>
+      )}
+      <StaffTable
+        staff={staffResult.staff}
+        total={staffResult.staff.length}
+        organizationRoles={organizationRoles}
+      />
+    </div>
+  )
 }
 
 export default async function StaffPage() {

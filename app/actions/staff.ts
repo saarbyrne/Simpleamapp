@@ -6,7 +6,7 @@ import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
 import { getTranslations } from 'next-intl/server'
-import { hasPermission, PERMISSIONS } from '@/lib/permissions'
+import { hasPermission, PERMISSIONS, ALL_PERMISSIONS } from '@/lib/permissions'
 
 export type StaffRow = {
   id: string
@@ -18,6 +18,12 @@ export type StaffRow = {
   permissions: string[]
   lastLoginAt: Date | null
   createdAt: Date
+}
+
+export type OrganizationRoleSummary = {
+  id: string
+  name: string
+  permissions: string[]
 }
 
 /**
@@ -78,6 +84,47 @@ export async function getStaff() {
       console.error('Error message:', error.message)
       console.error('Error stack:', error.stack)
       // Return more specific error message for debugging
+      return { error: `${t('failedToFetchData')}: ${error.message}` }
+    }
+    return { error: t('failedToFetchData') }
+  }
+}
+
+export async function getOrganizationRoles() {
+  const t = await getTranslations('errors')
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: t('notAuthenticated') }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    if (!dbUser?.organizationId) {
+      console.error('User does not have an organizationId:', dbUser)
+      return { error: 'User organization not found' }
+    }
+
+    const roles = await prisma.organizationRole.findMany({
+      where: {
+        organizationId: dbUser.organizationId,
+      },
+      select: {
+        id: true,
+        name: true,
+        permissions: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    })
+
+    return { success: true, roles }
+  } catch (error) {
+    console.error('Error fetching organization roles:', error)
+    if (error instanceof Error) {
       return { error: `${t('failedToFetchData')}: ${error.message}` }
     }
     return { error: t('failedToFetchData') }
@@ -167,11 +214,29 @@ export async function updateStaffRoles(staffId: string, roleNames: string[]) {
       return { error: t('staffMemberNotFound') }
     }
 
+    const organizationRoles = await prisma.organizationRole.findMany({
+      where: {
+        organizationId: dbUser.organizationId,
+      },
+      select: {
+        name: true,
+      },
+    })
+
+    const validRoleSet = new Set(organizationRoles.map((role) => role.name))
+    const invalidRoles = roleNames.filter((role) => !validRoleSet.has(role))
+
+    if (invalidRoles.length > 0) {
+      return { error: `Invalid roles: ${invalidRoles.join(', ')}` }
+    }
+
+    const normalizedRoles = Array.from(new Set(roleNames.filter((role) => validRoleSet.has(role))))
+
     const updated = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const updatedStaff = await tx.user.update({
         where: { id: staffId },
         data: {
-          roleNames: roleNames,
+          roleNames: normalizedRoles,
         },
       })
 
@@ -181,7 +246,7 @@ export async function updateStaffRoles(staffId: string, roleNames: string[]) {
           type: 'staff_roles_updated',
           data: {
             staffName: updatedStaff.name,
-            newRoles: roleNames,
+            newRoles: normalizedRoles,
           },
           userId: user.id,
         },
@@ -235,11 +300,28 @@ export async function updateStaffPermissions(
       return { error: t('staffMemberNotFound') }
     }
 
+    const validPermissionSet = new Set(ALL_PERMISSIONS)
+    const invalidPermissions = permissions.filter(
+      (permission) => !validPermissionSet.has(permission as (typeof ALL_PERMISSIONS)[number])
+    )
+
+    if (invalidPermissions.length > 0) {
+      return { error: `Invalid permissions: ${invalidPermissions.join(', ')}` }
+    }
+
+    const normalizedPermissions = Array.from(
+      new Set(
+        permissions.filter((permission) =>
+          validPermissionSet.has(permission as (typeof ALL_PERMISSIONS)[number])
+        )
+      )
+    )
+
     const updated = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const updatedStaff = await tx.user.update({
         where: { id: staffId },
         data: {
-          permissions: permissions,
+          permissions: normalizedPermissions,
         },
       })
 
@@ -249,7 +331,7 @@ export async function updateStaffPermissions(
           type: 'staff_permissions_updated',
           data: {
             staffName: updatedStaff.name,
-            newPermissions: permissions,
+            newPermissions: normalizedPermissions,
           },
           userId: user.id,
         },

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -10,18 +10,18 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { X } from 'lucide-react'
-import { COMMON_ROLES } from '@/lib/permissions'
+import { Checkbox } from '@/components/ui/checkbox'
+import { PERMISSION_METADATA } from '@/lib/permissions'
 import type { StaffRow } from './staff-table'
+import type { OrganizationRoleSummary } from '@/app/actions/staff'
 
 type EditRolesDialogProps = {
   staff: StaffRow
   open: boolean
   onOpenChange: (open: boolean) => void
   onSave: (staffId: string, roles: string[]) => Promise<void>
+  availableRoles: OrganizationRoleSummary[]
 }
 
 export function EditRolesDialog({
@@ -29,40 +29,42 @@ export function EditRolesDialog({
   open,
   onOpenChange,
   onSave,
+  availableRoles,
 }: EditRolesDialogProps) {
-  const [roles, setRoles] = useState<string[]>(staff.roleNames)
-  const [newRole, setNewRole] = useState('')
+  const availableRoleNames = useMemo(
+    () => availableRoles.map((role) => role.name),
+    [availableRoles]
+  )
+  const availableRoleSet = useMemo(
+    () => new Set(availableRoleNames),
+    [availableRoleNames]
+  )
+  const [roles, setRoles] = useState<string[]>(() =>
+    staff.roleNames.filter((role) => availableRoleSet.has(role))
+  )
   const [isSaving, setIsSaving] = useState(false)
 
-  const handleAddRole = () => {
-    const trimmed = newRole.trim()
-    if (trimmed && !roles.includes(trimmed)) {
-      setRoles([...roles, trimmed])
-      setNewRole('')
-    }
-  }
+  useEffect(() => {
+    setRoles(staff.roleNames.filter((role) => availableRoleSet.has(role)))
+  }, [staff.id, staff.roleNames, availableRoleSet])
 
-  const handleRemoveRole = (roleToRemove: string) => {
-    setRoles(roles.filter(r => r !== roleToRemove))
-  }
+  const missingRoles = staff.roleNames.filter(
+    (role) => !availableRoleSet.has(role)
+  )
 
-  const handleAddCommonRole = (role: string) => {
-    if (!roles.includes(role)) {
-      setRoles([...roles, role])
-    }
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleAddRole()
-    }
+  const handleToggleRole = (roleName: string) => {
+    setRoles((prev) =>
+      prev.includes(roleName)
+        ? prev.filter((role) => role !== roleName)
+        : [...prev, roleName]
+    )
   }
 
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      await onSave(staff.id, roles)
+      const normalizedRoles = roles.filter((role) => availableRoleSet.has(role))
+      await onSave(staff.id, normalizedRoles)
     } finally {
       setIsSaving(false)
     }
@@ -74,67 +76,56 @@ export function EditRolesDialog({
         <DialogHeader>
           <DialogTitle>Edit Roles for {staff.name}</DialogTitle>
           <DialogDescription>
-            Roles are flexible labels describing job functions. You can create custom roles or
-            use common suggestions below.
+            Assign roles that are defined for your organization. Roles control default
+            permissions and how this person appears across the workspace.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Current Roles */}
-          <div className="space-y-2">
-            <Label>Current Roles</Label>
-            {roles.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No roles assigned</p>
+          <div className="space-y-3">
+            <Label>Select Roles</Label>
+            {availableRoles.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No organization roles are defined yet. Create roles in system settings to assign
+                them here.
+              </p>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {roles.map((role) => (
-                  <Badge key={role} variant="secondary" className="gap-1">
-                    {role}
-                    <button
-                      onClick={() => handleRemoveRole(role)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
+              <div className="flex max-h-80 flex-col gap-2 overflow-y-auto">
+                {availableRoles.map((role) => (
+                  <label
+                    key={role.id}
+                    className="flex items-start gap-3 rounded-lg border border-border/60 p-3"
+                  >
+                    <Checkbox
+                      checked={roles.includes(role.name)}
+                      onCheckedChange={() => handleToggleRole(role.name)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1 space-y-1">
+                      <p className="text-sm font-medium">{role.name}</p>
+                      {role.permissions.length > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          Permissions:{' '}
+                          {role.permissions
+                            .map((permission) =>
+                              PERMISSION_METADATA[permission as keyof typeof PERMISSION_METADATA]?.label || permission
+                            )
+                            .join(', ')}
+                        </p>
+                      )}
+                    </div>
+                  </label>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Add New Role */}
-          <div className="space-y-2">
-            <Label htmlFor="new-role">Add Role</Label>
-            <div className="flex gap-2">
-              <Input
-                id="new-role"
-                placeholder="e.g., Head Coach, Physiotherapist"
-                value={newRole}
-                onChange={(e) => setNewRole(e.target.value)}
-                onKeyPress={handleKeyPress}
-              />
-              <Button type="button" onClick={handleAddRole}>
-                Add
-              </Button>
+          {missingRoles.length > 0 && (
+            <div className="rounded-md border border-amber-500/30 bg-amber-50 p-3 text-xs text-amber-900">
+              The following roles are no longer defined in your organization and will be removed
+              when you save: {missingRoles.join(', ')}
             </div>
-          </div>
-
-          {/* Common Role Suggestions */}
-          <div className="space-y-2">
-            <Label>Common Roles (click to add)</Label>
-            <div className="flex flex-wrap gap-2">
-              {COMMON_ROLES.filter(r => !roles.includes(r)).map((role) => (
-                <Badge
-                  key={role}
-                  variant="outline"
-                  className="cursor-pointer hover:bg-accent"
-                  onClick={() => handleAddCommonRole(role)}
-                >
-                  + {role}
-                </Badge>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
 
         <DialogFooter>
