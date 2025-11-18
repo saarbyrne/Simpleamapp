@@ -21,6 +21,7 @@ import { QuickActionsToolbar } from '@/components/dashboard/quick-actions-toolba
 import { AddPlayerDialog } from '@/components/dashboard/add-player-dialog'
 import { EventFormDialog } from '@/components/calendar/event-form-dialog'
 import { FormBuilderDialog } from '@/components/dashboard/form-builder-dialog'
+import { NoteEditorDialog } from '@/components/notes/note-editor-dialog'
 import { GlobalSearch, SearchTrigger, useSearchShortcut } from '@/components/global-search'
 
 type DashboardLayoutClientProps = {
@@ -148,10 +149,15 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
   disablePageFrame = false,
 }: DashboardLayoutClientProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false)
   const [isAddEventOpen, setIsAddEventOpen] = useState(false)
   const [isAddFormOpen, setIsAddFormOpen] = useState(false)
+  const [isAddNoteOpen, setIsAddNoteOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+
+  // Auto-disable page frame for canvas pages to allow full height usage
+  const shouldDisablePageFrame = disablePageFrame || pathname?.includes('/canvas/')
 
   // Enable keyboard shortcut for search (/ or Cmd/Ctrl+K)
   useSearchShortcut(() => setIsSearchOpen(true))
@@ -160,6 +166,7 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
     'add-player': () => setIsAddPlayerOpen(true),
     'add-event': () => setIsAddEventOpen(true),
     'add-form': () => setIsAddFormOpen(true),
+    'add-note': () => setIsAddNoteOpen(true),
   }), [])
   
   const handleEventFormSuccess = useCallback(() => {
@@ -191,7 +198,7 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
               />
             </header>
           </div>
-          {disablePageFrame ? (
+          {shouldDisablePageFrame ? (
             <div className="flex flex-1 flex-col bg-page-background overflow-y-auto overflow-x-hidden">
               {children}
             </div>
@@ -214,6 +221,14 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
           open={isAddFormOpen}
           onOpenChange={setIsAddFormOpen}
           onSuccess={handleFormBuilderSuccess}
+        />
+        <NoteEditorDialog
+          open={isAddNoteOpen}
+          onOpenChange={setIsAddNoteOpen}
+          onSuccess={() => {
+            setIsAddNoteOpen(false)
+            router.refresh()
+          }}
         />
         <GlobalSearch
           open={isSearchOpen}

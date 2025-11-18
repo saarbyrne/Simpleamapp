@@ -13,12 +13,14 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PageCard } from '@/components/ui/page-card'
 import { useBreadcrumb } from '@/lib/breadcrumb-context'
-import { 
-  FileText, 
-  Calendar, 
-  BarChart3, 
-  StickyNote, 
-  FolderOpen, 
+import { NotesList } from '@/components/notes/notes-list'
+import { createClient } from '@/lib/supabase/client'
+import {
+  FileText,
+  Calendar,
+  BarChart3,
+  StickyNote,
+  FolderOpen,
   Table,
   Mail,
   Phone,
@@ -66,6 +68,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
   const { preferences } = useUserPreferences()
   const [player, setPlayer] = React.useState<Awaited<ReturnType<typeof getPlayer>>['player'] | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
+  const [currentUser, setCurrentUser] = React.useState<{ id: string } | null>(null)
 
   React.useEffect(() => {
     async function loadPlayer() {
@@ -81,6 +84,17 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
     }
     loadPlayer()
   }, [params.id, setCustomLabel, router])
+
+  React.useEffect(() => {
+    async function loadCurrentUser() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setCurrentUser({ id: user.id })
+      }
+    }
+    loadCurrentUser()
+  }, [])
 
   if (isLoading || !player) {
     return null // Will show loading.tsx
@@ -303,17 +317,12 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
 
         {/* Notes Tab */}
         <TabsContent value="notes" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Notes</CardTitle>
-              <CardDescription>View all notes related to this player</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center p-8 text-muted-foreground">
-                <p>No notes yet</p>
-              </div>
-            </CardContent>
-          </Card>
+          <NotesList
+            linkedPersonId={params.id}
+            currentUserId={currentUser?.id}
+            showFilters={true}
+            showCreateButton={true}
+          />
         </TabsContent>
 
         {/* Files Tab */}

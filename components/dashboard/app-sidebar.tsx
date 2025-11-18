@@ -11,10 +11,11 @@ import {
   Database,
   FileText,
   Folder,
-  Palette,
+  PencilRuler,
   Settings,
   StickyNote,
   Table,
+  Target,
   Users,
   UserCircle,
   LogOut,
@@ -80,9 +81,10 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
     { labelKey: 'nav.calendar', href: '/dashboard/calendar', icon: Calendar },
     { labelKey: 'nav.notes', href: '/dashboard/notes', icon: StickyNote },
     { labelKey: 'nav.spreadsheets', href: '/dashboard/spreadsheets', icon: Table },
-    { labelKey: 'nav.canvas', href: '/dashboard/canvas', icon: Palette },
+    { labelKey: 'nav.canvas', href: '/dashboard/canvas', icon: PencilRuler },
     { labelKey: 'nav.files', href: '/dashboard/files', icon: Folder },
     { labelKey: 'nav.planner', href: '/dashboard/planner', icon: CalendarCheck },
+    { labelKey: 'nav.tactics', href: '/dashboard/tactics', icon: Target },
   ]
 
   const settingsItems = [
