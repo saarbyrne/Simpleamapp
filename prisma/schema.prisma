@@ -73,6 +73,9 @@ model User {
   // TODO: Add twoFactorSecret String field for TOTP
   // TODO: Add backupCodes String[] for recovery codes
 
+  // Platform Admin (for SaaS provider team only)
+  isPlatformAdmin Boolean @default(false) // Only set manually for vendor team members
+
   // Relations
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
