@@ -18,11 +18,21 @@ function StaffLoading() {
 async function StaffData() {
   const result = await getStaff()
 
-  if (result.error || !result.staff) {
+  if (result.error) {
     return (
       <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
         <p className="text-sm text-destructive">
-          {result.error || 'Failed to load staff'}
+          {result.error}
+        </p>
+      </div>
+    )
+  }
+
+  if (!result.staff || !Array.isArray(result.staff)) {
+    return (
+      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+        <p className="text-sm text-destructive">
+          Failed to load staff
         </p>
       </div>
     )

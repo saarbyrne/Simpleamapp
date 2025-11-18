@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -10,12 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PERMISSION_METADATA } from '@/lib/permissions'
 import { formatDate } from '@/lib/date-utils'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
-import { ArrowLeft, Mail, Phone, Calendar, Activity as ActivityIcon } from 'lucide-react'
+import { Mail, Phone, Calendar, Activity as ActivityIcon } from 'lucide-react'
 import { EditRolesDialog } from './edit-roles-dialog'
 import { EditPermissionsDialog } from './edit-permissions-dialog'
 import { updateStaffRoles, updateStaffPermissions } from '@/app/actions/staff'
 import { toast } from 'sonner'
 import type { StaffRow } from './staff-table'
+import { useBreadcrumb } from '@/lib/breadcrumb-context'
 
 type StaffProfileProps = {
   staff: any // Full staff member with relations
@@ -31,6 +32,7 @@ export function StaffProfile({ staff, stats }: StaffProfileProps) {
   const { preferences } = useUserPreferences()
   const [editRolesOpen, setEditRolesOpen] = useState(false)
   const [editPermissionsOpen, setEditPermissionsOpen] = useState(false)
+  const { setCustomLabel } = useBreadcrumb()
 
   const staffRow: StaffRow = {
     id: staff.id,
@@ -66,20 +68,17 @@ export function StaffProfile({ staff, stats }: StaffProfileProps) {
     }
   }
 
+  useEffect(() => {
+    if (staff?.id) {
+      setCustomLabel(staff.id, staff.name || 'Staff Member')
+      return () => setCustomLabel(staff.id, null)
+    }
+  }, [staff?.id, staff?.name, setCustomLabel])
+
   return (
     <div className="space-y-6">
-      {/* Back Button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => router.push('/dashboard/system-settings/staff')}
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Staff
-      </Button>
-
       {/* Header */}
-      <div className="flex items-start gap-6">
+      <div className="flex flex-wrap items-start gap-6">
         <Avatar className="h-20 w-20">
           {staff.avatar ? (
             <AvatarImage src={staff.avatar} alt={staff.name} />

@@ -3,23 +3,8 @@ import { routing } from './routing';
 import { getCurrentUserProfile } from '@/app/actions/profile';
 
 export default getRequestConfig(async ({ requestLocale }) => {
-  // Try to get locale from user preferences first
-  let locale: string | undefined;
-  
-  try {
-    const profileResult = await getCurrentUserProfile();
-    if (profileResult.success && profileResult.data?.language) {
-      locale = profileResult.data.language;
-    }
-  } catch (error) {
-    // If we can't get user profile, fall back to request locale
-    console.error('Failed to get user locale from profile:', error);
-  }
-
-  // Fall back to request locale (from URL or headers) if no user preference
-  if (!locale) {
-    locale = await requestLocale;
-  }
+  // Get locale from request (URL or headers) - skip database call for now
+  let locale = await requestLocale;
 
   // Ensure that a valid locale is used
   if (!locale || !routing.locales.includes(locale as any)) {

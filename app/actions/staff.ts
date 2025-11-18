@@ -35,6 +35,11 @@ export async function getStaff() {
   try {
     const dbUser = await ensureUserWithOrganization(user)
 
+    if (!dbUser?.organizationId) {
+      console.error('User does not have an organizationId:', dbUser)
+      return { error: 'User organization not found' }
+    }
+
     const staff = await prisma.user.findMany({
       where: {
         organizationId: dbUser.organizationId,
@@ -55,9 +60,26 @@ export async function getStaff() {
       },
     })
 
+    console.log('[getStaff] Successfully fetched:', {
+      count: staff.length,
+      organizationId: dbUser.organizationId,
+      firstStaff: staff[0] ? {
+        id: staff[0].id,
+        name: staff[0].name,
+        hasRoleNames: Array.isArray(staff[0].roleNames),
+        hasPermissions: Array.isArray(staff[0].permissions)
+      } : 'No staff found'
+    })
+
     return { success: true, staff }
   } catch (error) {
     console.error('Error fetching staff:', error)
+    if (error instanceof Error) {
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+      // Return more specific error message for debugging
+      return { error: `${t('failedToFetchData')}: ${error.message}` }
+    }
     return { error: t('failedToFetchData') }
   }
 }

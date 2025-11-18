@@ -15,6 +15,50 @@
     "dataManagement": "Data Management",
     "systemSettings": "System Settings"
   },
+  "staff": {
+    "title": "Staff",
+    "description": "Manage team roles, permissions, and contact details.",
+    "searchPlaceholder": "Search by name, email, role, or permission",
+    "emptyState": "No staff members found.",
+    "rows": "rows",
+    "previous": "Previous",
+    "next": "Next",
+    "viewProfile": "View Profile",
+    "editRoles": "Edit Roles",
+    "editPermissions": "Edit Permissions",
+    "rolesUpdated": "Roles updated successfully",
+    "permissionsUpdated": "Permissions updated successfully",
+    "bulkMissingValues": "Add at least one value.",
+    "bulkRolesUpdated": "Roles updated for selected members.",
+    "bulkPermissionsUpdated": "Permissions updated for selected members.",
+    "bulkUpdateFailed": "Failed to update staff.",
+    "exportComplete": "Export created for selected staff.",
+    "exportFailed": "Failed to export selection.",
+    "bulkEditRoles": "Edit Roles",
+    "bulkEditPermissions": "Edit Permissions",
+    "copyEmails": "Copy Emails",
+    "noEmailsToCopy": "None of the selected staff have an email address.",
+    "emailsCopied": "Copied emails to clipboard.",
+    "copyFailed": "Failed to copy emails.",
+    "rowsPerPage": "Rows per page",
+    "itemLabel": "staff member",
+    "bulkRolesPlaceholder": "Roles (comma separated)",
+    "bulkPermissionsPlaceholder": "Permissions (comma separated)",
+    "bulkUpdated": "Updated selected staff successfully.",
+    "noSelection": "Select at least one staff member.",
+    "singleSelected": "1 staff member selected",
+    "multiSelected": "{count} staff members selected",
+    "exportSelection": "Export selection",
+    "showingLabel": "Showing {start}-{end} of {total} team members",
+    "pageIndicator": "Page {current} of {total}",
+    "columns": {
+      "name": "Name",
+      "roles": "Roles",
+      "permissions": "Permissions",
+      "lastActive": "Last Active",
+      "actions": "Actions"
+    }
+  },
   "profile": {
     "title": "Profile Settings",
     "description": "Manage your personal information, preferences, and security settings",
@@ -736,6 +780,10 @@
     "failedToUpdateEvent": "Failed to update event",
     "failedToUpdateEventSeries": "Failed to update event series",
     "eventNotPartOfSeries": "Event is not part of a recurring series",
-    "noOccurrencesGenerated": "No occurrences generated from recurrence rule"
+    "noOccurrencesGenerated": "No occurrences generated from recurrence rule",
+    "failedToFetchData": "Failed to fetch data",
+    "staffMemberNotFound": "Staff member not found",
+    "insufficientPermissions": "You do not have sufficient permissions to perform this action",
+    "failedToUpdateStaff": "Failed to update staff member"
   }
 }
