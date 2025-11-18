@@ -41,6 +41,8 @@ model Organization {
   plans              Plan[]
   subscriptions      Subscription[]
   organizationRoles  OrganizationRole[]
+  reports            Report[]
+  reportTemplates    ReportTemplate[]
 
   @@map("organizations")
 }
@@ -623,4 +625,107 @@ model Activity {
   createdAt DateTime @default(now())
 
   @@map("activities")
+}
+
+// ============================================
+// REPORTS
+// ============================================
+
+model ReportTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  category    String // "player", "team", "medical", "performance"
+
+  // Template config
+  config      Json // {dataSources, visualization, filters, etc.}
+  sections    Json? // For multi-section dashboards
+
+  // Global vs user-created
+  isGlobal    Boolean @default(false)
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdBy   String?
+
+  // Community Hub
+  downloads   Int @default(0)
+  rating      Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reports Report[]
+
+  @@index([organizationId])
+  @@index([isGlobal, category])
+  @@map("report_templates")
+}
+
+model Report {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+
+  // Type
+  type        String // "single_chart", "dashboard", "table"
+
+  // Based on template?
+  templateId  String?
+  template    ReportTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  // Report configuration
+  config      Json // {dataSources, visualization, xAxis, yAxis, filters, chartOptions}
+
+  // Multi-section dashboard
+  sections    Json? // [{type: "chart", config: {...}}, {type: "table", config: {...}}]
+
+  // AI Insights
+  insights    Json? // AI-generated insights
+
+  // Organization
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Access
+  isPublic    Boolean @default(false)
+  shareToken  String? @unique
+
+  // Scheduling
+  schedule    ReportSchedule?
+
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([organizationId, type])
+  @@index([createdBy])
+  @@index([shareToken])
+  @@map("reports")
+}
+
+model ReportSchedule {
+  id          String @id @default(cuid())
+  reportId    String @unique
+  report      Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  frequency   String // "daily", "weekly", "monthly"
+  time        String // "09:00"
+  dayOfWeek   Int? // 1-7 for weekly
+  dayOfMonth  Int? // 1-31 for monthly
+
+  // Who gets it
+  recipients  String[] // user IDs or email addresses
+  format      String // "pdf", "link"
+
+  isActive    Boolean @default(true)
+  lastSent    DateTime?
+  nextSend    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, nextSend])
+  @@map("report_schedules")
 }
