@@ -90,6 +90,9 @@ model User {
   activities      Activity[]
   formResponses   FormResponse[]
   eventAttendance EventAttendance[]
+  plans           Plan[]
+  milestones      Milestone[]
+  milestoneComments MilestoneComment[]
 
   @@map("users")
 }
@@ -575,16 +578,120 @@ model Plan {
   id             String   @id @default(cuid())
   name           String
   description    String?
+
+  // Type/category
+  type           String // "season", "player_development", "rehabilitation", "event_prep", "custom"
+
+  // Duration
   startDate      DateTime
   endDate        DateTime
-  data           Json // Planning data
+
+  // Status
+  status         String   @default("not_started") // "not_started", "in_progress", "complete", "on_hold"
+
+  // Linked to entities
+  linkedToType   String? // "player", "event", "team", "person"
+  linkedToId     String?
+
+  // Ownership
+  ownerId        String // who's responsible
+  owner          User     @relation(fields: [ownerId], references: [id])
+
+  // Organization
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Milestones
+  milestones     Milestone[]
 
+  // Visibility & Publishing
+  isPublic       Boolean  @default(false)
+  isTemplate     Boolean  @default(false)
+  publishedAt    DateTime?
+
+  // Metadata
+  createdBy      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId, type])
+  @@index([organizationId, status])
+  @@index([organizationId, ownerId])
+  @@index([linkedToType, linkedToId])
   @@map("plans")
+}
+
+model Milestone {
+  id             String   @id @default(cuid())
+  planId         String
+  plan           Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  title          String
+  description    String?
+
+  // Timeline
+  startDate      DateTime?
+  endDate        DateTime?
+  dueDate        DateTime? // if single deadline
+
+  // Order
+  order          Int      @default(0) // for sorting
+
+  // Status
+  status         String   @default("pending") // "pending", "in_progress", "complete", "blocked"
+  completedAt    DateTime?
+  completedBy    String?
+
+  // Assignment
+  assignedTo     String? // user ID
+  assignee       User?    @relation(fields: [assignedTo], references: [id])
+
+  // Progress (0-100)
+  progress       Int      @default(0)
+
+  // Links to other entities
+  links          MilestoneLink[]
+
+  // Comments/updates
+  comments       MilestoneComment[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([planId, order])
+  @@index([planId, status])
+  @@map("milestones")
+}
+
+model MilestoneLink {
+  id             String   @id @default(cuid())
+  milestoneId    String
+  milestone      Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+
+  targetType     String // "note", "form", "event", "file", "spreadsheet", "drawing"
+  targetId       String
+
+  createdAt      DateTime @default(now())
+
+  @@unique([milestoneId, targetType, targetId])
+  @@index([milestoneId])
+  @@index([targetType, targetId])
+  @@map("milestone_links")
+}
+
+model MilestoneComment {
+  id             String   @id @default(cuid())
+  milestoneId    String
+  milestone      Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+
+  content        String
+  authorId       String
+  author         User     @relation(fields: [authorId], references: [id])
+
+  createdAt      DateTime @default(now())
+
+  @@index([milestoneId])
+  @@map("milestone_comments")
 }
 
 // ============================================

@@ -14,7 +14,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
 } from '@tanstack/react-table'
-import { updateStaffPermissions, updateStaffRoles } from '@/app/actions/staff'
+import { updateStaffRoles } from '@/app/actions/staff'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Badge } from '@/components/ui/badge'
@@ -34,11 +34,11 @@ import { BulkActionsBar, type BulkField } from '@/components/ui/bulk-actions-bar
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { toast } from 'sonner'
 import { EditRolesDialog } from './edit-roles-dialog'
-import { EditPermissionsDialog } from './edit-permissions-dialog'
 import { MoreHorizontal } from 'lucide-react'
 import { exportToCSV } from '@/lib/table-utils'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PERMISSION_METADATA } from '@/lib/permissions'
+import type { FilterConfig } from '@/components/data-table/data-table-filters'
 import type { OrganizationRoleSummary } from '@/app/actions/staff'
 
 export type StaffRow = {
@@ -119,7 +119,6 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
   const { preferences } = useUserPreferences()
   const [searchFilter, setSearchFilter] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
-  const [permissionFilter, setPermissionFilter] = useState('all')
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([])
@@ -127,7 +126,6 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
   const [editRolesStaff, setEditRolesStaff] = useState<StaffRow | null>(null)
-  const [editPermissionsStaff, setEditPermissionsStaff] = useState<StaffRow | null>(null)
   const [isBulkSaving, setIsBulkSaving] = useState(false)
 
   const totalCount = serverTotal ?? staff.length
@@ -141,15 +139,6 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
     [organizationRoles]
   )
 
-  const permissionOptions = useMemo(
-    () =>
-      Object.entries(PERMISSION_METADATA).map(([value, metadata]) => ({
-        value,
-        label: metadata.label,
-        description: metadata.description,
-      })),
-    []
-  )
 
   const filteredStaff = useMemo(() => {
     const normalizedSearch = searchFilter.trim().toLowerCase()
@@ -176,13 +165,9 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
           (role) => role.toLowerCase() === normalizedRoleFilter
         )
 
-      const matchesPermission =
-        permissionFilter === 'all' ||
-        member.permissions.includes(permissionFilter)
-
-      return matchesSearch && matchesRole && matchesPermission
+      return matchesSearch && matchesRole
     })
-  }, [staff, searchFilter, roleFilter, permissionFilter])
+  }, [staff, searchFilter, roleFilter])
 
   const onNavigateToProfile = useCallback(
     (staffId: string) => {
@@ -195,9 +180,6 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
     setEditRolesStaff(member)
   }, [])
 
-  const onEditPermissions = useCallback((member: StaffRow) => {
-    setEditPermissionsStaff(member)
-  }, [])
 
   const columns = useMemo<ColumnDef<StaffRow>[]>(() => [
     {
@@ -345,18 +327,15 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
                 <DropdownMenuItem onClick={() => onEditRoles(member)}>
                   {translate('staff.editRoles', 'Edit Roles')}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onEditPermissions(member)}>
-                  {translate('staff.editPermissions', 'Edit Permissions')}
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         )
       },
     },
-  ], [translate, onNavigateToProfile, onEditRoles, onEditPermissions, preferences])
+  ], [translate, onNavigateToProfile, onEditRoles, preferences])
 
-  const filterConfig = useMemo(() => {
+  const filterConfig = useMemo((): FilterConfig[] => {
     const config = [
       {
         key: 'search',
@@ -376,24 +355,14 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
       })
     }
 
-    if (permissionOptions.length > 0) {
-      config.push({
-        key: 'permission',
-        label: translate('staff.columns.permissions', 'Permissions'),
-        type: 'select' as const,
-        options: permissionOptions.map(({ value, label }) => ({ value, label })),
-        placeholder: translate('staff.allPermissions', 'All permissions'),
-      })
-    }
 
     return config
-  }, [translate, roleOptions, permissionOptions])
+  }, [translate, roleOptions])
 
   const filterValues = useMemo(() => ({
     search: searchFilter,
     role: roleFilter,
-    permission: permissionFilter,
-  }), [searchFilter, roleFilter, permissionFilter])
+  }), [searchFilter, roleFilter])
 
   const handleFilterChange = useCallback((key: string, value: string) => {
     if (key === 'search') {
@@ -449,16 +418,6 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
     }
   }
 
-  const handleSavePermissions = async (staffId: string, permissions: string[]) => {
-    const result = await updateStaffPermissions(staffId, permissions)
-    if (result.error) {
-      toast.error(result.error)
-    } else {
-      toast.success(translate('staff.permissionsUpdated', 'Permissions updated successfully'))
-      router.refresh()
-      setEditPermissionsStaff(null)
-    }
-  }
 
   const handleBulkSave = async (values: Record<string, string | string[] | null>) => {
     const roleValues = values.roles
@@ -490,10 +449,6 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
         selectedStaff.map(async (member) => {
           if (roles.length) {
             const result = await updateStaffRoles(member.id, roles)
-            if (result.error) throw new Error(result.error)
-          }
-          if (permissions.length) {
-            const result = await updateStaffPermissions(member.id, permissions)
             if (result.error) throw new Error(result.error)
           }
         })
@@ -540,16 +495,8 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
       })
     }
 
-    fields.push({
-      id: 'permissions',
-      type: 'multi-select',
-      placeholder: translate('staff.bulkPermissionsPlaceholder', 'Assign permissions'),
-      width: 'w-[260px]',
-      options: permissionOptions,
-    })
-
     return fields
-  }, [roleOptions, permissionOptions, translate])
+  }, [roleOptions, translate])
 
   const hasBulkFields = bulkFields.length > 0
 
@@ -716,14 +663,6 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
         />
       )}
 
-      {editPermissionsStaff && (
-        <EditPermissionsDialog
-          staff={editPermissionsStaff}
-          open={!!editPermissionsStaff}
-          onOpenChange={(open) => !open && setEditPermissionsStaff(null)}
-          onSave={handleSavePermissions}
-        />
-      )}
 
     </>
   )

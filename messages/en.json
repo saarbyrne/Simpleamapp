@@ -786,5 +786,9 @@
     "staffMemberNotFound": "Staff member not found",
     "insufficientPermissions": "You do not have sufficient permissions to perform this action",
     "failedToUpdateStaff": "Failed to update staff member"
+  },
+  "errors": {
+    "failedToCreate": "Failed to create item. Please try again.",
+    "serverError": "A server error occurred. Please try again."
   }
 }
