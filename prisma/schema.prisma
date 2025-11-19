@@ -66,6 +66,10 @@ model User {
   // Notification Settings (stored as JSON)
   notificationSettings Json? // {email: {...}, push: {...}, sms: {...}}
 
+  // Staff Management
+  roleNames   String[] @default([]) // Flexible role tags: "Head Coach", "Physiotherapist", etc.
+  permissions String[] @default([]) // System permissions: "admin", "medical_access", etc.
+
   // Security
   // Note: Password is managed by Supabase Auth
   // TODO: Implement 2FA (Two-Factor Authentication) in future iteration
