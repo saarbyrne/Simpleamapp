@@ -93,7 +93,7 @@ const statusConfig = {
   complete: {
     label: 'Complete',
     icon: CheckCircle2,
-    variant: 'success' as const,
+    variant: 'default' as const,
     color: 'text-green-500',
   },
   blocked: {
@@ -132,8 +132,7 @@ function SortableMilestone({
 
   const StatusIcon = statusConfig[milestone.status as keyof typeof statusConfig]?.icon || Circle
 
-  const handleToggleComplete = async (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleToggleComplete = async (checked: boolean | string) => {
     const newStatus = milestone.status === 'complete' ? 'pending' : 'complete'
     const result = await updateMilestone(milestone.id, { status: newStatus })
     if (result.error) {

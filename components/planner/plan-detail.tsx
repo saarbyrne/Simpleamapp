@@ -64,8 +64,8 @@ type PlanDetailProps = {
 const statusConfig = {
   not_started: { label: 'Not Started', variant: 'secondary' as const },
   in_progress: { label: 'In Progress', variant: 'default' as const },
-  complete: { label: 'Complete', variant: 'success' as const },
-  on_hold: { label: 'On Hold', variant: 'warning' as const },
+  complete: { label: 'Complete', variant: 'default' as const },
+  on_hold: { label: 'On Hold', variant: 'outline' as const },
 }
 
 const typeConfig: Record<string, string> = {

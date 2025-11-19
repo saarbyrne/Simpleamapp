@@ -738,5 +738,9 @@
     "failedToUpdateEventSeries": "Failed to update event series",
     "eventNotPartOfSeries": "Event is not part of a recurring series",
     "noOccurrencesGenerated": "No occurrences generated from recurrence rule"
+  },
+  "errors": {
+    "failedToCreate": "Failed to create item. Please try again.",
+    "serverError": "A server error occurred. Please try again."
   }
 }

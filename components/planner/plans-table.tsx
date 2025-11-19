@@ -77,12 +77,12 @@ const statusConfig = {
   complete: {
     label: 'Complete',
     icon: CheckCircle2,
-    variant: 'success' as const,
+    variant: 'default' as const,
   },
   on_hold: {
     label: 'On Hold',
     icon: Pause,
-    variant: 'warning' as const,
+    variant: 'outline' as const,
   },
 }
 
