@@ -1248,7 +1248,7 @@ export function TacticalBoardEditor({
                   <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => goToKeyframe(Math.min(keyframes.length - 1, currentKeyframe + 1))}>
                     <SkipForward className="h-4 w-4" />
                   </Button>
-                  <div className="ml-auto text-xs font-medium text-muted-foreground">{playbackSpeed}x</div>
+                  <div className="ms-auto text-xs font-medium text-muted-foreground">{playbackSpeed}x</div>
                 </div>
                 <input
                   type="range"
@@ -1282,7 +1282,7 @@ export function TacticalBoardEditor({
                       {index !== 0 && (
                         <button
                           type="button"
-                          className="ml-2 text-muted-foreground hover:text-destructive"
+                          className="ms-2 text-muted-foreground hover:text-destructive"
                           onClick={(e) => {
                             e.stopPropagation();
                             removeKeyframe(index);
@@ -1299,7 +1299,7 @@ export function TacticalBoardEditor({
 
             <div className="mt-auto space-y-3">
               <Button onClick={handleSave} className="w-full">
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-4 w-4 me-2" />
                 Save Board
               </Button>
             </div>
@@ -1309,7 +1309,7 @@ export function TacticalBoardEditor({
         {/* Canvas + bottom toolbar */}
         <div className="flex-1 flex flex-col min-h-0 px-4 py-6 lg:px-8">
           <div className="relative flex flex-1 flex-col rounded-3xl border bg-card shadow-md p-4 md:p-6">
-            <div className="absolute top-4 right-4 flex items-center gap-2 rounded-full border bg-card/90 px-2 py-1 shadow-sm">
+            <div className="absolute top-4 end-4 flex items-center gap-2 rounded-full border bg-card/90 px-2 py-1 shadow-sm">
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
                 <Minimize2 className="h-4 w-4" />
               </Button>

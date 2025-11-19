@@ -75,7 +75,7 @@ export function EventQuickView({
         <DialogOverlay className="fixed inset-0 z-50 bg-black/80" />
         <DialogPrimitive.Content
           className={cn(
-            "fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg sm:rounded-lg p-0",
+            "fixed start-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg sm:rounded-lg p-0",
             "duration-0 data-[state=open]:animate-none data-[state=closed]:animate-none"
           )}
         >

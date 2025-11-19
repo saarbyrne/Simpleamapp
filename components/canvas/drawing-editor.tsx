@@ -272,7 +272,7 @@ export function DrawingEditor({
       {/* Canvas - Using Excalidraw's native toolbar */}
       <div className="flex-1 relative overflow-hidden">
         {/* Canvas Menu */}
-        <div className="fixed top-4 left-4 z-50">
+        <div className="fixed top-4 start-4 z-50">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -285,7 +285,7 @@ export function DrawingEditor({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48">
               <DropdownMenuItem onClick={() => setShowExportDialog(true)}>
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="me-2 h-4 w-4" />
                 Download Canvas
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -293,7 +293,7 @@ export function DrawingEditor({
         </div>
 
         {/* Floating Action Bar */}
-        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 bg-background/80 backdrop-blur-sm border rounded-lg px-3 py-2 shadow-lg">
+        <div className="fixed bottom-4 end-4 z-50 flex items-center gap-2 bg-background/80 backdrop-blur-sm border rounded-lg px-3 py-2 shadow-lg">
           {hasUnsavedChanges && (
             <span className="text-xs text-muted-foreground">Unsaved</span>
           )}

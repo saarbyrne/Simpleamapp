@@ -84,7 +84,7 @@ export default function ReportBuilderPage() {
         description={t('builder.configureReport')}
         headerActions={
           <Button variant="outline" onClick={() => router.push('/dashboard/reports')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4 me-2" />
             {t('back')}
           </Button>
         }
@@ -188,7 +188,7 @@ export default function ReportBuilderPage() {
               <Label>{t('builder.chartOptions')}</Label>
               <Select value={visualization} onValueChange={(value: any) => setVisualization(value)}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder={t('builder.selectChartType')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="line">

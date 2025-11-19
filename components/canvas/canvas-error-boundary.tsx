@@ -61,7 +61,7 @@ export class CanvasErrorBoundary extends React.Component<Props, State> {
                 The drawing canvas encountered an error and could not load properly.
               </p>
               {this.state.error && (
-                <details className="mt-4 text-left">
+                <details className="mt-4 text-start">
                   <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
                     Technical details
                   </summary>

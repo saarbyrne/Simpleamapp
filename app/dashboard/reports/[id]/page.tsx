@@ -55,6 +55,14 @@ import {
   Cell,
 } from 'recharts'
 import { ChartContainer } from '@/components/ui/chart'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { format } from 'date-fns'
 
 interface Report {
@@ -207,82 +215,156 @@ export default function ReportViewPage() {
       },
     }
 
-    switch (visualization) {
-      case 'line':
+    // Handle different report types
+    switch (report.type) {
+      case 'table':
         return (
-          <ChartContainer config={chartConfig} className="h-[400px] w-full">
-            <LineChart data={SAMPLE_DATA}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="value" stroke="var(--color-value)" strokeWidth={2} />
-              <Line type="monotone" dataKey="value2" stroke="var(--color-value2)" strokeWidth={2} />
-            </LineChart>
-          </ChartContainer>
-        )
-
-      case 'bar':
-        return (
-          <ChartContainer config={chartConfig} className="h-[400px] w-full">
-            <BarChart data={SAMPLE_DATA}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="value" fill="var(--color-value)" />
-              <Bar dataKey="value2" fill="var(--color-value2)" />
-            </BarChart>
-          </ChartContainer>
-        )
-
-      case 'pie':
-        return (
-          <ChartContainer config={chartConfig} className="h-[400px] w-full">
-            <PieChart>
-              <Pie
-                data={SAMPLE_DATA}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={(entry) => entry.name}
-                outerRadius={120}
-                fill="var(--color-value)"
-                dataKey="value"
-              >
-                {SAMPLE_DATA.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          <div className="border rounded-lg overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Value</TableHead>
+                  <TableHead>Secondary Value</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {SAMPLE_DATA.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">{row.name}</TableCell>
+                    <TableCell>{row.value}</TableCell>
+                    <TableCell>{row.value2}</TableCell>
+                  </TableRow>
                 ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ChartContainer>
-        )
-
-      case 'area':
-        return (
-          <ChartContainer config={chartConfig} className="h-[400px] w-full">
-            <AreaChart data={SAMPLE_DATA}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Area type="monotone" dataKey="value" stroke="var(--color-value)" fill="var(--color-value)" fillOpacity={0.6} />
-              <Area type="monotone" dataKey="value2" stroke="var(--color-value2)" fill="var(--color-value2)" fillOpacity={0.6} />
-            </AreaChart>
-          </ChartContainer>
-        )
-
-      default:
-        return (
-          <div className="h-[400px] flex items-center justify-center border rounded-lg bg-muted/10">
-            <p className="text-muted-foreground">{t('builder.noDataAvailable')}</p>
+              </TableBody>
+            </Table>
           </div>
         )
+
+      case 'dashboard':
+        return (
+          <div className="space-y-6">
+            {/* Main Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Main Chart</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[300px] w-full">
+                  <BarChart data={SAMPLE_DATA}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="value" fill="var(--color-value)" />
+                    <Bar dataKey="value2" fill="var(--color-value2)" />
+                  </BarChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            {/* Secondary Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Secondary Chart</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[300px] w-full">
+                  <LineChart data={SAMPLE_DATA}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="value" stroke="var(--color-value)" strokeWidth={2} />
+                    <Line type="monotone" dataKey="value2" stroke="var(--color-value2)" strokeWidth={2} />
+                  </LineChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+          </div>
+        )
+
+      case 'single_chart':
+      default:
+        switch (visualization) {
+          case 'line':
+            return (
+              <ChartContainer config={chartConfig} className="h-[400px] w-full">
+                <LineChart data={SAMPLE_DATA}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="value" stroke="var(--color-value)" strokeWidth={2} />
+                  <Line type="monotone" dataKey="value2" stroke="var(--color-value2)" strokeWidth={2} />
+                </LineChart>
+              </ChartContainer>
+            )
+
+          case 'bar':
+            return (
+              <ChartContainer config={chartConfig} className="h-[400px] w-full">
+                <BarChart data={SAMPLE_DATA}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="value" fill="var(--color-value)" />
+                  <Bar dataKey="value2" fill="var(--color-value2)" />
+                </BarChart>
+              </ChartContainer>
+            )
+
+          case 'pie':
+            return (
+              <ChartContainer config={chartConfig} className="h-[400px] w-full">
+                <PieChart>
+                  <Pie
+                    data={SAMPLE_DATA}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={(entry) => entry.name}
+                    outerRadius={120}
+                    fill="var(--color-value)"
+                    dataKey="value"
+                  >
+                    {SAMPLE_DATA.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ChartContainer>
+            )
+
+          case 'area':
+            return (
+              <ChartContainer config={chartConfig} className="h-[400px] w-full">
+                <AreaChart data={SAMPLE_DATA}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Area type="monotone" dataKey="value" stroke="var(--color-value)" fill="var(--color-value)" fillOpacity={0.6} />
+                  <Area type="monotone" dataKey="value2" stroke="var(--color-value2)" fill="var(--color-value2)" fillOpacity={0.6} />
+                </AreaChart>
+              </ChartContainer>
+            )
+
+          default:
+            return (
+              <div className="h-[400px] flex items-center justify-center border rounded-lg bg-muted/10">
+                <p className="text-muted-foreground">{t('builder.noDataAvailable')}</p>
+              </div>
+            )
+        }
     }
   }
 
@@ -322,7 +404,7 @@ export default function ReportViewPage() {
               <Download className="h-4 w-4" />
             </Button>
             <Button variant="outline" onClick={() => router.push('/dashboard/reports')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 me-2" />
               {t('back')}
             </Button>
           </div>

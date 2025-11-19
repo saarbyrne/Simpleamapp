@@ -138,12 +138,12 @@ export function AiAssistant({ drawingData, drawingType }: AiAssistantProps) {
         >
           {loading ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 me-2 animate-spin" />
               Analyzing...
             </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4 mr-2" />
+              <Sparkles className="h-4 w-4 me-2" />
               Generate Suggestions
             </>
           )}
@@ -151,7 +151,7 @@ export function AiAssistant({ drawingData, drawingType }: AiAssistantProps) {
 
         {suggestions.length > 0 && (
           <ScrollArea className="h-[300px]">
-            <div className="space-y-3 pr-4">
+            <div className="space-y-3 pe-4">
               {suggestions.map((suggestion, index) => (
                 <div
                   key={index}

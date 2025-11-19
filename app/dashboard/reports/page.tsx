@@ -166,11 +166,11 @@ export default function ReportsPage() {
               variant="outline"
               onClick={() => setShowTemplateDialog(true)}
             >
-              <Sparkles className="h-4 w-4 mr-2" />
+              <Sparkles className="h-4 w-4 me-2" />
               {t('useTemplate')}
             </Button>
             <Button onClick={() => router.push('/dashboard/reports/builder')}>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 me-2" />
               {t('newReport')}
             </Button>
           </div>
@@ -228,7 +228,7 @@ export default function ReportsPage() {
                             router.push(`/dashboard/reports/${report.id}`)
                           }}
                         >
-                          <Edit className="h-4 w-4 mr-2" />
+                          <Edit className="h-4 w-4 me-2" />
                           {t('edit')}
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -237,7 +237,7 @@ export default function ReportsPage() {
                             router.push(`/dashboard/reports/${report.id}?action=share`)
                           }}
                         >
-                          <Share2 className="h-4 w-4 mr-2" />
+                          <Share2 className="h-4 w-4 me-2" />
                           {t('share')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -248,7 +248,7 @@ export default function ReportsPage() {
                           }}
                           className="text-destructive"
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
+                          <Trash2 className="h-4 w-4 me-2" />
                           {t('delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -269,7 +269,7 @@ export default function ReportsPage() {
                     )}
                     {report.schedule?.isActive && (
                       <Badge variant="outline" className="text-xs">
-                        <Clock className="h-3 w-3 mr-1" />
+                        <Clock className="h-3 w-3 me-1" />
                         {report.schedule.frequency}
                       </Badge>
                     )}

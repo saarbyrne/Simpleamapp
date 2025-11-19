@@ -1,7 +1,33 @@
 import React from 'react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { NextIntlClientProvider } from 'next-intl'
 import { QuickActionsToolbar } from '@/components/dashboard/quick-actions-toolbar'
+
+vi.mock('@/components/ui/dropdown-menu', () => {
+  return {
+    DropdownMenu: ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="dropdown-menu">{children}</div>
+    ),
+    DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    DropdownMenuContent: ({ children }: { children: React.ReactNode }) => (
+      <div role="menu">{children}</div>
+    ),
+    DropdownMenuItem: ({
+      children,
+      onClick,
+    }: {
+      children: React.ReactNode
+      onClick?: () => void
+    }) => (
+      <button type="button" role="menuitem" onClick={onClick}>
+        {children}
+      </button>
+    ),
+    DropdownMenuLabel: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    DropdownMenuSeparator: () => <hr />,
+  }
+})
 import {
   getEnabledQuickActions,
   getQuickAction,
@@ -18,52 +44,58 @@ describe('QuickActionsToolbar', () => {
     vi.clearAllMocks()
   })
 
+  const renderToolbar = () =>
+    render(
+      <NextIntlClientProvider
+        locale="en"
+        messages={{ dashboard: { quickActions: 'Quick Actions' } }}
+      >
+        <QuickActionsToolbar actionHandlers={mockHandlers} />
+      </NextIntlClientProvider>
+    )
+
+  const openMenu = () => {
+    const trigger = screen.getByRole('button', { name: 'Quick actions menu' })
+    fireEvent.pointerDown(trigger, { button: 0 })
+    fireEvent.click(trigger)
+    return trigger
+  }
+
   describe('Desktop View', () => {
-    it('renders enabled quick actions as individual buttons', () => {
-      render(<QuickActionsToolbar actionHandlers={mockHandlers} />)
+    it('renders enabled quick actions as dropdown items', () => {
+      renderToolbar()
+      openMenu()
 
       const enabledActions = getEnabledQuickActions()
       expect(enabledActions.length).toBeGreaterThan(0)
 
-      // Check that buttons exist for enabled actions
       enabledActions.forEach(action => {
-        const buttons = screen.getAllByRole('button', { name: action.label })
-        expect(buttons.length).toBeGreaterThan(0)
+        expect(
+          screen.getByRole('menuitem', { name: action.label })
+        ).toBeDefined()
       })
     })
 
-    it('calls the correct handler when an action button is clicked', () => {
-      render(<QuickActionsToolbar actionHandlers={mockHandlers} />)
+    it('calls the correct handler when an action menu item is clicked', () => {
+      renderToolbar()
+      openMenu()
 
-      // Find and click the Add Player button (in desktop view)
-      const addPlayerButtons = screen.getAllByRole('button', { name: 'Add Player' })
-      // The desktop button should be one of them (not the dropdown item)
-      const desktopButton = addPlayerButtons.find(btn =>
-        btn.classList.contains('h-8') && btn.classList.contains('w-8')
-      )
-
-      if (desktopButton) {
-        fireEvent.click(desktopButton)
-        expect(mockHandlers['add-player']).toHaveBeenCalledTimes(1)
-      }
+      const addPlayerItem = screen.getByRole('menuitem', { name: 'Add Player' })
+      fireEvent.click(addPlayerItem)
+      expect(mockHandlers['add-player']).toHaveBeenCalledTimes(1)
     })
 
-    it('displays tooltips on hover', () => {
-      render(<QuickActionsToolbar actionHandlers={mockHandlers} />)
+    it('displays the quick actions label inside the dropdown', () => {
+      renderToolbar()
+      openMenu()
 
-      // Tooltips are rendered via TooltipContent which shows the label
-      const enabledActions = getEnabledQuickActions()
-      enabledActions.forEach(action => {
-        // The tooltip trigger should have aria-label
-        const buttons = screen.getAllByRole('button', { name: action.label })
-        expect(buttons.length).toBeGreaterThan(0)
-      })
+      expect(screen.getAllByText('Quick Actions')[0]).toBeDefined()
     })
   })
 
   describe('Mobile View', () => {
     it('renders a dropdown menu button', () => {
-      render(<QuickActionsToolbar actionHandlers={mockHandlers} />)
+      renderToolbar()
 
       // The mobile dropdown trigger should have aria-label
       const dropdownTrigger = screen.getByLabelText('Quick actions menu')
@@ -75,46 +107,47 @@ describe('QuickActionsToolbar', () => {
     it('only renders enabled actions', () => {
       const enabledActions = getEnabledQuickActions()
 
-      // Should have at least add-player and add-event enabled
       const enabledIds = enabledActions.map(a => a.id)
-      expect(enabledIds).toContain('add-player')
-      expect(enabledIds).toContain('add-event')
 
-      // Should not include disabled actions
-      expect(enabledIds).not.toContain('add-form')
-      expect(enabledIds).not.toContain('add-spreadsheet')
-      expect(enabledIds).not.toContain('add-note')
+      expect(enabledIds).toEqual(
+        expect.arrayContaining(['add-player', 'add-event', 'add-form', 'add-note'])
+      )
+
+      const disabledActions = AVAILABLE_QUICK_ACTIONS.filter((action) => !action.enabled).map(
+        (action) => action.id
+      )
+      disabledActions.forEach((id) => {
+        expect(enabledIds).not.toContain(id)
+      })
     })
   })
 
   describe('Accessibility', () => {
-    it('has proper aria-labels on action buttons', () => {
-      render(<QuickActionsToolbar actionHandlers={mockHandlers} />)
+    it('makes each action available via accessible menu items', () => {
+      renderToolbar()
+      openMenu()
 
       const enabledActions = getEnabledQuickActions()
       enabledActions.forEach(action => {
-        const buttons = screen.getAllByRole('button', { name: action.label })
-        expect(buttons.length).toBeGreaterThan(0)
+        expect(
+          screen.getByRole('menuitem', { name: action.label })
+        ).toBeDefined()
       })
     })
 
     it('has proper aria-label on dropdown menu trigger', () => {
-      render(<QuickActionsToolbar actionHandlers={mockHandlers} />)
+      renderToolbar()
 
-      const dropdownTrigger = screen.getByLabelText('Quick actions menu')
+      const dropdownTrigger = openMenu()
       expect(dropdownTrigger).toBeDefined()
       expect(dropdownTrigger.getAttribute('aria-label')).toBe('Quick actions menu')
     })
 
-    it('uses semantic button elements', () => {
-      render(<QuickActionsToolbar actionHandlers={mockHandlers} />)
+    it('uses a semantic button element for the dropdown trigger', () => {
+      renderToolbar()
 
-      const buttons = screen.getAllByRole('button')
-      expect(buttons.length).toBeGreaterThan(0)
-
-      buttons.forEach(button => {
-        expect(button.tagName).toBe('BUTTON')
-      })
+      const dropdownTrigger = screen.getByRole('button', { name: 'Quick actions menu' })
+      expect(dropdownTrigger.tagName).toBe('BUTTON')
     })
   })
 })

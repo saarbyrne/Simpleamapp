@@ -812,6 +812,7 @@
       "showLegend": "Show legend",
       "showDataLabels": "Show data labels",
       "colorScheme": "Color scheme",
+      "selectChartType": "Select chart type",
       "aggregation": "Aggregation",
       "sum": "Sum",
       "average": "Average",
