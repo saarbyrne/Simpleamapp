@@ -8,6 +8,27 @@ import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
 import { getTranslations } from 'next-intl/server'
 import { hasPermission, PERMISSIONS, ALL_PERMISSIONS } from '@/lib/permissions'
 
+async function getUserPermissions(userId: string): Promise<string[]> {
+  const userWithRoles = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      roles: {
+        select: {
+          role: {
+            select: {
+              permissions: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!userWithRoles) return []
+
+  return userWithRoles.roles.flatMap(userRole => userRole.role.permissions)
+}
+
 export type StaffRow = {
   id: string
   name: string
@@ -56,28 +77,43 @@ export async function getStaff() {
         email: true,
         avatar: true,
         phone: true,
-        roleNames: true,
-        permissions: true,
         lastLoginAt: true,
         createdAt: true,
+        roles: {
+          select: {
+            role: {
+              select: {
+                name: true,
+                permissions: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         name: 'asc',
       },
     })
 
+    // Transform the data to include roleNames and permissions arrays
+    const transformedStaff = staff.map(user => ({
+      ...user,
+      roleNames: user.roles.map(userRole => userRole.role.name),
+      permissions: user.roles.flatMap(userRole => userRole.role.permissions),
+    }))
+
     console.log('[getStaff] Successfully fetched:', {
-      count: staff.length,
+      count: transformedStaff.length,
       organizationId: dbUser.organizationId,
-      firstStaff: staff[0] ? {
-        id: staff[0].id,
-        name: staff[0].name,
-        hasRoleNames: Array.isArray(staff[0].roleNames),
-        hasPermissions: Array.isArray(staff[0].permissions)
+      firstStaff: transformedStaff[0] ? {
+        id: transformedStaff[0].id,
+        name: transformedStaff[0].name,
+        hasRoleNames: Array.isArray(transformedStaff[0].roleNames),
+        hasPermissions: Array.isArray(transformedStaff[0].permissions)
       } : 'No staff found'
     })
 
-    return { success: true, staff }
+    return { success: true, staff: transformedStaff }
   } catch (error) {
     console.error('Error fetching staff:', error)
     if (error instanceof Error) {
@@ -196,9 +232,10 @@ export async function updateStaffRoles(staffId: string, roleNames: string[]) {
 
   try {
     const dbUser = await ensureUserWithOrganization(user)
+    const userPermissions = await getUserPermissions(user.id)
 
     // Check if user has permission to manage staff
-    if (!hasPermission(dbUser.permissions, PERMISSIONS.MANAGE_STAFF)) {
+    if (!hasPermission(userPermissions, PERMISSIONS.MANAGE_STAFF)) {
       return { error: t('insufficientPermissions') }
     }
 
@@ -233,10 +270,46 @@ export async function updateStaffRoles(staffId: string, roleNames: string[]) {
     const normalizedRoles = Array.from(new Set(roleNames.filter((role) => validRoleSet.has(role))))
 
     const updated = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const updatedStaff = await tx.user.update({
+      // Get role IDs for the normalized role names
+      const roleRecords = await tx.organizationRole.findMany({
+        where: {
+          organizationId: dbUser.organizationId,
+          name: {
+            in: normalizedRoles,
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      })
+
+      // Delete existing user roles
+      await tx.userRole.deleteMany({
+        where: {
+          userId: staffId,
+        },
+      })
+
+      // Create new user roles
+      if (roleRecords.length > 0) {
+        await tx.userRole.createMany({
+          data: roleRecords.map(role => ({
+            userId: staffId,
+            roleId: role.id,
+          })),
+        })
+      }
+
+      // Get updated user
+      const updatedStaff = await tx.user.findUnique({
         where: { id: staffId },
-        data: {
-          roleNames: normalizedRoles,
+        include: {
+          roles: {
+            include: {
+              role: true,
+            },
+          },
         },
       })
 
@@ -245,7 +318,7 @@ export async function updateStaffRoles(staffId: string, roleNames: string[]) {
         data: {
           type: 'staff_roles_updated',
           data: {
-            staffName: updatedStaff.name,
+            staffName: updatedStaff?.name || 'Unknown',
             newRoles: normalizedRoles,
           },
           userId: user.id,
@@ -265,90 +338,6 @@ export async function updateStaffRoles(staffId: string, roleNames: string[]) {
   }
 }
 
-/**
- * Update staff member's permissions
- */
-export async function updateStaffPermissions(
-  staffId: string,
-  permissions: string[]
-) {
-  const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
-  try {
-    const dbUser = await ensureUserWithOrganization(user)
-
-    // Only admins can update permissions
-    if (!hasPermission(dbUser.permissions, PERMISSIONS.ADMIN)) {
-      return { error: t('insufficientPermissions') }
-    }
-
-    // Verify staff member belongs to same organization
-    const staffMember = await prisma.user.findFirst({
-      where: {
-        id: staffId,
-        organizationId: dbUser.organizationId,
-      },
-    })
-
-    if (!staffMember) {
-      return { error: t('staffMemberNotFound') }
-    }
-
-    const validPermissionSet = new Set(ALL_PERMISSIONS)
-    const invalidPermissions = permissions.filter(
-      (permission) => !validPermissionSet.has(permission as (typeof ALL_PERMISSIONS)[number])
-    )
-
-    if (invalidPermissions.length > 0) {
-      return { error: `Invalid permissions: ${invalidPermissions.join(', ')}` }
-    }
-
-    const normalizedPermissions = Array.from(
-      new Set(
-        permissions.filter((permission) =>
-          validPermissionSet.has(permission as (typeof ALL_PERMISSIONS)[number])
-        )
-      )
-    )
-
-    const updated = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const updatedStaff = await tx.user.update({
-        where: { id: staffId },
-        data: {
-          permissions: normalizedPermissions,
-        },
-      })
-
-      // Log activity
-      await tx.activity.create({
-        data: {
-          type: 'staff_permissions_updated',
-          data: {
-            staffName: updatedStaff.name,
-            newPermissions: normalizedPermissions,
-          },
-          userId: user.id,
-        },
-      })
-
-      return updatedStaff
-    })
-
-    revalidatePath('/dashboard/system-settings/staff')
-    revalidatePath(`/dashboard/system-settings/staff/${staffId}`)
-
-    return { success: true, staff: updated }
-  } catch (error) {
-    console.error('Error updating staff permissions:', error)
-    return { error: t('failedToUpdateStaff') }
-  }
-}
 
 /**
  * Update staff member's profile
@@ -371,11 +360,12 @@ export async function updateStaffProfile(
 
   try {
     const dbUser = await ensureUserWithOrganization(user)
+    const userPermissions = await getUserPermissions(user.id)
 
     // Check if user has permission to manage staff or is updating their own profile
     if (
       staffId !== user.id &&
-      !hasPermission(dbUser.permissions, PERMISSIONS.MANAGE_STAFF)
+      !hasPermission(userPermissions, PERMISSIONS.MANAGE_STAFF)
     ) {
       return { error: t('insufficientPermissions') }
     }

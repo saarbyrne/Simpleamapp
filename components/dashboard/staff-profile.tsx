@@ -12,8 +12,7 @@ import { formatDate } from '@/lib/date-utils'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { Mail, Phone, Calendar, Activity as ActivityIcon } from 'lucide-react'
 import { EditRolesDialog } from './edit-roles-dialog'
-import { EditPermissionsDialog } from './edit-permissions-dialog'
-import { updateStaffRoles, updateStaffPermissions } from '@/app/actions/staff'
+import { updateStaffRoles } from '@/app/actions/staff'
 import { toast } from 'sonner'
 import type { StaffRow } from './staff-table'
 import { useBreadcrumb } from '@/lib/breadcrumb-context'
@@ -33,7 +32,6 @@ export function StaffProfile({ staff, stats, organizationRoles }: StaffProfilePr
   const router = useRouter()
   const { preferences } = useUserPreferences()
   const [editRolesOpen, setEditRolesOpen] = useState(false)
-  const [editPermissionsOpen, setEditPermissionsOpen] = useState(false)
   const { setCustomLabel } = useBreadcrumb()
 
   const staffRow: StaffRow = {
@@ -59,16 +57,6 @@ export function StaffProfile({ staff, stats, organizationRoles }: StaffProfilePr
     }
   }
 
-  const handleSavePermissions = async (staffId: string, permissions: string[]) => {
-    const result = await updateStaffPermissions(staffId, permissions)
-    if (result.error) {
-      toast.error(result.error)
-    } else {
-      toast.success('Permissions updated successfully')
-      router.refresh()
-      setEditPermissionsOpen(false)
-    }
-  }
 
   useEffect(() => {
     if (staff?.id) {
@@ -103,9 +91,6 @@ export function StaffProfile({ staff, stats, organizationRoles }: StaffProfilePr
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setEditRolesOpen(true)}>
             Edit Roles
-          </Button>
-          <Button variant="outline" onClick={() => setEditPermissionsOpen(true)}>
-            Edit Permissions
           </Button>
         </div>
       </div>
@@ -267,14 +252,6 @@ export function StaffProfile({ staff, stats, organizationRoles }: StaffProfilePr
                   })}
                 </div>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-4"
-                onClick={() => setEditPermissionsOpen(true)}
-              >
-                Edit Permissions
-              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -350,14 +327,6 @@ export function StaffProfile({ staff, stats, organizationRoles }: StaffProfilePr
         />
       )}
 
-      {editPermissionsOpen && (
-        <EditPermissionsDialog
-          staff={staffRow}
-          open={editPermissionsOpen}
-          onOpenChange={setEditPermissionsOpen}
-          onSave={handleSavePermissions}
-        />
-      )}
     </div>
   )
 }

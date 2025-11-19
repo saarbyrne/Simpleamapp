@@ -824,12 +824,12 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
                   category?: string | null
                 } = {}
                 
-                if (values.status && ['Active', 'Draft', 'Archived'].includes(values.status)) {
+                if (values.status && typeof values.status === 'string' && ['Active', 'Draft', 'Archived'].includes(values.status)) {
                   updates.status = values.status as 'Active' | 'Draft' | 'Archived'
                 }
                 
                 if (values.category !== undefined) {
-                  updates.category = values.category || null
+                  updates.category = typeof values.category === 'string' ? values.category : null
                 }
                 
                 await handleBulkUpdate(updates)
