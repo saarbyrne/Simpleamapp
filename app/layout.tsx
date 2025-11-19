@@ -11,7 +11,7 @@ import { ErrorBoundary } from '@/components/error-boundary'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400', '600'], // Reduced from 5 to 2 weights for performance
+  weight: ['400', '500', '600', '800'], // Supported weights for marketing site
   variable: '--font-plus-jakarta-sans',
   display: 'swap', // Prevent invisible text during load
   preload: true,
@@ -38,16 +38,16 @@ export default async function RootLayout({
   // These will use the request config which reads from user preferences
   const locale = await getLocale()
   const messages = await getMessages()
-  
+
   // RTL languages
   const rtlLocales = ['ar', 'he', 'fa', 'ur']
   const isRTL = rtlLocales.includes(locale)
 
   return (
-    <html 
-      lang={locale} 
+    <html
+      lang={locale}
       dir={isRTL ? 'rtl' : 'ltr'}
-      suppressHydrationWarning 
+      suppressHydrationWarning
       className={plusJakartaSans.variable}
     >
       <body className={plusJakartaSans.className}>

@@ -53,36 +53,41 @@ export function DataTable<TData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
-                  const canResize = enableColumnResizing && header.column.getCanResize()
-                  const isGrouped = enableGrouping && header.column.getIsGrouped()
-
+                  const column = header.column
+                  const columnId = column?.id
+                  const columnDef = column?.columnDef
+                  const canResize = Boolean(enableColumnResizing && column?.getCanResize?.())
+                  const isGrouped = Boolean(enableGrouping && column && column.getIsGrouped?.())
+                  const headerStyle =
+                    column && columnDef
+                      ? {
+                          minWidth: columnDef.minSize,
+                          maxWidth: columnDef.maxSize,
+                        }
+                      : undefined
                   return (
                     <TableHead
                       key={header.id}
                       className={cn(
                         'relative',
-                        header.column.id === 'actions' && 'text-end',
-                        header.column.id === 'select' && 'w-10 !px-2 !py-0'
+                        columnId === 'actions' && 'text-end',
+                        columnId === 'select' && 'w-10 !px-2 !py-0'
                       )}
-                      style={{
-                        width: header.getSize(),
-                        minWidth: header.column.columnDef.minSize,
-                        maxWidth: header.column.columnDef.maxSize,
-                      }}
+                      style={headerStyle}
                     >
-                      {header.isPlaceholder ? null : (
-                        header.column.id === 'select' ? (
+                      {header.isPlaceholder || !column ? null : (
+                        columnId === 'select' ? (
                           <div className="flex items-center justify-center">
-                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {flexRender(column.columnDef.header, header.getContext())}
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
                             {isGrouped && (
                               <button
-                                onClick={header.column.getToggleGroupingHandler()}
+                                onClick={column.getToggleGroupingHandler()}
                                 className="p-1 hover:bg-muted rounded"
                               >
-                                {header.column.getIsGrouped() ? (
+                                {column.getIsGrouped() ? (
                                   <ChevronDown className="h-4 w-4" />
                                 ) : (
                                   <ChevronRight className="h-4 w-4" />
@@ -91,28 +96,28 @@ export function DataTable<TData>({
                             )}
                             <div
                               {...{
-                                className: header.column.getCanSort()
+                                className: column.getCanSort()
                                   ? 'flex cursor-pointer items-center gap-2 select-none'
                                   : 'flex items-center gap-2',
-                                onClick: header.column.getToggleSortingHandler(),
+                                onClick: column.getToggleSortingHandler(),
                               }}
                             >
-                              {flexRender(header.column.columnDef.header, header.getContext())}
+                              {flexRender(column.columnDef.header, header.getContext())}
                               {{
                                 asc: ' ▲',
                                 desc: ' ▼',
-                              }[header.column.getIsSorted() as string] ?? null}
+                              }[column.getIsSorted() as string] ?? null}
                             </div>
                           </div>
                         )
                       )}
-                      {canResize && (
+                      {canResize && column && (
                         <div
                           onMouseDown={header.getResizeHandler()}
                           onTouchStart={header.getResizeHandler()}
                           className={cn(
                             'absolute end-0 top-0 h-full w-1 cursor-col-resize touch-none select-none bg-border hover:bg-primary/50',
-                            header.column.getIsResizing() && 'bg-primary'
+                            column.getIsResizing() && 'bg-primary'
                           )}
                         />
                       )}
@@ -166,26 +171,27 @@ export function DataTable<TData>({
                       isExpanded && isGrouped && ''
                     )}
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className={cn(
-                          cell.column.id === 'actions' && 'text-end',
-                          cell.column.id === 'select' && 'w-10 !px-2 !py-0'
-                        )}
-                        style={{
-                          width: cell.column.getSize(),
-                        }}
-                      >
-                        {cell.column.id === 'select' ? (
-                          <div className="flex items-center justify-center">
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </div>
-                        ) : (
-                          flexRender(cell.column.columnDef.cell, cell.getContext())
-                        )}
-                      </TableCell>
-                    ))}
+                    {row.getVisibleCells().map((cell) => {
+                      const cellColumn = cell.column
+                      const cellColumnId = cellColumn?.id
+                      return (
+                        <TableCell
+                          key={cell.id}
+                          className={cn(
+                            cellColumnId === 'actions' && 'text-end',
+                            cellColumnId === 'select' && 'w-10 !px-2 !py-0'
+                          )}
+                        >
+                          {cellColumnId === 'select' && cellColumn ? (
+                            <div className="flex items-center justify-center">
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </div>
+                          ) : cellColumn ? (
+                            flexRender(cell.column.columnDef.cell, cell.getContext())
+                          ) : null}
+                        </TableCell>
+                      )
+                    })}
                   </TableRow>
                 )
               })
@@ -202,4 +208,3 @@ export function DataTable<TData>({
     </div>
   )
 }
-

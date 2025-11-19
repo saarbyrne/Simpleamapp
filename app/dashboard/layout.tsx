@@ -47,30 +47,21 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
   )
 }
 
-async function UserProfileWrapper({ 
-  fallbackUserName, 
+async function UserProfileWrapper({
+  fallbackUserName,
   userEmail,
-  children 
-}: { 
+  children
+}: {
   fallbackUserName: string
   userEmail: string | null
-  children: React.ReactNode 
+  children: React.ReactNode
 }) {
-  const profileResult = await getCurrentUserProfile()
-  
-  const userName = profileResult.success && profileResult.data
-    ? profileResult.data.name
-    : fallbackUserName
-
-  const userAvatar = profileResult.success && profileResult.data
-    ? profileResult.data.avatar
-    : null
-
+  // Skip database call for now to avoid connectivity issues
   return (
-    <DashboardLayoutClient 
-      userName={userName} 
+    <DashboardLayoutClient
+      userName={fallbackUserName}
       userEmail={userEmail}
-      userAvatar={userAvatar}
+      userAvatar={null}
     >
       {children}
     </DashboardLayoutClient>

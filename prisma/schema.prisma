@@ -66,6 +66,10 @@ model User {
   // Notification Settings (stored as JSON)
   notificationSettings Json? // {email: {...}, push: {...}, sms: {...}}
 
+  // Staff Management
+  roleNames   String[] @default([]) // Flexible role tags: "Head Coach", "Physiotherapist", etc.
+  permissions String[] @default([]) // System permissions: "admin", "medical_access", etc.
+
   // Security
   // Note: Password is managed by Supabase Auth
   // TODO: Implement 2FA (Two-Factor Authentication) in future iteration
@@ -292,6 +296,7 @@ model Event {
   updatedAt DateTime @updatedAt
 
   attendance EventAttendance[]
+  notes      Note[]
 
   @@map("events")
 }
@@ -322,25 +327,55 @@ model EventAttendance {
 model Note {
   id             String   @id @default(cuid())
   title          String?
-  content        Json // Tiptap JSON
-  privacyLevel   String   @default("public") // public, medical, coaching, private
+  content        Json // Tiptap JSON document format
+
+  // Privacy/Visibility
+  privacyLevel   String   @default("public") // public, medical, mental_health, coaches, private
+
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   authorId String
   author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
-  // Linked entities
+  // Linked entities (deprecated - kept for backward compatibility during migration)
   linkedPersonId String?
-  linkedPerson   Person? @relation(fields: [linkedPersonId], references: [id])
+  linkedPerson   Person? @relation(fields: [linkedPersonId], references: [id], onDelete: SetNull)
 
-  linkedEventId String?
+  linkedEventId  String?
+  linkedEvent    Event? @relation(fields: [linkedEventId], references: [id], onDelete: SetNull)
 
+  // New: Multi-entity linking
+  links NoteLink[]
+
+  // Tags for organization
   tags      String[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([organizationId])
+  @@index([authorId])
+  @@index([linkedPersonId])
+  @@index([linkedEventId])
+  @@index([privacyLevel])
   @@map("notes")
+}
+
+model NoteLink {
+  id         String @id @default(cuid())
+  noteId     String
+  note       Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  
+  targetType String // "person" or "event"
+  targetId   String
+  
+  createdAt  DateTime @default(now())
+  
+  @@unique([noteId, targetType, targetId])
+  @@index([noteId])
+  @@index([targetType, targetId])
+  @@map("note_links")
 }
 
 // ============================================

@@ -1,0 +1,55 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
+
+interface AuthAwareLinkProps {
+  children: React.ReactNode;
+  className?: string;
+  loginHref?: string;
+  dashboardHref?: string;
+}
+
+/**
+ * A link component that intelligently routes based on authentication status:
+ * - If user is logged in → routes to dashboard
+ * - If user is not logged in → routes to login page
+ */
+export function AuthAwareLink({
+  children,
+  className,
+  loginHref = "/login",
+  dashboardHref = "/dashboard"
+}: AuthAwareLinkProps) {
+  const [href, setHref] = useState(loginHref);
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        setHref(user ? dashboardHref : loginHref);
+      } catch (error) {
+        // On error, default to login
+        setHref(loginHref);
+      } finally {
+        setIsChecking(false);
+      }
+    }
+
+    checkAuth();
+  }, [loginHref, dashboardHref]);
+
+  // Prevent flash of wrong link while checking
+  if (isChecking) {
+    return <span className={className}>{children}</span>;
+  }
+
+  return (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  );
+}

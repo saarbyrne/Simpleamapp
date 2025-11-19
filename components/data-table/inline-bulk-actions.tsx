@@ -102,32 +102,42 @@ export function InlineBulkActions<TData>({
     })
   }
 
-  const handleSave = async (values: Record<string, string | null>) => {
+  const handleSave = async (values: Record<string, string | string[] | null>) => {
+    const positionValue = Array.isArray(values.position)
+      ? values.position[0]
+      : values.position
+    const statusValue = Array.isArray(values.status)
+      ? values.status[0]
+      : values.status
+    const nationalityValue = Array.isArray(values.nationality)
+      ? values.nationality[0]
+      : values.nationality
+
     const updates: {
       position?: string | null
       status?: 'active' | 'injured' | 'inactive'
       nationality?: string | null
     } = {}
 
-    if (values.position !== undefined && values.position !== null && values.position !== '') {
-      updates.position = values.position
-    } else if (values.position === '') {
+    if (positionValue !== undefined && positionValue !== null && positionValue !== '') {
+      updates.position = positionValue
+    } else if (positionValue === '') {
       // Allow clearing position (it's nullable in schema)
       updates.position = null
     }
 
     // Status is required - only include if a valid value is provided
     // Don't allow clearing/nullifying status
-    if (values.status !== undefined && values.status !== null && values.status !== '') {
-      const statusValue = values.status as 'active' | 'injured' | 'inactive'
-      if (['active', 'injured', 'inactive'].includes(statusValue)) {
-        updates.status = statusValue
+    if (statusValue !== undefined && statusValue !== null && statusValue !== '') {
+      const normalizedStatus = statusValue as 'active' | 'injured' | 'inactive'
+      if (['active', 'injured', 'inactive'].includes(normalizedStatus)) {
+        updates.status = normalizedStatus
       }
     }
 
-    if (values.nationality !== undefined && values.nationality !== null && values.nationality !== '') {
-      updates.nationality = values.nationality
-    } else if (values.nationality === '') {
+    if (nationalityValue !== undefined && nationalityValue !== null && nationalityValue !== '') {
+      updates.nationality = nationalityValue
+    } else if (nationalityValue === '') {
       // Allow clearing nationality (it's nullable in schema)
       updates.nationality = null
     }
@@ -150,4 +160,3 @@ export function InlineBulkActions<TData>({
     />
   )
 }
-

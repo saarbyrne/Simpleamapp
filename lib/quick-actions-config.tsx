@@ -86,7 +86,7 @@ export const AVAILABLE_QUICK_ACTIONS: QuickActionConfig[] = [
     id: 'add-note',
     label: 'Add Note',
     icon: StickyNote,
-    enabled: false, // Not yet implemented
+    enabled: true,
     description: 'Create a new note or document',
     category: 'content',
   },
