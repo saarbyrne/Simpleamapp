@@ -13,6 +13,7 @@ import {
   Folder,
   PencilRuler,
   Settings,
+  Sparkles,
   StickyNote,
   Table,
   Target,
@@ -75,6 +76,7 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
   const t = useTranslations()
 
   const navItems = [
+    { labelKey: 'nav.ai', href: '/dashboard/ai', icon: Sparkles },
     { labelKey: 'nav.players', href: '/dashboard/players', icon: Users },
     { labelKey: 'nav.forms', href: '/dashboard/forms', icon: FileText },
     { labelKey: 'nav.reports', href: '/dashboard/reports', icon: BarChart3 },

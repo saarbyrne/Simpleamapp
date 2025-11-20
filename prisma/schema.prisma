@@ -99,6 +99,7 @@ model User {
   plans           Plan[]
   milestones      Milestone[]
   milestoneComments MilestoneComment[]
+  aiConversations AIConversation[]
 
   @@map("users")
 }
@@ -887,4 +888,128 @@ model ReportSchedule {
 
   @@index([isActive, nextSend])
   @@map("report_schedules")
+}
+
+// ============================================
+// AI ASSISTANT & TOOLING
+// ============================================
+
+model AIConversation {
+  id        String @id @default(cuid())
+  orgId     String
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title     String // auto-generated summary
+  messages  AIMessage[]
+
+  // Context
+  contextType String? // "player", "event", "report"
+  contextId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId, userId])
+  @@index([orgId, createdAt])
+  @@map("ai_conversations")
+}
+
+model AIMessage {
+  id             String @id @default(cuid())
+  conversationId String
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role           String // "user" or "assistant"
+  content        String @db.Text
+
+  // If AI took actions
+  actions        Json? // [{type: "event_created", id: "event_123"}]
+
+  // Tool calls made
+  toolCalls      Json?
+
+  // Token usage for cost tracking
+  inputTokens    Int @default(0)
+  outputTokens   Int @default(0)
+
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId])
+  @@map("ai_messages")
+}
+
+model AIInsight {
+  id          String @id @default(cuid())
+  orgId       String
+
+  type        String // "injury_risk", "wellness_decline", "load_spike"
+  priority    String // "high", "medium", "low"
+
+  title       String
+  description String @db.Text
+  data        Json // detailed data backing insight
+
+  // Related entities
+  playerIds   String[]
+
+  // Status
+  status      String @default("active") // "active", "dismissed", "acted_on"
+
+  createdAt   DateTime @default(now())
+  dismissedAt DateTime?
+
+  @@index([orgId, status])
+  @@index([orgId, priority])
+  @@index([orgId, createdAt])
+  @@map("ai_insights")
+}
+
+model AISettings {
+  id     String @id @default(cuid())
+  orgId  String @unique
+  userId String @unique
+
+  // Proactive Insights
+  injuryRiskAlerts     Boolean @default(true)
+  wellnessAlerts       Boolean @default(true)
+  loadAlerts           Boolean @default(true)
+  formCompletionAlerts Boolean @default(true)
+
+  // Alert Frequency
+  alertFrequency String @default("real_time") // "real_time", "daily_digest", "weekly_summary"
+
+  // Data Access Control
+  dataAccess Json @default("{\"playerWellness\": true, \"loadData\": true, \"medicalNotes\": false, \"formResponses\": true, \"eventAttendance\": true, \"privateNotes\": false}")
+
+  // Cost Controls
+  monthlyTokenLimit  Int @default(1000000) // 1M tokens per month
+  tokensUsedThisMonth Int @default(0)
+  lastResetAt        DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ai_settings")
+}
+
+model AICostTracking {
+  id             String @id @default(cuid())
+  orgId          String
+  userId         String
+  conversationId String?
+
+  inputTokens    Int
+  outputTokens   Int
+  totalCost      Float // in USD
+
+  // Metadata
+  model          String @default("claude-sonnet-4")
+  endpoint       String // "chat", "tool_call", "insight_generation"
+
+  createdAt      DateTime @default(now())
+
+  @@index([orgId, createdAt])
+  @@index([userId, createdAt])
+  @@map("ai_cost_tracking")
 }
