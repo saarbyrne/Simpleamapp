@@ -387,23 +387,65 @@ model NoteLink {
 model File {
   id             String   @id @default(cuid())
   name           String
+  originalName   String // before sanitization
   path           String // Supabase Storage path
+  bucket         String   @default("files")
   size           Int
   mimeType       String
+  url            String? // Public URL from Supabase Storage
+
+  // Metadata
+  description    String?
+  tags           String[]
+
+  // Organization
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
+  // Upload info
   uploadedById String
   uploadedBy   User   @relation(fields: [uploadedById], references: [id])
 
-  // Linked entities
+  // Linked entities (deprecated - kept for backward compatibility)
   linkedPersonId String?
-  linkedPerson   Person? @relation(fields: [linkedPersonId], references: [id])
+  linkedPerson   Person? @relation(fields: [linkedPersonId], references: [id], onDelete: SetNull)
 
-  tags      String[]
+  // New: Multi-entity linking
+  links FileLink[]
+
+  // Visibility/Access Control
+  visibility     String   @default("public") // "public", "medical", "coaches", "private"
+
+  // Version control (optional)
+  version        Int      @default(1)
+  previousVersionId String?
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@index([organizationId])
+  @@index([uploadedById])
+  @@index([linkedPersonId])
+  @@index([visibility])
+  @@index([mimeType])
+  @@index([tags])
   @@map("files")
+}
+
+model FileLink {
+  id         String @id @default(cuid())
+  fileId     String
+  file       File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  targetType String // "person", "event", "note", "plan", "drawing"
+  targetId   String
+
+  createdAt  DateTime @default(now())
+
+  @@unique([fileId, targetType, targetId])
+  @@index([fileId])
+  @@index([targetType, targetId])
+  @@map("file_links")
 }
 
 // ============================================
