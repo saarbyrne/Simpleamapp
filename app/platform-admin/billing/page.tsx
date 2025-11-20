@@ -1,6 +1,7 @@
 import { PageHeader } from '@/components/platform-admin/page-header'
 import { StatsCard } from '@/components/platform-admin/stats-card'
 import { logPlatformAdminAction } from '@/lib/platform-admin'
+import { PLAN_PRICING } from '@/lib/platform-admin-config'
 import { prisma } from '@/lib/db'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,13 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-
-// Plan pricing (should match your actual Stripe prices)
-const PLAN_PRICING = {
-  free: 0,
-  pro: 29, // Monthly price
-  enterprise: 99, // Monthly price
-} as const
 
 export default async function BillingPage() {
   // Log access
