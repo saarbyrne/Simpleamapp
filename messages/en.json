@@ -9,7 +9,8 @@
     "canvas": "Whiteboard",
     "files": "Files",
     "planner": "Planner",
-    "tactics": "Tactics"
+    "tactics": "Tactics",
+    "templates": "Templates"
   },
   "settings": {
     "profile": "Profile",
