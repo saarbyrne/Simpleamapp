@@ -4,12 +4,12 @@
     "forms": "Forms",
     "reports": "Reports",
     "calendar": "Calendar",
+    "messages": "Messages",
     "notes": "Notes",
     "spreadsheets": "Spreadsheets",
     "canvas": "Whiteboard",
     "files": "Files",
-    "planner": "Planner",
-    "tactics": "Tactics"
+    "planner": "Planner"
   },
   "settings": {
     "profile": "Profile",

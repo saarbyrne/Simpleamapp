@@ -392,12 +392,12 @@
     "canvas": "Tableau",
     "files": "Fichiers",
     "forms": "Formulaires",
+    "messages": "Messages",
     "notes": "Notes",
     "planner": "Planificateur",
     "players": "Joueurs",
     "reports": "Rapports",
-    "spreadsheets": "Feuilles de calcul",
-    "tactics": "Tactiques"
+    "spreadsheets": "Feuilles de calcul"
   },
   "notes": {
     "description": "Créer et gérer des notes",
