@@ -99,11 +99,11 @@ export function TableFilters({
                 <Button
                   variant="outline"
                   className={cn(
-                    'h-10 w-[240px] justify-start text-left font-normal shrink-0',
+                    'h-10 w-[240px] justify-start text-start font-normal shrink-0',
                     !dateRange && 'text-muted-foreground'
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="me-2 h-4 w-4" />
                   {dateRange?.from ? (
                     dateRange.to ? (
                       <>
@@ -150,4 +150,3 @@ export function TableFilters({
     </div>
   )
 }
-

@@ -148,19 +148,19 @@ export function LinkEntityDialog({
               Unlink
             </Button>
           )}
-          <div className="flex gap-2 ml-auto">
+          <div className="flex gap-2 ms-auto">
             <Button variant="outline" onClick={onClose} disabled={isLinking}>
               Cancel
             </Button>
             <Button onClick={handleLink} disabled={isLinking}>
               {isLinking ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                   Linking...
                 </>
               ) : (
                 <>
-                  <Link className="h-4 w-4 mr-2" />
+                  <Link className="h-4 w-4 me-2" />
                   Link
                 </>
               )}

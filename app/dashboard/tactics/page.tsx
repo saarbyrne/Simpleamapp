@@ -112,7 +112,7 @@ export default function TacticsPage() {
           </p>
         </div>
         <Button onClick={handleCreateBoard}>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 me-2" />
           New Board
         </Button>
       </div>
@@ -122,11 +122,11 @@ export default function TacticsPage() {
         <table className="w-full">
           <thead className="border-b bg-muted/50">
             <tr>
-              <th className="text-left p-4 font-medium">Title</th>
-              <th className="text-left p-4 font-medium">Formation</th>
-              <th className="text-left p-4 font-medium">Phase</th>
-              <th className="text-left p-4 font-medium">Opponent</th>
-              <th className="text-left p-4 font-medium">Created</th>
+              <th className="text-start p-4 font-medium">Title</th>
+              <th className="text-start p-4 font-medium">Formation</th>
+              <th className="text-start p-4 font-medium">Phase</th>
+              <th className="text-start p-4 font-medium">Opponent</th>
+              <th className="text-start p-4 font-medium">Created</th>
             </tr>
           </thead>
           <tbody>
@@ -176,7 +176,7 @@ export default function TacticsPage() {
             Create your first tactical board to start planning strategies
           </p>
           <Button onClick={handleCreateBoard}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 me-2" />
             Create Your First Board
           </Button>
         </div>

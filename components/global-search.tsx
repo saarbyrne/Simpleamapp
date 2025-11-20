@@ -304,7 +304,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                         onSelect={() => handleSelect(result)}
                         className="cursor-pointer"
                       >
-                        <Icon className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
+                        <Icon className="h-4 w-4 text-muted-foreground me-2 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="font-medium truncate">{result.title}</span>
@@ -346,7 +346,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                             </p>
                           )}
                         </div>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground opacity-50 ml-2 flex-shrink-0" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground opacity-50 ms-2 flex-shrink-0" />
                       </CommandItem>
                     ))}
                   </CommandGroup>

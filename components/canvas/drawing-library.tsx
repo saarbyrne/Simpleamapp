@@ -244,7 +244,7 @@ export function DrawingLibrary() {
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search drawings..."
               value={searchQuery}
@@ -252,7 +252,7 @@ export function DrawingLibrary() {
                 setSearchQuery(e.target.value)
                 // Page will be reset by the debounced effect
               }}
-              className="pl-9"
+              className="ps-9"
             />
           </div>
           <Select
@@ -276,7 +276,7 @@ export function DrawingLibrary() {
           </Select>
         </div>
         <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 me-2" />
           New Drawing
         </Button>
       </div>
@@ -314,7 +314,7 @@ export function DrawingLibrary() {
               : 'Create your first tactical drawing'}
           </p>
           <Button onClick={() => setShowCreateDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 me-2" />
             Create Drawing
           </Button>
         </div>
@@ -356,7 +356,7 @@ export function DrawingLibrary() {
                           router.push(`/dashboard/canvas/${drawing.id}`)
                         }}
                       >
-                        <Edit className="h-4 w-4 mr-2" />
+                        <Edit className="h-4 w-4 me-2" />
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -365,7 +365,7 @@ export function DrawingLibrary() {
                           handleDuplicate(drawing.id)
                         }}
                       >
-                        <Copy className="h-4 w-4 mr-2" />
+                        <Copy className="h-4 w-4 me-2" />
                         Duplicate
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -377,7 +377,7 @@ export function DrawingLibrary() {
                         }}
                         className="text-destructive"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="h-4 w-4 me-2" />
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
