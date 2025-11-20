@@ -1,11 +1,29 @@
 'use server'
 
 import { createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
 import { getTranslations } from 'next-intl/server'
 import { generateStoragePath, sanitizeFilename } from '@/lib/files'
+
+// Create service role client for storage operations (bypasses RLS)
+function createServiceRoleClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase service role configuration. Please ensure SUPABASE_SERVICE_ROLE_KEY is set in your environment variables.')
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  })
+}
 
 export interface FileMetadata {
   description?: string
@@ -63,8 +81,11 @@ export async function uploadFile(
       user.id
     )
 
+    // Use service role client for storage operations (bypasses RLS)
+    const serviceSupabase = createServiceRoleClient()
+
     // Upload to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { data: uploadData, error: uploadError } = await serviceSupabase.storage
       .from('files')
       .upload(storagePath, file, {
         cacheControl: '3600',
@@ -77,7 +98,7 @@ export async function uploadFile(
     }
 
     // Get public URL
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = serviceSupabase.storage
       .from('files')
       .getPublicUrl(storagePath)
 
@@ -349,8 +370,11 @@ export async function deleteFile(fileId: string) {
       return { error: 'File not found' }
     }
 
+    // Use service role client for storage operations (bypasses RLS)
+    const serviceSupabase = createServiceRoleClient()
+
     // Delete from storage
-    const { error: storageError } = await supabase.storage
+    const { error: storageError } = await serviceSupabase.storage
       .from(file.bucket)
       .remove([file.path])
 
@@ -412,9 +436,12 @@ export async function bulkDeleteFiles(fileIds: string[]) {
       return { error: 'No files found' }
     }
 
+    // Use service role client for storage operations (bypasses RLS)
+    const serviceSupabase = createServiceRoleClient()
+
     // Delete from storage
     const paths = files.map((f: { path: string }) => f.path)
-    const { error: storageError } = await supabase.storage
+    const { error: storageError } = await serviceSupabase.storage
       .from('files')
       .remove(paths)
 
@@ -466,8 +493,11 @@ export async function getFileDownloadUrl(fileId: string) {
       return { error: 'File not found' }
     }
 
+    // Use service role client for storage operations (bypasses RLS)
+    const serviceSupabase = createServiceRoleClient()
+
     // Get signed URL (expires in 1 hour)
-    const { data, error } = await supabase.storage
+    const { data, error } = await serviceSupabase.storage
       .from(file.bucket)
       .createSignedUrl(file.path, 3600)
 
