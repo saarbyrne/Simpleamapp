@@ -9,6 +9,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================
@@ -78,6 +79,9 @@ model User {
   // TODO: Add twoFactorEnabled Boolean field
   // TODO: Add twoFactorSecret String field for TOTP
   // TODO: Add backupCodes String[] for recovery codes
+
+  // Platform Admin (for SaaS provider team only)
+  isPlatformAdmin Boolean @default(false) // Only set manually for vendor team members
 
   // Relations
   organizationId String
@@ -744,7 +748,7 @@ model MilestoneComment {
 
 model Subscription {
   id             String   @id @default(cuid())
-  organizationId String
+  organizationId String   @unique // One subscription per organization
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   plan           String // free, pro, enterprise
@@ -753,11 +757,13 @@ model Subscription {
   currentPeriodEnd   DateTime
 
   stripeCustomerId      String?
-  stripeSubscriptionId  String?
+  stripeSubscriptionId  String?  @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([status])
+  @@index([plan])
   @@map("subscriptions")
 }
 
