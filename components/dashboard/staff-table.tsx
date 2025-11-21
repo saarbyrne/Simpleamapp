@@ -336,11 +336,11 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
   ], [translate, onNavigateToProfile, onEditRoles, preferences])
 
   const filterConfig = useMemo((): FilterConfig[] => {
-    const config: FilterConfig[] = [
+    const config = [
       {
         key: 'search',
         label: translate('staff.searchLabel', 'Search'),
-        type: 'search',
+        type: 'search' as const,
         placeholder: translate('staff.searchPlaceholder', 'Search by name, email, role, or permission'),
       },
     ]
@@ -349,10 +349,10 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
       config.push({
         key: 'role',
         label: translate('staff.columns.roles', 'Roles'),
-        type: 'select',
+        type: 'select' as const,
         options: roleOptions,
         placeholder: translate('staff.allRoles', 'All roles'),
-      } as FilterConfig)
+      })
     }
 
 
@@ -374,6 +374,10 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
       setRoleFilter(value)
       setPagination((prev) => ({ ...prev, pageIndex: 0 }))
       return
+    }
+    if (key === 'permission') {
+      setPermissionFilter(value)
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }))
     }
   }, [setPagination])
 

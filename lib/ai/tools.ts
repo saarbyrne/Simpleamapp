@@ -223,62 +223,6 @@ export const AI_TOOLS: ToolDefinition[] = [
       required: ['content']
     }
   },
-  {
-    name: 'create_form',
-    description: 'Create a new form with specified fields for data collection',
-    input_schema: {
-      type: 'object',
-      properties: {
-        name: {
-          type: 'string',
-          description: 'Form name'
-        },
-        description: {
-          type: 'string',
-          description: 'Form description'
-        },
-        category: {
-          type: 'string',
-          enum: ['wellness', 'medical', 'performance', 'custom'],
-          description: 'Form category'
-        },
-        fields: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              name: { type: 'string' },
-              label: { type: 'string' },
-              type: {
-                type: 'string',
-                enum: ['text', 'number', 'slider', 'select', 'multiselect', 'date', 'time', 'textarea']
-              },
-              required: { type: 'boolean' },
-              options: {
-                type: 'array',
-                items: { type: 'string' }
-              },
-              min: { type: 'number' },
-              max: { type: 'number' },
-              placeholder: { type: 'string' }
-            }
-          },
-          description: 'Array of form fields'
-        },
-        scheduleType: {
-          type: 'string',
-          enum: ['one_time', 'daily', 'weekly', 'custom'],
-          description: 'Schedule type for the form'
-        },
-        targetType: {
-          type: 'string',
-          enum: ['all', 'specific', 'tag'],
-          description: 'Who should receive the form'
-        }
-      },
-      required: ['name', 'fields']
-    }
-  },
 
   // Analysis tools
   {
@@ -343,8 +287,6 @@ export async function executeToolCall(
       return await distributeForm(orgId, toolInput)
     case 'create_note':
       return await createNote(orgId, userId, toolInput)
-    case 'create_form':
-      return await createForm(orgId, userId, toolInput)
     case 'analyze_load_wellness':
       return await analyzeLoadWellness(orgId, toolInput)
     case 'calculate_injury_risk':
@@ -630,45 +572,6 @@ async function createNote(orgId: string, userId: string, input: any) {
     success: true,
     noteId: note.id,
     message: 'Note created successfully'
-  }
-}
-
-async function createForm(orgId: string, userId: string, input: any) {
-  // Build the form schema from the input fields
-  const schema = input.fields.map((field: any) => ({
-    name: field.name,
-    label: field.label || field.name,
-    type: field.type,
-    required: field.required !== false,
-    options: field.options || undefined,
-    min: field.min,
-    max: field.max,
-    placeholder: field.placeholder
-  }))
-
-  const form = await db.form.create({
-    data: {
-      name: input.name,
-      description: input.description || '',
-      schema: schema,
-      organizationId: orgId,
-      scheduleType: input.scheduleType || 'one_time',
-      targetType: input.targetType || 'all',
-      isActive: true,
-      category: input.category || 'custom'
-    }
-  })
-
-  return {
-    success: true,
-    formId: form.id,
-    message: `Created form: ${form.name}`,
-    details: {
-      name: form.name,
-      fieldCount: schema.length,
-      category: form.category,
-      scheduleType: form.scheduleType
-    }
   }
 }
 
