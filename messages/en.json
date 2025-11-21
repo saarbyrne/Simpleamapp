@@ -4,12 +4,13 @@
     "forms": "Forms",
     "reports": "Reports",
     "calendar": "Calendar",
+    "messages": "Messages",
     "notes": "Notes",
     "spreadsheets": "Spreadsheets",
     "canvas": "Whiteboard",
     "files": "Files",
+<<<<<<< HEAD
     "planner": "Planner",
-    "tactics": "Tactics",
     "templates": "Templates"
   },
   "settings": {
