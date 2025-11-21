@@ -77,35 +77,46 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    // SECURITY: Validate input with Zod schema
     const body = await request.json()
+    const { AISettingsSchema } = await import('@/lib/api-validation')
+    const validatedData = AISettingsSchema.parse(body)
 
     const settings = await db.aISettings.upsert({
       where: { userId: dbUser.id },
       update: {
-        injuryRiskAlerts: body.injuryRiskAlerts,
-        wellnessAlerts: body.wellnessAlerts,
-        loadAlerts: body.loadAlerts,
-        formCompletionAlerts: body.formCompletionAlerts,
-        alertFrequency: body.alertFrequency,
-        dataAccess: body.dataAccess,
-        monthlyTokenLimit: body.monthlyTokenLimit
+        injuryRiskAlerts: validatedData.injuryRiskAlerts,
+        wellnessAlerts: validatedData.wellnessAlerts,
+        loadAlerts: validatedData.loadAlerts,
+        formCompletionAlerts: validatedData.formCompletionAlerts,
+        alertFrequency: validatedData.alertFrequency,
+        dataAccess: validatedData.dataAccess,
+        monthlyTokenLimit: validatedData.monthlyTokenLimit
       },
       create: {
         orgId: dbUser.organizationId,
         userId: dbUser.id,
-        injuryRiskAlerts: body.injuryRiskAlerts,
-        wellnessAlerts: body.wellnessAlerts,
-        loadAlerts: body.loadAlerts,
-        formCompletionAlerts: body.formCompletionAlerts,
-        alertFrequency: body.alertFrequency,
-        dataAccess: body.dataAccess,
-        monthlyTokenLimit: body.monthlyTokenLimit,
+        injuryRiskAlerts: validatedData.injuryRiskAlerts,
+        wellnessAlerts: validatedData.wellnessAlerts,
+        loadAlerts: validatedData.loadAlerts,
+        formCompletionAlerts: validatedData.formCompletionAlerts,
+        alertFrequency: validatedData.alertFrequency,
+        dataAccess: validatedData.dataAccess,
+        monthlyTokenLimit: validatedData.monthlyTokenLimit,
         tokensUsedThisMonth: 0
       }
     })
 
     return NextResponse.json({ success: true, settings })
   } catch (error) {
+    // Handle validation errors
+    if (error instanceof Error && error.name === 'ZodError') {
+      return NextResponse.json(
+        { error: 'Invalid request data', details: error },
+        { status: 400 }
+      )
+    }
+
     console.error('Error saving AI settings:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
