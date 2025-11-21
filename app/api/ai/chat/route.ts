@@ -85,7 +85,6 @@ export async function POST(request: NextRequest) {
               controller.enqueue(
                 encoder.encode(`data: ${JSON.stringify({ type: 'content', content: chunk.content })}\n\n`)
               )
-              outputTokens += 1 // Rough estimate
             } else if (chunk.type === 'tool_use') {
               if (chunk.toolResult) {
                 toolCalls.push({
@@ -97,6 +96,20 @@ export async function POST(request: NextRequest) {
                   encoder.encode(`data: ${JSON.stringify({ type: 'tool_call', tool: chunk.toolName, result: chunk.toolResult })}\n\n`)
                 )
               }
+            } else if (chunk.type === 'tool_result') {
+              // Stream tool result back to UI
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ type: 'tool_result', content: chunk.content })}\n\n`)
+              )
+            } else if (chunk.type === 'thinking') {
+              // Stream thinking status
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ type: 'thinking', content: chunk.content })}\n\n`)
+              )
+            } else if (chunk.type === 'usage') {
+              // Collect actual token usage from API
+              inputTokens = chunk.inputTokens || 0
+              outputTokens = chunk.outputTokens || 0
             } else if (chunk.type === 'message_stop') {
               // Save assistant message
               await db.aIMessage.create({
@@ -109,6 +122,12 @@ export async function POST(request: NextRequest) {
                   inputTokens,
                   outputTokens
                 }
+              })
+
+              // Update conversation timestamp
+              await db.aIConversation.update({
+                where: { id: conversation.id },
+                data: { updatedAt: new Date() }
               })
 
               // Track costs
