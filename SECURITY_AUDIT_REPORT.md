@@ -31,9 +31,9 @@ This security audit identified **18 security vulnerabilities** ranging from **CR
 Firebase credentials are hardcoded directly in the source code with fallback values:
 ```typescript
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '***REMOVED***',
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '***REMOVED***',
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '***REMOVED***',
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyBfSJkNiLY7r6p80Bb4aCm9W7Vci8kTk8Q',
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'simpleam-80594.firebaseapp.com',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'simpleam-80594',
   // ... more hardcoded credentials
 }
 ```
@@ -63,9 +63,9 @@ const firebaseConfig = {
 **Issue:**
 Production Firebase credentials are committed to `.env.example`:
 ```bash
-NEXT_PUBLIC_FIREBASE_API_KEY=***REMOVED***
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=***REMOVED***
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=***REMOVED***
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyBfSJkNiLY7r6p80Bb4aCm9W7Vci8kTk8Q
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=simpleam-80594.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=simpleam-80594
 # ... more production keys
 ```
 

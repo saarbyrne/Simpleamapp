@@ -1,18 +1,89 @@
-rules_version='2'
+rules_version = '2';
+
+/**
+ * Firebase Security Rules for Firestore
+ *
+ * SECURITY: These rules protect chat messages and ensure users can only
+ * access data from their own organization.
+ *
+ * IMPORTANT: Deploy these rules using:
+ *   firebase deploy --only firestore:rules
+ */
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserId() {
+      return request.auth.uid;
+    }
+
+    function getOrgId() {
+      // Custom token should include organizationId claim
+      return request.auth.token.organizationId;
+    }
+
+    function hasOrgClaim() {
+      return request.auth.token.organizationId != null;
+    }
+
+    // ============================================
+    // CHAT ROOMS
+    // ============================================
+    match /chatRooms/{roomId} {
+      // Users can only read/write to rooms in their organization
+      allow read: if isAuthenticated()
+        && hasOrgClaim()
+        && resource.data.organizationId == getOrgId();
+
+      allow create: if isAuthenticated()
+        && hasOrgClaim()
+        && request.resource.data.organizationId == getOrgId();
+
+      allow update: if isAuthenticated()
+        && hasOrgClaim()
+        && resource.data.organizationId == getOrgId();
+
+      allow delete: if isAuthenticated()
+        && hasOrgClaim()
+        && resource.data.organizationId == getOrgId();
+
+      // Chat messages subcollection
+      match /messages/{messageId} {
+        // Users can read messages from their org's rooms
+        allow read: if isAuthenticated()
+          && hasOrgClaim()
+          && get(/databases/$(database)/documents/chatRooms/$(roomId)).data.organizationId == getOrgId();
+
+        // Users can create messages in their org's rooms
+        allow create: if isAuthenticated()
+          && hasOrgClaim()
+          && request.resource.data.userId == getUserId()
+          && get(/databases/$(database)/documents/chatRooms/$(roomId)).data.organizationId == getOrgId();
+
+        // Users can update their own messages
+        allow update: if isAuthenticated()
+          && hasOrgClaim()
+          && resource.data.userId == getUserId()
+          && request.resource.data.userId == getUserId();
+
+        // Users can delete their own messages
+        allow delete: if isAuthenticated()
+          && hasOrgClaim()
+          && resource.data.userId == getUserId();
+      }
+    }
+
+    // ============================================
+    // DEFAULT: DENY ALL
+    // ============================================
+    // Deny access to all other documents by default
     match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2025, 12, 20);
+      allow read, write: if false;
     }
   }
 }

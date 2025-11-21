@@ -24,6 +24,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    // SECURITY: Rate limiting for expensive AI operations
+    const { checkRateLimit, RATE_LIMITS, createRateLimitResponse } = await import('@/lib/rate-limit')
+    const rateLimitResult = checkRateLimit(dbUser.id, RATE_LIMITS.AI_CHAT)
+
+    if (!rateLimitResult.success) {
+      return createRateLimitResponse(rateLimitResult)
+    }
+
     const body = await request.json()
     const { messages, conversationId } = body
 

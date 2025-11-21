@@ -16,7 +16,7 @@
 
 The indexes are currently being built by Firebase.
 
-**Check status:** https://console.firebase.google.com/project/***REMOVED***/firestore/indexes
+**Check status:** https://console.firebase.google.com/project/simpleam-80594/firestore/indexes
 
 You'll see:
 - 🔄 **Building** - Wait a few minutes
@@ -28,7 +28,7 @@ You'll see:
 
 ### Enable Firebase Authentication
 
-1. Go to: https://console.firebase.google.com/project/***REMOVED***/authentication
+1. Go to: https://console.firebase.google.com/project/simpleam-80594/authentication
 2. Click **"Get started"**
 3. Click **"Anonymous"** provider
 4. Toggle **"Enable"**
@@ -79,12 +79,12 @@ Navigate to: http://localhost:3000/dashboard/chat
 ## 🎯 What to Do Now
 
 ### Step 1: Enable Authentication (30 seconds)
-**Link:** https://console.firebase.google.com/project/***REMOVED***/authentication
+**Link:** https://console.firebase.google.com/project/simpleam-80594/authentication
 
 Click "Get started" → Enable "Anonymous" → Save
 
 ### Step 2: Wait for Index (2-10 minutes)
-**Link:** https://console.firebase.google.com/project/***REMOVED***/firestore/indexes
+**Link:** https://console.firebase.google.com/project/simpleam-80594/firestore/indexes
 
 Wait until it shows "Enabled" instead of "Building"
 
@@ -98,9 +98,9 @@ Visit: http://localhost:3000/dashboard/chat
 
 ## 🔗 Quick Links
 
-- **Firestore Indexes:** https://console.firebase.google.com/project/***REMOVED***/firestore/indexes
-- **Authentication:** https://console.firebase.google.com/project/***REMOVED***/authentication
-- **Project Overview:** https://console.firebase.google.com/project/***REMOVED***/overview
+- **Firestore Indexes:** https://console.firebase.google.com/project/simpleam-80594/firestore/indexes
+- **Authentication:** https://console.firebase.google.com/project/simpleam-80594/authentication
+- **Project Overview:** https://console.firebase.google.com/project/simpleam-80594/overview
 
 ---
 

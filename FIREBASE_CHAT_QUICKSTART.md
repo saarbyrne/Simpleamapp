@@ -8,7 +8,7 @@ Follow these steps to get your Firebase chat system running.
 
 ## Step 1: Get Firebase Credentials
 
-1. Go to [Firebase Console](https://console.firebase.google.com/project/***REMOVED***/settings/general)
+1. Go to [Firebase Console](https://console.firebase.google.com/project/simpleam-80594/settings/general)
 2. Scroll to "Your apps" section
 3. If you don't see a web app:
    - Click **"Add app"**
@@ -20,9 +20,9 @@ Follow these steps to get your Firebase chat system running.
 ```javascript
 const firebaseConfig = {
   apiKey: "AIza...",
-  authDomain: "***REMOVED***",
-  projectId: "***REMOVED***",
-  storageBucket: "***REMOVED***.appspot.com",
+  authDomain: "simpleam-80594.firebaseapp.com",
+  projectId: "simpleam-80594",
+  storageBucket: "simpleam-80594.appspot.com",
   messagingSenderId: "123456789",
   appId: "1:123456789:web:abc123"
 };
@@ -37,9 +37,9 @@ Create or update your `.env.local` file:
 ```bash
 # Firebase Configuration (COPY FROM FIREBASE CONSOLE)
 NEXT_PUBLIC_FIREBASE_API_KEY=AIza...
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=***REMOVED***
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=***REMOVED***
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=***REMOVED***.appspot.com
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=simpleam-80594.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=simpleam-80594
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=simpleam-80594.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
 NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:abc123
 ```
@@ -78,18 +78,18 @@ This deploys the rules in `storage.rules`.
 ## Step 5: Enable Firebase Services
 
 ### Enable Authentication:
-1. Go to [Firebase Console](https://console.firebase.google.com/project/***REMOVED***/authentication)
+1. Go to [Firebase Console](https://console.firebase.google.com/project/simpleam-80594/authentication)
 2. Click "Get started"
 3. Enable "Anonymous" authentication (for now)
 
 ### Enable Firestore:
-1. Go to [Firestore Database](https://console.firebase.google.com/project/***REMOVED***/firestore)
+1. Go to [Firestore Database](https://console.firebase.google.com/project/simpleam-80594/firestore)
 2. If not enabled, click "Create database"
 3. Choose "Start in production mode"
 4. Select location: `eur3` (Europe)
 
 ### Enable Storage:
-1. Go to [Storage](https://console.firebase.google.com/project/***REMOVED***/storage)
+1. Go to [Storage](https://console.firebase.google.com/project/simpleam-80594/storage)
 2. If not enabled, click "Get started"
 3. Start in production mode
 4. Choose location: `eur3` (Europe)
