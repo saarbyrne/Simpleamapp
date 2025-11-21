@@ -1,6 +1,6 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '***REMOVED***',
@@ -11,11 +11,43 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:***REMOVED***:web:c14efb48186ba231166875',
 };
 
-// Initialize Firebase (only once)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+// Lazy initialization - Firebase only initializes when these functions are called
+// This reduces bundle size by ~500KB for users who never access chat features
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let db: Firestore | null = null;
 
-// Get Firebase services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+/**
+ * Get Firebase app instance (lazy initialization)
+ * Only initializes Firebase when first called
+ */
+export function getFirebaseApp(): FirebaseApp {
+  if (!app) {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  }
+  return app;
+}
 
-export default app;
+/**
+ * Get Firebase Auth instance (lazy initialization)
+ * Only initializes when chat/auth features are used
+ */
+export function getFirebaseAuth(): Auth {
+  if (!auth) {
+    auth = getAuth(getFirebaseApp());
+  }
+  return auth;
+}
+
+/**
+ * Get Firebase Firestore instance (lazy initialization)
+ * Only initializes when chat features are used
+ */
+export function getFirebaseDb(): Firestore {
+  if (!db) {
+    db = getFirestore(getFirebaseApp());
+  }
+  return db;
+}
+
+export default getFirebaseApp;

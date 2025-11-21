@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getFirebaseDb } from '@/lib/firebase';
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user';
 import { ChatWindow } from '@/components/chat/ChatWindow';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,7 +29,8 @@ export default async function ChatWindowPage({ params }: ChatWindowPageProps) {
   // Get user from database
   const dbUser = await ensureUserWithOrganization(user);
 
-  // Fetch chat details
+  // Fetch chat details (lazy initialize Firebase only when chat is accessed)
+  const db = getFirebaseDb();
   const chatRef = doc(db, 'chats', chatId);
   const chatSnap = await getDoc(chatRef);
 

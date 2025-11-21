@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, orderBy, onSnapshot, QueryConstraint } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getFirebaseDb } from '@/lib/firebase';
 import { Chat } from '@/types/chat';
 
 interface UseChatsReturn {
@@ -34,6 +34,7 @@ export function useChats(userId: string | null, orgId: string | null): UseChatsR
         orderBy('lastMessageAt', 'desc'),
       ];
 
+      const db = getFirebaseDb(); // Lazy initialize Firebase only when hook is used
       const q = query(collection(db, 'chats'), ...constraints);
 
       const unsubscribe = onSnapshot(
