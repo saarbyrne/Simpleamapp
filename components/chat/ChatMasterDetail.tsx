@@ -203,11 +203,7 @@ const ChatListItem = memo(function ChatListItem({
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
             <h3 className="font-medium text-sm truncate">{chatName}</h3>
-<<<<<<< HEAD
             <ChatNotificationBadge chatId={chat.id} userId={userId} />
-=======
-            <ChatNotificationBadge chatId={chat.id} userId={userId} />
->>>>>>> origin/main
           </div>
           {chat.lastMessage && (
             <p className="text-xs text-muted-foreground truncate">
