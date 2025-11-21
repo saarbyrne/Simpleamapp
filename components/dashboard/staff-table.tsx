@@ -377,10 +377,6 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
       setPagination((prev) => ({ ...prev, pageIndex: 0 }))
       return
     }
-    if (key === 'permission') {
-      setPermissionFilter(value)
-      setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-    }
   }, [setPagination])
 
   const tableInstance = useReactTable({
