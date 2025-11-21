@@ -31,7 +31,7 @@ async function FeaturedTemplates() {
     <div className="mb-8">
       <h2 className="text-2xl font-bold mb-4">Featured Templates</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {templates.slice(0, 6).map((template) => (
+        {templates.slice(0, 6).map((template: any) => (
           <Link key={template.id} href={`/dashboard/templates/${template.id}`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
               <CardHeader>
@@ -104,7 +104,7 @@ async function TemplatesData({ searchParams }: TemplatesPageProps) {
 
   const { templates = [], total = 0 } = result
 
-  const templateRows: TemplateRow[] = templates.map((template) => ({
+  const templateRows: TemplateRow[] = templates.map((template: any) => ({
     id: template.id,
     name: template.name,
     description: template.description,

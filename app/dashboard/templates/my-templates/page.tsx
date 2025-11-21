@@ -22,7 +22,7 @@ async function MyTemplatesData() {
 
   const { templates } = result
 
-  if (templates.length === 0) {
+  if (!templates || templates.length === 0) {
     return (
       <div className="text-center py-12 space-y-4">
         <div className="text-6xl">📋</div>
@@ -42,7 +42,7 @@ async function MyTemplatesData() {
   return (
     <div className="space-y-4">
       <div className="grid gap-4">
-        {templates.map((template) => (
+        {templates.map((template: any) => (
           <Card key={template.id}>
             <CardHeader>
               <div className="flex items-start justify-between">

@@ -117,7 +117,7 @@ export default async function OrganizationsPage() {
                           </Badge>
                           {subscription && (
                             <Badge
-                              variant={isActive ? 'success' : 'destructive'}
+                              variant={isActive ? 'default' : 'destructive'}
                               className={isActive ? 'bg-green-500' : ''}
                             >
                               {subscription.status}

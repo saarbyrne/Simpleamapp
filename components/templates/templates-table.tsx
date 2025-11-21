@@ -383,7 +383,7 @@ export function TemplatesTable({ templates, total: serverTotal, onOpenSubmitDial
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    enableRowSelection: false,
+    enableRowSelection: true,
     autoResetPageIndex: false,
   })
 
@@ -427,12 +427,12 @@ export function TemplatesTable({ templates, total: serverTotal, onOpenSubmitDial
           onRowSelectionChange={setRowSelection}
           pagination={pagination}
           onPaginationChange={setPagination}
-          enableRowSelection={false}
+          enableRowSelection={true}
           enableGrouping={false}
           enableColumnResizing={true}
           enableColumnReordering={false}
           enableColumnVisibility={true}
-          enableBulkActions={false}
+          enableBulkActions={true}
           enableExport={false}
           emptyMessage="No templates found matching your filters"
         />
