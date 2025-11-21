@@ -99,6 +99,9 @@ model User {
   plans           Plan[]
   milestones      Milestone[]
   milestoneComments MilestoneComment[]
+  communityTemplates CommunityTemplate[]
+  templateReviews    TemplateReview[]
+  templateUsages     TemplateUsage[]
 
   @@map("users")
 }
@@ -887,4 +890,120 @@ model ReportSchedule {
 
   @@index([isActive, nextSend])
   @@map("report_schedules")
+}
+
+// ============================================
+// COMMUNITY TEMPLATES HUB
+// ============================================
+
+model CommunityTemplate {
+  id          String @id @default(cuid())
+
+  // Type
+  type        String // "form", "report", "drawing", "plan", "spreadsheet"
+
+  // Info
+  name        String
+  description String
+  longDescription String? @db.Text
+
+  // Categorization
+  category    String // "wellness", "performance", "medical", "tactics", "training"
+  sport       String // "football", "rugby", "basketball", "multi-sport"
+  tags        String[]
+  features    String[] // what's included
+
+  // Template data
+  config      Json // the actual template configuration
+
+  // Preview
+  previewImage String?
+  thumbnailUrl String?
+
+  // Author
+  authorId    String?
+  author      User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorName  String? // cached author name for display
+  orgName     String? // author's org name (for display)
+
+  // Official templates
+  isOfficial  Boolean @default(false)
+  isFeatured  Boolean @default(false)
+
+  // Publishing settings
+  isPublic    Boolean @default(true)
+  allowModifications Boolean @default(true)
+
+  // Stats
+  downloads   Int @default(0)
+  usageCount  Int @default(0)
+  rating      Float?
+  reviewCount Int @default(0)
+
+  // Reviews
+  reviews     TemplateReview[]
+
+  // Status
+  status      String @default("published") // "draft", "pending_review", "published", "archived", "rejected"
+  moderationNotes String? @db.Text
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  publishedAt DateTime?
+
+  // Usage tracking
+  usages      TemplateUsage[]
+
+  @@index([type, status])
+  @@index([category, status])
+  @@index([sport, status])
+  @@index([isOfficial, isFeatured])
+  @@index([status, publishedAt])
+  @@index([authorId])
+  @@map("community_templates")
+}
+
+model TemplateReview {
+  id         String @id @default(cuid())
+  templateId String
+  template   CommunityTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  userId     String
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rating     Int // 1-5
+  content    String @db.Text
+
+  helpfulCount Int @default(0)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([templateId, userId]) // one review per user per template
+  @@index([templateId])
+  @@index([userId])
+  @@index([rating])
+  @@map("template_reviews")
+}
+
+model TemplateUsage {
+  id         String @id @default(cuid())
+  templateId String
+  template   CommunityTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  userId     String
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // What they created from it
+  createdType String // "form", "report", "drawing", "plan", "spreadsheet"
+  createdId   String?
+  createdName String? // name of the item they created
+
+  usedAt     DateTime @default(now())
+
+  @@index([templateId])
+  @@index([userId])
+  @@index([usedAt])
+  @@map("template_usages")
 }

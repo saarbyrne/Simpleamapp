@@ -20,6 +20,7 @@ import {
   UserCircle,
   LogOut,
   ChevronsUpDown,
+  Layout,
 } from 'lucide-react'
 
 import {
@@ -85,6 +86,7 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
     { labelKey: 'nav.canvas', href: '/dashboard/canvas', icon: PencilRuler },
     { labelKey: 'nav.files', href: '/dashboard/files', icon: Folder },
     { labelKey: 'nav.planner', href: '/dashboard/planner', icon: CalendarCheck },
+    { labelKey: 'nav.templates', href: '/dashboard/templates', icon: Layout },
   ]
 
   const settingsItems = [
