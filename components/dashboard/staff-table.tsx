@@ -119,6 +119,7 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
   const { preferences } = useUserPreferences()
   const [searchFilter, setSearchFilter] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
+  const [permissionFilter, setPermissionFilter] = useState('all')
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([])
@@ -362,7 +363,8 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
   const filterValues = useMemo(() => ({
     search: searchFilter,
     role: roleFilter,
-  }), [searchFilter, roleFilter])
+    permission: permissionFilter,
+  }), [searchFilter, roleFilter, permissionFilter])
 
   const handleFilterChange = useCallback((key: string, value: string) => {
     if (key === 'search') {
