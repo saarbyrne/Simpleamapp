@@ -27,7 +27,6 @@ export function useChatParticipants(participantIds: string[]): UseChatParticipan
       id,
       name: 'User ' + id.substring(0, 6),
       role: 'Member',
-      type: 'user' as const,
     }));
 
     setParticipants(mockParticipants);
