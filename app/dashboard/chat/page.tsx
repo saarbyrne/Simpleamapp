@@ -2,8 +2,9 @@ import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user';
-import { ChatList } from '@/components/chat/ChatList';
+import { ChatMasterDetail } from '@/components/chat/ChatMasterDetail';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/components/ui/card';
 
 export default async function ChatPage() {
   const supabase = await createClient();
@@ -19,9 +20,9 @@ export default async function ChatPage() {
   const dbUser = await ensureUserWithOrganization(user);
 
   return (
-    <div className="h-[calc(100vh-4rem)]">
-      <Suspense fallback={<ChatListSkeleton />}>
-        <ChatList
+    <div className="h-[calc(100vh-4rem)] p-6">
+      <Suspense fallback={<ChatSkeleton />}>
+        <ChatMasterDetail
           userId={dbUser.id}
           userName={dbUser.name}
           orgId={dbUser.organizationId}
@@ -31,21 +32,32 @@ export default async function ChatPage() {
   );
 }
 
-function ChatListSkeleton() {
+function ChatSkeleton() {
   return (
-    <div className="flex h-full flex-col">
-      <div className="border-b p-4">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-32" />
-          <Skeleton className="h-10 w-10 rounded-full" />
+    <Card className="h-full flex">
+      {/* Chat list skeleton */}
+      <div className="w-80 border-r flex flex-col">
+        <div className="p-4 border-b">
+          <Skeleton className="h-6 w-24 mb-3" />
+          <Skeleton className="h-10 w-full" />
         </div>
-        <Skeleton className="mt-4 h-10 w-full" />
+        <div className="flex-1 p-4 space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-16 w-full" />
+          ))}
+        </div>
       </div>
-      <div className="flex-1 p-4 space-y-4">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-20 w-full" />
-        ))}
+      {/* Chat window skeleton */}
+      <div className="flex-1 flex flex-col">
+        <div className="p-4 border-b">
+          <Skeleton className="h-6 w-32" />
+        </div>
+        <div className="flex-1 p-4 space-y-4">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-16 w-64" />
+          ))}
+        </div>
       </div>
-    </div>
+    </Card>
   );
 }

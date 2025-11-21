@@ -1,5 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
-import { Participant } from '@/types/chat';
+import { Participant, Chat } from '@/types/chat';
 import { formatDistanceToNow, format, isToday, isYesterday, isThisYear } from 'date-fns';
 
 /**
@@ -53,6 +53,24 @@ export function truncateText(text: string, maxLength: number): string {
 export function generateChatName(participants: Participant[], currentUserId: string): string {
   const otherParticipant = participants.find(p => p.id !== currentUserId);
   return otherParticipant?.name || 'Unknown';
+}
+
+/**
+ * Get the other participant's name in a direct chat
+ * Returns the name from lastMessage if available, otherwise "Direct Chat"
+ */
+export function getOtherParticipantName(chat: Chat, currentUserId: string): string {
+  if (chat.type !== 'direct') {
+    return chat.name || 'Group Chat';
+  }
+
+  // Try to get name from lastMessage
+  if (chat.lastMessage && chat.lastMessage.senderId !== currentUserId) {
+    return chat.lastMessage.senderName;
+  }
+
+  // Fallback to "Direct Chat"
+  return 'Direct Chat';
 }
 
 /**
