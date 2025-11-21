@@ -140,7 +140,7 @@ export function EventFormDialog({
 
     if (data.recurrenceEndType === 'until' && !data.recurrenceEndDate) return false
     if (data.recurrenceEndType === 'count' && !data.recurrenceCount) return false
-    if (data.recurrenceFrequency === 'weekly' && (!data.recurrenceDaysOfWeek || data.recurrenceDaysOfWeek.length === 0)) return false
+    // Days of week is optional for weekly - we'll default to start day
 
     return true
   }, {
@@ -150,6 +150,7 @@ export function EventFormDialog({
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
+    mode: 'onChange', // Enable real-time validation
     defaultValues: {
       title: defaultValues?.title || '',
       description: defaultValues?.description || '',
@@ -312,8 +313,14 @@ export function EventFormDialog({
         }
 
         // Add days of week for weekly recurrence
-        if (data.recurrenceFrequency === 'weekly' && data.recurrenceDaysOfWeek && data.recurrenceDaysOfWeek.length > 0) {
-          rruleOptions.byweekday = data.recurrenceDaysOfWeek
+        if (data.recurrenceFrequency === 'weekly') {
+          if (data.recurrenceDaysOfWeek && data.recurrenceDaysOfWeek.length > 0) {
+            rruleOptions.byweekday = data.recurrenceDaysOfWeek
+          } else {
+            // If no days selected for weekly, default to the start day
+            const startDay = startDateTime.getDay()
+            rruleOptions.byweekday = [startDay]
+          }
         }
 
         const rule = new RRule(rruleOptions)
@@ -544,6 +551,7 @@ export function EventFormDialog({
                       <FormDescription>
                         {t('calendar.recurringEventDescription')}
                       </FormDescription>
+                      <FormMessage />
                     </div>
                   </FormItem>
                 )}

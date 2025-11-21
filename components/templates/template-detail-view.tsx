@@ -189,7 +189,7 @@ export function TemplateDetailView({ template, currentUserId }: TemplateDetailPr
       {template.features && template.features.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>What's Included</CardTitle>
+            <CardTitle>What&apos;s Included</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">

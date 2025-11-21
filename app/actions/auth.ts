@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { slugify } from '@/lib/utils'
 import { revalidatePath } from 'next/cache'
+import { Prisma } from '@prisma/client'
 
 export async function createOrganizationForUser(
   organizationName: string,
@@ -28,7 +29,7 @@ export async function createOrganizationForUser(
     }
 
     // Create organization and user in a transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Create organization
       const org = await tx.organization.create({
         data: {
