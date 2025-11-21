@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { useUserPreferences } from "@/hooks/use-user-preferences";
-import { dateToTimeInput, timeInputToDate } from "@/lib/date-input-utils";
+import { dateToTimeInput, timeInputToDate } from "@/lib/date";
 import { forwardRef, useEffect, useState } from "react";
 
 interface TimeInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "onChange"> {

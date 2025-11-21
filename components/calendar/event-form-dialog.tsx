@@ -43,7 +43,7 @@ import { createEvent, updateEvent, type CreateEventData } from '@/app/actions/ev
 import { getEventTemplates } from '@/app/actions/event-templates'
 import { toast } from 'sonner'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
-import { dateToTimeInput } from '@/lib/date-input-utils'
+import { dateToTimeInput } from '@/lib/date'
 
 // Schema will be created inside component to access translations
 type EventFormValues = {

@@ -21,7 +21,7 @@ import { type EventWithDetails } from '@/app/actions/events'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
-import { formatDate, formatTime, formatDateRange } from '@/lib/date-utils'
+import { formatDate, formatTime, formatDateRange } from '@/lib/date'
 import { useTranslations } from 'next-intl'
 
 interface EventQuickViewProps {

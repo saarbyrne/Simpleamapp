@@ -51,7 +51,7 @@ import { NATIONALITIES } from '@/lib/nationalities'
 import { NationalitySelect } from '@/components/ui/nationality-select'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { NoteEditorDialog } from '@/components/notes/note-editor-dialog'
-import { formatDate } from '@/lib/date-utils'
+import { formatDate } from '@/lib/date'
 import { toast } from 'sonner'
 
 export type PlayerRow = {
