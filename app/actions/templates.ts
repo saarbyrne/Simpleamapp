@@ -184,12 +184,18 @@ export async function createTemplate(data: CreateTemplateInput) {
 
     const dbUser = await ensureUserWithOrganization(user)
 
+    // Fetch organization name
+    const organization = await prisma.organization.findUnique({
+      where: { id: dbUser.organizationId },
+      select: { name: true },
+    })
+
     const template = await prisma.communityTemplate.create({
       data: {
         ...data,
         authorId: dbUser.id,
         authorName: dbUser.name,
-        orgName: user.organization.name,
+        orgName: organization?.name || null,
         status: 'published', // Auto-publish for now
         publishedAt: new Date(),
       },
@@ -360,7 +366,7 @@ export async function createReview(templateId: string, rating: number, content: 
       select: { rating: true },
     })
 
-    const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    const avgRating = reviews.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / reviews.length
 
     await prisma.communityTemplate.update({
       where: { id: templateId },
