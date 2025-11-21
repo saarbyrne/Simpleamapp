@@ -1,7 +1,7 @@
 import { PageHeader } from '@/components/platform-admin/page-header'
 import { StatsCard } from '@/components/platform-admin/stats-card'
 import { logPlatformAdminAction } from '@/lib/platform-admin'
-import { PLAN_PRICING } from '@/lib/platform-admin-config'
+import { PLAN_PRICING } from '@/lib/platform-admin'
 import { prisma } from '@/lib/db'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

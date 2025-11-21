@@ -44,3 +44,18 @@ storybook-static
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Build artifacts and logs
+dev-server.log
+*.log
+
+# Large files
+*.pdf
+
+# Test scripts and temporary files
+canvas-test-script.js
+.temp/
+*.tmp
+
+# Archive directory (optional - remove this line if you want to track archives)
+/archive/
