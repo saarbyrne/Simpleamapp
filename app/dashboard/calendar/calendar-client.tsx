@@ -8,19 +8,12 @@ import { CalendarSkeleton } from '@/components/calendar/calendar-skeleton'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 
-// Lazy load the heavy calendar component to improve initial page load
-const EventCalendar = dynamic(
-  () => import('@/components/calendar/event-calendar').then((mod) => ({ default: mod.EventCalendar })),
-  {
-    loading: () => <CalendarSkeleton />,
-    ssr: false, // Calendar is client-only
-  }
-)
+// Import lazy-loaded calendar (includes dynamic import and proper loading state)
+import { EventCalendar, type CalendarEvent } from '@/components/calendar/event-calendar-lazy'
 import { getEvents, getEvent, deleteEvent, deleteEventSeries, type EventWithDetails } from '@/app/actions/events'
 import { toast } from 'sonner'
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, startOfDay, endOfDay, subMonths, addMonths, subWeeks, addWeeks, subDays, addDays } from 'date-fns'
 import type { View } from 'react-big-calendar'
-import type { CalendarEvent } from '@/components/calendar/event-calendar'
 import {
   AlertDialog,
   AlertDialogAction,
