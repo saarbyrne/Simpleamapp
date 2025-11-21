@@ -99,13 +99,10 @@ model User {
   plans           Plan[]
   milestones      Milestone[]
   milestoneComments MilestoneComment[]
-<<<<<<< HEAD
   aiConversations AIConversation[]
-=======
   communityTemplates CommunityTemplate[]
   templateReviews    TemplateReview[]
   templateUsages     TemplateUsage[]
->>>>>>> remotes/origin/main
 
   @@map("users")
 }

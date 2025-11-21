@@ -322,7 +322,7 @@ export function SubmitTemplateDialog({ open, onOpenChange }: SubmitTemplateDialo
               </div>
 
               <div className="space-y-2">
-                <Label>What's included?</Label>
+                <Label>What&apos;s included?</Label>
                 <div className="grid grid-cols-2 gap-2">
                   {COMMON_FEATURES.map((feature) => (
                     <div key={feature} className="flex items-center space-x-2">
@@ -362,7 +362,7 @@ export function SubmitTemplateDialog({ open, onOpenChange }: SubmitTemplateDialo
                 )}
                 {features.length > 0 && (
                   <div>
-                    <div className="text-sm font-semibold mb-2">What's Included:</div>
+                    <div className="text-sm font-semibold mb-2">What&apos;s Included:</div>
                     <ul className="text-sm space-y-1 ml-4">
                       {features.map((feature) => (
                         <li key={feature} className="list-disc">

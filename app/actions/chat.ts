@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/db';
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user';
+import { User } from '@prisma/client';
 
 export interface ChatParticipant {
   id: string;
@@ -57,8 +58,8 @@ export async function getChatParticipants() {
 
     // Format users (exclude current user)
     const userParticipants: ChatParticipant[] = users
-      .filter(u => u.id !== dbUser.id)
-      .map((u) => {
+      .filter((u: User) => u.id !== dbUser.id)
+      .map((u: User) => {
         // Access roleNames safely - it should exist after prisma generate
         const roleNames = (u as any).roleNames as string[] | undefined;
         return {
