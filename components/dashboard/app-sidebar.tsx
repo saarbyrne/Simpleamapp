@@ -11,16 +11,17 @@ import {
   Database,
   FileText,
   Folder,
+  MessageSquare,
   PencilRuler,
   Settings,
   Sparkles,
   StickyNote,
   Table,
-  Target,
   Users,
   UserCircle,
   LogOut,
   ChevronsUpDown,
+  Layout,
 } from 'lucide-react'
 
 import {
@@ -81,12 +82,13 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
     { labelKey: 'nav.forms', href: '/dashboard/forms', icon: FileText },
     { labelKey: 'nav.reports', href: '/dashboard/reports', icon: BarChart3 },
     { labelKey: 'nav.calendar', href: '/dashboard/calendar', icon: Calendar },
+    { labelKey: 'nav.messages', href: '/dashboard/chat', icon: MessageSquare },
     { labelKey: 'nav.notes', href: '/dashboard/notes', icon: StickyNote },
     { labelKey: 'nav.spreadsheets', href: '/dashboard/spreadsheets', icon: Table },
     { labelKey: 'nav.canvas', href: '/dashboard/canvas', icon: PencilRuler },
     { labelKey: 'nav.files', href: '/dashboard/files', icon: Folder },
     { labelKey: 'nav.planner', href: '/dashboard/planner', icon: CalendarCheck },
-    { labelKey: 'nav.tactics', href: '/dashboard/tactics', icon: Target },
+    { labelKey: 'nav.templates', href: '/dashboard/templates', icon: Layout },
   ]
 
   const settingsItems = [
