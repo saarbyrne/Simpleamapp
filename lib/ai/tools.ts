@@ -654,8 +654,7 @@ async function createForm(orgId: string, userId: string, input: any) {
       organizationId: orgId,
       scheduleType: input.scheduleType || 'one_time',
       targetType: input.targetType || 'all',
-      isActive: true,
-      category: input.category || 'custom'
+      isActive: true
     }
   })
 
@@ -666,8 +665,8 @@ async function createForm(orgId: string, userId: string, input: any) {
     details: {
       name: form.name,
       fieldCount: schema.length,
-      category: form.category,
-      scheduleType: form.scheduleType
+      scheduleType: form.scheduleType,
+      targetType: form.targetType
     }
   }
 }
