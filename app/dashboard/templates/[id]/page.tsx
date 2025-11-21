@@ -4,8 +4,7 @@ import { TemplateDetailView } from '@/components/templates/template-detail-view'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { notFound } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { createClient } from '@/lib/supabase/server'
 
 type TemplateDetailPageProps = {
   params: {
@@ -14,8 +13,7 @@ type TemplateDetailPageProps = {
 }
 
 async function TemplateDetailData({ id }: { id: string }) {
-  const [session, result] = await Promise.all([
-    getServerSession(authOptions),
+  const [result] = await Promise.all([
     getTemplateById(id),
   ])
 
@@ -24,7 +22,7 @@ async function TemplateDetailData({ id }: { id: string }) {
   }
 
   return (
-    <TemplateDetailView template={result.template} currentUserId={session?.user?.id} />
+    <TemplateDetailView template={result.template} currentUserId={undefined} />
   )
 }
 
