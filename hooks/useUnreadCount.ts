@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getFirebaseDb } from '@/lib/firebase';
 import { UserChatStatus } from '@/types/chat';
 
 /**
@@ -17,6 +17,7 @@ export function useUnreadCount(userId: string | null): number {
     }
 
     try {
+      const db = getFirebaseDb(); // Lazy initialize Firebase only when hook is used
       const statusRef = doc(db, 'userChatStatus', userId);
 
       const unsubscribe = onSnapshot(
