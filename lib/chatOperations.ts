@@ -120,18 +120,23 @@ export async function sendMessage(data: {
   fileSize?: number;
 }): Promise<string> {
   try {
-    const messageRef = await addDoc(collection(db, 'chats', data.chatId, 'messages'), {
+    // Build message object without undefined values (Firestore doesn't allow them)
+    const messageData: any = {
       chatId: data.chatId,
       senderId: data.senderId,
       senderName: data.senderName,
       text: data.text,
       type: data.type || 'text',
-      fileUrl: data.fileUrl,
-      fileName: data.fileName,
-      fileSize: data.fileSize,
       createdAt: serverTimestamp(),
       readBy: [data.senderId], // Sender has read it
-    });
+    };
+
+    // Only add file fields if they exist
+    if (data.fileUrl) messageData.fileUrl = data.fileUrl;
+    if (data.fileName) messageData.fileName = data.fileName;
+    if (data.fileSize) messageData.fileSize = data.fileSize;
+
+    const messageRef = await addDoc(collection(db, 'chats', data.chatId, 'messages'), messageData);
 
     // Update chat's last message
     const chatRef = doc(db, 'chats', data.chatId);

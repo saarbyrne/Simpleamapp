@@ -52,21 +52,17 @@ export function CreateChatModal({
     if (!isOpen) return;
 
     async function fetchParticipants() {
-      console.log('[CreateChatModal] Starting to fetch participants...');
       setLoadingParticipants(true);
       try {
         const result = await getChatParticipants();
-        console.log('[CreateChatModal] Result:', result);
         if (result.success && result.data) {
-          console.log('[CreateChatModal] Setting participants:', result.data.length);
           setParticipants(result.data);
         } else {
-          console.error('[CreateChatModal] Error from server:', result.error);
           toast.error(result.error || 'Failed to load participants');
           setParticipants([]);
         }
       } catch (error) {
-        console.error('[CreateChatModal] Exception:', error);
+        console.error('Error fetching participants:', error);
         toast.error('Failed to load participants');
         setParticipants([]);
       } finally {

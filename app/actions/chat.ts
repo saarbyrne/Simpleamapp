@@ -24,38 +24,24 @@ export async function getChatParticipants() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      console.log('[getChatParticipants] No authenticated user');
       return { success: false, error: 'Authentication required' };
     }
 
     const dbUser = await ensureUserWithOrganization(user);
-    console.log('[getChatParticipants] Current user:', {
-      id: dbUser.id,
-      name: dbUser.name,
-      orgId: dbUser.organizationId,
-    });
 
-    // Get all users in the organization (staff)
+    // Get all users in the organization (staff, excluding current user)
     const users = await prisma.user.findMany({
       where: {
         organizationId: dbUser.organizationId,
-        id: { not: dbUser.id }, // Exclude current user
-      },
-      select: {
-        id: true,
-        name: true,
-        avatar: true,
-        roleNames: true,
+        id: { not: dbUser.id },
       },
     });
-    console.log('[getChatParticipants] Found users:', users.length);
 
-    // Get all players in the organization
+    // Get all players in the organization (include all statuses for chat)
     const players = await prisma.personOrganization.findMany({
       where: {
         organizationId: dbUser.organizationId,
         role: 'player',
-        status: 'active',
       },
       include: {
         person: {
@@ -68,16 +54,21 @@ export async function getChatParticipants() {
         },
       },
     });
-    console.log('[getChatParticipants] Found players:', players.length);
 
-    // Format users
-    const userParticipants: ChatParticipant[] = users.map((u) => ({
-      id: u.id,
-      name: u.name,
-      role: u.roleNames?.[0] || 'Staff',
-      avatarUrl: u.avatar || undefined,
-      type: 'user' as const,
-    }));
+    // Format users (exclude current user)
+    const userParticipants: ChatParticipant[] = users
+      .filter(u => u.id !== dbUser.id)
+      .map((u) => {
+        // Access roleNames safely - it should exist after prisma generate
+        const roleNames = (u as any).roleNames as string[] | undefined;
+        return {
+          id: u.id,
+          name: u.name,
+          role: roleNames?.[0] || 'Staff',
+          avatarUrl: u.avatar || undefined,
+          type: 'user' as const,
+        };
+      });
 
     // Format players
     const playerParticipants: ChatParticipant[] = players.map((p) => ({
@@ -92,9 +83,6 @@ export async function getChatParticipants() {
     const allParticipants = [...userParticipants, ...playerParticipants].sort(
       (a, b) => a.name.localeCompare(b.name)
     );
-
-    console.log('[getChatParticipants] Total participants:', allParticipants.length);
-    console.log('[getChatParticipants] Participants:', allParticipants.map(p => ({ name: p.name, type: p.type })));
 
     return {
       success: true,
