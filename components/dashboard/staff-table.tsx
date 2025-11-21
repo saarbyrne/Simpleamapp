@@ -119,6 +119,7 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
   const { preferences } = useUserPreferences()
   const [searchFilter, setSearchFilter] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
+  const [permissionFilter, setPermissionFilter] = useState('all')
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([])
@@ -336,11 +337,11 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
   ], [translate, onNavigateToProfile, onEditRoles, preferences])
 
   const filterConfig = useMemo((): FilterConfig[] => {
-    const config = [
+    const config: FilterConfig[] = [
       {
         key: 'search',
         label: translate('staff.searchLabel', 'Search'),
-        type: 'search' as const,
+        type: 'search',
         placeholder: translate('staff.searchPlaceholder', 'Search by name, email, role, or permission'),
       },
     ]
@@ -349,7 +350,7 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
       config.push({
         key: 'role',
         label: translate('staff.columns.roles', 'Roles'),
-        type: 'select' as const,
+        type: 'select',
         options: roleOptions,
         placeholder: translate('staff.allRoles', 'All roles'),
       })
@@ -362,7 +363,8 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
   const filterValues = useMemo(() => ({
     search: searchFilter,
     role: roleFilter,
-  }), [searchFilter, roleFilter])
+    permission: permissionFilter,
+  }), [searchFilter, roleFilter, permissionFilter])
 
   const handleFilterChange = useCallback((key: string, value: string) => {
     if (key === 'search') {
