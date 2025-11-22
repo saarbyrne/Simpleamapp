@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import Image from 'next/image'
 import {
   Dialog,
   DialogContent,
@@ -138,12 +139,16 @@ export function FilePreviewDialog({
               <div className="border rounded-lg overflow-hidden bg-muted/30">
                 {isImage && (
                   <div className="flex items-center justify-center p-4 min-h-[300px] max-h-[500px]">
-                    <img
-                      src={file.url!}
-                      alt={file.name}
-                      className="max-w-full max-h-[500px] object-contain"
-                      onError={() => setImageError(true)}
-                    />
+                    <div className="relative w-full h-[500px]">
+                      <Image
+                        src={file.url!}
+                        alt={file.name}
+                        fill
+                        className="object-contain"
+                        onError={() => setImageError(true)}
+                        unoptimized={!file.url?.includes('supabase.co')}
+                      />
+                    </div>
                   </div>
                 )}
                 {isVideo && (
