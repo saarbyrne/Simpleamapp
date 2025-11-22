@@ -21,35 +21,10 @@ const nextConfig = {
   // Performance: Enable SWC minification for better compression
   swcMinify: true,
 
-  // Performance: Optimize build output
-  output: {
-    // Reduce chunk size warnings
-    hashDigestLength: 8,
-  },
+  // Performance: Standalone output for deployment
+  output: 'standalone',
 
-  // Performance: Aggressive optimization for production
-  optimization: {
-    // Enable more aggressive chunk splitting
-    splitChunks: {
-      chunks: 'all',
-      cacheGroups: {
-        // Existing splits...
-        radix: {
-          test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
-          name: 'radix-ui',
-          priority: 20,
-          reuseExistingChunk: true,
-          enforce: true,
-        },
-      },
-    },
-  },
 
-  // Performance: Optimize CSS
-  css: {
-    // Enable CSS optimization
-    optimizeCss: true,
-  },
 
   // Performance: Image optimization
   images: {

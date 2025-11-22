@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import { getFirebaseDb } from '@/lib/firebase';
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user';
-import { ChatWindow } from '@/components/chat/ChatWindow';
+import { ChatWindow } from '@/components/chat/chat-window';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Chat } from '@/types/chat';
 
