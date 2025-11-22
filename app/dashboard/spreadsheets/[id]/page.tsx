@@ -73,13 +73,7 @@ export default function SpreadsheetDetailPage() {
   const [showVersionHistory, setShowVersionHistory] = useState(false)
   const [isEditingInfo, setIsEditingInfo] = useState(false)
 
-  // Load spreadsheet data
-  useEffect(() => {
-    if (!spreadsheetId) return
-    loadSpreadsheet()
-  }, [spreadsheetId])
-
-  const loadSpreadsheet = async () => {
+  const loadSpreadsheet = useCallback(async () => {
     setIsLoading(true)
     try {
       const result = await getSpreadsheet(spreadsheetId)
@@ -104,7 +98,13 @@ export default function SpreadsheetDetailPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [spreadsheetId, router, t])
+
+  // Load spreadsheet data
+  useEffect(() => {
+    if (!spreadsheetId) return
+    loadSpreadsheet()
+  }, [loadSpreadsheet])
 
   const handleDataChange = useCallback((newData: SpreadsheetRow[]) => {
     setData(newData)

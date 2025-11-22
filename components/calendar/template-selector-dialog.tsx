@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -60,14 +60,7 @@ export function TemplateSelectorDialog({
   const [isLoading, setIsLoading] = useState(true)
   const [selectedTemplate, setSelectedTemplate] = useState<EventTemplate | null>(null)
 
-  useEffect(() => {
-    if (open) {
-      loadTemplates()
-      setSelectedTemplate(null)
-    }
-  }, [open])
-
-  const loadTemplates = async () => {
+  const loadTemplates = useCallback(async () => {
     setIsLoading(true)
     try {
       const result = await getEventTemplates()
@@ -82,7 +75,14 @@ export function TemplateSelectorDialog({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [t])
+
+  useEffect(() => {
+    if (open) {
+      loadTemplates()
+      setSelectedTemplate(null)
+    }
+  }, [open, loadTemplates])
 
   const handleSelect = () => {
     if (selectedTemplate) {

@@ -63,6 +63,34 @@ const nextConfig = {
         cacheGroups: {
           default: false,
           vendors: false,
+          // Excalidraw chunk - only loads on canvas pages
+          excalidraw: {
+            test: /[\\/]node_modules[\\/]@excalidraw[\\/]/,
+            name: 'excalidraw',
+            priority: 30,
+            reuseExistingChunk: true,
+          },
+          // Firebase chunk - only loads when chat is used
+          firebase: {
+            test: /[\\/]node_modules[\\/]firebase[\\/]/,
+            name: 'firebase',
+            priority: 25,
+            reuseExistingChunk: true,
+          },
+          // TipTap chunk - only loads when rich text editing is used
+          tiptap: {
+            test: /[\\/]node_modules[\\/]@tiptap[\\/]/,
+            name: 'tiptap',
+            priority: 25,
+            reuseExistingChunk: true,
+          },
+          // Recharts chunk - only loads on reports/analytics pages
+          recharts: {
+            test: /[\\/]node_modules[\\/]recharts[\\/]/,
+            name: 'recharts',
+            priority: 25,
+            reuseExistingChunk: true,
+          },
           // Calendar library chunk
           calendar: {
             test: /[\\/]node_modules[\\/]react-big-calendar[\\/]/,
@@ -84,7 +112,7 @@ const nextConfig = {
             priority: 15,
             reuseExistingChunk: true,
           },
-          // Common vendor chunk
+          // Common vendor chunk - everything else
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendor',
