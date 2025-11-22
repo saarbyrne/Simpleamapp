@@ -20,8 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUserPreferences } from "@/hooks/use-user-preferences";
-import { formatTime } from "@/lib/date-utils";
-import { dateToTimeInput } from "@/lib/date-input-utils";
+import { formatTime } from "@/lib/date";
+import { dateToTimeInput } from "@/lib/date";
 
 export interface TimePickerProps {
   time?: Date | string; // Date object or time string (HH:mm)

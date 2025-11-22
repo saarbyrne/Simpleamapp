@@ -60,10 +60,14 @@ export function Hero() {
             <div className="relative bg-[#F5F5F5] rounded-lg p-8 shadow-2xl">
               <div className="absolute -top-4 -left-4 w-24 h-24 bg-[#142978] rounded-lg opacity-20"></div>
               <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-[#142978] rounded-lg opacity-10"></div>
-              <img
+              <Image
                 src="https://images.unsplash.com/photo-1743004873139-5bc0e3d937d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjB0ZWFtJTIwdGFibGV0JTIwZGFzaGJvYXJkfGVufDF8fHx8MTc2MjI4NjY0M3ww&ixlib=rb-4.1.0&q=80&w=1080"
                 alt="SAM Platform Dashboard"
+                width={1080}
+                height={720}
+                priority={true}
                 className="relative rounded-lg w-full object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
           </div>

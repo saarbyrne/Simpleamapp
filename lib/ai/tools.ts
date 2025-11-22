@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { formatDate } from '@/lib/date-utils'
+import { formatDate } from '@/lib/date'
 
 export interface ToolDefinition {
   name: string

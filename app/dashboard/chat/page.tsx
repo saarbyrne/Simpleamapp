@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user';
-import { ChatMasterDetail } from '@/components/chat/ChatMasterDetail';
+import { ChatMasterDetail } from '@/components/chat/chat-master-detail';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 

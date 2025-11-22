@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState, useEffect, useRef, useCallback, startTransition } from 'react'
+import Image from 'next/image'
 import {
   ColumnDef,
   SortingState,
@@ -33,7 +34,7 @@ import {
   type FilterConfig,
 } from '@/components/data-table'
 import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/react-table'
-import { formatDate } from '@/lib/date-utils'
+import { formatDate } from '@/lib/date'
 import { formatBytes, getFileIcon, getFileCategory } from '@/lib/files'
 import { toast } from 'sonner'
 import { FileUploadDialog } from './file-upload-dialog'
@@ -105,11 +106,13 @@ const createColumns = (
           <div className="flex items-center gap-3">
             <div className="flex-shrink-0">
               {file.mimeType.startsWith('image/') && file.url ? (
-                <img
+                <Image
                   src={file.url}
                   alt={file.name}
+                  width={40}
+                  height={40}
                   className="h-10 w-10 rounded object-cover"
-                  loading="lazy"
+                  unoptimized={!file.url?.includes('supabase.co')}
                 />
               ) : (
                 <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
