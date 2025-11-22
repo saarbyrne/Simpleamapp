@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/select'
 import { ArrowLeft, Mail } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { formatDate } from '@/lib/date-utils'
+import { formatDate } from '@/lib/date'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { Label } from '@/components/ui/label'
 import type { FormWithDetails } from '@/app/actions/forms'
