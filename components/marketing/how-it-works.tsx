@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export function HowItWorks() {
   const steps = [
     {
@@ -23,10 +25,14 @@ export function HowItWorks() {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left - Image */}
           <div className="order-2 lg:order-1">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1596443019365-eb263a588404?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsJTIwd29ya3NwYWNlJTIwbGFwdG9wfGVufDF8fHx8MTc2MjI4NjY0NHww&ixlib=rb-4.1.0&q=80&w=1080"
               alt="Simple workflow"
+              width={1080}
+              height={720}
+              loading="lazy"
               className="rounded-lg shadow-2xl w-full"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
 
@@ -42,8 +48,8 @@ export function HowItWorks() {
             </div>
 
             <div className="space-y-8">
-              {steps.map((step, index) => (
-                <div key={index} className="flex gap-6">
+              {steps.map((step) => (
+                <div key={step.number} className="flex gap-6">
                   <div className="flex-shrink-0">
                     <div className="w-16 h-16 bg-[#FF6A1F] rounded-lg flex items-center justify-center">
                       <span className="text-white text-xl font-bold">{step.number}</span>

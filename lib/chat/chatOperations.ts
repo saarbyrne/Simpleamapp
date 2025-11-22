@@ -13,7 +13,7 @@ import {
   writeBatch,
   Timestamp,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { getFirebaseDb } from '@/lib/firebase';
 import { Chat, Message } from '@/types/chat';
 import { createClient } from '@/lib/supabase/client';
 
@@ -28,6 +28,7 @@ export async function createChat(data: {
   createdBy: string;
   creatorName: string;
 }): Promise<string> {
+  const db = getFirebaseDb(); // Lazy initialize Firebase
   try {
     // For direct chats, check if one already exists between these two users
     if (data.type === 'direct' && data.participantIds.length === 2) {
@@ -81,6 +82,7 @@ export async function createChat(data: {
  * Find existing direct chat between two users
  */
 async function findDirectChat(orgId: string, participantIds: string[]): Promise<Chat | null> {
+  const db = getFirebaseDb(); // Lazy initialize Firebase
   try {
     const q = query(
       collection(db, 'chats'),
@@ -119,6 +121,7 @@ export async function sendMessage(data: {
   fileName?: string;
   fileSize?: number;
 }): Promise<string> {
+  const db = getFirebaseDb(); // Lazy initialize Firebase
   try {
     // Build message object without undefined values (Firestore doesn't allow them)
     const messageData: any = {
@@ -183,6 +186,7 @@ export async function sendMessage(data: {
  * Mark a chat as read for a user
  */
 export async function markChatAsRead(chatId: string, userId: string): Promise<void> {
+  const db = getFirebaseDb(); // Lazy initialize Firebase
   try {
     const statusRef = doc(db, 'userChatStatus', userId);
     await updateDoc(statusRef, {
@@ -260,6 +264,7 @@ export async function uploadFile(data: {
  * Delete a chat (soft delete)
  */
 export async function deleteChat(chatId: string, userId: string): Promise<void> {
+  const db = getFirebaseDb(); // Lazy initialize Firebase
   try {
     const statusRef = doc(db, 'userChatStatus', userId);
     await updateDoc(statusRef, {
@@ -275,6 +280,7 @@ export async function deleteChat(chatId: string, userId: string): Promise<void> 
  * Leave a group chat
  */
 export async function leaveChat(chatId: string, userId: string): Promise<void> {
+  const db = getFirebaseDb(); // Lazy initialize Firebase
   try {
     const chatRef = doc(db, 'chats', chatId);
     const chatSnap = await getDoc(chatRef);

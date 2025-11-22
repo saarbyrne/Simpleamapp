@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -23,6 +23,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DataTableFilters, type FilterConfig } from '@/components/data-table'
+import { useVirtualizer } from '@tanstack/react-virtual'
 
 interface NotesListProps {
   linkedPersonId?: string
@@ -61,6 +62,15 @@ export function NotesList({
   const [selectedTags, setSelectedTags] = useState<string[]>([])
 
   const hasActiveFilters = searchQuery || privacyLevelFilter !== 'all' || selectedTags.length > 0 || dateFrom !== undefined || dateTo !== undefined
+
+  // Virtualization setup
+  const parentRef = useRef<HTMLDivElement>(null)
+  const virtualizer = useVirtualizer({
+    count: filteredNotes.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 200, // Estimated height of each note card (adjust as needed)
+    overscan: 5, // Render 5 extra items above/below viewport
+  })
 
   // Optimized filter configuration
   const filterConfig: FilterConfig[] = useMemo(
@@ -403,26 +413,56 @@ export function NotesList({
             </div>
           </div>
 
-          {/* Individual notes */}
-          {filteredNotes.map((note) => (
-            <div key={note.id} className="flex items-start gap-3">
-              <Checkbox
-                checked={selectedNotes.has(note.id)}
-                onCheckedChange={() => handleToggleSelectNote(note.id)}
-                aria-label={`Select note ${note.title || 'Untitled'}`}
-                className="mt-6"
-              />
-              <div className="flex-1">
-                <NoteCard
-                  note={note}
-                  currentUserId={currentUserId}
-                  onEdit={handleEditNote}
-                  onDelete={(id) => setNoteToDelete(id)}
-                  showLinkedEntities={!linkedPersonId && !linkedEventId}
-                />
-              </div>
+          {/* Virtualized notes list */}
+          <div
+            ref={parentRef}
+            className="h-[600px] overflow-auto"
+            style={{
+              contain: 'strict', // CSS containment for better performance
+            }}
+          >
+            <div
+              style={{
+                height: `${virtualizer.getTotalSize()}px`,
+                width: '100%',
+                position: 'relative',
+              }}
+            >
+              {virtualizer.getVirtualItems().map((virtualRow) => {
+                const note = filteredNotes[virtualRow.index]
+                return (
+                  <div
+                    key={note.id}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        checked={selectedNotes.has(note.id)}
+                        onCheckedChange={() => handleToggleSelectNote(note.id)}
+                        aria-label={`Select note ${note.title || 'Untitled'}`}
+                        className="mt-6"
+                      />
+                      <div className="flex-1">
+                        <NoteCard
+                          note={note}
+                          currentUserId={currentUserId}
+                          onEdit={handleEditNote}
+                          onDelete={(id) => setNoteToDelete(id)}
+                          showLinkedEntities={!linkedPersonId && !linkedEventId}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
-          ))}
+          </div>
         </div>
       )}
 

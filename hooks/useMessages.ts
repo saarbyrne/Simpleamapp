@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getFirebaseDb } from '@/lib/firebase';
 import { Message } from '@/types/chat';
 
 interface UseMessagesReturn {
@@ -30,6 +30,7 @@ export function useMessages(chatId: string | null, initialLimit: number = 50): U
     setError(null);
 
     try {
+      const db = getFirebaseDb(); // Lazy initialize Firebase only when hook is used
       const q = query(
         collection(db, 'chats', chatId, 'messages'),
         orderBy('createdAt', 'asc'),
