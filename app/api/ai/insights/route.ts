@@ -66,6 +66,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
     }
 
+    // SECURITY: Verify insight belongs to user's organization before updating
+    const insight = await db.aIInsight.findFirst({
+      where: {
+        id: insightId,
+        orgId: dbUser.organizationId // Authorization check
+      }
+    })
+
+    if (!insight) {
+      return NextResponse.json(
+        { error: 'Insight not found or access denied' },
+        { status: 404 }
+      )
+    }
+
+    // Now update the insight
     if (action === 'dismiss') {
       await db.aIInsight.update({
         where: { id: insightId },

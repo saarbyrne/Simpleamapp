@@ -391,10 +391,11 @@ async function listPlayers(orgId: string, input: any) {
 }
 
 async function getPlayer(orgId: string, playerId: string) {
+  // SECURITY: Verify player belongs to organization
   const playerOrg = await db.personOrganization.findFirst({
     where: {
       personId: playerId,
-      organizationId: orgId
+      organizationId: orgId // Authorization check
     },
     include: {
       person: true
@@ -402,7 +403,7 @@ async function getPlayer(orgId: string, playerId: string) {
   })
 
   if (!playerOrg) {
-    return { error: 'Player not found' }
+    return { error: 'Player not found or access denied' }
   }
 
   return {
@@ -434,15 +435,16 @@ async function querySpreadsheet(orgId: string, input: any) {
     return { spreadsheets }
   }
 
+  // SECURITY: Verify spreadsheet belongs to organization
   const spreadsheet = await db.spreadsheet.findFirst({
     where: {
       id: input.spreadsheetId,
-      organizationId: orgId
+      organizationId: orgId // Authorization check
     }
   })
 
   if (!spreadsheet) {
-    return { error: 'Spreadsheet not found' }
+    return { error: 'Spreadsheet not found or access denied' }
   }
 
   // Return the data (could apply filters here)
@@ -607,6 +609,32 @@ async function createEvent(orgId: string, userId: string, input: any) {
 }
 
 async function distributeForm(orgId: string, input: any) {
+  // SECURITY: Verify form belongs to organization
+  const form = await db.form.findFirst({
+    where: {
+      id: input.formId,
+      organizationId: orgId // Authorization check
+    }
+  })
+
+  if (!form) {
+    return { error: 'Form not found or access denied' }
+  }
+
+  // SECURITY: Verify all player IDs belong to organization
+  if (input.playerIds && input.playerIds.length > 0) {
+    const players = await db.personOrganization.findMany({
+      where: {
+        personId: { in: input.playerIds },
+        organizationId: orgId // Authorization check
+      }
+    })
+
+    if (players.length !== input.playerIds.length) {
+      return { error: 'One or more players not found or access denied' }
+    }
+  }
+
   // This would integrate with form distribution logic
   return {
     success: true,
@@ -615,6 +643,20 @@ async function distributeForm(orgId: string, input: any) {
 }
 
 async function createNote(orgId: string, userId: string, input: any) {
+  // SECURITY: If attaching to a person, verify they belong to organization
+  if (input.attachTo?.id) {
+    const person = await db.personOrganization.findFirst({
+      where: {
+        personId: input.attachTo.id,
+        organizationId: orgId // Authorization check
+      }
+    })
+
+    if (!person) {
+      return { error: 'Person not found or access denied' }
+    }
+  }
+
   const note = await db.note.create({
     data: {
       content: input.content,

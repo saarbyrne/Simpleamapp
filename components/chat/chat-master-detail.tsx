@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useChats } from '@/hooks/useChats';
 import { useMessages } from '@/hooks/useMessages';
@@ -19,6 +19,7 @@ import { sendMessage, markChatAsRead, uploadFile, formatTimestamp, getOtherParti
 import { Chat, Message } from '@/types/chat';
 import { toast } from 'sonner';
 import { memo } from 'react';
+import { initFirebaseAuth } from '@/lib/firebaseAuth';
 
 interface ChatMasterDetailProps {
   userId: string;
@@ -31,8 +32,37 @@ export function ChatMasterDetail({ userId, userName, orgId }: ChatMasterDetailPr
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [firebaseAuthInitialized, setFirebaseAuthInitialized] = useState(false);
 
-  const { chats, loading: chatsLoading, error: chatsError } = useChats(userId, orgId);
+  // Initialize Firebase auth when component mounts
+  useEffect(() => {
+    let mounted = true;
+
+    async function initAuth() {
+      try {
+        await initFirebaseAuth();
+        if (mounted) {
+          setFirebaseAuthInitialized(true);
+        }
+      } catch (error) {
+        console.error('Failed to initialize Firebase auth:', error);
+        if (mounted) {
+          toast.error('Failed to initialize messaging. Please refresh the page.');
+        }
+      }
+    }
+
+    initAuth();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const { chats, loading: chatsLoading, error: chatsError } = useChats(
+    firebaseAuthInitialized ? userId : null,
+    firebaseAuthInitialized ? orgId : null
+  );
 
   // Filter chats based on search
   const filteredChats = useMemo(() => {
