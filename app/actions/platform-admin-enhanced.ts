@@ -22,7 +22,7 @@ import {
   platformAdminAccessSchema,
   exportOrganizationDataSchema,
   getActivityLogsSchema,
-} from '@/lib/platform-admin-validation'
+} from '@/lib/platform-admin'
 import { ZodError } from 'zod'
 import { Prisma } from '@prisma/client'
 

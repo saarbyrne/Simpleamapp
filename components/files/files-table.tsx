@@ -34,7 +34,7 @@ import {
   type FilterConfig,
 } from '@/components/data-table'
 import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/react-table'
-import { formatDate } from '@/lib/date-utils'
+import { formatDate } from '@/lib/date'
 import { formatBytes, getFileIcon, getFileCategory } from '@/lib/files'
 import { toast } from 'sonner'
 import { FileUploadDialog } from './file-upload-dialog'

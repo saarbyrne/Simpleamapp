@@ -21,7 +21,7 @@ import {
   ExternalLink,
 } from 'lucide-react'
 import { formatBytes, isPreviewable, getFileIcon } from '@/lib/files'
-import { formatDate } from '@/lib/date-utils'
+import { formatDate } from '@/lib/date'
 import { cn } from '@/components/ui/utils'
 
 interface FilePreviewDialogProps {

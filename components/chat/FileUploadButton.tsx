@@ -4,7 +4,7 @@ import { useState, useRef, ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Paperclip, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { validateFile } from '@/lib/chatUtils';
+import { validateFile } from '@/lib/chat';
 import { Progress } from '@/components/ui/progress';
 
 interface FileUploadButtonProps {
