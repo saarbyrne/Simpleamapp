@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Card } from '@/components/ui/card'
-import { Loader2, Send, Sparkles, X } from 'lucide-react'
+import { Loader2, Send, Sparkles, X, MessageSquare } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/components/ui/utils'
@@ -30,9 +30,52 @@ export function AIChat({ conversationId, initialMessages = [], onNewConversation
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [currentConversationId, setCurrentConversationId] = useState(conversationId)
+  const [isLoadingConversation, setIsLoadingConversation] = useState(false)
+  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>(conversationId)
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Load conversation messages when conversationId changes
+  useEffect(() => {
+    if (conversationId && conversationId !== currentConversationId && !isLoadingConversation) {
+      setCurrentConversationId(conversationId)
+      loadConversationMessages(conversationId)
+    }
+  }, [conversationId, currentConversationId, isLoadingConversation])
+
+  // Load existing conversation messages
+  const loadConversationMessages = async (convId: string) => {
+    if (!convId) return
+
+    setIsLoadingConversation(true)
+    try {
+      const response = await fetch(`/api/ai/conversations/${convId}`)
+      if (response.ok) {
+        const data = await response.json()
+        const conversationMessages = data.conversation.messages.map((msg: any) => ({
+          id: msg.id,
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content,
+          toolCalls: msg.toolCalls,
+          actions: msg.actions,
+          createdAt: new Date(msg.createdAt)
+        }))
+        setMessages(conversationMessages)
+      } else if (response.status === 401) {
+        // Not authenticated - keep empty messages
+        setMessages([])
+      } else {
+        console.error('Failed to load conversation')
+        setMessages([])
+      }
+    } catch (error) {
+      console.error('Error loading conversation:', error)
+      setMessages([])
+    } finally {
+      setIsLoadingConversation(false)
+    }
+  }
+
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -143,24 +186,21 @@ export function AIChat({ conversationId, initialMessages = [], onNewConversation
     }
   }
 
-  const suggestedQueries = [
-    'Show me players with wellness scores below 6',
-    'Create a load vs wellness report for this month',
-    "Who hasn't completed wellness form today?",
-    'Summarize this week\'s training sessions',
-    'Analyze injury risk for the first team'
-  ]
-
-  const handleSuggestedQuery = (query: string) => {
-    setInput(query)
-    textareaRef.current?.focus()
-  }
-
   return (
     <div className="flex flex-col h-full">
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         <div className="space-y-4 max-w-4xl mx-auto">
-          {messages.length === 0 && (
+          {isLoadingConversation ? (
+            <div className="text-center py-12">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Loading Conversation</h3>
+              <p className="text-muted-foreground">
+                Please wait while we load your conversation...
+              </p>
+            </div>
+          ) : messages.length === 0 && !conversationId ? (
             <div className="text-center py-12">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
                 <Sparkles className="w-8 h-8 text-primary" />
@@ -169,19 +209,21 @@ export function AIChat({ conversationId, initialMessages = [], onNewConversation
               <p className="text-muted-foreground mb-6">
                 Ask me anything about your team, players, or data
               </p>
-              <div className="grid grid-cols-1 gap-2 max-w-2xl mx-auto">
-                {suggestedQueries.map((query, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleSuggestedQuery(query)}
-                    className="text-left p-3 rounded-lg border border-border hover:bg-accent hover:border-accent-foreground/20 transition-colors text-sm"
-                  >
-                    {query}
-                  </button>
-                ))}
-              </div>
+              <p className="text-xs text-muted-foreground">
+                I can help you query data, create events, manage forms, and analyze your team's performance.
+              </p>
             </div>
-          )}
+          ) : messages.length === 0 && conversationId ? (
+            <div className="text-center py-12">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+                <MessageSquare className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No Messages</h3>
+              <p className="text-muted-foreground mb-4">
+                This conversation is empty. Start chatting with the AI!
+              </p>
+            </div>
+          ) : null}
 
           {messages.map((message, index) => (
             <div
@@ -192,22 +234,22 @@ export function AIChat({ conversationId, initialMessages = [], onNewConversation
               )}
             >
               {message.role === 'assistant' && (
-                <Avatar className="h-8 w-8 mt-1">
+                <Avatar className="h-8 w-8 mt-1 shrink-0">
                   <AvatarFallback className="bg-primary/10">
                     <Sparkles className="h-4 w-4 text-primary" />
                   </AvatarFallback>
                 </Avatar>
               )}
-              <div
+              <Card
                 className={cn(
-                  'rounded-lg px-4 py-3 max-w-[80%]',
+                  'px-4 py-3 max-w-[85%]',
                   message.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-card'
                 )}
               >
                 {message.role === 'assistant' ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                     <ReactMarkdown>{message.content}</ReactMarkdown>
                   </div>
                 ) : (
@@ -216,7 +258,7 @@ export function AIChat({ conversationId, initialMessages = [], onNewConversation
                 {message.actions && message.actions.length > 0 && (
                   <div className="mt-3 space-y-2">
                     {message.actions.map((action: any, i: number) => (
-                      <Card key={i} className="p-3">
+                      <Card key={i} className="p-3 bg-background">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Badge variant="outline">{action.type}</Badge>
@@ -233,9 +275,9 @@ export function AIChat({ conversationId, initialMessages = [], onNewConversation
                     ))}
                   </div>
                 )}
-              </div>
+              </Card>
               {message.role === 'user' && (
-                <Avatar className="h-8 w-8 mt-1">
+                <Avatar className="h-8 w-8 mt-1 shrink-0">
                   <AvatarFallback>U</AvatarFallback>
                 </Avatar>
               )}
@@ -244,47 +286,49 @@ export function AIChat({ conversationId, initialMessages = [], onNewConversation
 
           {isLoading && (
             <div className="flex gap-3 justify-start">
-              <Avatar className="h-8 w-8 mt-1">
+              <Avatar className="h-8 w-8 mt-1 shrink-0">
                 <AvatarFallback className="bg-primary/10">
                   <Sparkles className="h-4 w-4 text-primary" />
                 </AvatarFallback>
               </Avatar>
-              <div className="bg-muted rounded-lg px-4 py-3">
+              <Card className="px-4 py-3 bg-card">
                 <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
                   <span className="text-sm text-muted-foreground">Thinking...</span>
                 </div>
-              </div>
+              </Card>
             </div>
           )}
         </div>
       </ScrollArea>
 
-      <div className="border-t p-4 bg-background">
+      <div className="border-t p-4 bg-muted/30 shrink-0">
         <div className="max-w-4xl mx-auto">
-          <div className="flex gap-2">
-            <Textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask anything about your team..."
-              className="min-h-[60px] max-h-[200px] resize-none"
-              disabled={isLoading}
-            />
-            <Button
-              onClick={handleSend}
-              disabled={!input.trim() || isLoading}
-              size="icon"
-              className="h-[60px] w-[60px]"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Send className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
+          <Card className="p-2 bg-background">
+            <div className="flex gap-2">
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask anything about your team..."
+                className="min-h-[60px] max-h-[200px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                disabled={isLoading}
+              />
+              <Button
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading}
+                size="icon"
+                className="h-[60px] w-[60px] shrink-0"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
+          </Card>
         </div>
       </div>
     </div>

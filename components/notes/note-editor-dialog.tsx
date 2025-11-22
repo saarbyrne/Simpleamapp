@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { RichTextEditor } from './rich-text-editor'
+import { RichTextEditor } from './rich-text-editor-lazy'
 import { 
   createNote, 
   updateNote, 

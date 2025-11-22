@@ -620,7 +620,7 @@ export function FilesTable({ files, total: serverTotal }: FilesTableProps) {
             <AlertDialogAction
               onClick={confirmDelete}
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90"
             >
               {isDeleting ? t('files.deleting') : t('files.delete')}
             </AlertDialogAction>

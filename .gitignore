@@ -63,3 +63,8 @@ canvas-test-script.js
 
 # Archive directory (optional - remove this line if you want to track archives)
 /archive/
+
+# Sensitive documentation (never commit these)
+/docs/security/
+/docs/business/
+/docs/internal/

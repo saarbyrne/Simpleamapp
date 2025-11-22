@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { AlertTriangle, TrendingDown, TrendingUp, X, CheckCircle } from 'lucide-react'
+import { AlertTriangle, TrendingDown, TrendingUp, X, CheckCircle, Lightbulb } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
 interface AIInsight {
@@ -118,13 +118,31 @@ export function AIInsights() {
 
   if (insights.length === 0) {
     return (
-      <div className="text-center py-8">
-        <CheckCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-lg font-semibold mb-2">No Active Insights</h3>
-        <p className="text-sm text-muted-foreground">
-          The AI is monitoring your data and will alert you to important patterns
+      <Card className="p-8 text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-950 mb-4">
+          <Lightbulb className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+        </div>
+        <h3 className="text-xl font-semibold mb-2">Proactive Insights Coming Soon</h3>
+        <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
+          AI-powered proactive insights and monitoring are currently in development. 
+          Soon, the AI will automatically analyze your data and alert you to important patterns, 
+          risks, and opportunities.
         </p>
-      </div>
+        <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950 p-4 max-w-lg mx-auto mt-6">
+          <p className="text-sm text-blue-900 dark:text-blue-100 text-left">
+            <strong>Coming features:</strong>
+          </p>
+          <ul className="text-sm text-blue-900 dark:text-blue-100 text-left mt-2 space-y-1 list-disc list-inside">
+            <li>Injury risk detection</li>
+            <li>Wellness trend monitoring</li>
+            <li>Training load analysis</li>
+            <li>Form completion tracking</li>
+          </ul>
+        </div>
+        <p className="text-xs text-muted-foreground mt-6">
+          In the meantime, you can ask questions in the Chat tab to get insights on demand.
+        </p>
+      </Card>
     )
   }
 

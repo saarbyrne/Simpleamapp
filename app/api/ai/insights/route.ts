@@ -32,7 +32,12 @@ export async function GET(request: NextRequest) {
       take: 20
     })
 
-    return NextResponse.json({ insights })
+    const response = NextResponse.json({ insights })
+
+    // Cache for 2 minutes - insights don't change frequently
+    response.headers.set('Cache-Control', 'private, max-age=120, stale-while-revalidate=600')
+
+    return response
   } catch (error) {
     console.error('Error fetching insights:', error)
     return NextResponse.json(

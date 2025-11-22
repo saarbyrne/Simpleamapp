@@ -50,6 +50,13 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={plusJakartaSans.variable}
     >
+      <head>
+        {/* Performance: Preconnect to external API origins */}
+        <link rel="preconnect" href="https://hjzcimtmdxafilgrfeye.supabase.co" />
+        <link rel="dns-prefetch" href="https://api.anthropic.com" />
+        <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+        <link rel="dns-prefetch" href="https://app.posthog.com" />
+      </head>
       <body className={plusJakartaSans.className}>
         <ErrorBoundary>
           <NextIntlClientProvider locale={locale} messages={messages}>

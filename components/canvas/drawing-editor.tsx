@@ -272,7 +272,7 @@ export function DrawingEditor({
       {/* Canvas - Using Excalidraw's native toolbar */}
       <div className="flex-1 relative overflow-hidden">
         {/* Canvas Menu */}
-        <div className="fixed top-4 start-4 z-50">
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -283,7 +283,7 @@ export function DrawingEditor({
                 <Menu className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuContent align="center" className="w-48">
               <DropdownMenuItem onClick={() => setShowExportDialog(true)}>
                 <Download className="me-2 h-4 w-4" />
                 Download Canvas

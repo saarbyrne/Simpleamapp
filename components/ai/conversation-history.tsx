@@ -39,10 +39,14 @@ export function ConversationHistory({
       const response = await fetch('/api/ai/conversations')
       if (response.ok) {
         const data = await response.json()
-        setConversations(data.conversations)
+        setConversations(data.conversations || [])
+      } else if (response.status === 401) {
+        // User not authenticated - just show empty state
+        setConversations([])
       }
     } catch (error) {
       console.error('Failed to load conversations:', error)
+      setConversations([])
     } finally {
       setIsLoading(false)
     }
@@ -70,18 +74,7 @@ export function ConversationHistory({
   }
 
   return (
-    <div className="flex flex-col h-full border-r bg-muted/5">
-      <div className="p-4 border-b">
-        <Button
-          onClick={onNewConversation}
-          className="w-full"
-          variant="default"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          New Conversation
-        </Button>
-      </div>
-
+    <div className="flex flex-col h-full">
       <ScrollArea className="flex-1">
         <div className="p-2 space-y-1">
           {isLoading ? (
@@ -89,8 +82,14 @@ export function ConversationHistory({
               Loading conversations...
             </div>
           ) : conversations.length === 0 ? (
-            <div className="text-center py-8 text-sm text-muted-foreground">
-              No conversations yet
+            <div className="text-center py-8 px-4">
+              <MessageSquare className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">
+                No conversations yet
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Start chatting with AI to see your history here
+              </p>
             </div>
           ) : (
             conversations.map((conversation) => (
@@ -106,20 +105,20 @@ export function ConversationHistory({
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
                     <h4 className="text-sm font-medium truncate">
-                      {conversation.title}
+                      {conversation.title || 'AI Conversation'}
                     </h4>
                   </div>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                  <button
+                    type="button"
+                    className="h-6 w-6 p-1 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 rounded transition-colors"
                     onClick={(e) => handleDelete(conversation.id, e)}
+                    title="Delete conversation"
                   >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                    <Trash2 className="h-3 w-3 text-destructive" />
+                  </button>
                 </div>
                 <p className="text-xs text-muted-foreground line-clamp-2">
-                  {conversation.preview}
+                  {conversation.preview || 'No messages yet'}
                 </p>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-xs text-muted-foreground">

@@ -1,5 +1,5 @@
 import { signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase';
+import { getFirebaseAuth } from './firebase';
 
 /**
  * Initialize Firebase authentication for chat using custom token
@@ -22,7 +22,7 @@ export async function initFirebaseAuth() {
     const { token } = await response.json();
 
     // Sign in with custom token
-    const userCredential = await signInWithCustomToken(auth, token);
+    const userCredential = await signInWithCustomToken(getFirebaseAuth(), token);
     return userCredential.user;
   } catch (error) {
     console.error('Firebase custom token authentication failed:', error);
@@ -34,12 +34,12 @@ export async function initFirebaseAuth() {
  * Get current Firebase user
  */
 export function getCurrentFirebaseUser() {
-  return auth.currentUser;
+  return getFirebaseAuth().currentUser;
 }
 
 /**
  * Sign out from Firebase
  */
 export async function signOutFirebase() {
-  await auth.signOut();
+  await getFirebaseAuth().signOut();
 }

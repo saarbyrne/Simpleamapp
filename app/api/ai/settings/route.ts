@@ -49,7 +49,12 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ settings })
+    const response = NextResponse.json({ settings })
+
+    // Cache for 5 minutes - settings change infrequently
+    response.headers.set('Cache-Control', 'private, max-age=300, stale-while-revalidate=900')
+
+    return response
   } catch (error) {
     console.error('Error fetching AI settings:', error)
     return NextResponse.json(

@@ -117,11 +117,25 @@ export function CreateChatModal({
       toast.success(
         chatType === 'direct' ? 'Chat created' : 'Group chat created'
       );
+
+      // Reset form state
+      setGroupName('');
+      setSelectedParticipants([]);
+      setSearchQuery('');
+      setChatType('direct');
+      setLoadingParticipants(true);
+
+      // Close modal by calling onClose (which updates parent state)
+      onClose();
+
+      // Call the callback to notify parent (after modal is closed)
       onChatCreated(chatId);
-      handleClose();
     } catch (error) {
       console.error('Error creating chat:', error);
-      toast.error('Failed to create chat');
+      toast.error('Failed to create chat. Please check your permissions.');
+
+      // Close modal even on error so user can retry or cancel
+      onClose();
     } finally {
       setCreating(false);
     }
@@ -188,14 +202,14 @@ export function CreateChatModal({
           </div>
 
           {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative flex items-center border border-input rounded-md px-3 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/50 h-10">
+            <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
             <Input
               type="text"
               placeholder="Search participants..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+              className="border-0 shadow-none focus-visible:ring-0 px-0 h-10"
               disabled={creating}
             />
           </div>

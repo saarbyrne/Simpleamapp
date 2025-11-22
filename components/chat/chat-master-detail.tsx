@@ -11,11 +11,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Search, Send, ArrowLeft } from 'lucide-react';
+import { Plus, Search, Send, ArrowLeft, MoreVertical, Trash2 } from 'lucide-react';
 import { CreateChatModal } from './create-chat-modal';
 import { ChatNotificationBadge } from './chat-notification-badge';
 import { FileUploadButton } from './FileUploadButton';
 import { sendMessage, markChatAsRead, uploadFile, formatTimestamp, getOtherParticipantName } from '@/lib/chat';
+import { deleteChat } from '@/lib/chat/chatOperations';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Chat, Message } from '@/types/chat';
 import { toast } from 'sonner';
 import { memo } from 'react';
@@ -78,13 +85,28 @@ export function ChatMasterDetail({ userId, userName, orgId }: ChatMasterDetailPr
 
   const handleChatCreated = useCallback((chatId: string) => {
     setSelectedChatId(chatId);
-    setIsCreateModalOpen(false);
+    // Modal is already closed by the modal component itself
   }, []);
 
   const handleChatSelect = useCallback((chatId: string) => {
     setSelectedChatId(chatId);
     markChatAsRead(chatId, userId).catch(console.error);
   }, [userId]);
+
+  const handleDeleteChat = useCallback(async (chatId: string) => {
+    try {
+      await deleteChat(chatId, userId);
+      toast.success('Chat deleted');
+
+      // If the deleted chat was selected, deselect it
+      if (selectedChatId === chatId) {
+        setSelectedChatId(null);
+      }
+    } catch (error) {
+      console.error('Error deleting chat:', error);
+      toast.error('Failed to delete chat');
+    }
+  }, [userId, selectedChatId]);
 
   const selectedChat = useMemo(
     () => chats.find((chat) => chat.id === selectedChatId),
@@ -109,14 +131,14 @@ export function ChatMasterDetail({ userId, userName, orgId }: ChatMasterDetailPr
                 <Plus className="h-5 w-5" />
               </Button>
             </div>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <div className="relative flex items-center border border-input rounded-md px-3 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/50 h-10">
+              <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
               <Input
                 type="text"
                 placeholder="Search chats..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
+                className="border-0 shadow-none focus-visible:ring-0 px-0 h-10"
               />
             </div>
           </div>
@@ -157,6 +179,7 @@ export function ChatMasterDetail({ userId, userName, orgId }: ChatMasterDetailPr
                     userId={userId}
                     isSelected={selectedChatId === chat.id}
                     onClick={() => handleChatSelect(chat.id)}
+                    onDelete={() => handleDeleteChat(chat.id)}
                   />
                 ))}
               </div>
@@ -206,24 +229,25 @@ const ChatListItem = memo(function ChatListItem({
   userId,
   isSelected,
   onClick,
+  onDelete,
 }: {
   chat: Chat;
   userId: string;
   isSelected: boolean;
   onClick: () => void;
+  onDelete: () => void;
 }) {
   const chatName = chat.type === 'direct'
     ? getOtherParticipantName(chat, userId)
     : chat.name || 'Group Chat';
 
   return (
-    <button
-      onClick={onClick}
-      className={`w-full text-left px-4 py-3 hover:bg-accent transition-colors ${
+    <div
+      className={`w-full text-left px-4 py-3 hover:bg-accent transition-colors flex items-start gap-3 group ${
         isSelected ? 'bg-accent' : ''
       }`}
     >
-      <div className="flex items-start gap-3">
+      <button onClick={onClick} className="flex items-start gap-3 flex-1 min-w-0">
         <Avatar className="h-10 w-10 flex-shrink-0">
           <div className="flex h-full w-full items-center justify-center bg-primary text-primary-foreground font-semibold text-sm">
             {chatName.charAt(0).toUpperCase()}
@@ -240,8 +264,32 @@ const ChatListItem = memo(function ChatListItem({
             </p>
           )}
         </div>
-      </div>
-    </button>
+      </button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="text-destructive focus:text-destructive"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete Chat
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 });
 

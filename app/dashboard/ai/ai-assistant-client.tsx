@@ -1,98 +1,102 @@
 'use client'
 
-import { useState } from 'react'
-import { PageFrame } from '@/components/dashboard/page-frame'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useState, useCallback } from 'react'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { AIChat } from '@/components/ai/ai-chat'
 import { ConversationHistory } from '@/components/ai/conversation-history'
-import { AIInsights } from '@/components/ai/ai-insights'
 import { AISettings } from '@/components/ai/ai-settings'
-import { Sparkles, MessageSquare, Lightbulb, Settings } from 'lucide-react'
+import { MessageSquare, Settings } from 'lucide-react'
 
 export function AIAssistantClient() {
   const [currentConversationId, setCurrentConversationId] = useState<string | undefined>()
   const [key, setKey] = useState(0) // Used to force remount of AIChat
+  const [activeView, setActiveView] = useState<'chat' | 'settings'>('chat')
 
-  const handleSelectConversation = (conversationId: string) => {
+  const handleSelectConversation = useCallback((conversationId: string) => {
     setCurrentConversationId(conversationId)
     setKey(prev => prev + 1) // Force remount to load conversation
-  }
+  }, [])
 
-  const handleNewConversation = () => {
+  const handleNewConversation = useCallback(() => {
     setCurrentConversationId(undefined)
     setKey(prev => prev + 1) // Force remount for new conversation
-  }
+  }, [])
 
   return (
-    <PageFrame padding="none">
-      <div className="flex h-full">
-        {/* Sidebar */}
-        <div className="w-80 shrink-0 hidden lg:block">
+    <Card className="h-[calc(100vh-8rem)] flex overflow-hidden">
+      {/* Conversation List - Left Panel */}
+      <div className="w-80 border-r flex flex-col bg-background">
+        {/* Header */}
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Conversations</h2>
+            <Button
+              size="sm"
+              onClick={handleNewConversation}
+              className="h-8"
+            >
+              New Chat
+            </Button>
+          </div>
+        </div>
+
+        {/* Conversation List */}
+        <div className="flex-1 overflow-hidden">
           <ConversationHistory
             currentConversationId={currentConversationId}
             onSelectConversation={handleSelectConversation}
             onNewConversation={handleNewConversation}
           />
         </div>
+      </div>
 
-        {/* Main content */}
-        <div className="flex-1 flex flex-col min-w-0">
-          <Tabs defaultValue="chat" className="flex-1 flex flex-col">
-            <div className="border-b px-6 pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold">AI Assistant</h1>
-                    <p className="text-sm text-muted-foreground">
-                      Your intelligent team management companion
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <TabsList className="grid w-full max-w-md grid-cols-3">
-                <TabsTrigger value="chat" className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  Chat
-                </TabsTrigger>
-                <TabsTrigger value="insights" className="flex items-center gap-2">
-                  <Lightbulb className="h-4 w-4" />
-                  Insights
-                </TabsTrigger>
-                <TabsTrigger value="settings" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Settings
-                </TabsTrigger>
-              </TabsList>
+      {/* Main Content - Right Panel */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header with tabs */}
+        <div className="p-4 border-b bg-background">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold">
+              {currentConversationId ? 'AI Chat' : 'AI Assistant'}
+            </h1>
+            <div className="flex gap-2">
+              <Button
+                variant={activeView === 'chat' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveView('chat')}
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Chat
+              </Button>
+              <Button
+                variant={activeView === 'settings' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveView('settings')}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
             </div>
+          </div>
+        </div>
 
-            <TabsContent value="chat" className="flex-1 m-0 border-0 p-0">
-              <AIChat
-                key={key}
-                conversationId={currentConversationId}
-                onNewConversation={(id) => {
-                  setCurrentConversationId(id)
-                }}
-              />
-            </TabsContent>
-
-            <TabsContent value="insights" className="flex-1 m-0 border-0 p-6 overflow-y-auto">
-              <div className="max-w-4xl mx-auto">
-                <AIInsights />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="settings" className="flex-1 m-0 border-0 p-6 overflow-y-auto">
-              <div className="max-w-4xl mx-auto">
-                <AISettings />
-              </div>
-            </TabsContent>
-          </Tabs>
+        {/* Content Area */}
+        <div className="flex-1 overflow-hidden">
+          {activeView === 'chat' ? (
+            <AIChat
+              key={key}
+              conversationId={currentConversationId}
+              onNewConversation={(id) => {
+                setCurrentConversationId(id)
+              }}
+            />
+          ) : (
+            <div className="h-full overflow-y-auto">
+              <AISettings />
+            </div>
+          )}
         </div>
       </div>
-    </PageFrame>
+    </Card>
   )
 }

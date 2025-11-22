@@ -112,7 +112,7 @@ export function DataTableBulkActions<TData>({
                       }
                     }}
                     disabled={isDisabled}
-                    className={action.variant === 'destructive' ? 'text-destructive' : ''}
+                    className={action.variant === 'destructive' ? 'bg-destructive text-white hover:bg-destructive hover:text-white' : ''}
                   >
                     {action.icon && <span className="me-2">{action.icon}</span>}
                     {action.label}

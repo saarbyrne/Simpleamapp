@@ -100,9 +100,15 @@ export function AISettings() {
     <div className="space-y-6">
       <PageCard
         title="Proactive Insights"
-        description="AI monitors your data and alerts you to important patterns"
+        description="Configure AI monitoring and alerts (Coming Soon)"
       >
-        <div className="space-y-4">
+        <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950 p-4 mb-4">
+          <p className="text-sm text-amber-900 dark:text-amber-100">
+            <strong>Note:</strong> Proactive insights and alerting features are currently in development. 
+            Settings can be configured now, but automated monitoring and alerts will be enabled in a future update.
+          </p>
+        </div>
+        <div className="space-y-4 opacity-60">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="injury-risk">Injury Risk Alerts</Label>
@@ -116,6 +122,7 @@ export function AISettings() {
               onCheckedChange={(checked) =>
                 setSettings({ ...settings, injuryRiskAlerts: checked })
               }
+              disabled
             />
           </div>
 
@@ -132,6 +139,7 @@ export function AISettings() {
               onCheckedChange={(checked) =>
                 setSettings({ ...settings, wellnessAlerts: checked })
               }
+              disabled
             />
           </div>
 
@@ -148,6 +156,7 @@ export function AISettings() {
               onCheckedChange={(checked) =>
                 setSettings({ ...settings, loadAlerts: checked })
               }
+              disabled
             />
           </div>
 
@@ -164,6 +173,7 @@ export function AISettings() {
               onCheckedChange={(checked) =>
                 setSettings({ ...settings, formCompletionAlerts: checked })
               }
+              disabled
             />
           </div>
         </div>
@@ -171,13 +181,14 @@ export function AISettings() {
 
       <PageCard
         title="Alert Frequency"
-        description="Choose how often you receive AI insights"
+        description="Choose how often you receive AI insights (Coming Soon)"
       >
         <Select
           value={settings.alertFrequency}
           onValueChange={(value) =>
             setSettings({ ...settings, alertFrequency: value })
           }
+          disabled
         >
           <SelectTrigger>
             <SelectValue />
@@ -192,8 +203,13 @@ export function AISettings() {
 
       <PageCard
         title="Data Access"
-        description="Control what data AI can access"
+        description="Control what data the AI can access when responding to queries"
       >
+        <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950 p-4 mb-4">
+          <p className="text-sm text-blue-900 dark:text-blue-100">
+            These settings control what data the AI Assistant can access when you ask questions in chat.
+          </p>
+        </div>
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -346,9 +362,12 @@ export function AISettings() {
         </div>
       </PageCard>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t">
+        <p className="text-sm text-muted-foreground">
+          Only Data Access and Usage settings are currently active.
+        </p>
         <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? 'Saving...' : 'Save Settings'}
+          {isSaving ? 'Saving...' : 'Save Data Access Settings'}
         </Button>
       </div>
     </div>

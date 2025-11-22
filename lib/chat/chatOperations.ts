@@ -13,7 +13,8 @@ import {
   writeBatch,
   Timestamp,
 } from 'firebase/firestore';
-import { getFirebaseDb } from '@/lib/firebase';
+import { getAuth } from 'firebase/auth';
+import { getFirebaseDb, getFirebaseAuth } from '@/lib/firebase';
 import { Chat, Message } from '@/types/chat';
 import { createClient } from '@/lib/supabase/client';
 
@@ -28,7 +29,14 @@ export async function createChat(data: {
   createdBy: string;
   creatorName: string;
 }): Promise<string> {
+  const auth = getFirebaseAuth();
   const db = getFirebaseDb(); // Lazy initialize Firebase
+
+  // Ensure user is authenticated
+  if (!auth.currentUser) {
+    throw new Error('User not authenticated with Firebase');
+  }
+
   try {
     // For direct chats, check if one already exists between these two users
     if (data.type === 'direct' && data.participantIds.length === 2) {
@@ -88,7 +96,15 @@ export async function createChat(data: {
  * Find existing direct chat between two users
  */
 async function findDirectChat(orgId: string, participantIds: string[]): Promise<Chat | null> {
+  const auth = getFirebaseAuth();
   const db = getFirebaseDb(); // Lazy initialize Firebase
+
+  // Ensure user is authenticated
+  if (!auth.currentUser) {
+    console.warn('User not authenticated with Firebase in findDirectChat');
+    return null;
+  }
+
   try {
     const q = query(
       collection(db, 'chats'),

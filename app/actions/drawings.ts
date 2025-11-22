@@ -132,7 +132,8 @@ export async function createDrawing(drawingData: DrawingData) {
       },
     })
 
-    revalidatePath('/dashboard/canvas')
+    // Note: Removed revalidatePath to allow optimistic updates to work smoothly
+    // Cache will be invalidated naturally on subsequent requests
     return { success: true, drawing }
   } catch (error) {
     console.error('Error creating drawing:', error)
@@ -207,7 +208,8 @@ export async function updateDrawing(id: string, drawingData: Partial<DrawingData
       },
     })
 
-    revalidatePath('/dashboard/canvas')
+    // Note: Removed revalidatePath to allow optimistic updates to work smoothly
+    // Cache will be invalidated naturally on subsequent requests
     revalidatePath(`/dashboard/canvas/${id}`)
     return { success: true, drawing }
   } catch (error) {
@@ -250,7 +252,8 @@ export async function deleteDrawing(id: string) {
       where: { id },
     })
 
-    revalidatePath('/dashboard/canvas')
+    // Note: Removed revalidatePath to allow optimistic updates to work smoothly
+    // Cache will be invalidated naturally on subsequent requests
     return { success: true }
   } catch (error) {
     console.error('Error deleting drawing:', error)
@@ -524,7 +527,8 @@ export async function duplicateDrawing(id: string) {
       },
     })
 
-    revalidatePath('/dashboard/canvas')
+    // Note: Removed revalidatePath to allow optimistic updates to work smoothly
+    // Cache will be invalidated naturally on subsequent requests
     return { success: true, drawing }
   } catch (error) {
     console.error('Error duplicating drawing:', error)

@@ -17,6 +17,8 @@ export * from './animations';
 
 // Animation utility functions and helpers
 export * from './animation-utils';
+// Re-export prefersReducedMotion as shouldReduceMotion for backwards compatibility
+export { prefersReducedMotion as shouldReduceMotion } from './animation-utils';
 
 // Feedback animations (success, error, etc.)
 export * from './feedback-animations';

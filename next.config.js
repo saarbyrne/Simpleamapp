@@ -84,10 +84,22 @@ const nextConfig = {
 
   // Performance: Image optimization
   images: {
-    domains: [
-      'api.dicebear.com',
-      'hjzcimtmdxafilgrfeye.supabase.co',
-      'images.unsplash.com',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'api.dicebear.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'hjzcimtmdxafilgrfeye.supabase.co',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60,

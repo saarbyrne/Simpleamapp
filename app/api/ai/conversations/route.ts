@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       take: 50
     })
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       conversations: conversations.map(c => ({
         id: c.id,
         title: c.title,
@@ -53,6 +53,11 @@ export async function GET(request: NextRequest) {
         updatedAt: c.updatedAt
       }))
     })
+
+    // Cache for 60 seconds with stale-while-revalidate
+    response.headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=300')
+
+    return response
   } catch (error) {
     console.error('Error fetching conversations:', error)
     return NextResponse.json(

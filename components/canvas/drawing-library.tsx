@@ -172,16 +172,41 @@ export function DrawingLibrary() {
   const handleDelete = async () => {
     if (!drawingToDelete) return
 
+    // Optimistically remove the drawing from local state
+    const drawingToRemove = drawings.find(d => d.id === drawingToDelete)
+    if (drawingToRemove) {
+      setDrawings(prev => prev.filter(d => d.id !== drawingToDelete))
+      setTotal(prev => prev - 1)
+    }
+
     try {
       const result = await deleteDrawing(drawingToDelete)
       if (result.success) {
         toast.success('Drawing deleted successfully')
-        loadDrawings()
+        // Drawing already removed from state, no need to reload
       } else {
+        // Revert optimistic update on failure
+        if (drawingToRemove) {
+          setDrawings(prev => {
+            const newDrawings = [...prev, drawingToRemove]
+            // Sort by updatedAt desc to maintain order
+            return newDrawings.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+          })
+          setTotal(prev => prev + 1)
+        }
         toast.error(result.error || 'Failed to delete drawing')
       }
     } catch (error) {
       console.error('Error deleting drawing:', error)
+      // Revert optimistic update on failure
+      if (drawingToRemove) {
+        setDrawings(prev => {
+          const newDrawings = [...prev, drawingToRemove]
+          // Sort by updatedAt desc to maintain order
+          return newDrawings.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        })
+        setTotal(prev => prev + 1)
+      }
       toast.error('Failed to delete drawing')
     } finally {
       setDeleteDialogOpen(false)
@@ -190,16 +215,45 @@ export function DrawingLibrary() {
   }
 
   const handleDuplicate = async (id: string) => {
+    const originalDrawing = drawings.find(d => d.id === id)
+    if (!originalDrawing) return
+
+    // Create optimistic duplicate with temporary ID
+    const optimisticDuplicate: Drawing = {
+      ...originalDrawing,
+      id: `temp-${Date.now()}`, // Temporary ID
+      name: `${originalDrawing.name} (Copy)`,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    // Optimistically add to local state at the top
+    setDrawings(prev => [optimisticDuplicate, ...prev])
+    setTotal(prev => prev + 1)
+
     try {
       const result = await duplicateDrawing(id)
       if (result.success && result.drawing) {
         toast.success('Drawing duplicated successfully')
-        loadDrawings()
+        // Replace optimistic drawing with real one
+        setDrawings(prev => prev.map(d =>
+          d.id === optimisticDuplicate.id ? {
+            ...result.drawing,
+            createdAt: new Date(result.drawing.createdAt),
+            updatedAt: new Date(result.drawing.updatedAt),
+          } : d
+        ))
       } else {
+        // Revert optimistic update on failure
+        setDrawings(prev => prev.filter(d => d.id !== optimisticDuplicate.id))
+        setTotal(prev => prev - 1)
         toast.error(result.error || 'Failed to duplicate drawing')
       }
     } catch (error) {
       console.error('Error duplicating drawing:', error)
+      // Revert optimistic update on failure
+      setDrawings(prev => prev.filter(d => d.id !== optimisticDuplicate.id))
+      setTotal(prev => prev - 1)
       toast.error('Failed to duplicate drawing')
     }
   }
@@ -243,8 +297,8 @@ export function DrawingLibrary() {
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="relative flex-1 max-w-sm flex items-center border border-input rounded-md px-3 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/50 h-10">
+            <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
             <Input
               placeholder="Search drawings..."
               value={searchQuery}
@@ -252,7 +306,7 @@ export function DrawingLibrary() {
                 setSearchQuery(e.target.value)
                 // Page will be reset by the debounced effect
               }}
-              className="ps-9"
+              className="border-0 shadow-none focus-visible:ring-0 px-0 h-10"
             />
           </div>
           <Select
@@ -375,9 +429,11 @@ export function DrawingLibrary() {
                           setDrawingToDelete(drawing.id)
                           setDeleteDialogOpen(true)
                         }}
-                        className="text-destructive"
+                        className="bg-destructive text-white focus:bg-destructive focus:text-white hover:bg-destructive hover:text-white"
+                        aria-label={`Delete drawing "${drawing.name}"`}
+                        role="menuitem"
                       >
-                        <Trash2 className="h-4 w-4 me-2" />
+                        <Trash2 className="h-4 w-4 me-2" aria-hidden="true" />
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -447,16 +503,20 @@ export function DrawingLibrary() {
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent role="alertdialog" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the drawing.
+            <AlertDialogTitle id="delete-dialog-title">Delete Drawing</AlertDialogTitle>
+            <AlertDialogDescription id="delete-dialog-description">
+              This action cannot be undone. This will permanently delete the drawing "{drawings.find(d => d.id === drawingToDelete)?.name}" and all its content.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+            <AlertDialogCancel aria-label="Cancel deletion">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-white focus:ring-destructive"
+              aria-label={`Confirm deletion of drawing "${drawings.find(d => d.id === drawingToDelete)?.name}"`}
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

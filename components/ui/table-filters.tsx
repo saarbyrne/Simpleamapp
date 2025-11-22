@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { format } from 'date-fns'
-import { Calendar as CalendarIcon } from 'lucide-react'
+import { Calendar as CalendarIcon, Search } from 'lucide-react'
 import { DateRange } from 'react-day-picker'
 import { Input } from '@/components/ui/input'
 import {
@@ -57,13 +57,16 @@ export function TableFilters({
       {filters.map((filter) => {
         if (filter.type === 'search') {
           return (
-            <Input
-              key={filter.key}
-              placeholder={filter.placeholder || searchPlaceholder}
-              value={values[filter.key] || ''}
-              onChange={(e) => onFilterChange(filter.key, e.target.value)}
-              className={cn('h-10 w-[200px] shrink-0', filter.width)}
-            />
+            <div key={filter.key} className="relative flex items-center border border-input rounded-md px-3 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/50 h-10">
+              <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
+              <Input
+                type="text"
+                placeholder={filter.placeholder || searchPlaceholder}
+                value={values[filter.key] || ''}
+                onChange={(e) => onFilterChange(filter.key, e.target.value)}
+                className="border-0 shadow-none focus-visible:ring-0 px-0 h-10"
+              />
+            </div>
           )
         }
 
