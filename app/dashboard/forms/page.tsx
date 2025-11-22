@@ -8,6 +8,9 @@ type FormsPageProps = {
   }
 }
 
+// ISR: Regenerate page every 10 minutes for forms data
+export const revalidate = 600
+
 export default async function FormsPage({ searchParams }: FormsPageProps) {
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 0
   const pageSize = searchParams.pageSize ? parseInt(searchParams.pageSize, 10) : 20
