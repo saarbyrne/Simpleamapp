@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -107,11 +107,7 @@ export default function ReportViewPage() {
   const [showInsights, setShowInsights] = useState(false)
   const [generatingInsights, setGeneratingInsights] = useState(false)
 
-  useEffect(() => {
-    loadReport()
-  }, [reportId])
-
-  const loadReport = async () => {
+  const loadReport = useCallback(async () => {
     setIsLoading(true)
     try {
       const result = await getReport(reportId)
@@ -127,7 +123,7 @@ export default function ReportViewPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [reportId, router, t])
 
   const handleGenerateShareLink = async () => {
     try {

@@ -17,6 +17,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar } from '@/components/ui/avatar';
 import { Search, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 import { Participant } from '@/types/chat';
 import { createChat } from '@/lib/chat';
 import { getChatParticipants } from '@/app/actions/chat';
@@ -228,7 +229,14 @@ export function CreateChatModal({
                     <RadioGroupItem value={participant.id} id={participant.id} />
                     <Avatar className="h-10 w-10">
                       {participant.avatarUrl ? (
-                        <img src={participant.avatarUrl} alt={participant.name} className="h-full w-full object-cover" />
+                        <Image
+                          src={participant.avatarUrl}
+                          alt={participant.name}
+                          width={40}
+                          height={40}
+                          className="h-full w-full object-cover"
+                          unoptimized={!participant.avatarUrl?.includes('supabase.co')}
+                        />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-primary text-primary-foreground font-semibold">
                           {participant.name.charAt(0).toUpperCase()}
@@ -261,7 +269,14 @@ export function CreateChatModal({
                     />
                     <Avatar className="h-10 w-10">
                       {participant.avatarUrl ? (
-                        <img src={participant.avatarUrl} alt={participant.name} className="h-full w-full object-cover" />
+                        <Image
+                          src={participant.avatarUrl}
+                          alt={participant.name}
+                          width={40}
+                          height={40}
+                          className="h-full w-full object-cover"
+                          unoptimized={!participant.avatarUrl?.includes('supabase.co')}
+                        />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-primary text-primary-foreground font-semibold">
                           {participant.name.charAt(0).toUpperCase()}

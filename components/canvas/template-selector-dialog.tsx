@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import {
   Dialog,
   DialogContent,
@@ -61,13 +62,7 @@ export function TemplateSelectorDialog({
   const [drawingType, setDrawingType] = useState<string>('')
   const [category, setCategory] = useState<string>('all')
 
-  useEffect(() => {
-    if (open) {
-      loadTemplates()
-    }
-  }, [open, category])
-
-  const loadTemplates = async () => {
+  const loadTemplates = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getDrawingTemplates(
@@ -84,7 +79,13 @@ export function TemplateSelectorDialog({
     } finally {
       setLoading(false)
     }
-  }
+  }, [category])
+
+  useEffect(() => {
+    if (open) {
+      loadTemplates()
+    }
+  }, [open, category, loadTemplates])
 
   const handleCreate = async () => {
     console.log('handleCreate called', { drawingName, drawingType, selectedTemplate })
@@ -260,10 +261,13 @@ export function TemplateSelectorDialog({
                         <CardContent className="p-4">
                           <div className="aspect-video bg-muted rounded mb-3 flex items-center justify-center">
                             {template.thumbnailUrl ? (
-                              <img
+                              <Image
                                 src={template.thumbnailUrl}
                                 alt={template.name}
+                                width={200}
+                                height={150}
                                 className="w-full h-full object-cover rounded"
+                                unoptimized={!template.thumbnailUrl?.includes('supabase.co')}
                               />
                             ) : (
                               <TacticalIcon className="h-8 w-8 text-muted-foreground" size={32} />
