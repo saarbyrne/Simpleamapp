@@ -13,7 +13,7 @@ import {
   writeBatch,
   Timestamp,
 } from 'firebase/firestore';
-import { getFirebaseDb } from './firebase';
+import { getFirebaseDb } from '@/lib/firebase';
 import { Chat, Message } from '@/types/chat';
 import { createClient } from '@/lib/supabase/client';
 
