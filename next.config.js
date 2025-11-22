@@ -18,6 +18,39 @@ const nextConfig = {
     } : false,
   },
 
+  // Performance: Enable SWC minification for better compression
+  swcMinify: true,
+
+  // Performance: Optimize build output
+  output: {
+    // Reduce chunk size warnings
+    hashDigestLength: 8,
+  },
+
+  // Performance: Aggressive optimization for production
+  optimization: {
+    // Enable more aggressive chunk splitting
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        // Existing splits...
+        radix: {
+          test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+          name: 'radix-ui',
+          priority: 20,
+          reuseExistingChunk: true,
+          enforce: true,
+        },
+      },
+    },
+  },
+
+  // Performance: Optimize CSS
+  css: {
+    // Enable CSS optimization
+    optimizeCss: true,
+  },
+
   // Performance: Image optimization
   images: {
     domains: [
@@ -45,6 +78,8 @@ const nextConfig = {
       allowedOrigins: ['localhost:3000'],
     },
     instrumentationHook: true,
+    // Performance: Enable optimizePackageImports for better tree-shaking
+    optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
   },
 
   // Enable React strict mode for better performance warnings
@@ -89,6 +124,27 @@ const nextConfig = {
             test: /[\\/]node_modules[\\/]recharts[\\/]/,
             name: 'recharts',
             priority: 25,
+            reuseExistingChunk: true,
+          },
+          // Radix UI components - split major ones
+          radix: {
+            test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+            name: 'radix-ui',
+            priority: 20,
+            reuseExistingChunk: true,
+          },
+          // PDF generation libraries - only loads when needed
+          pdf: {
+            test: /[\\/]node_modules[\\/](jspdf|html2canvas)[\\/]/,
+            name: 'pdf-libs',
+            priority: 20,
+            reuseExistingChunk: true,
+          },
+          // Anthropic AI SDK - only loads for AI features
+          ai: {
+            test: /[\\/]node_modules[\\/]@anthropic-ai[\\/]/,
+            name: 'anthropic-ai',
+            priority: 20,
             reuseExistingChunk: true,
           },
           // Calendar library chunk

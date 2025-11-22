@@ -9,6 +9,9 @@ type PlayersPageProps = {
   }
 }
 
+// ISR: Regenerate page every 5 minutes for frequently accessed data
+export const revalidate = 300
+
 export default async function PlayersPage({ searchParams }: PlayersPageProps) {
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 0
   const pageSize = searchParams.pageSize ? parseInt(searchParams.pageSize, 10) : 20
