@@ -13,7 +13,7 @@
 
 ### Step 1: Enable Firebase Storage (1 minute)
 
-1. Go to: https://console.firebase.google.com/project/***REMOVED***/storage
+1. Go to: https://console.firebase.google.com/project/simpleam-80594/storage
 2. Click **"Get Started"**
 3. Choose **"Start in production mode"**
 4. Select location: **Europe (eur3)**
@@ -21,7 +21,7 @@
 
 ### Step 2: Enable Firestore Database (1 minute)
 
-1. Go to: https://console.firebase.google.com/project/***REMOVED***/firestore
+1. Go to: https://console.firebase.google.com/project/simpleam-80594/firestore
 2. Click **"Create database"**
 3. Choose **"Start in production mode"**
 4. Select location: **eur3 (europe-west)**
@@ -29,7 +29,7 @@
 
 ### Step 3: Enable Authentication (30 seconds)
 
-1. Go to: https://console.firebase.google.com/project/***REMOVED***/authentication
+1. Go to: https://console.firebase.google.com/project/simpleam-80594/authentication
 2. Click **"Get started"**
 3. Click **"Anonymous"** provider
 4. Toggle **"Enable"**
@@ -82,10 +82,10 @@ Test:
 
 ## 📍 Quick Links
 
-- **Storage Setup:** https://console.firebase.google.com/project/***REMOVED***/storage
-- **Firestore Setup:** https://console.firebase.google.com/project/***REMOVED***/firestore
-- **Authentication Setup:** https://console.firebase.google.com/project/***REMOVED***/authentication
-- **Project Overview:** https://console.firebase.google.com/project/***REMOVED***/overview
+- **Storage Setup:** https://console.firebase.google.com/project/simpleam-80594/storage
+- **Firestore Setup:** https://console.firebase.google.com/project/simpleam-80594/firestore
+- **Authentication Setup:** https://console.firebase.google.com/project/simpleam-80594/authentication
+- **Project Overview:** https://console.firebase.google.com/project/simpleam-80594/overview
 
 ---
 
@@ -106,7 +106,7 @@ Once all steps are done, your chat system will be fully functional with:
 
 Just complete the 4 steps above (total: ~5 minutes) and your chat system will be live!
 
-**Start here:** https://console.firebase.google.com/project/***REMOVED***/storage
+**Start here:** https://console.firebase.google.com/project/simpleam-80594/storage
 
 Then run: `firebase deploy --only firestore:rules,storage`
 

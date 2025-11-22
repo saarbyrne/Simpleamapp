@@ -15,7 +15,7 @@ Your chat system has been configured to use **Supabase Storage** (which you alre
 
 ### Step 1: Enable Firestore Database (1 minute)
 
-1. Go to: https://console.firebase.google.com/project/***REMOVED***/firestore
+1. Go to: https://console.firebase.google.com/project/simpleam-80594/firestore
 2. Click **"Create database"**
 3. Choose **"Start in production mode"**
 4. Select location: **eur3 (europe-west)**
@@ -23,7 +23,7 @@ Your chat system has been configured to use **Supabase Storage** (which you alre
 
 ### Step 2: Enable Authentication (30 seconds)
 
-1. Go to: https://console.firebase.google.com/project/***REMOVED***/authentication
+1. Go to: https://console.firebase.google.com/project/simpleam-80594/authentication
 2. Click **"Get started"**
 3. Click **"Anonymous"** provider
 4. Toggle **"Enable"**
@@ -114,9 +114,9 @@ This is plenty for development and small teams!
 
 ## 📍 Quick Links
 
-- **Firestore Setup:** https://console.firebase.google.com/project/***REMOVED***/firestore
-- **Authentication Setup:** https://console.firebase.google.com/project/***REMOVED***/authentication
-- **Project Overview:** https://console.firebase.google.com/project/***REMOVED***/overview
+- **Firestore Setup:** https://console.firebase.google.com/project/simpleam-80594/firestore
+- **Authentication Setup:** https://console.firebase.google.com/project/simpleam-80594/authentication
+- **Project Overview:** https://console.firebase.google.com/project/simpleam-80594/overview
 
 ---
 
@@ -142,8 +142,8 @@ Once you complete the 3 steps above, your chat system will be fully functional w
 Just complete the 3 steps above and you're ready to chat!
 
 **Start here:**
-1. https://console.firebase.google.com/project/***REMOVED***/firestore (Enable)
-2. https://console.firebase.google.com/project/***REMOVED***/authentication (Enable Anonymous)
+1. https://console.firebase.google.com/project/simpleam-80594/firestore (Enable)
+2. https://console.firebase.google.com/project/simpleam-80594/authentication (Enable Anonymous)
 3. Run: `firebase deploy --only firestore:rules`
 4. Run: `npm run dev`
 5. Visit: http://localhost:3000/dashboard/chat

@@ -9,7 +9,7 @@ The required Firestore indexes have been deployed successfully.
 ## 📊 Index Status
 
 Check the build status here:
-**https://console.firebase.google.com/project/***REMOVED***/firestore/indexes**
+**https://console.firebase.google.com/project/simpleam-80594/firestore/indexes**
 
 ### Building Progress:
 
@@ -80,15 +80,15 @@ firebase firestore:indexes
 ```
 
 Or visit:
-**https://console.firebase.google.com/project/***REMOVED***/firestore/indexes**
+**https://console.firebase.google.com/project/simpleam-80594/firestore/indexes**
 
 ---
 
 ## 📖 Next Steps
 
 1. **Wait 2-10 minutes** for indexes to build
-2. **Check status:** https://console.firebase.google.com/project/***REMOVED***/firestore/indexes
-3. **Enable Auth:** https://console.firebase.google.com/project/***REMOVED***/authentication
+2. **Check status:** https://console.firebase.google.com/project/simpleam-80594/firestore/indexes
+3. **Enable Auth:** https://console.firebase.google.com/project/simpleam-80594/authentication
 4. **Test chat:** `npm run dev` → http://localhost:3000/dashboard/chat
 
 ---

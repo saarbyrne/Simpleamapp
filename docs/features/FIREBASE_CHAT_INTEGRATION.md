@@ -21,7 +21,7 @@ A complete real-time chat system built with Firebase Firestore for SimpleAM. Thi
 
 ## Prerequisites
 
-- Firebase project already created (`***REMOVED***`)
+- Firebase project already created (`simpleam-80594`)
 - Firestore database enabled
 - Firebase Storage enabled
 - Firebase Authentication enabled
@@ -33,7 +33,7 @@ A complete real-time chat system built with Firebase Firestore for SimpleAM. Thi
 ### 1. Get Firebase Configuration
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project: `***REMOVED***`
+2. Select your project: `simpleam-80594`
 3. Go to Project Settings > General
 4. Scroll to "Your apps" section
 5. Copy your Firebase config values
@@ -83,9 +83,9 @@ Add these to your `.env.local` file:
 ```bash
 # Firebase Configuration
 NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=***REMOVED***
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=***REMOVED***
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=***REMOVED***.appspot.com
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=simpleam-80594.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=simpleam-80594
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=simpleam-80594.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 ```

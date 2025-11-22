@@ -87,12 +87,12 @@ Your sidebar now shows:
 ## Next Steps
 
 ### 1. Enable Firebase Auth (30 seconds)
-https://console.firebase.google.com/project/***REMOVED***/authentication
+https://console.firebase.google.com/project/simpleam-80594/authentication
 
 Click "Get started" → Enable "Anonymous" → Save
 
 ### 2. Wait for Firestore Index (2-10 minutes)
-https://console.firebase.google.com/project/***REMOVED***/firestore/indexes
+https://console.firebase.google.com/project/simpleam-80594/firestore/indexes
 
 Wait until it shows "Enabled"
 

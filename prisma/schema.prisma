@@ -75,10 +75,11 @@ model User {
 
   // Security
   // Note: Password is managed by Supabase Auth
-  // TODO: Implement 2FA (Two-Factor Authentication) in future iteration
-  // TODO: Add twoFactorEnabled Boolean field
-  // TODO: Add twoFactorSecret String field for TOTP
-  // TODO: Add backupCodes String[] for recovery codes
+  // Two-Factor Authentication (TOTP)
+  twoFactorEnabled Boolean  @default(false) // User has enabled 2FA
+  twoFactorSecret  String?   // TOTP secret (encrypted)
+  backupCodes      String[]  @default([]) // Recovery codes (hashed)
+  twoFactorEnabledAt DateTime? // When 2FA was enabled
 
   // Platform Admin (for SaaS provider team only)
   isPlatformAdmin Boolean @default(false) // Only set manually for vendor team members

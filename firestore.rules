@@ -1,18 +1,105 @@
-rules_version='2'
+rules_version = '2';
+
+/**
+ * Firebase Security Rules for Firestore
+ *
+ * SECURITY: These rules protect chat messages and ensure users can only
+ * access data from their own organization.
+ *
+ * IMPORTANT: Deploy these rules using:
+ *   firebase deploy --only firestore:rules
+ */
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserId() {
+      return request.auth.uid;
+    }
+
+    function getOrgId() {
+      // Custom token should include organizationId claim
+      return request.auth.token.organizationId;
+    }
+
+    function hasOrgClaim() {
+      return request.auth.token.organizationId != null;
+    }
+
+    // ============================================
+    // CHATS
+    // ============================================
+    match /chats/{chatId} {
+      // Users can only read/write to chats in their organization and where they are a participant
+      allow read: if isAuthenticated()
+        && hasOrgClaim()
+        && resource.data.orgId == getOrgId()
+        && getUserId() in resource.data.participantIds;
+
+      allow create: if isAuthenticated()
+        && hasOrgClaim()
+        && request.resource.data.orgId == getOrgId()
+        && getUserId() in request.resource.data.participantIds;
+
+      allow update: if isAuthenticated()
+        && hasOrgClaim()
+        && resource.data.orgId == getOrgId()
+        && getUserId() in resource.data.participantIds;
+
+      allow delete: if isAuthenticated()
+        && hasOrgClaim()
+        && resource.data.orgId == getOrgId()
+        && getUserId() in resource.data.participantIds;
+
+      // Chat messages subcollection
+      match /messages/{messageId} {
+        // Users can read messages from their org's chats where they are participants
+        allow read: if isAuthenticated()
+          && hasOrgClaim()
+          && get(/databases/$(database)/documents/chats/$(chatId)).data.orgId == getOrgId()
+          && getUserId() in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds;
+
+        // Users can create messages in their org's chats where they are participants
+        allow create: if isAuthenticated()
+          && hasOrgClaim()
+          && request.resource.data.senderId == getUserId()
+          && get(/databases/$(database)/documents/chats/$(chatId)).data.orgId == getOrgId()
+          && getUserId() in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds;
+
+        // Users can update their own messages
+        allow update: if isAuthenticated()
+          && hasOrgClaim()
+          && resource.data.senderId == getUserId()
+          && request.resource.data.senderId == getUserId();
+
+        // Users can delete their own messages
+        allow delete: if isAuthenticated()
+          && hasOrgClaim()
+          && resource.data.senderId == getUserId();
+      }
+    }
+
+    // ============================================
+    // USER CHAT STATUS
+    // ============================================
+    match /userChatStatus/{userId} {
+      // Users can only read/write their own chat status
+      allow read, write: if isAuthenticated()
+        && hasOrgClaim()
+        && userId == getUserId();
+    }
+
+    // ============================================
+    // DEFAULT: DENY ALL
+    // ============================================
+    // Deny access to all other documents by default
     match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2025, 12, 20);
+      allow read, write: if false;
     }
   }
 }
