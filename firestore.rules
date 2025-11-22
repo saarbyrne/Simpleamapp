@@ -32,50 +32,66 @@ service cloud.firestore {
     }
 
     // ============================================
-    // CHAT ROOMS
+    // CHATS
     // ============================================
-    match /chatRooms/{roomId} {
-      // Users can only read/write to rooms in their organization
+    match /chats/{chatId} {
+      // Users can only read/write to chats in their organization and where they are a participant
       allow read: if isAuthenticated()
         && hasOrgClaim()
-        && resource.data.organizationId == getOrgId();
+        && resource.data.orgId == getOrgId()
+        && getUserId() in resource.data.participantIds;
 
       allow create: if isAuthenticated()
         && hasOrgClaim()
-        && request.resource.data.organizationId == getOrgId();
+        && request.resource.data.orgId == getOrgId()
+        && getUserId() in request.resource.data.participantIds;
 
       allow update: if isAuthenticated()
         && hasOrgClaim()
-        && resource.data.organizationId == getOrgId();
+        && resource.data.orgId == getOrgId()
+        && getUserId() in resource.data.participantIds;
 
       allow delete: if isAuthenticated()
         && hasOrgClaim()
-        && resource.data.organizationId == getOrgId();
+        && resource.data.orgId == getOrgId()
+        && getUserId() in resource.data.participantIds;
 
       // Chat messages subcollection
       match /messages/{messageId} {
-        // Users can read messages from their org's rooms
+        // Users can read messages from their org's chats where they are participants
         allow read: if isAuthenticated()
           && hasOrgClaim()
-          && get(/databases/$(database)/documents/chatRooms/$(roomId)).data.organizationId == getOrgId();
+          && get(/databases/$(database)/documents/chats/$(chatId)).data.orgId == getOrgId()
+          && getUserId() in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds;
 
-        // Users can create messages in their org's rooms
+        // Users can create messages in their org's chats where they are participants
         allow create: if isAuthenticated()
           && hasOrgClaim()
-          && request.resource.data.userId == getUserId()
-          && get(/databases/$(database)/documents/chatRooms/$(roomId)).data.organizationId == getOrgId();
+          && request.resource.data.senderId == getUserId()
+          && get(/databases/$(database)/documents/chats/$(chatId)).data.orgId == getOrgId()
+          && getUserId() in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds;
 
         // Users can update their own messages
         allow update: if isAuthenticated()
           && hasOrgClaim()
-          && resource.data.userId == getUserId()
-          && request.resource.data.userId == getUserId();
+          && resource.data.senderId == getUserId()
+          && request.resource.data.senderId == getUserId();
 
         // Users can delete their own messages
         allow delete: if isAuthenticated()
           && hasOrgClaim()
-          && resource.data.userId == getUserId();
+          && resource.data.senderId == getUserId();
       }
+    }
+
+    // ============================================
+    // USER CHAT STATUS
+    // ============================================
+    match /userChatStatus/{userId} {
+      // Users can only read/write their own chat status
+      allow read, write: if isAuthenticated()
+        && hasOrgClaim()
+        && userId == getUserId();
     }
 
     // ============================================

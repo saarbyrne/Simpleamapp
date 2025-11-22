@@ -49,7 +49,7 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: `
               default-src 'self';
-              script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.posthog.com https://*.sentry.io;
+              script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.vercel-scripts.com https://*.posthog.com https://*.sentry.io https://*.googleapis.com https://apis.google.com;
               style-src 'self' 'unsafe-inline';
               img-src 'self' data: https: blob:;
               font-src 'self' data:;
@@ -57,7 +57,7 @@ const nextConfig = {
               frame-ancestors 'self';
               base-uri 'self';
               form-action 'self';
-              frame-src 'self' https://vercel.live;
+              frame-src 'self' https://vercel.live https://*.googleapis.com https://*.firebaseapp.com;
               object-src 'none';
               worker-src 'self' blob:;
             `.replace(/\s{2,}/g, ' ').trim()

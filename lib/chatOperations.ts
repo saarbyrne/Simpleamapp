@@ -38,15 +38,21 @@ export async function createChat(data: {
     }
 
     const chatRef = doc(collection(db, 'chats'));
-    const chatData: Omit<Chat, 'id'> = {
+
+    // Build chat data without undefined values (Firestore doesn't allow them)
+    const chatData: any = {
       orgId: data.orgId,
       type: data.type,
-      name: data.name,
       participantIds: data.participantIds,
       createdBy: data.createdBy,
       createdAt: Timestamp.now(),
       lastMessageAt: Timestamp.now(),
     };
+
+    // Only add name if it's provided (for group chats)
+    if (data.name) {
+      chatData.name = data.name;
+    }
 
     await setDoc(chatRef, chatData);
 
