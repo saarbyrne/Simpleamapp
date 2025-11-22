@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 import { Star, Download, Eye, Edit, Trash2 } from 'lucide-react'
 import { PageCard } from '@/components/ui/page-card'
-import { formatDate } from '@/lib/date-utils'
+import { formatDate } from '@/lib/date'
 
 async function MyTemplatesData() {
   const result = await getUserTemplates()

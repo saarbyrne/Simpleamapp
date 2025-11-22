@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useUserPreferences } from "@/hooks/use-user-preferences";
-import { formatDate } from "@/lib/date-utils";
+import { formatDate } from "@/lib/date";
 
 export interface DatePickerProps {
   date?: Date;

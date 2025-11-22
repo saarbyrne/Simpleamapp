@@ -46,7 +46,7 @@ import {
 import { BulkActionsBar, type BulkField } from '@/components/ui/bulk-actions-bar'
 import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/react-table'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
-import { formatDate } from '@/lib/date-utils'
+import { formatDate } from '@/lib/date'
 
 export type FormRow = {
   id: string

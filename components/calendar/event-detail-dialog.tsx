@@ -31,7 +31,7 @@ import { EventWithDetails } from '@/app/actions/events'
 import { cn } from '@/lib/utils'
 import { AttendanceManager } from './attendance-manager'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
-import { formatDate, formatTime } from '@/lib/date-utils'
+import { formatDate, formatTime } from '@/lib/date'
 
 interface EventDetailDialogProps {
   open: boolean
