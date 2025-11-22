@@ -59,7 +59,7 @@ export async function getCurrentUserProfile() {
   try {
     const supabase = await createServerClient();
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !authUser) {
       return { success: false, error: "Authentication required" };
     }
@@ -67,29 +67,46 @@ export async function getCurrentUserProfile() {
     // Ensure user exists in database and has organization
     const dbUser = await ensureUserWithOrganization(authUser);
 
-    const user = await prisma.user.findUnique({
-      where: { id: dbUser.id },
-      include: {
-        organization: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            logo: true,
-          },
-        },
-        roles: {
+    // Add retry logic for database queries to handle temporary connection issues
+    let user;
+    let retries = 3;
+
+    while (retries > 0) {
+      try {
+        user = await prisma.user.findUnique({
+          where: { id: dbUser.id },
           include: {
-            role: {
+            organization: {
               select: {
+                id: true,
                 name: true,
-                permissions: true,
+                slug: true,
+                logo: true,
+              },
+            },
+            roles: {
+              include: {
+                role: {
+                  select: {
+                    name: true,
+                    permissions: true,
+                  },
+                },
               },
             },
           },
-        },
-      },
-    });
+        });
+        break; // Success, exit retry loop
+      } catch (dbError) {
+        retries--;
+        if (retries === 0) {
+          throw dbError; // Re-throw the error if all retries failed
+        }
+        console.warn(`Database query failed, ${retries} retries remaining:`, dbError);
+        // Wait 100ms before retry
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
 
     if (!user) {
       return { success: false, error: "User not found" };
