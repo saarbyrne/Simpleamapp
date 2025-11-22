@@ -1,7 +1,7 @@
 "use client";
 
 import { useUserPreferences } from "@/hooks/use-user-preferences";
-import { formatDate, formatTime, formatDateTime, formatDateRange, type UserPreferences } from "@/lib/date-utils";
+import { formatDate, formatTime, formatDateTime, formatDateRange, type UserPreferences } from "@/lib/date";
 import { useTranslations } from "next-intl";
 
 interface FormattedDateProps {

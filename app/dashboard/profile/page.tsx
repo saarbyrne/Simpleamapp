@@ -26,6 +26,9 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
+  // Log for debugging connection issues
+  console.log('Profile page: User authenticated, fetching profile for:', authUser.id);
+
   const profileResult = await getCurrentUserProfile();
 
   if (!profileResult.success || !profileResult.data) {
