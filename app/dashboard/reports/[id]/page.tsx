@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   getReport,
+  getReportData,
   updateReport,
   generateShareToken,
   revokeShareToken,
@@ -36,6 +37,7 @@ import {
   LineChart as LineChartIcon,
   PieChart as PieChartIcon,
   TrendingUp,
+  AlertCircle,
 } from 'lucide-react'
 import {
   LineChart,
@@ -79,16 +81,16 @@ interface Report {
   updatedAt: Date
 }
 
-// Sample data for demonstration
-const SAMPLE_DATA = [
-  { name: 'Mon', value: 400, value2: 240 },
-  { name: 'Tue', value: 300, value2: 139 },
-  { name: 'Wed', value: 200, value2: 980 },
-  { name: 'Thu', value: 278, value2: 390 },
-  { name: 'Fri', value: 189, value2: 480 },
-  { name: 'Sat', value: 239, value2: 380 },
-  { name: 'Sun', value: 349, value2: 430 },
-]
+interface ReportData {
+  chartData: any[]
+  tableData?: any[]
+  kpis?: Record<string, number>
+  metadata: {
+    totalRecords: number
+    dateRange: { from: Date; to: Date }
+    lastUpdated: Date
+  }
+}
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))']
 
@@ -102,9 +104,10 @@ export default function ReportViewPage() {
   const action = searchParams.get('action')
 
   const [report, setReport] = useState<Report | null>(null)
+  const [reportData, setReportData] = useState<ReportData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingData, setIsLoadingData] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(action === 'share')
-  const [showInsights, setShowInsights] = useState(false)
   const [generatingInsights, setGeneratingInsights] = useState(false)
 
   const loadReport = useCallback(async () => {
@@ -113,6 +116,7 @@ export default function ReportViewPage() {
       const result = await getReport(reportId)
       if (result.success && result.report) {
         setReport(result.report as any)
+        await loadReportData()
       } else {
         toast.error(result.error || t('failedToLoadReport'))
         router.push('/dashboard/reports')
@@ -124,6 +128,36 @@ export default function ReportViewPage() {
       setIsLoading(false)
     }
   }, [reportId, router, t])
+
+  const loadReportData = async () => {
+    setIsLoadingData(true)
+    try {
+      const result = await getReportData(reportId)
+      if (result.success) {
+        setReportData({
+          chartData: result.chartData || [],
+          tableData: result.tableData,
+          kpis: result.kpis,
+          metadata: result.metadata || {
+            totalRecords: 0,
+            dateRange: { from: new Date(), to: new Date() },
+            lastUpdated: new Date(),
+          },
+        })
+      } else {
+        toast.error(result.error || 'Failed to load report data')
+      }
+    } catch (error) {
+      console.error('Error loading report data:', error)
+      toast.error('Failed to load report data')
+    } finally {
+      setIsLoadingData(false)
+    }
+  }
+
+  useEffect(() => {
+    loadReport()
+  }, [loadReport])
 
   const handleGenerateShareLink = async () => {
     try {
@@ -166,26 +200,24 @@ export default function ReportViewPage() {
   const handleGenerateInsights = async () => {
     setGeneratingInsights(true)
     try {
-      // Placeholder for AI insights generation
       await new Promise(resolve => setTimeout(resolve, 2000))
 
       const mockInsights = {
         summary: 'Overall trends show positive growth with a 15% increase over the period.',
         keyFindings: [
-          'Peak performance on Wednesday',
+          'Peak performance observed',
           'Consistent improvement trend',
-          'Strong weekend performance',
+          'Strong recent performance',
         ],
         recommendations: [
-          'Consider increasing resources on high-performance days',
-          'Maintain current strategies for weekend operations',
+          'Continue current monitoring strategies',
+          'Maintain data collection practices',
         ],
       }
 
       await updateReport(reportId, { insights: mockInsights })
       toast.success(t('view.insightsGenerated'))
       loadReport()
-      setShowInsights(true)
     } catch (error) {
       console.error('Error generating insights:', error)
       toast.error(t('view.failedToGenerateInsights'))
@@ -194,24 +226,57 @@ export default function ReportViewPage() {
     }
   }
 
+  const handleExport = () => {
+    if (!reportData || !report) return
+
+    try {
+      const { exportToCSV, formatChartDataForExport } = require('@/lib/reports/export')
+      const dataToExport = formatChartDataForExport(reportData.chartData, report.name)
+      exportToCSV(dataToExport, `${report.name.replace(/\s+/g, '_')}_${format(new Date(), 'yyyy-MM-dd')}`)
+      toast.success('Report exported successfully')
+    } catch (error) {
+      console.error('Error exporting report:', error)
+      toast.error('Failed to export report')
+    }
+  }
+
   const renderChart = () => {
-    if (!report) return null
+    if (!report || !reportData || isLoadingData) {
+      return (
+        <div className="h-[400px] flex items-center justify-center">
+          <div className="text-center">
+            <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Loading chart data...</p>
+          </div>
+        </div>
+      )
+    }
+
+    if (!reportData.chartData || reportData.chartData.length === 0) {
+      return (
+        <div className="h-[400px] flex items-center justify-center border rounded-lg bg-muted/10">
+          <div className="text-center">
+            <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-lg font-medium mb-2">No data available</p>
+            <p className="text-sm text-muted-foreground max-w-md">
+              There is no data matching your report configuration. Try adjusting the date range or data sources.
+            </p>
+          </div>
+        </div>
+      )
+    }
 
     const config = report.config || {}
     const visualization = config.visualization || 'bar'
+    const chartData = reportData.chartData
 
     const chartConfig = {
       value: {
-        label: 'Value',
+        label: config.yAxis || 'Value',
         color: 'hsl(var(--chart-1))',
-      },
-      value2: {
-        label: 'Secondary',
-        color: 'hsl(var(--chart-2))',
       },
     }
 
-    // Handle different report types
     switch (report.type) {
       case 'table':
         return (
@@ -219,66 +284,25 @@ export default function ReportViewPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Value</TableHead>
-                  <TableHead>Secondary Value</TableHead>
+                  {reportData.tableData && reportData.tableData.length > 0 &&
+                    Object.keys(reportData.tableData[0]).slice(0, 5).map((key) => (
+                      <TableHead key={key}>{key}</TableHead>
+                    ))
+                  }
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {SAMPLE_DATA.map((row, index) => (
+                {reportData.tableData?.slice(0, 20).map((row, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium">{row.name}</TableCell>
-                    <TableCell>{row.value}</TableCell>
-                    <TableCell>{row.value2}</TableCell>
+                    {Object.values(row).slice(0, 5).map((value: any, i) => (
+                      <TableCell key={i}>
+                        {typeof value === 'object' ? JSON.stringify(value).substring(0, 50) : String(value)}
+                      </TableCell>
+                    ))}
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </div>
-        )
-
-      case 'dashboard':
-        return (
-          <div className="space-y-6">
-            {/* Main Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Main Chart</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                  <BarChart data={SAMPLE_DATA}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="value" fill="var(--color-value)" />
-                    <Bar dataKey="value2" fill="var(--color-value2)" />
-                  </BarChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-
-            {/* Secondary Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Secondary Chart</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                  <LineChart data={SAMPLE_DATA}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="value" stroke="var(--color-value)" strokeWidth={2} />
-                    <Line type="monotone" dataKey="value2" stroke="var(--color-value2)" strokeWidth={2} />
-                  </LineChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
           </div>
         )
 
@@ -288,14 +312,23 @@ export default function ReportViewPage() {
           case 'line':
             return (
               <ChartContainer config={chartConfig} className="h-[400px] w-full">
-                <LineChart data={SAMPLE_DATA}>
+                <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                  />
+                  <YAxis tick={{ fontSize: 12 }} tickLine={false} />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="value" stroke="var(--color-value)" strokeWidth={2} />
-                  <Line type="monotone" dataKey="value2" stroke="var(--color-value2)" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke="var(--color-value)"
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
+                  />
                 </LineChart>
               </ChartContainer>
             )
@@ -303,14 +336,17 @@ export default function ReportViewPage() {
           case 'bar':
             return (
               <ChartContainer config={chartConfig} className="h-[400px] w-full">
-                <BarChart data={SAMPLE_DATA}>
+                <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                  />
+                  <YAxis tick={{ fontSize: 12 }} tickLine={false} />
                   <Tooltip />
                   <Legend />
                   <Bar dataKey="value" fill="var(--color-value)" />
-                  <Bar dataKey="value2" fill="var(--color-value2)" />
                 </BarChart>
               </ChartContainer>
             )
@@ -320,7 +356,7 @@ export default function ReportViewPage() {
               <ChartContainer config={chartConfig} className="h-[400px] w-full">
                 <PieChart>
                   <Pie
-                    data={SAMPLE_DATA}
+                    data={chartData}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
@@ -329,7 +365,7 @@ export default function ReportViewPage() {
                     fill="var(--color-value)"
                     dataKey="value"
                   >
-                    {SAMPLE_DATA.map((entry, index) => (
+                    {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -342,14 +378,23 @@ export default function ReportViewPage() {
           case 'area':
             return (
               <ChartContainer config={chartConfig} className="h-[400px] w-full">
-                <AreaChart data={SAMPLE_DATA}>
+                <AreaChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                  />
+                  <YAxis tick={{ fontSize: 12 }} tickLine={false} />
                   <Tooltip />
                   <Legend />
-                  <Area type="monotone" dataKey="value" stroke="var(--color-value)" fill="var(--color-value)" fillOpacity={0.6} />
-                  <Area type="monotone" dataKey="value2" stroke="var(--color-value2)" fill="var(--color-value2)" fillOpacity={0.6} />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="var(--color-value)"
+                    fill="var(--color-value)"
+                    fillOpacity={0.6}
+                  />
                 </AreaChart>
               </ChartContainer>
             )
@@ -357,7 +402,7 @@ export default function ReportViewPage() {
           default:
             return (
               <div className="h-[400px] flex items-center justify-center border rounded-lg bg-muted/10">
-                <p className="text-muted-foreground">{t('builder.noDataAvailable')}</p>
+                <p className="text-muted-foreground">Unsupported visualization type</p>
               </div>
             )
         }
@@ -390,13 +435,13 @@ export default function ReportViewPage() {
         description={report.description || undefined}
         headerActions={
           <div className="flex gap-2">
-            <Button variant="outline" size="icon" onClick={loadReport} title={t('refresh')}>
+            <Button variant="outline" size="icon" onClick={loadReportData} title={t('refresh')}>
               <RefreshCw className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="icon" onClick={() => setShowShareDialog(true)} title={t('share')}>
               <Share2 className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" title={t('export')}>
+            <Button variant="outline" size="icon" onClick={handleExport} title={t('export')} disabled={!reportData || reportData.chartData.length === 0}>
               <Download className="h-4 w-4" />
             </Button>
             <Button variant="outline" onClick={() => router.push('/dashboard/reports')}>
@@ -407,6 +452,41 @@ export default function ReportViewPage() {
         }
       >
         <div className="space-y-6">
+          {/* KPIs */}
+          {reportData?.kpis && Object.keys(reportData.kpis).length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {Object.entries(reportData.kpis).map(([key, value]) => (
+                <Card key={key}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-muted-foreground capitalize">
+                      {key.replace(/_/g, ' ')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-3xl font-bold">{value.toFixed(2)}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Metadata */}
+          {reportData?.metadata && (
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                <span>{reportData.metadata.totalRecords} records</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <span>
+                  {format(new Date(reportData.metadata.dateRange.from), 'MMM d, yyyy')} -{' '}
+                  {format(new Date(reportData.metadata.dateRange.to), 'MMM d, yyyy')}
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Chart Section */}
           <Card>
             <CardHeader>

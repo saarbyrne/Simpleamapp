@@ -625,6 +625,43 @@ function calculateNextSendTime(data: CreateReportScheduleData): Date {
   return nextSend
 }
 
+// ===== DATA SOURCE FETCHING FOR BUILDER =====
+
+export async function getAvailableDataSources() {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    const [forms, spreadsheets] = await Promise.all([
+      prisma.form.findMany({
+        where: { organizationId: dbUser.organizationId },
+        select: { id: true, name: true },
+        orderBy: { name: 'asc' },
+      }),
+      prisma.spreadsheet.findMany({
+        where: { organizationId: dbUser.organizationId },
+        select: { id: true, name: true },
+        orderBy: { name: 'asc' },
+      }),
+    ])
+
+    return {
+      success: true,
+      forms: forms.map(f => ({ id: f.id, name: f.name, type: 'form' as const })),
+      spreadsheets: spreadsheets.map(s => ({ id: s.id, name: s.name, type: 'spreadsheet' as const })),
+    }
+  } catch (error) {
+    console.error('Error fetching data sources:', error)
+    return { error: 'Failed to fetch data sources' }
+  }
+}
+
 // ===== DATA FETCHING FOR REPORTS =====
 
 export async function getReportData(reportId: string, filters?: any) {
@@ -651,108 +688,14 @@ export async function getReportData(reportId: string, filters?: any) {
     }
 
     const config = report.config as ReportConfig
-    const mergedFilters = { ...config.filters, ...filters }
 
-    // Fetch data based on data sources
-    const data = await fetchDataForReport(config, mergedFilters, dbUser.organizationId)
+    // Use new query builder to fetch and aggregate real data
+    const { buildReportData } = await import('@/lib/reports/query-builder')
+    const reportData = await buildReportData(config, dbUser.organizationId, filters)
 
-    return { success: true, data, config }
+    return { success: true, ...reportData, config }
   } catch (error) {
     console.error('Error fetching report data:', error)
     return { error: 'Failed to fetch report data' }
   }
-}
-
-async function fetchDataForReport(
-  config: ReportConfig,
-  filters: any,
-  organizationId: string
-) {
-  // This is a placeholder - actual implementation would fetch from various sources
-  // based on config.dataSources and apply filters
-
-  const results: any[] = []
-
-  if (config.dataSources) {
-    for (const source of config.dataSources) {
-      switch (source.type) {
-        case 'spreadsheet':
-          // Fetch spreadsheet data
-          if (source.id) {
-            const spreadsheet = await prisma.spreadsheet.findFirst({
-              where: { id: source.id, organizationId },
-            })
-            if (spreadsheet) {
-              results.push({
-                source: source.type,
-                name: spreadsheet.name,
-                data: spreadsheet.data,
-              })
-            }
-          }
-          break
-
-        case 'form':
-          // Fetch form responses
-          if (source.id) {
-            const responses = await prisma.formResponse.findMany({
-              where: {
-                formId: source.id,
-                form: { organizationId },
-              },
-              include: {
-                personOrg: {
-                  include: {
-                    person: true,
-                  },
-                },
-              },
-            })
-            results.push({
-              source: source.type,
-              name: source.name,
-              data: responses,
-            })
-          }
-          break
-
-        case 'player':
-          // Fetch player data
-          const players = await prisma.personOrganization.findMany({
-            where: {
-              organizationId,
-              role: 'player',
-            },
-            include: {
-              person: true,
-            },
-          })
-          results.push({
-            source: source.type,
-            name: 'Players',
-            data: players,
-          })
-          break
-
-        case 'event':
-          // Fetch event data
-          const events = await prisma.event.findMany({
-            where: {
-              organizationId,
-            },
-            include: {
-              attendance: true,
-            },
-          })
-          results.push({
-            source: source.type,
-            name: 'Events',
-            data: events,
-          })
-          break
-      }
-    }
-  }
-
-  return results
 }
