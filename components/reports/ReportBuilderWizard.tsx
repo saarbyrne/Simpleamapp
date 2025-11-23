@@ -15,6 +15,12 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Calendar as CalendarComponent } from '@/components/ui/calendar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import {
   FileSpreadsheet,
   FileText,
@@ -29,7 +35,11 @@ import {
   ChevronRight,
   ChevronLeft,
   Check,
+  Calendar as CalendarIcon,
 } from 'lucide-react'
+import { DateRange } from 'react-day-picker'
+import { format } from 'date-fns'
+import { cn } from '@/components/ui/utils'
 import type { CreateReportData } from '@/app/actions/reports'
 
 interface DataSource {
@@ -59,7 +69,8 @@ export function ReportBuilderWizard({
   const [visualization, setVisualization] = useState<'line' | 'bar' | 'pie' | 'area' | 'table'>('bar')
   const [xAxis, setXAxis] = useState('createdAt')
   const [yAxis, setYAxis] = useState('value')
-  const [dateRange, setDateRange] = useState('last_30_days')
+  const [dateRangePreset, setDateRangePreset] = useState('last_30_days')
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>()
   const [aggregation, setAggregation] = useState<'sum' | 'average' | 'count'>('average')
 
   const dataSourceIcon = {
@@ -139,6 +150,17 @@ export function ReportBuilderWizard({
   const handleComplete = () => {
     const reportType = visualization === 'table' ? 'table' : 'single_chart'
 
+    // Build date range filter
+    let dateRangeFilter
+    if (dateRangePreset === 'custom' && customDateRange?.from) {
+      dateRangeFilter = {
+        from: customDateRange.from.toISOString(),
+        to: customDateRange.to?.toISOString(),
+      }
+    } else if (dateRangePreset !== 'all_time') {
+      dateRangeFilter = { from: dateRangePreset }
+    }
+
     const reportData: CreateReportData = {
       name: reportName,
       description: description || undefined,
@@ -157,7 +179,7 @@ export function ReportBuilderWizard({
         xAxis,
         yAxis,
         filters: {
-          dateRange: dateRange === 'custom' ? undefined : { from: dateRange },
+          dateRange: dateRangeFilter,
         },
         chartOptions: {
           title: reportName,
@@ -317,19 +339,77 @@ export function ReportBuilderWizard({
               <CardTitle>Date Range</CardTitle>
               <CardDescription>Filter data by time period</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="last_7_days">Last 7 days</SelectItem>
-                  <SelectItem value="last_30_days">Last 30 days</SelectItem>
-                  <SelectItem value="last_90_days">Last 90 days</SelectItem>
-                  <SelectItem value="last_365_days">Last year</SelectItem>
-                  <SelectItem value="all_time">All time</SelectItem>
-                </SelectContent>
-              </Select>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Preset Range</Label>
+                <Select value={dateRangePreset} onValueChange={setDateRangePreset}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="last_7_days">Last 7 days</SelectItem>
+                    <SelectItem value="last_30_days">Last 30 days</SelectItem>
+                    <SelectItem value="last_90_days">Last 90 days</SelectItem>
+                    <SelectItem value="last_365_days">Last year</SelectItem>
+                    <SelectItem value="all_time">All time</SelectItem>
+                    <SelectItem value="custom">Custom range</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {dateRangePreset === 'custom' && (
+                <div>
+                  <Label>Custom Date Range</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          'w-full justify-start text-start font-normal mt-2',
+                          !customDateRange && 'text-muted-foreground'
+                        )}
+                      >
+                        <CalendarIcon className="me-2 h-4 w-4" />
+                        {customDateRange?.from ? (
+                          customDateRange.to ? (
+                            <>
+                              {format(customDateRange.from, 'LLL dd, y')} -{' '}
+                              {format(customDateRange.to, 'LLL dd, y')}
+                            </>
+                          ) : (
+                            format(customDateRange.from, 'LLL dd, y')
+                          )
+                        ) : (
+                          <span>Pick a date range</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 min-w-[600px]" align="start">
+                      <CalendarComponent
+                        initialFocus
+                        mode="range"
+                        defaultMonth={customDateRange?.from}
+                        selected={customDateRange}
+                        onSelect={setCustomDateRange}
+                        numberOfMonths={2}
+                        className="flex"
+                      />
+                      {customDateRange && (
+                        <div className="border-t p-3 flex justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setCustomDateRange(undefined)}
+                            className="h-8"
+                          >
+                            Clear
+                          </Button>
+                        </div>
+                      )}
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

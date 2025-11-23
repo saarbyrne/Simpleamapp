@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ScheduleReportDialog } from '@/components/reports/ScheduleReportDialog'
 import {
   getReport,
   getReportData,
@@ -38,7 +39,18 @@ import {
   PieChart as PieChartIcon,
   TrendingUp,
   AlertCircle,
+  Printer,
+  FileDown,
+  ChevronDown,
+  Clock,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   LineChart,
   Line,
@@ -108,6 +120,7 @@ export default function ReportViewPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingData, setIsLoadingData] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(action === 'share')
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [generatingInsights, setGeneratingInsights] = useState(false)
 
   const loadReport = useCallback(async () => {
@@ -226,17 +239,48 @@ export default function ReportViewPage() {
     }
   }
 
-  const handleExport = () => {
+  const handleExportCSV = () => {
     if (!reportData || !report) return
 
     try {
       const { exportToCSV, formatChartDataForExport } = require('@/lib/reports/export')
       const dataToExport = formatChartDataForExport(reportData.chartData, report.name)
       exportToCSV(dataToExport, `${report.name.replace(/\s+/g, '_')}_${format(new Date(), 'yyyy-MM-dd')}`)
-      toast.success('Report exported successfully')
+      toast.success('Report exported to CSV successfully')
     } catch (error) {
-      console.error('Error exporting report:', error)
-      toast.error('Failed to export report')
+      console.error('Error exporting to CSV:', error)
+      toast.error('Failed to export to CSV')
+    }
+  }
+
+  const handleExportPDF = async () => {
+    if (!reportData || !report) return
+
+    try {
+      const { exportToPDF } = require('@/lib/reports/export')
+      await exportToPDF({
+        reportName: report.name,
+        description: report.description || undefined,
+        metadata: reportData.metadata,
+        kpis: reportData.kpis,
+        chartData: reportData.chartData,
+      })
+      toast.success('Report exported to PDF successfully')
+    } catch (error) {
+      console.error('Error exporting to PDF:', error)
+      toast.error('Failed to export to PDF')
+    }
+  }
+
+  const handlePrint = () => {
+    if (!report) return
+
+    try {
+      const { printReport } = require('@/lib/reports/export')
+      printReport('report-content', report.name)
+    } catch (error) {
+      console.error('Error printing report:', error)
+      toast.error('Failed to print report')
     }
   }
 
@@ -441,9 +485,33 @@ export default function ReportViewPage() {
             <Button variant="outline" size="icon" onClick={() => setShowShareDialog(true)} title={t('share')}>
               <Share2 className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={handleExport} title={t('export')} disabled={!reportData || reportData.chartData.length === 0}>
-              <Download className="h-4 w-4" />
+            <Button variant="outline" size="icon" onClick={() => setShowScheduleDialog(true)} title="Schedule Report">
+              <Clock className="h-4 w-4" />
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={!reportData || reportData.chartData.length === 0}>
+                  <Download className="h-4 w-4 me-2" />
+                  Export
+                  <ChevronDown className="h-4 w-4 ms-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportCSV}>
+                  <FileText className="h-4 w-4 me-2" />
+                  Export as CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportPDF}>
+                  <FileDown className="h-4 w-4 me-2" />
+                  Export as PDF
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handlePrint}>
+                  <Printer className="h-4 w-4 me-2" />
+                  Print Report
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" onClick={() => router.push('/dashboard/reports')}>
               <ArrowLeft className="h-4 w-4 me-2" />
               {t('back')}
@@ -451,7 +519,7 @@ export default function ReportViewPage() {
           </div>
         }
       >
-        <div className="space-y-6">
+        <div id="report-content" className="space-y-6">
           {/* KPIs */}
           {reportData?.kpis && Object.keys(reportData.kpis).length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -605,6 +673,16 @@ export default function ReportViewPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Schedule Dialog */}
+      <ScheduleReportDialog
+        reportId={reportId}
+        reportName={report.name}
+        existingSchedule={report.schedule as any}
+        open={showScheduleDialog}
+        onOpenChange={setShowScheduleDialog}
+        onScheduleCreated={loadReport}
+      />
     </div>
   )
 }
