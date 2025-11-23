@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Settings } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { getFeatureCounts } from '@/lib/permissions/feature-access'
 
 type OrganizationDetailsPageProps = {
   params: Promise<{ id: string }>
@@ -63,6 +64,9 @@ export default async function OrganizationDetailsPage({ params }: OrganizationDe
   })
 
   const currentSubscription = organization.subscriptions[0]
+  
+  // Get feature counts
+  const featureCounts = await getFeatureCounts(id)
 
   return (
     <div className="flex flex-col">
@@ -80,7 +84,7 @@ export default async function OrganizationDetailsPage({ params }: OrganizationDe
 
       <div className="flex-1 space-y-6 p-8">
         {/* Organization Info */}
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-4">
           <Card>
             <CardHeader>
               <CardTitle>Details</CardTitle>
@@ -160,6 +164,34 @@ export default async function OrganizationDetailsPage({ params }: OrganizationDe
                 <span className="text-sm text-muted-foreground">Files</span>
                 <span className="text-sm font-medium">{organization._count.files}</span>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Features</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Enabled</span>
+                  <span className="text-sm font-medium text-green-600">{featureCounts.enabled}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Disabled</span>
+                  <span className="text-sm font-medium text-red-600">{featureCounts.disabled}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Total</span>
+                  <span className="text-sm font-medium">{featureCounts.total}</span>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" className="w-full" asChild>
+                <Link href={`/platform-admin/organizations/${id}/features`}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Manage Features
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         </div>

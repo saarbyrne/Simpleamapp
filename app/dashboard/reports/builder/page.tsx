@@ -1,240 +1,113 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useRouter } from 'next/navigation'
 import { PageCard } from '@/components/ui/page-card'
-import { createReport } from '@/app/actions/reports'
+import { Button } from '@/components/ui/button'
+import { ReportBuilderWizard } from '@/components/reports/ReportBuilderWizard'
+import { createReport, getAvailableDataSources, getReport, getReportData } from '@/app/actions/reports'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
-import {
-  ArrowLeft,
-  BarChart3,
-  LineChart,
-  PieChart,
-  Table,
-  LayoutDashboard,
-  TrendingUp,
-} from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
+import type { CreateReportData } from '@/app/actions/reports'
 
 export default function ReportBuilderPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const t = useTranslations('reports')
-
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [reportType, setReportType] = useState<'single_chart' | 'dashboard' | 'table'>('single_chart')
-  const [visualization, setVisualization] = useState<'line' | 'bar' | 'pie' | 'heatmap' | 'table'>('bar')
   const [isCreating, setIsCreating] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [dataSources, setDataSources] = useState<{
+    forms: Array<{ id: string; name: string; type: 'form' }>
+    spreadsheets: Array<{ id: string; name: string; type: 'spreadsheet' }>
+  }>({ forms: [], spreadsheets: [] })
 
-  const handleCreate = async () => {
-    if (!name.trim()) {
-      toast.error(t('reportName') + ' is required')
-      return
+  useEffect(() => {
+    loadDataSources()
+  }, [])
+
+  const loadDataSources = async () => {
+    setIsLoading(true)
+    try {
+      const result = await getAvailableDataSources()
+      if (result.success && result.forms && result.spreadsheets) {
+        setDataSources({
+          forms: result.forms,
+          spreadsheets: result.spreadsheets,
+        })
+      } else {
+        toast.error(result.error || 'Failed to load data sources')
+      }
+    } catch (error) {
+      console.error('Error loading data sources:', error)
+      toast.error('Failed to load data sources')
+    } finally {
+      setIsLoading(false)
     }
+  }
 
+  const handleComplete = async (reportData: CreateReportData) => {
     setIsCreating(true)
     try {
-      const result = await createReport({
-        name: name.trim(),
-        description: description.trim() || undefined,
-        type: reportType,
-        config: {
-          visualization,
-          dataSources: [],
-          filters: {},
-          chartOptions: {
-            title: name,
-            showLegend: true,
-            showDataLabels: false,
-          },
-        },
-      })
+      // Step 1: Create the report
+      const result = await createReport(reportData)
 
       if (result.success && result.report) {
+        // Step 2: Pre-fetch report data BEFORE navigating
+        // This ensures the report page has data ready and shows no loading state
+        await Promise.all([
+          getReport(result.report.id),
+          getReportData(result.report.id)
+        ])
+        
         toast.success(t('reportCreated'))
+        // Now navigate - data is already loaded, so no loading state on report page
         router.push(`/dashboard/reports/${result.report.id}`)
       } else {
         toast.error(result.error || t('failedToCreateReport'))
+        setIsCreating(false)
       }
     } catch (error) {
       console.error('Error creating report:', error)
       toast.error(t('failedToCreateReport'))
-    } finally {
       setIsCreating(false)
     }
+  }
+
+  const handleCancel = () => {
+    router.push('/dashboard/reports')
   }
 
   return (
     <div className="container mx-auto py-8">
       <PageCard
         title={t('builder.title')}
-        description={t('builder.configureReport')}
+        description={t('builder.wizardDescription')}
         headerActions={
-          <Button variant="outline" onClick={() => router.push('/dashboard/reports')}>
+          <Button variant="outline" onClick={handleCancel} disabled={isCreating}>
             <ArrowLeft className="h-4 w-4 me-2" />
             {t('back')}
           </Button>
         }
       >
-        <div className="max-w-3xl mx-auto space-y-8">
-          {/* Basic Information */}
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="name">{t('reportName')}</Label>
-              <Input
-                id="name"
-                placeholder="My Report"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+        <div className="max-w-4xl mx-auto">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <span className="ms-3 text-muted-foreground">Loading data sources...</span>
             </div>
-            <div>
-              <Label htmlFor="description">{t('reportDescription')}</Label>
-              <Textarea
-                id="description"
-                placeholder="Describe what this report shows..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-              />
+          ) : isCreating ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <span className="ms-3 text-muted-foreground">Creating report...</span>
             </div>
-          </div>
-
-          {/* Report Type Selection */}
-          <div className="space-y-4">
-            <div>
-              <Label>{t('builder.chooseVisualization')}</Label>
-              <p className="text-sm text-muted-foreground mb-4">
-                {t('builder.chooseVisualizationDescription')}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card
-                className={`cursor-pointer transition-all hover:shadow-lg ${
-                  reportType === 'single_chart' ? 'ring-2 ring-primary' : ''
-                }`}
-                onClick={() => setReportType('single_chart')}
-              >
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <BarChart3 className="h-5 w-5" />
-                    </div>
-                    <CardTitle className="text-base">{t('types.singleChart')}</CardTitle>
-                  </div>
-                  <CardDescription className="text-sm">
-                    {t('builder.lineChartDescription')}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card
-                className={`cursor-pointer transition-all hover:shadow-lg ${
-                  reportType === 'dashboard' ? 'ring-2 ring-primary' : ''
-                }`}
-                onClick={() => setReportType('dashboard')}
-              >
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <LayoutDashboard className="h-5 w-5" />
-                    </div>
-                    <CardTitle className="text-base">{t('types.dashboard')}</CardTitle>
-                  </div>
-                  <CardDescription className="text-sm">
-                    {t('builder.dashboardDescription')}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card
-                className={`cursor-pointer transition-all hover:shadow-lg ${
-                  reportType === 'table' ? 'ring-2 ring-primary' : ''
-                }`}
-                onClick={() => setReportType('table')}
-              >
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Table className="h-5 w-5" />
-                    </div>
-                    <CardTitle className="text-base">{t('types.table')}</CardTitle>
-                  </div>
-                  <CardDescription className="text-sm">
-                    {t('builder.tableDescription')}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </div>
-          </div>
-
-          {/* Visualization Type for Charts */}
-          {reportType === 'single_chart' && (
-            <div className="space-y-4">
-              <Label>{t('builder.chartOptions')}</Label>
-              <Select value={visualization} onValueChange={(value: any) => setVisualization(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('builder.selectChartType')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="line">
-                    <div className="flex items-center gap-2">
-                      <LineChart className="h-4 w-4" />
-                      {t('builder.lineChart')}
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="bar">
-                    <div className="flex items-center gap-2">
-                      <BarChart3 className="h-4 w-4" />
-                      {t('builder.barChart')}
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="pie">
-                    <div className="flex items-center gap-2">
-                      <PieChart className="h-4 w-4" />
-                      {t('builder.pieChart')}
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="area">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4" />
-                      {t('builder.areaChart')}
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          ) : (
+            <ReportBuilderWizard
+              availableForms={dataSources.forms}
+              availableSpreadsheets={dataSources.spreadsheets}
+              onComplete={handleComplete}
+              onCancel={handleCancel}
+            />
           )}
-
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-4 pt-6 border-t">
-            <Button
-              variant="outline"
-              onClick={() => router.push('/dashboard/reports')}
-            >
-              {t('cancel')}
-            </Button>
-            <Button
-              onClick={handleCreate}
-              disabled={isCreating || !name.trim()}
-            >
-              {isCreating ? t('create') + '...' : t('create')}
-            </Button>
-          </div>
         </div>
       </PageCard>
     </div>

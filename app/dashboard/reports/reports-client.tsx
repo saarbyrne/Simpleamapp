@@ -39,7 +39,7 @@ import {
   LayoutDashboard,
   Table,
 } from 'lucide-react'
-import { deleteReport } from '@/app/actions/reports'
+import { deleteReport, getReports } from '@/app/actions/reports'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
@@ -84,22 +84,40 @@ export function ReportsClient({
   const [reports, setReports] = useState<Report[]>(initialReports)
   const [templates, setTemplates] = useState<ReportTemplate[]>(initialTemplates)
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
     if (!confirm(t('deleteConfirmation'))) return
+
+    setDeletingId(id)
+    
+    // Optimistic update - remove immediately for instant feedback
+    setReports(prev => prev.filter(r => r.id !== id))
 
     try {
       const result = await deleteReport(id)
 
       if (result.success) {
         toast.success(t('reportDeleted'))
-        setReports(prev => prev.filter(r => r.id !== id))
       } else {
+        // Revert on error
         toast.error(result.error || t('failedToDeleteReport'))
+        // Reload reports to get correct state
+        const reportsResult = await getReports()
+        if (reportsResult.success) {
+          setReports(reportsResult.reports || [])
+        }
       }
     } catch (error) {
       console.error('Error deleting report:', error)
       toast.error(t('failedToDeleteReport'))
+      // Reload reports to get correct state
+      const reportsResult = await getReports()
+      if (reportsResult.success) {
+        setReports(reportsResult.reports || [])
+      }
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -161,7 +179,9 @@ export function ReportsClient({
             {reports.map((report) => (
               <Card
                 key={report.id}
-                className="hover:shadow-lg transition-shadow cursor-pointer"
+                className={`hover:shadow-lg transition-all cursor-pointer ${
+                  deletingId === report.id ? 'opacity-50 pointer-events-none' : ''
+                }`}
                 onClick={() => router.push(`/dashboard/reports/${report.id}`)}
               >
                 <CardHeader>
