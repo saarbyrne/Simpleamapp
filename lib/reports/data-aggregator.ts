@@ -53,9 +53,15 @@ export async function fetchFormData(
   }
 
   if (filters?.dateRange?.from) {
-    where.createdAt = {
-      gte: new Date(filters.dateRange.from),
-      ...(filters.dateRange.to && { lte: new Date(filters.dateRange.to) }),
+    const fromDate = new Date(filters.dateRange.from)
+    // Only add date filter if the date is valid
+    if (!isNaN(fromDate.getTime())) {
+      where.submittedAt = {
+        gte: fromDate,
+        ...(filters.dateRange.to && {
+          lte: new Date(filters.dateRange.to)
+        }),
+      }
     }
   }
 
@@ -70,7 +76,7 @@ export async function fetchFormData(
         select: {
           id: true,
           name: true,
-          fields: true,
+          schema: true,
         },
       },
       personOrg: {
@@ -86,7 +92,7 @@ export async function fetchFormData(
       },
     },
     orderBy: {
-      createdAt: 'desc',
+      submittedAt: 'desc',
     },
   })
 
@@ -98,8 +104,8 @@ export async function fetchFormData(
     playerName: response.personOrg
       ? `${response.personOrg.person.firstName} ${response.personOrg.person.lastName}`
       : 'Unknown',
-    data: response.data as any,
-    createdAt: response.createdAt,
+    data: response.responses as any,
+    createdAt: response.submittedAt,
   }))
 }
 
@@ -117,9 +123,15 @@ export async function fetchSpreadsheetData(
   }
 
   if (filters?.dateRange?.from) {
-    where.updatedAt = {
-      gte: new Date(filters.dateRange.from),
-      ...(filters.dateRange.to && { lte: new Date(filters.dateRange.to) }),
+    const fromDate = new Date(filters.dateRange.from)
+    // Only add date filter if the date is valid
+    if (!isNaN(fromDate.getTime())) {
+      where.updatedAt = {
+        gte: fromDate,
+        ...(filters.dateRange.to && {
+          lte: new Date(filters.dateRange.to)
+        }),
+      }
     }
   }
 
@@ -129,7 +141,7 @@ export async function fetchSpreadsheetData(
       id: true,
       name: true,
       data: true,
-      columns: true,
+      schema: true,
       updatedAt: true,
     },
     orderBy: {
@@ -137,13 +149,16 @@ export async function fetchSpreadsheetData(
     },
   })
 
-  return spreadsheets.map(sheet => ({
-    id: sheet.id,
-    name: sheet.name,
-    columns: sheet.columns as any,
-    rows: (sheet.data as any) || [],
-    updatedAt: sheet.updatedAt,
-  }))
+  return spreadsheets.map(sheet => {
+    const data = sheet.data as any
+    return {
+      id: sheet.id,
+      name: sheet.name,
+      columns: (sheet.schema as any)?.columns || [],
+      rows: data?.rows || [],
+      updatedAt: sheet.updatedAt,
+    }
+  })
 }
 
 export async function fetchEventData(
@@ -155,9 +170,15 @@ export async function fetchEventData(
   }
 
   if (filters?.dateRange?.from) {
-    where.start = {
-      gte: new Date(filters.dateRange.from),
-      ...(filters.dateRange.to && { lte: new Date(filters.dateRange.to) }),
+    const fromDate = new Date(filters.dateRange.from)
+    // Only add date filter if the date is valid
+    if (!isNaN(fromDate.getTime())) {
+      where.startTime = {
+        gte: fromDate,
+        ...(filters.dateRange.to && {
+          lte: new Date(filters.dateRange.to)
+        }),
+      }
     }
   }
 
@@ -185,7 +206,7 @@ export async function fetchEventData(
       },
     },
     orderBy: {
-      start: 'desc',
+      startTime: 'desc',
     },
   })
 
@@ -197,9 +218,9 @@ export async function fetchEventData(
     return {
       id: event.id,
       title: event.title,
-      eventType: event.eventType,
-      start: event.start,
-      end: event.end,
+      eventType: event.type,
+      start: event.startTime,
+      end: event.endTime,
       location: event.location,
       attendance: event.attendance.map(a => ({
         playerId: a.personOrgId,

@@ -44,6 +44,7 @@ model Organization {
   organizationRoles  OrganizationRole[]
   reports            Report[]
   reportTemplates    ReportTemplate[]
+  features           OrganizationFeatures?
 
   @@map("organizations")
 }
@@ -1133,4 +1134,59 @@ model TemplateUsage {
   @@index([userId])
   @@index([usedAt])
   @@map("template_usages")
+}
+
+// ============================================
+// ORGANIZATION FEATURES
+// ============================================
+
+model OrganizationFeatures {
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  // Main Navigation Features (12 sections)
+  aiEnabled          Boolean @default(true)
+  playersEnabled     Boolean @default(true)
+  formsEnabled       Boolean @default(true)
+  reportsEnabled     Boolean @default(true)
+  calendarEnabled    Boolean @default(true)
+  messagesEnabled    Boolean @default(true)
+  notesEnabled       Boolean @default(true)
+  spreadsheetsEnabled Boolean @default(true)
+  canvasEnabled      Boolean @default(true)
+  filesEnabled       Boolean @default(true)
+  plannerEnabled     Boolean @default(true)
+  templatesEnabled   Boolean @default(true)
+  
+  // Sub-features: Reports
+  reportsBuilderEnabled    Boolean @default(true)
+  reportsTemplatesEnabled  Boolean @default(true)
+  reportsSchedulingEnabled Boolean @default(true)
+  reportsAiInsightsEnabled Boolean @default(true)
+  reportsSharingEnabled    Boolean @default(true)
+  
+  // Sub-features: Calendar
+  calendarAttendanceEnabled Boolean @default(true)
+  calendarFormsEnabled      Boolean @default(true)
+  calendarDrawingsEnabled   Boolean @default(true)
+  calendarSpreadsheetsEnabled Boolean @default(true)
+  calendarNotesEnabled      Boolean @default(true)
+  calendarFilesEnabled      Boolean @default(true)
+  
+  // Sub-features: Forms
+  formsBuilderEnabled    Boolean @default(true)
+  formsResponsesEnabled  Boolean @default(true)
+  formsSchedulingEnabled Boolean @default(true)
+  
+  // Sub-features: Players
+  playersNotesEnabled        Boolean @default(true)
+  playersFilesEnabled        Boolean @default(true)
+  playersMedicalDataEnabled  Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([organizationId])
+  @@map("organization_features")
 }

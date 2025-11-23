@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { PageCard } from '@/components/ui/page-card'
 import { Button } from '@/components/ui/button'
 import { ReportBuilderWizard } from '@/components/reports/ReportBuilderWizard'
-import { createReport, getAvailableDataSources } from '@/app/actions/reports'
+import { createReport, getAvailableDataSources, getReport, getReportData } from '@/app/actions/reports'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { ArrowLeft, Loader2 } from 'lucide-react'
@@ -48,10 +48,19 @@ export default function ReportBuilderPage() {
   const handleComplete = async (reportData: CreateReportData) => {
     setIsCreating(true)
     try {
+      // Step 1: Create the report
       const result = await createReport(reportData)
 
       if (result.success && result.report) {
+        // Step 2: Pre-fetch report data BEFORE navigating
+        // This ensures the report page has data ready and shows no loading state
+        await Promise.all([
+          getReport(result.report.id),
+          getReportData(result.report.id)
+        ])
+        
         toast.success(t('reportCreated'))
+        // Now navigate - data is already loaded, so no loading state on report page
         router.push(`/dashboard/reports/${result.report.id}`)
       } else {
         toast.error(result.error || t('failedToCreateReport'))

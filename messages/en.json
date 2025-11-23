@@ -813,6 +813,7 @@
     },
     "builder": {
       "title": "Report Builder",
+      "wizardDescription": "Create a custom report in 3 easy steps: select your data source, choose how to visualize it, and configure the details",
       "step1": "Select Data",
       "step2": "Choose Visualization",
       "step3": "Configure & Preview",

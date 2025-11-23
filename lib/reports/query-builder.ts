@@ -274,12 +274,85 @@ function calculateCustomPercentage(data: any[], metricId: string): number {
 // ============================================
 
 function mergeFilters(configFilters: any, runtimeFilters?: FilterConfig): FilterConfig {
+  const dateRange = runtimeFilters?.dateRange || configFilters.dateRange
+  
   return {
-    dateRange: runtimeFilters?.dateRange || configFilters.dateRange,
+    dateRange: dateRange ? convertDateRangePreset(dateRange) : undefined,
     playerIds: runtimeFilters?.playerIds || configFilters.players,
     eventTypes: runtimeFilters?.eventTypes || configFilters.eventTypes,
     tags: runtimeFilters?.tags || configFilters.tags,
     status: runtimeFilters?.status || configFilters.status,
+  }
+}
+
+function convertDateRangePreset(dateRange: any): { from: Date | string; to?: Date | string } | undefined {
+  // If dateRange is already an object with from/to dates, validate and return
+  if (dateRange && typeof dateRange === 'object' && dateRange.from) {
+    // If from is already a Date or valid date string, return as-is
+    const fromDate = new Date(dateRange.from)
+    if (!isNaN(fromDate.getTime())) {
+      return {
+        from: fromDate,
+        to: dateRange.to ? new Date(dateRange.to) : undefined,
+      }
+    }
+    
+    // If from is a preset string, convert it
+    if (typeof dateRange.from === 'string') {
+      return convertPresetToDateRange(dateRange.from)
+    }
+  }
+  
+  return undefined
+}
+
+function convertPresetToDateRange(preset: string): { from: Date; to?: Date } | undefined {
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  
+  switch (preset) {
+    case 'last_7_days':
+      return {
+        from: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000),
+        to: now,
+      }
+    
+    case 'last_30_days':
+      return {
+        from: new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000),
+        to: now,
+      }
+    
+    case 'last_90_days':
+      return {
+        from: new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000),
+        to: now,
+      }
+    
+    case 'this_week':
+      const startOfWeek = new Date(today)
+      startOfWeek.setDate(today.getDate() - today.getDay())
+      return {
+        from: startOfWeek,
+        to: now,
+      }
+    
+    case 'this_month':
+      return {
+        from: new Date(now.getFullYear(), now.getMonth(), 1),
+        to: now,
+      }
+    
+    case 'this_year':
+      return {
+        from: new Date(now.getFullYear(), 0, 1),
+        to: now,
+      }
+    
+    case 'all_time':
+    default:
+      // Return undefined to fetch all data
+      return undefined
   }
 }
 

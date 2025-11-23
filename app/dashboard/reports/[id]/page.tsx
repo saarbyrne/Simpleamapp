@@ -124,20 +124,55 @@ export default function ReportViewPage() {
   const [generatingInsights, setGeneratingInsights] = useState(false)
 
   const loadReport = useCallback(async () => {
-    setIsLoading(true)
+    // Don't show loading state if data loads quickly (from cache/pre-fetch)
+    // This prevents the "2 loading states" issue when creating reports
+    let loadingTimeout: NodeJS.Timeout | null = null
+    const showLoading = () => {
+      loadingTimeout = setTimeout(() => setIsLoading(true), 100) // Only show after 100ms
+    }
+    showLoading()
+    
     try {
-      const result = await getReport(reportId)
-      if (result.success && result.report) {
-        setReport(result.report as any)
-        await loadReportData()
+      // Load both report config and data in parallel
+      const [reportResult, dataResult] = await Promise.all([
+        getReport(reportId),
+        getReportData(reportId)
+      ])
+      
+      // Cancel loading state if data loaded quickly
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout)
+        setIsLoading(false) // Data ready, no need to show loading
+      }
+      
+      if (reportResult.success && reportResult.report) {
+        setReport(reportResult.report as any)
+        
+        if ('success' in dataResult && dataResult.success && 'chartData' in dataResult) {
+          setReportData({
+            chartData: dataResult.chartData || [],
+            tableData: dataResult.tableData,
+            kpis: dataResult.kpis,
+            metadata: dataResult.metadata || {
+              totalRecords: 0,
+              dateRange: { from: new Date(), to: new Date() },
+              lastUpdated: new Date(),
+            },
+          })
+        } else {
+          toast.error('error' in dataResult ? dataResult.error : 'Failed to load report data')
+        }
       } else {
-        toast.error(result.error || t('failedToLoadReport'))
+        toast.error('error' in reportResult ? reportResult.error : t('failedToLoadReport'))
         router.push('/dashboard/reports')
       }
     } catch (error) {
+      if (loadingTimeout) clearTimeout(loadingTimeout)
       console.error('Error loading report:', error)
       toast.error(t('failedToLoadReport'))
+      setIsLoading(false)
     } finally {
+      if (loadingTimeout) clearTimeout(loadingTimeout)
       setIsLoading(false)
     }
   }, [reportId, router, t])
@@ -146,7 +181,7 @@ export default function ReportViewPage() {
     setIsLoadingData(true)
     try {
       const result = await getReportData(reportId)
-      if (result.success) {
+      if ('success' in result && result.success && 'chartData' in result) {
         setReportData({
           chartData: result.chartData || [],
           tableData: result.tableData,
@@ -158,7 +193,7 @@ export default function ReportViewPage() {
           },
         })
       } else {
-        toast.error(result.error || 'Failed to load report data')
+        toast.error('error' in result ? result.error : 'Failed to load report data')
       }
     } catch (error) {
       console.error('Error loading report data:', error)
@@ -440,15 +475,10 @@ export default function ReportViewPage() {
   }
 
   const renderChart = () => {
-    if (!report || !reportData || isLoadingData) {
-      return (
-        <div className="h-[400px] flex items-center justify-center">
-          <div className="text-center">
-            <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Loading chart data...</p>
-          </div>
-        </div>
-      )
+    // This function should only be called when we have both report and reportData
+    // The loading check is done in the parent component
+    if (!report || !reportData) {
+      return null
     }
 
     if (!reportData.chartData || reportData.chartData.length === 0) {
@@ -617,7 +647,7 @@ export default function ReportViewPage() {
         <PageCard title={t('loadingReport')} description="">
           <div className="flex items-center justify-center h-[400px]">
             <div className="text-center">
-              <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-pulse" />
+              <RefreshCw className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-spin" />
               <p className="text-muted-foreground">{t('loadingReport')}</p>
             </div>
           </div>
@@ -714,7 +744,11 @@ export default function ReportViewPage() {
           )}
 
           {/* Chart Section */}
-          {report.type === 'dashboard' ? (
+          {isLoading || !reportData ? (
+            <div className="h-[400px] flex items-center justify-center">
+              <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : report.type === 'dashboard' ? (
             renderChart()
           ) : (
             <Card>
@@ -840,7 +874,7 @@ export default function ReportViewPage() {
       <ScheduleReportDialog
         reportId={reportId}
         reportName={report.name}
-        existingSchedule={report.schedule as any}
+        existingSchedule={(report as any).schedule}
         open={showScheduleDialog}
         onOpenChange={setShowScheduleDialog}
         onScheduleCreated={loadReport}

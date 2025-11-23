@@ -1,6 +1,6 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -47,6 +47,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { signOut } from '@/app/actions/profile'
 import { toast } from 'sonner'
+import { getUserEnabledFeatures } from '@/app/actions/user-features'
+import { FeatureKey } from '@/lib/permissions/feature-metadata'
 
 type AppSidebarProps = {
   userName: string
@@ -75,21 +77,43 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
   const pathname = usePathname()
   const router = useRouter()
   const t = useTranslations()
+  const [enabledFeatures, setEnabledFeatures] = useState<Set<string>>(new Set())
+  const [isLoadingFeatures, setIsLoadingFeatures] = useState(true)
 
-  const navItems = [
-    { labelKey: 'nav.ai', href: '/dashboard/ai', icon: Sparkles },
-    { labelKey: 'nav.players', href: '/dashboard/players', icon: Users },
-    { labelKey: 'nav.forms', href: '/dashboard/forms', icon: FileText },
-    { labelKey: 'nav.reports', href: '/dashboard/reports', icon: BarChart3 },
-    { labelKey: 'nav.calendar', href: '/dashboard/calendar', icon: Calendar },
-    { labelKey: 'nav.messages', href: '/dashboard/chat', icon: MessageSquare },
-    { labelKey: 'nav.notes', href: '/dashboard/notes', icon: StickyNote },
-    { labelKey: 'nav.spreadsheets', href: '/dashboard/spreadsheets', icon: Table },
-    { labelKey: 'nav.canvas', href: '/dashboard/canvas', icon: PencilRuler },
-    { labelKey: 'nav.files', href: '/dashboard/files', icon: Folder },
-    { labelKey: 'nav.planner', href: '/dashboard/planner', icon: CalendarCheck },
-    { labelKey: 'nav.templates', href: '/dashboard/templates', icon: Layout },
+  // Load enabled features on mount
+  useEffect(() => {
+    async function loadFeatures() {
+      const result = await getUserEnabledFeatures()
+      if (result.success && result.features) {
+        setEnabledFeatures(new Set(result.features))
+      } else {
+        // On error, enable all features (fail open)
+        setEnabledFeatures(new Set(['ai', 'players', 'forms', 'reports', 'calendar', 'messages', 'notes', 'spreadsheets', 'canvas', 'files', 'planner', 'templates']))
+      }
+      setIsLoadingFeatures(false)
+    }
+    loadFeatures()
+  }, [])
+
+  const allNavItems = [
+    { labelKey: 'nav.ai', href: '/dashboard/ai', icon: Sparkles, featureKey: 'ai' as FeatureKey },
+    { labelKey: 'nav.players', href: '/dashboard/players', icon: Users, featureKey: 'players' as FeatureKey },
+    { labelKey: 'nav.forms', href: '/dashboard/forms', icon: FileText, featureKey: 'forms' as FeatureKey },
+    { labelKey: 'nav.reports', href: '/dashboard/reports', icon: BarChart3, featureKey: 'reports' as FeatureKey },
+    { labelKey: 'nav.calendar', href: '/dashboard/calendar', icon: Calendar, featureKey: 'calendar' as FeatureKey },
+    { labelKey: 'nav.messages', href: '/dashboard/chat', icon: MessageSquare, featureKey: 'messages' as FeatureKey },
+    { labelKey: 'nav.notes', href: '/dashboard/notes', icon: StickyNote, featureKey: 'notes' as FeatureKey },
+    { labelKey: 'nav.spreadsheets', href: '/dashboard/spreadsheets', icon: Table, featureKey: 'spreadsheets' as FeatureKey },
+    { labelKey: 'nav.canvas', href: '/dashboard/canvas', icon: PencilRuler, featureKey: 'canvas' as FeatureKey },
+    { labelKey: 'nav.files', href: '/dashboard/files', icon: Folder, featureKey: 'files' as FeatureKey },
+    { labelKey: 'nav.planner', href: '/dashboard/planner', icon: CalendarCheck, featureKey: 'planner' as FeatureKey },
+    { labelKey: 'nav.templates', href: '/dashboard/templates', icon: Layout, featureKey: 'templates' as FeatureKey },
   ]
+
+  // Filter navigation items based on enabled features
+  const navItems = isLoadingFeatures 
+    ? allNavItems // Show all while loading
+    : allNavItems.filter(item => enabledFeatures.has(item.featureKey))
 
   const settingsItems = [
     { labelKey: 'settings.profile', href: '/dashboard/profile', icon: UserCircle },

@@ -250,7 +250,8 @@ export async function deleteReport(reportId: string) {
       where: { id: reportId },
     })
 
-    revalidatePath('/dashboard/reports')
+    // Don't revalidate here - client does optimistic update
+    // revalidatePath('/dashboard/reports')
 
     return { success: true }
   } catch (error) {
