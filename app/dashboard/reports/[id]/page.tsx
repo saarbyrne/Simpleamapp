@@ -284,6 +284,161 @@ export default function ReportViewPage() {
     }
   }
 
+  const renderSectionChart = (section: any, data: any[]) => {
+    if (!data || data.length === 0) {
+      return (
+        <div className="h-full min-h-[200px] flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">No data available</p>
+        </div>
+      )
+    }
+
+    const chartConfig = {
+      value: {
+        label: section.config.yAxis || 'Value',
+        color: 'hsl(var(--chart-1))',
+      },
+    }
+
+    switch (section.config.visualization) {
+      case 'line':
+        return (
+          <ChartContainer config={chartConfig} className="h-[250px] w-full">
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} />
+              <YAxis tick={{ fontSize: 11 }} tickLine={false} />
+              <Tooltip />
+              {section.config.chartOptions?.showLegend && <Legend />}
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="var(--color-value)"
+                strokeWidth={2}
+                dot={{ r: 3 }}
+              />
+            </LineChart>
+          </ChartContainer>
+        )
+
+      case 'bar':
+        return (
+          <ChartContainer config={chartConfig} className="h-[250px] w-full">
+            <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} />
+              <YAxis tick={{ fontSize: 11 }} tickLine={false} />
+              <Tooltip />
+              {section.config.chartOptions?.showLegend && <Legend />}
+              <Bar dataKey="value" fill="var(--color-value)" />
+            </BarChart>
+          </ChartContainer>
+        )
+
+      case 'area':
+        return (
+          <ChartContainer config={chartConfig} className="h-[250px] w-full">
+            <AreaChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} />
+              <YAxis tick={{ fontSize: 11 }} tickLine={false} />
+              <Tooltip />
+              {section.config.chartOptions?.showLegend && <Legend />}
+              <Area
+                type="monotone"
+                dataKey="value"
+                fill="var(--color-value)"
+                stroke="var(--color-value)"
+              />
+            </AreaChart>
+          </ChartContainer>
+        )
+
+      case 'pie':
+        return (
+          <ChartContainer config={chartConfig} className="h-[250px] w-full">
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                label
+              >
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${(index % 5) + 1}))`} />
+                ))}
+              </Pie>
+              <Tooltip />
+              {section.config.chartOptions?.showLegend && <Legend />}
+            </PieChart>
+          </ChartContainer>
+        )
+
+      case 'table':
+        return (
+          <div className="border rounded-lg overflow-hidden max-h-[250px] overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Value</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.slice(0, 10).map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.value}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )
+
+      default:
+        return <p className="text-sm text-muted-foreground">Unknown visualization type</p>
+    }
+  }
+
+  const renderDashboard = () => {
+    if (!report?.config?.sections || report.config.sections.length === 0) {
+      return (
+        <div className="h-[400px] flex items-center justify-center">
+          <p className="text-muted-foreground">No dashboard sections configured</p>
+        </div>
+      )
+    }
+
+    const SIZE_CLASSES = {
+      full: 'col-span-12',
+      half: 'col-span-12 md:col-span-6',
+      third: 'col-span-12 md:col-span-4',
+    }
+
+    return (
+      <div className="grid grid-cols-12 gap-4">
+        {report.config.sections.map((section: any, index: number) => (
+          <div key={section.id || index} className={SIZE_CLASSES[section.size as keyof typeof SIZE_CLASSES] || 'col-span-12 md:col-span-6'}>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">
+                  {section.config.chartOptions?.title || `Chart ${index + 1}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {renderSectionChart(section, reportData?.chartData || [])}
+              </CardContent>
+            </Card>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   const renderChart = () => {
     if (!report || !reportData || isLoadingData) {
       return (
@@ -349,6 +504,9 @@ export default function ReportViewPage() {
             </Table>
           </div>
         )
+
+      case 'dashboard':
+        return renderDashboard()
 
       case 'single_chart':
       default:
@@ -556,17 +714,21 @@ export default function ReportViewPage() {
           )}
 
           {/* Chart Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{report.config?.chartOptions?.title || report.name}</CardTitle>
-              <CardDescription>
-                {t('view.lastUpdated')}: {format(new Date(report.updatedAt), 'PPpp')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {renderChart()}
-            </CardContent>
-          </Card>
+          {report.type === 'dashboard' ? (
+            renderChart()
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>{report.config?.chartOptions?.title || report.name}</CardTitle>
+                <CardDescription>
+                  {t('view.lastUpdated')}: {format(new Date(report.updatedAt), 'PPpp')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {renderChart()}
+              </CardContent>
+            </Card>
+          )}
 
           {/* AI Insights Section */}
           <Card>

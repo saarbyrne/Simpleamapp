@@ -36,11 +36,13 @@ import {
   ChevronLeft,
   Check,
   Calendar as CalendarIcon,
+  LayoutGrid,
 } from 'lucide-react'
 import { DateRange } from 'react-day-picker'
 import { format } from 'date-fns'
 import { cn } from '@/components/ui/utils'
-import type { CreateReportData } from '@/app/actions/reports'
+import type { CreateReportData, ReportSection } from '@/app/actions/reports'
+import { DashboardBuilder } from './DashboardBuilder'
 
 interface DataSource {
   id: string
@@ -64,6 +66,7 @@ export function ReportBuilderWizard({
   const [step, setStep] = useState(1)
   const [reportName, setReportName] = useState('')
   const [description, setDescription] = useState('')
+  const [reportType, setReportType] = useState<'single_chart' | 'dashboard'>('single_chart')
   const [selectedDataSource, setSelectedDataSource] = useState<DataSource | null>(null)
   const [dataSourceType, setDataSourceType] = useState<'form' | 'spreadsheet' | 'event' | 'player'>('form')
   const [visualization, setVisualization] = useState<'line' | 'bar' | 'pie' | 'area' | 'table'>('bar')
@@ -72,6 +75,7 @@ export function ReportBuilderWizard({
   const [dateRangePreset, setDateRangePreset] = useState('last_30_days')
   const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>()
   const [aggregation, setAggregation] = useState<'sum' | 'average' | 'count'>('average')
+  const [dashboardSections, setDashboardSections] = useState<ReportSection[]>([])
 
   const dataSourceIcon = {
     form: FileText,
@@ -148,8 +152,6 @@ export function ReportBuilderWizard({
   }
 
   const handleComplete = () => {
-    const reportType = visualization === 'table' ? 'table' : 'single_chart'
-
     // Build date range filter
     let dateRangeFilter
     if (dateRangePreset === 'custom' && customDateRange?.from) {
@@ -161,11 +163,26 @@ export function ReportBuilderWizard({
       dateRangeFilter = { from: dateRangePreset }
     }
 
-    const reportData: CreateReportData = {
-      name: reportName,
-      description: description || undefined,
-      type: reportType,
-      config: {
+    // Build config based on report type
+    let config
+    if (reportType === 'dashboard') {
+      config = {
+        dataSources: selectedDataSource
+          ? [{
+              type: selectedDataSource.type,
+              id: selectedDataSource.id !== 'all-events' && selectedDataSource.id !== 'all-players'
+                ? selectedDataSource.id
+                : undefined,
+              name: selectedDataSource.name,
+            }]
+          : [],
+        filters: {
+          dateRange: dateRangeFilter,
+        },
+        sections: dashboardSections,
+      }
+    } else {
+      config = {
         dataSources: selectedDataSource
           ? [{
               type: selectedDataSource.type,
@@ -187,7 +204,14 @@ export function ReportBuilderWizard({
           showDataLabels: false,
           aggregation,
         },
-      },
+      }
+    }
+
+    const reportData: CreateReportData = {
+      name: reportName,
+      description: description || undefined,
+      type: reportType === 'dashboard' ? 'dashboard' : visualization === 'table' ? 'table' : 'single_chart',
+      config,
     }
 
     onComplete(reportData)
@@ -195,7 +219,9 @@ export function ReportBuilderWizard({
 
   const canProceedToStep2 = reportName.trim().length > 0
   const canProceedToStep3 = selectedDataSource !== null
-  const canComplete = canProceedToStep3 && visualization !== null
+  const canComplete = reportType === 'dashboard'
+    ? canProceedToStep3 && dashboardSections.length > 0
+    : canProceedToStep3 && visualization !== null
 
   return (
     <div className="space-y-6">
@@ -231,34 +257,76 @@ export function ReportBuilderWizard({
 
       {/* Step 1: Basic Information */}
       {step === 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Report Details</CardTitle>
-            <CardDescription>Give your report a name and description</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="name">Report Name *</Label>
-              <Input
-                id="name"
-                placeholder="e.g., Weekly Wellness Trends"
-                value={reportName}
-                onChange={(e) => setReportName(e.target.value)}
-                autoFocus
-              />
-            </div>
-            <div>
-              <Label htmlFor="description">Description (optional)</Label>
-              <Textarea
-                id="description"
-                placeholder="Describe what this report shows..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Report Details</CardTitle>
+              <CardDescription>Give your report a name and description</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="name">Report Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="e.g., Weekly Wellness Trends"
+                  value={reportName}
+                  onChange={(e) => setReportName(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <Label htmlFor="description">Description (optional)</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Describe what this report shows..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Report Type</CardTitle>
+              <CardDescription>Choose between a single chart or multi-chart dashboard</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <Card
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    reportType === 'single_chart' ? 'ring-2 ring-primary' : ''
+                  }`}
+                  onClick={() => setReportType('single_chart')}
+                >
+                  <CardContent className="p-4 text-center">
+                    <BarChart3 className="h-8 w-8 mx-auto mb-2" />
+                    <p className="text-sm font-medium">Single Chart</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      One visualization with detailed configuration
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    reportType === 'dashboard' ? 'ring-2 ring-primary' : ''
+                  }`}
+                  onClick={() => setReportType('dashboard')}
+                >
+                  <CardContent className="p-4 text-center">
+                    <LayoutGrid className="h-8 w-8 mx-auto mb-2" />
+                    <p className="text-sm font-medium">Dashboard</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Multiple charts in a customizable layout
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Step 2: Data Source Selection */}
@@ -418,95 +486,106 @@ export function ReportBuilderWizard({
       {/* Step 3: Visualization Configuration */}
       {step === 3 && (
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Choose Visualization</CardTitle>
-              <CardDescription>Select how you want to display your data</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {[
-                  { value: 'bar', label: 'Bar Chart', icon: BarChart3, desc: 'Compare categories' },
-                  { value: 'line', label: 'Line Chart', icon: LineChart, desc: 'Show trends over time' },
-                  { value: 'area', label: 'Area Chart', icon: TrendingUp, desc: 'Filled line chart' },
-                  { value: 'pie', label: 'Pie Chart', icon: PieChart, desc: 'Show proportions' },
-                  { value: 'table', label: 'Table', icon: Table, desc: 'Detailed data view' },
-                ].map((viz) => {
-                  const Icon = viz.icon
-                  return (
-                    <Card
-                      key={viz.value}
-                      className={`cursor-pointer transition-all hover:shadow-md ${
-                        visualization === viz.value ? 'ring-2 ring-primary' : ''
-                      }`}
-                      onClick={() => setVisualization(viz.value as any)}
-                    >
-                      <CardContent className="p-4 text-center">
-                        <Icon className="h-8 w-8 mx-auto mb-2" />
-                        <p className="text-sm font-medium">{viz.label}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{viz.desc}</p>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
+          {reportType === 'dashboard' ? (
+            <DashboardBuilder
+              sections={dashboardSections}
+              onSectionsChange={setDashboardSections}
+              availableMetrics={getYAxisOptions()}
+              dataSourceType={dataSourceType}
+            />
+          ) : (
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Choose Visualization</CardTitle>
+                  <CardDescription>Select how you want to display your data</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {[
+                      { value: 'bar', label: 'Bar Chart', icon: BarChart3, desc: 'Compare categories' },
+                      { value: 'line', label: 'Line Chart', icon: LineChart, desc: 'Show trends over time' },
+                      { value: 'area', label: 'Area Chart', icon: TrendingUp, desc: 'Filled line chart' },
+                      { value: 'pie', label: 'Pie Chart', icon: PieChart, desc: 'Show proportions' },
+                      { value: 'table', label: 'Table', icon: Table, desc: 'Detailed data view' },
+                    ].map((viz) => {
+                      const Icon = viz.icon
+                      return (
+                        <Card
+                          key={viz.value}
+                          className={`cursor-pointer transition-all hover:shadow-md ${
+                            visualization === viz.value ? 'ring-2 ring-primary' : ''
+                          }`}
+                          onClick={() => setVisualization(viz.value as any)}
+                        >
+                          <CardContent className="p-4 text-center">
+                            <Icon className="h-8 w-8 mx-auto mb-2" />
+                            <p className="text-sm font-medium">{viz.label}</p>
+                            <p className="text-xs text-muted-foreground mt-1">{viz.desc}</p>
+                          </CardContent>
+                        </Card>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
 
-          {visualization !== 'table' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Chart Configuration</CardTitle>
-                <CardDescription>Customize what data to show</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>X-Axis (Horizontal)</Label>
-                  <Select value={xAxis} onValueChange={setXAxis}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getXAxisOptions().map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              {visualization !== 'table' && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Chart Configuration</CardTitle>
+                    <CardDescription>Customize what data to show</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label>X-Axis (Horizontal)</Label>
+                      <Select value={xAxis} onValueChange={setXAxis}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getXAxisOptions().map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                <div>
-                  <Label>Y-Axis (Vertical)</Label>
-                  <Select value={yAxis} onValueChange={setYAxis}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getYAxisOptions().map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                    <div>
+                      <Label>Y-Axis (Vertical)</Label>
+                      <Select value={yAxis} onValueChange={setYAxis}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getYAxisOptions().map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                <div>
-                  <Label>Aggregation Method</Label>
-                  <Select value={aggregation} onValueChange={(v: any) => setAggregation(v)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="average">Average</SelectItem>
-                      <SelectItem value="sum">Sum</SelectItem>
-                      <SelectItem value="count">Count</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
+                    <div>
+                      <Label>Aggregation Method</Label>
+                      <Select value={aggregation} onValueChange={(v: any) => setAggregation(v)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="average">Average</SelectItem>
+                          <SelectItem value="sum">Sum</SelectItem>
+                          <SelectItem value="count">Count</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
           )}
         </div>
       )}
