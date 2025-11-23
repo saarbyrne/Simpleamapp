@@ -7,7 +7,6 @@ const DYNAMIC_CACHE = 'simpleam-dynamic-v1.0'
 const STATIC_ASSETS = [
   '/',
   '/favicon.ico',
-  '/manifest.json',
   // Add critical CSS/JS files here when known
 ]
 
@@ -15,8 +14,22 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
-      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .then((cache) => {
+        // Cache each asset individually to avoid failures
+        return Promise.allSettled(
+          STATIC_ASSETS.map(url => 
+            cache.add(url).catch(err => {
+              console.warn(`Failed to cache ${url}:`, err)
+              return null
+            })
+          )
+        )
+      })
       .then(() => self.skipWaiting())
+      .catch(err => {
+        console.error('Service worker install failed:', err)
+        return self.skipWaiting()
+      })
   )
 })
 

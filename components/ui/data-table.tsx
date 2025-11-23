@@ -138,7 +138,7 @@ export function DataTable<TData>({
                   const groupingColumnId = row.groupingColumnId || ''
                   const groupingValue = groupingColumnId ? row.getGroupingValue(groupingColumnId) : row.id
                   return (
-                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                    <TableRow key={row.id} data-state={enableRowSelection && row.getIsSelected?.() ? 'selected' : undefined}>
                       <TableCell
                         colSpan={row.getVisibleCells().length}
                         className="font-medium"
@@ -165,7 +165,7 @@ export function DataTable<TData>({
                 return (
                   <TableRow
                     key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
+                    data-state={enableRowSelection && row.getIsSelected?.() ? 'selected' : undefined}
                     className={cn(
                       !isExpanded && isGrouped && 'hidden',
                       isExpanded && isGrouped && ''
