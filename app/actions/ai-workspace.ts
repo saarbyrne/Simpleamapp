@@ -1,0 +1,328 @@
+'use server'
+
+import { createServerClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/db'
+import { revalidatePath } from 'next/cache'
+import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { ArtifactType, WorkspaceStatus, ArtifactData, PublishDestination } from '@/lib/types/ai-workspace'
+
+// ===== TYPES =====
+
+export interface CreateWorkspaceData {
+  prompt: string
+  artifactType?: ArtifactType
+}
+
+export interface UpdateWorkspaceData {
+  name?: string
+  status?: WorkspaceStatus
+  artifactData?: ArtifactData
+  generatedContent?: any
+}
+
+export interface PublishWorkspaceData {
+  destinations: PublishDestination[]
+}
+
+// ===== CREATE WORKSPACE =====
+
+export async function createAIWorkspace(data: CreateWorkspaceData) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', success: false }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    // Infer artifact type from prompt if not provided
+    const artifactType = data.artifactType || inferArtifactType(data.prompt)
+
+    const workspace = await prisma.aIWorkspace.create({
+      data: {
+        name: generateWorkspaceName(data.prompt, artifactType),
+        artifactType,
+        status: 'draft',
+        initialPrompt: data.prompt,
+        userId: dbUser.id,
+        organizationId: dbUser.organizationId,
+      },
+    })
+
+    // Create initial system message
+    await prisma.aIWorkspaceMessage.create({
+      data: {
+        workspaceId: workspace.id,
+        role: 'user',
+        content: data.prompt,
+      },
+    })
+
+    revalidatePath('/dashboard/ai-workspace')
+
+    return {
+      success: true,
+      workspace,
+      workspaceId: workspace.id,
+    }
+  } catch (error) {
+    console.error('Error creating AI workspace:', error)
+    return { error: 'Failed to create workspace', success: false }
+  }
+}
+
+// ===== GET WORKSPACES =====
+
+export async function getAIWorkspaces() {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', success: false }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    const workspaces = await prisma.aIWorkspace.findMany({
+      where: {
+        organizationId: dbUser.organizationId,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+      include: {
+        messages: {
+          orderBy: {
+            createdAt: 'asc',
+          },
+          take: 1, // Just get the first message for preview
+        },
+      },
+    })
+
+    return { success: true, workspaces }
+  } catch (error) {
+    console.error('Error fetching workspaces:', error)
+    return { error: 'Failed to fetch workspaces', success: false }
+  }
+}
+
+// ===== GET WORKSPACE BY ID =====
+
+export async function getAIWorkspace(workspaceId: string) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', success: false }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    const workspace = await prisma.aIWorkspace.findFirst({
+      where: {
+        id: workspaceId,
+        organizationId: dbUser.organizationId,
+      },
+      include: {
+        messages: {
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
+      },
+    })
+
+    if (!workspace) {
+      return { error: 'Workspace not found', success: false }
+    }
+
+    return { success: true, workspace }
+  } catch (error) {
+    console.error('Error fetching workspace:', error)
+    return { error: 'Failed to fetch workspace', success: false }
+  }
+}
+
+// ===== UPDATE WORKSPACE =====
+
+export async function updateAIWorkspace(workspaceId: string, data: UpdateWorkspaceData) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', success: false }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    const workspace = await prisma.aIWorkspace.update({
+      where: {
+        id: workspaceId,
+        organizationId: dbUser.organizationId,
+      },
+      data: {
+        ...(data.name && { name: data.name }),
+        ...(data.status && { status: data.status }),
+        ...(data.artifactData && { artifactData: data.artifactData as any }),
+        ...(data.generatedContent && { generatedContent: data.generatedContent as any }),
+        version: { increment: 1 },
+      },
+    })
+
+    revalidatePath('/dashboard/ai-workspace')
+    revalidatePath(`/dashboard/ai-workspace/${workspaceId}`)
+
+    return { success: true, workspace }
+  } catch (error) {
+    console.error('Error updating workspace:', error)
+    return { error: 'Failed to update workspace', success: false }
+  }
+}
+
+// ===== ADD MESSAGE =====
+
+export async function addAIWorkspaceMessage(
+  workspaceId: string,
+  role: 'user' | 'assistant' | 'system',
+  content: string
+) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', success: false }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    // Verify workspace belongs to user's organization
+    const workspace = await prisma.aIWorkspace.findFirst({
+      where: {
+        id: workspaceId,
+        organizationId: dbUser.organizationId,
+      },
+    })
+
+    if (!workspace) {
+      return { error: 'Workspace not found', success: false }
+    }
+
+    const message = await prisma.aIWorkspaceMessage.create({
+      data: {
+        workspaceId,
+        role,
+        content,
+      },
+    })
+
+    return { success: true, message }
+  } catch (error) {
+    console.error('Error adding message:', error)
+    return { error: 'Failed to add message', success: false }
+  }
+}
+
+// ===== PUBLISH WORKSPACE =====
+
+export async function publishAIWorkspace(workspaceId: string, data: PublishWorkspaceData) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', success: false }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    const workspace = await prisma.aIWorkspace.update({
+      where: {
+        id: workspaceId,
+        organizationId: dbUser.organizationId,
+      },
+      data: {
+        status: 'published',
+        publishedAt: new Date(),
+        publishedTo: data.destinations as any,
+      },
+    })
+
+    revalidatePath('/dashboard/ai-workspace')
+    revalidatePath(`/dashboard/ai-workspace/${workspaceId}`)
+
+    return { success: true, workspace }
+  } catch (error) {
+    console.error('Error publishing workspace:', error)
+    return { error: 'Failed to publish workspace', success: false }
+  }
+}
+
+// ===== DELETE WORKSPACE =====
+
+export async function deleteAIWorkspace(workspaceId: string) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', success: false }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    await prisma.aIWorkspace.delete({
+      where: {
+        id: workspaceId,
+        organizationId: dbUser.organizationId,
+      },
+    })
+
+    revalidatePath('/dashboard/ai-workspace')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting workspace:', error)
+    return { error: 'Failed to delete workspace', success: false }
+  }
+}
+
+// ===== HELPER FUNCTIONS =====
+
+function inferArtifactType(prompt: string): ArtifactType {
+  const lowerPrompt = prompt.toLowerCase()
+
+  // Check for keywords to infer type
+  if (lowerPrompt.includes('report') || lowerPrompt.includes('chart') || lowerPrompt.includes('graph') || lowerPrompt.includes('dashboard')) {
+    return 'reports'
+  }
+  if (lowerPrompt.includes('whiteboard') || lowerPrompt.includes('tactics') || lowerPrompt.includes('formation') || lowerPrompt.includes('drawing')) {
+    return 'whiteboards'
+  }
+  if (lowerPrompt.includes('plan') || lowerPrompt.includes('schedule') || lowerPrompt.includes('milestone') || lowerPrompt.includes('timeline')) {
+    return 'plans'
+  }
+  if (lowerPrompt.includes('page') || lowerPrompt.includes('interface') || lowerPrompt.includes('view') || lowerPrompt.includes('ui')) {
+    return 'uiPages'
+  }
+
+  // Default to reports
+  return 'reports'
+}
+
+function generateWorkspaceName(prompt: string, artifactType: ArtifactType): string {
+  // Take first 50 characters of prompt as name
+  const baseName = prompt.slice(0, 50).trim()
+
+  // If it ends mid-word, truncate to last complete word
+  const lastSpace = baseName.lastIndexOf(' ')
+  const name = lastSpace > 20 ? baseName.slice(0, lastSpace) : baseName
+
+  return name || `New ${artifactType}`
+}

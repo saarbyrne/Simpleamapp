@@ -18,10 +18,12 @@ import {
   Folder,
   CalendarCheck,
   Layout,
+  Wand2,
   type LucideIcon,
 } from 'lucide-react'
 
-export type FeatureKey = 
+export type FeatureKey =
+  | 'aiWorkspace'
   | 'ai'
   | 'players'
   | 'forms'
@@ -76,6 +78,15 @@ export interface FeatureMetadata {
 }
 
 export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
+  aiWorkspace: {
+    key: 'aiWorkspace',
+    label: 'AI Workspace',
+    description: 'AI-powered workspace for creating reports, whiteboards, UI pages, and plans',
+    icon: Wand2,
+    fieldName: 'aiWorkspaceEnabled',
+    subFeatures: [],
+    navPath: '/dashboard/ai-workspace',
+  },
   ai: {
     key: 'ai',
     label: 'AI Assistant',

@@ -45,6 +45,7 @@ model Organization {
   reports            Report[]
   reportTemplates    ReportTemplate[]
   features           OrganizationFeatures?
+  aiWorkspaces       AIWorkspace[]
 
   @@map("organizations")
 }
@@ -1140,12 +1141,80 @@ model TemplateUsage {
 // ORGANIZATION FEATURES
 // ============================================
 
+// ============================================
+// AI WORKSPACE
+// ============================================
+
+model AIWorkspace {
+  id          String @id @default(cuid())
+  name        String
+
+  // Artifact type
+  artifactType String // "reports", "whiteboards", "uiPages", "plans"
+
+  // Status
+  status      String @default("draft") // "generating", "draft", "updating", "ready", "published", "syncing"
+
+  // Initial prompt
+  initialPrompt String @db.Text
+
+  // Artifact configuration and data (JSON)
+  artifactData Json? // stores reportConfig, whiteboardConfig, uiPageConfig, or planConfig
+
+  // Structured inputs from user (JSON)
+  structuredInputs Json? // stores criteria, artifact-specific inputs, etc.
+
+  // Generated content
+  generatedContent Json?
+
+  // Publishing
+  publishedAt DateTime?
+  publishedTo Json? // Array of {type, id, name} destinations
+
+  // Version control
+  version     Int @default(1)
+
+  // Organization and ownership
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId      String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  messages    AIWorkspaceMessage[]
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([artifactType])
+  @@index([status])
+  @@map("ai_workspaces")
+}
+
+model AIWorkspaceMessage {
+  id          String @id @default(cuid())
+  workspaceId String
+  workspace   AIWorkspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  role        String // "user", "assistant", "system"
+  content     String @db.Text
+
+  createdAt   DateTime @default(now())
+
+  @@index([workspaceId])
+  @@index([createdAt])
+  @@map("ai_workspace_messages")
+}
+
 model OrganizationFeatures {
   id             String       @id @default(cuid())
   organizationId String       @unique
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  // Main Navigation Features (12 sections)
+
+  // Main Navigation Features (13 sections - added aiWorkspace)
+  aiWorkspaceEnabled Boolean @default(true)
   aiEnabled          Boolean @default(true)
   playersEnabled     Boolean @default(true)
   formsEnabled       Boolean @default(true)

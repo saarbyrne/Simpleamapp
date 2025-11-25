@@ -22,6 +22,7 @@ import {
   LogOut,
   ChevronsUpDown,
   Layout,
+  Wand2,
 } from 'lucide-react'
 
 import {
@@ -88,7 +89,7 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
         setEnabledFeatures(new Set(result.features))
       } else {
         // On error, enable all features (fail open)
-        setEnabledFeatures(new Set(['ai', 'players', 'forms', 'reports', 'calendar', 'messages', 'notes', 'spreadsheets', 'canvas', 'files', 'planner', 'templates']))
+        setEnabledFeatures(new Set(['aiWorkspace', 'ai', 'players', 'forms', 'reports', 'calendar', 'messages', 'notes', 'spreadsheets', 'canvas', 'files', 'planner', 'templates']))
       }
       setIsLoadingFeatures(false)
     }
@@ -96,6 +97,7 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
   }, [])
 
   const allNavItems = [
+    { labelKey: 'nav.aiWorkspace', href: '/dashboard/ai-workspace', icon: Wand2, featureKey: 'aiWorkspace' as FeatureKey },
     { labelKey: 'nav.ai', href: '/dashboard/ai', icon: Sparkles, featureKey: 'ai' as FeatureKey },
     { labelKey: 'nav.players', href: '/dashboard/players', icon: Users, featureKey: 'players' as FeatureKey },
     { labelKey: 'nav.forms', href: '/dashboard/forms', icon: FileText, featureKey: 'forms' as FeatureKey },
