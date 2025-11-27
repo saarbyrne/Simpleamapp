@@ -2,6 +2,9 @@
   "mcpServers": {
     "Sentry": {
       "url": "https://mcp.sentry.dev/mcp/sam-40m/javascript-nextjs"
+    },
+    "Figma": {
+      "url": "http://127.0.0.1:3845/mcp"
     }
   }
 }
