@@ -242,7 +242,61 @@ export async function publishAIWorkspace(workspaceId: string, data: PublishWorks
   try {
     const dbUser = await ensureUserWithOrganization(user)
 
-    const workspace = await prisma.aIWorkspace.update({
+    // 1. Fetch the workspace to get the artifact data
+    const workspace = await prisma.aIWorkspace.findFirst({
+      where: {
+        id: workspaceId,
+        organizationId: dbUser.organizationId,
+      },
+    })
+
+    if (!workspace) {
+      return { error: 'Workspace not found', success: false }
+    }
+
+    // 2. Materialize the artifact based on type
+    const artifactData = workspace.artifactData as any
+    const config = artifactData?.config
+
+    if (!config) {
+      return { error: 'No artifact configuration found to publish', success: false }
+    }
+
+    let publishedArtifactId: string | undefined
+
+    if (workspace.artifactType === 'reports') {
+      const { createReport } = await import('@/app/actions/reports')
+      const result = await createReport({
+        name: workspace.name,
+        description: `Generated from AI Workspace: ${workspace.initialPrompt}`,
+        type: 'dashboard', // Default to dashboard for now
+        config: config
+      })
+
+      if (result.success && result.report) {
+        publishedArtifactId = result.report.id
+      } else {
+        throw new Error(result.error || 'Failed to create report')
+      }
+    } else if (workspace.artifactType === 'whiteboards') {
+      const { createDrawing } = await import('@/app/actions/drawings')
+      const result = await createDrawing({
+        name: workspace.name,
+        description: `Generated from AI Workspace: ${workspace.initialPrompt}`,
+        type: 'tactical',
+        data: config, // Excalidraw data
+        isPublic: true // Default to public within org
+      })
+
+      if (result.success && result.drawing) {
+        publishedArtifactId = result.drawing.id
+      } else {
+        throw new Error(result.error || 'Failed to create drawing')
+      }
+    }
+
+    // 3. Update workspace status
+    const updatedWorkspace = await prisma.aIWorkspace.update({
       where: {
         id: workspaceId,
         organizationId: dbUser.organizationId,
@@ -251,13 +305,18 @@ export async function publishAIWorkspace(workspaceId: string, data: PublishWorks
         status: 'published',
         publishedAt: new Date(),
         publishedTo: data.destinations as any,
+        // Store the ID of the created artifact for reference
+        generatedContent: {
+          ...((workspace.generatedContent as any) || {}),
+          publishedArtifactId
+        }
       },
     })
 
     revalidatePath('/dashboard/ai-workspace')
     revalidatePath(`/dashboard/ai-workspace/${workspaceId}`)
 
-    return { success: true, workspace }
+    return { success: true, workspace: updatedWorkspace }
   } catch (error) {
     console.error('Error publishing workspace:', error)
     return { error: 'Failed to publish workspace', success: false }

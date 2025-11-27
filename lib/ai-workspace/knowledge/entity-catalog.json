@@ -1,0 +1,138 @@
+{
+    "metrics": {
+        "rpe": {
+            "name": "Rate of Perceived Exertion",
+            "abbreviation": "RPE",
+            "range": "1-10",
+            "unit": "scale",
+            "higher_is_better": false,
+            "category": "wellness"
+        },
+        "wellness_score": {
+            "name": "Wellness Score",
+            "abbreviation": "Wellness",
+            "range": "0-100",
+            "unit": "score",
+            "higher_is_better": true,
+            "category": "wellness"
+        },
+        "load": {
+            "name": "Training Load",
+            "abbreviation": "Load",
+            "range": "0-1000+",
+            "unit": "AU",
+            "higher_is_better": null,
+            "category": "performance"
+        },
+        "soreness_level": {
+            "name": "Soreness Level",
+            "abbreviation": "Soreness",
+            "range": "1-5",
+            "unit": "scale",
+            "higher_is_better": false,
+            "category": "wellness"
+        },
+        "sleep_hours": {
+            "name": "Sleep Duration",
+            "abbreviation": "Sleep",
+            "range": "0-12",
+            "unit": "hours",
+            "higher_is_better": true,
+            "category": "wellness"
+        }
+    },
+    "chart_types": {
+        "bar": {
+            "best_for": [
+                "comparing_players",
+                "comparing_periods",
+                "categorical_data"
+            ],
+            "requires": [
+                "x_axis",
+                "y_axis"
+            ],
+            "description": "Vertical bars comparing values across categories"
+        },
+        "line": {
+            "best_for": [
+                "trends_over_time",
+                "continuous_data"
+            ],
+            "requires": [
+                "date_axis",
+                "value_axis"
+            ],
+            "description": "Line connecting data points to show progression"
+        },
+        "pie": {
+            "best_for": [
+                "proportions",
+                "part_to_whole"
+            ],
+            "requires": [
+                "category",
+                "value"
+            ],
+            "description": "Circular chart divided into sectors"
+        },
+        "scatter": {
+            "best_for": [
+                "correlation",
+                "distribution"
+            ],
+            "requires": [
+                "x_value",
+                "y_value"
+            ],
+            "description": "Points plotted on X-Y coordinates"
+        },
+        "heatmap": {
+            "best_for": [
+                "intensity_distribution",
+                "complex_patterns"
+            ],
+            "requires": [
+                "x_axis",
+                "y_axis",
+                "value"
+            ],
+            "description": "Grid of colored cells representing values"
+        }
+    },
+    "artifact_templates": {
+        "report": {
+            "typical_components": [
+                "kpi_cards",
+                "charts",
+                "summary_text"
+            ],
+            "required_config": [
+                "dataSources",
+                "visualization"
+            ]
+        },
+        "whiteboard": {
+            "typical_components": [
+                "pitch_diagram",
+                "player_tokens",
+                "movement_arrows"
+            ],
+            "required_config": [
+                "elements",
+                "appState"
+            ]
+        },
+        "plan": {
+            "typical_components": [
+                "timeline",
+                "milestones",
+                "tasks"
+            ],
+            "required_config": [
+                "phases",
+                "start_date"
+            ]
+        }
+    }
+}

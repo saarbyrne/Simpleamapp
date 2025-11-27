@@ -1,0 +1,150 @@
+{
+    "intent_classification": [
+        {
+            "input": "Show me how the squad is recovering after the match",
+            "output": {
+                "artifactType": "reports",
+                "confidence": 0.9,
+                "reasoning": "User is asking for data visualization ('show me') related to recovery status."
+            }
+        },
+        {
+            "input": "Draw up a 4-4-2 formation for the weekend",
+            "output": {
+                "artifactType": "whiteboards",
+                "confidence": 0.95,
+                "reasoning": "User explicitly asks to 'draw' a tactical formation."
+            }
+        },
+        {
+            "input": "Create a rehab schedule for John's hamstring injury",
+            "output": {
+                "artifactType": "plans",
+                "confidence": 0.85,
+                "reasoning": "User asks for a 'schedule' or plan for a specific process."
+            }
+        },
+        {
+            "input": "I need a screen for players to log their daily wellness",
+            "output": {
+                "artifactType": "uiPages",
+                "confidence": 0.9,
+                "reasoning": "User asks for a 'screen' or interface for data entry."
+            }
+        }
+    ],
+    "entity_extraction": [
+        {
+            "input": "Report for my boss on mental state",
+            "context_note": "User reports to John Jones (Head of Performance)",
+            "entities": [
+                {
+                    "key": "recipient",
+                    "originalText": "my boss",
+                    "resolvedValue": {
+                        "lookup": "reports_to",
+                        "id": "user_123",
+                        "name": "John Jones"
+                    }
+                },
+                {
+                    "key": "metric_category",
+                    "originalText": "mental state",
+                    "resolvedValue": [
+                        "wellness_score",
+                        "mood",
+                        "stress"
+                    ]
+                }
+            ]
+        },
+        {
+            "input": "Compare load vs wellness for the midfielders last month",
+            "entities": [
+                {
+                    "key": "metrics",
+                    "originalText": "load vs wellness",
+                    "resolvedValue": [
+                        "load",
+                        "wellness_score"
+                    ]
+                },
+                {
+                    "key": "player_group",
+                    "originalText": "midfielders",
+                    "resolvedValue": [
+                        "CM",
+                        "CDM",
+                        "CAM",
+                        "LM",
+                        "RM"
+                    ]
+                },
+                {
+                    "key": "time_range",
+                    "originalText": "last month",
+                    "resolvedValue": "last_30_days"
+                }
+            ]
+        }
+    ],
+    "prompt_enhancement": [
+        {
+            "input": "Report on mental state",
+            "classification": {
+                "artifactType": "reports"
+            },
+            "entities": [
+                {
+                    "key": "metric",
+                    "value": [
+                        "rpe",
+                        "mood"
+                    ]
+                }
+            ],
+            "output": {
+                "enhancedPrompt": "Create a report showing player mental state using **RPE** and **Mood** scores for the **last 30 days**, visualised as a **line chart** to show trends.",
+                "variables": [
+                    {
+                        "id": "metrics",
+                        "label": "Metrics",
+                        "type": "multi-select",
+                        "value": [
+                            "rpe",
+                            "mood"
+                        ],
+                        "options": [
+                            "rpe",
+                            "mood",
+                            "stress",
+                            "sleep"
+                        ]
+                    },
+                    {
+                        "id": "timeRange",
+                        "label": "Time Range",
+                        "type": "select",
+                        "value": "last_30_days",
+                        "options": [
+                            "last_7_days",
+                            "last_30_days",
+                            "season_to_date"
+                        ]
+                    },
+                    {
+                        "id": "chartType",
+                        "label": "Visualization",
+                        "type": "select",
+                        "value": "line",
+                        "options": [
+                            "line",
+                            "bar",
+                            "table"
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,86 @@
+{
+    "mental_health_terms": {
+        "mentally": [
+            "rpe",
+            "mood",
+            "stress",
+            "wellness_score",
+            "energy_level"
+        ],
+        "psychologically": [
+            "mood",
+            "stress",
+            "anxiety"
+        ],
+        "headspace": [
+            "mood",
+            "stress"
+        ],
+        "feeling": [
+            "wellness_score",
+            "mood",
+            "soreness_level"
+        ]
+    },
+    "physical_terms": {
+        "fitness": [
+            "load",
+            "hrv",
+            "distance_covered",
+            "high_speed_running"
+        ],
+        "physically": [
+            "soreness_level",
+            "fatigue",
+            "injury_status"
+        ],
+        "body": [
+            "soreness_level",
+            "injury_status"
+        ],
+        "workload": [
+            "load",
+            "acute_chronic_ratio",
+            "training_minutes"
+        ]
+    },
+    "time_expressions": {
+        "recently": "last_7_days",
+        "lately": "last_14_days",
+        "this week": "current_week",
+        "last match": "last_match_date",
+        "season to date": "season_start_to_now"
+    },
+    "role_synonyms": {
+        "boss": "reports_to",
+        "manager": "reports_to",
+        "head coach": "HC",
+        "physio": "Head of Medical",
+        "performance director": "HOP"
+    },
+    "player_groups": {
+        "defenders": [
+            "CB",
+            "LB",
+            "RB",
+            "LWB",
+            "RWB"
+        ],
+        "midfielders": [
+            "CM",
+            "CDM",
+            "CAM",
+            "LM",
+            "RM"
+        ],
+        "forwards": [
+            "ST",
+            "CF",
+            "LW",
+            "RW"
+        ],
+        "starters": "starting_xi",
+        "bench": "substitutes",
+        "rehab": "injured_reserve"
+    }
+}

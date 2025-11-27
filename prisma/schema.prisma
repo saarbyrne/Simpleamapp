@@ -46,6 +46,7 @@ model Organization {
   reportTemplates    ReportTemplate[]
   features           OrganizationFeatures?
   aiWorkspaces       AIWorkspace[]
+  orgDataSources     OrgDataSource[]
 
   @@map("organizations")
 }
@@ -87,8 +88,15 @@ model User {
   isPlatformAdmin Boolean @default(false) // Only set manually for vendor team members
 
   // Relations
+  // Relations
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Org Context (AI Workspace)
+  reportsToId       String?
+  reportsTo         User?   @relation("UserReportsTo", fields: [reportsToId], references: [id])
+  subordinates      User[]  @relation("UserReportsTo")
+  roleAbbreviation  String? // e.g. "HOP", "HC"
 
   personId String?
   person   Person? @relation(fields: [personId], references: [id])
@@ -1258,4 +1266,24 @@ model OrganizationFeatures {
   
   @@index([organizationId])
   @@map("organization_features")
+}
+
+// ============================================
+// AI WORKSPACE CONTEXT
+// ============================================
+
+model OrgDataSource {
+  id               String   @id @default(cuid())
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  sourceType       String // wellness, gps, medical, match_stats, video
+  availableMetrics String[] // ["rpe", "wellness_score", "load"]
+  isActive         Boolean  @default(true)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([organizationId])
+  @@map("org_data_sources")
 }
