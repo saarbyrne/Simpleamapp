@@ -68,7 +68,13 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts'
-import { ChartContainer } from '@/components/ui/chart'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from '@/components/ui/chart'
 import {
   Table,
   TableBody,
@@ -124,30 +130,17 @@ export default function ReportViewPage() {
   const [generatingInsights, setGeneratingInsights] = useState(false)
 
   const loadReport = useCallback(async () => {
-    // Don't show loading state if data loads quickly (from cache/pre-fetch)
-    // This prevents the "2 loading states" issue when creating reports
-    let loadingTimeout: NodeJS.Timeout | null = null
-    const showLoading = () => {
-      loadingTimeout = setTimeout(() => setIsLoading(true), 100) // Only show after 100ms
-    }
-    showLoading()
-    
+    setIsLoading(true)
     try {
       // Load both report config and data in parallel
       const [reportResult, dataResult] = await Promise.all([
         getReport(reportId),
         getReportData(reportId)
       ])
-      
-      // Cancel loading state if data loaded quickly
-      if (loadingTimeout) {
-        clearTimeout(loadingTimeout)
-        setIsLoading(false) // Data ready, no need to show loading
-      }
-      
+
       if (reportResult.success && reportResult.report) {
         setReport(reportResult.report as any)
-        
+
         if ('success' in dataResult && dataResult.success && 'chartData' in dataResult) {
           setReportData({
             chartData: dataResult.chartData || [],
@@ -160,22 +153,71 @@ export default function ReportViewPage() {
             },
           })
         } else {
-          toast.error('error' in dataResult ? dataResult.error : 'Failed to load report data')
+          // Don't show error toast on initial load if data is just empty/missing
+          // Let the UI handle the "No data" state
+          console.warn('Failed to load report data:', dataResult)
         }
       } else {
         toast.error('error' in reportResult ? reportResult.error : t('failedToLoadReport'))
         router.push('/dashboard/reports')
       }
     } catch (error) {
-      if (loadingTimeout) clearTimeout(loadingTimeout)
       console.error('Error loading report:', error)
       toast.error(t('failedToLoadReport'))
-      setIsLoading(false)
     } finally {
-      if (loadingTimeout) clearTimeout(loadingTimeout)
       setIsLoading(false)
     }
   }, [reportId, router, t])
+
+  // ... (rest of component)
+
+  // Inside render:
+  /*
+        headerActions={
+          <div className="flex gap-2">
+            <Button variant="outline" size="icon" onClick={() => router.push(`/dashboard/reports/builder?edit=${report.id}`)} title={t('edit')}>
+              <FileText className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={loadReportData} title={t('refresh')}>
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={() => setShowShareDialog(true)} title={t('share')}>
+              <Share2 className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={() => setShowScheduleDialog(true)} title="Schedule Report">
+              <Clock className="h-4 w-4" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={!reportData || reportData.chartData.length === 0}>
+                  <Download className="h-4 w-4 me-2" />
+                  Export
+                  <ChevronDown className="h-4 w-4 ms-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportCSV}>
+                  <FileText className="h-4 w-4 me-2" />
+                  Export as CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportPDF}>
+                  <FileDown className="h-4 w-4 me-2" />
+                  Export as PDF
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handlePrint}>
+                  <Printer className="h-4 w-4 me-2" />
+                  Print Report
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button variant="outline" onClick={() => router.push('/dashboard/reports')}>
+              <ArrowLeft className="h-4 w-4 me-2" />
+              {t('back')}
+            </Button>
+          </div>
+        }
+  */
 
   const loadReportData = async () => {
     setIsLoadingData(true)
@@ -343,8 +385,8 @@ export default function ReportViewPage() {
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} />
               <YAxis tick={{ fontSize: 11 }} tickLine={false} />
-              <Tooltip />
-              {section.config.chartOptions?.showLegend && <Legend />}
+              <ChartTooltip content={<ChartTooltipContent />} />
+              {section.config.chartOptions?.showLegend && <ChartLegend content={<ChartLegendContent />} />}
               <Line
                 type="monotone"
                 dataKey="value"
@@ -363,8 +405,8 @@ export default function ReportViewPage() {
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} />
               <YAxis tick={{ fontSize: 11 }} tickLine={false} />
-              <Tooltip />
-              {section.config.chartOptions?.showLegend && <Legend />}
+              <ChartTooltip content={<ChartTooltipContent />} />
+              {section.config.chartOptions?.showLegend && <ChartLegend content={<ChartLegendContent />} />}
               <Bar dataKey="value" fill="var(--color-value)" />
             </BarChart>
           </ChartContainer>
@@ -377,8 +419,8 @@ export default function ReportViewPage() {
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} />
               <YAxis tick={{ fontSize: 11 }} tickLine={false} />
-              <Tooltip />
-              {section.config.chartOptions?.showLegend && <Legend />}
+              <ChartTooltip content={<ChartTooltipContent />} />
+              {section.config.chartOptions?.showLegend && <ChartLegend content={<ChartLegendContent />} />}
               <Area
                 type="monotone"
                 dataKey="value"
@@ -406,8 +448,8 @@ export default function ReportViewPage() {
                   <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${(index % 5) + 1}))`} />
                 ))}
               </Pie>
-              <Tooltip />
-              {section.config.chartOptions?.showLegend && <Legend />}
+              <ChartTooltip content={<ChartTooltipContent />} />
+              {section.config.chartOptions?.showLegend && <ChartLegend content={<ChartLegendContent />} />}
             </PieChart>
           </ChartContainer>
         )
@@ -552,8 +594,8 @@ export default function ReportViewPage() {
                     tickLine={false}
                   />
                   <YAxis tick={{ fontSize: 12 }} tickLine={false} />
-                  <Tooltip />
-                  <Legend />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
                   <Line
                     type="monotone"
                     dataKey="value"
@@ -576,8 +618,8 @@ export default function ReportViewPage() {
                     tickLine={false}
                   />
                   <YAxis tick={{ fontSize: 12 }} tickLine={false} />
-                  <Tooltip />
-                  <Legend />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
                   <Bar dataKey="value" fill="var(--color-value)" />
                 </BarChart>
               </ChartContainer>
@@ -601,8 +643,8 @@ export default function ReportViewPage() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
                 </PieChart>
               </ChartContainer>
             )
@@ -618,8 +660,8 @@ export default function ReportViewPage() {
                     tickLine={false}
                   />
                   <YAxis tick={{ fontSize: 12 }} tickLine={false} />
-                  <Tooltip />
-                  <Legend />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
                   <Area
                     type="monotone"
                     dataKey="value"
@@ -667,6 +709,9 @@ export default function ReportViewPage() {
         description={report.description || undefined}
         headerActions={
           <div className="flex gap-2">
+            <Button variant="outline" size="icon" onClick={() => router.push(`/dashboard/reports/builder?edit=${report.id}`)} title={t('edit')}>
+              <FileText className="h-4 w-4" />
+            </Button>
             <Button variant="outline" size="icon" onClick={loadReportData} title={t('refresh')}>
               <RefreshCw className="h-4 w-4" />
             </Button>
@@ -824,10 +869,10 @@ export default function ReportViewPage() {
             </CardContent>
           </Card>
         </div>
-      </PageCard>
+      </PageCard >
 
       {/* Share Dialog */}
-      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+      < Dialog open={showShareDialog} onOpenChange={setShowShareDialog} >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('sharing.title')}</DialogTitle>
@@ -868,10 +913,10 @@ export default function ReportViewPage() {
             )}
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog >
 
       {/* Schedule Dialog */}
-      <ScheduleReportDialog
+      < ScheduleReportDialog
         reportId={reportId}
         reportName={report.name}
         existingSchedule={(report as any).schedule}
@@ -879,6 +924,6 @@ export default function ReportViewPage() {
         onOpenChange={setShowScheduleDialog}
         onScheduleCreated={loadReport}
       />
-    </div>
+    </div >
   )
 }

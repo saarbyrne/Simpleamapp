@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,10 +11,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import {
   Popover,
@@ -22,11 +23,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import {
-  FileSpreadsheet,
-  FileText,
-  Calendar,
-  Users,
-  StickyNote,
   BarChart3,
   LineChart,
   PieChart,
@@ -44,64 +40,99 @@ import { cn } from '@/components/ui/utils'
 import type { CreateReportData, ReportSection } from '@/app/actions/reports'
 import { DashboardBuilder } from './DashboardBuilder'
 
-interface DataSource {
+export interface DataPoint {
   id: string
-  name: string
-  type: 'form' | 'spreadsheet' | 'event' | 'player' | 'note'
+  label: string
+  group: string
+  type: 'form' | 'spreadsheet' | 'event' | 'player'
+  sourceId?: string
+  metricKey?: string
+}
+
+export interface Population {
+  id: string
+  label: string
+  type: string
 }
 
 interface ReportBuilderWizardProps {
-  availableForms: DataSource[]
-  availableSpreadsheets: DataSource[]
+  dataPoints: DataPoint[]
+  populations: Population[]
   onComplete: (data: CreateReportData) => void
   onCancel: () => void
+  initialData?: Partial<CreateReportData>
 }
 
 export function ReportBuilderWizard({
-  availableForms,
-  availableSpreadsheets,
+  dataPoints,
+  populations,
   onComplete,
   onCancel,
+  initialData,
 }: ReportBuilderWizardProps) {
+  // Initialize state from initialData if available
   const [step, setStep] = useState(1)
-  const [reportName, setReportName] = useState('')
-  const [description, setDescription] = useState('')
-  const [reportType, setReportType] = useState<'single_chart' | 'dashboard'>('single_chart')
-  const [selectedDataSource, setSelectedDataSource] = useState<DataSource | null>(null)
-  const [dataSourceType, setDataSourceType] = useState<'form' | 'spreadsheet' | 'event' | 'player'>('form')
-  const [visualization, setVisualization] = useState<'line' | 'bar' | 'pie' | 'area' | 'table'>('bar')
-  const [xAxis, setXAxis] = useState('createdAt')
-  const [yAxis, setYAxis] = useState('value')
-  const [dateRangePreset, setDateRangePreset] = useState('last_30_days')
-  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>()
-  const [aggregation, setAggregation] = useState<'sum' | 'average' | 'count'>('average')
-  const [dashboardSections, setDashboardSections] = useState<ReportSection[]>([])
+  const [reportName, setReportName] = useState(initialData?.name || '')
+  const [description, setDescription] = useState(initialData?.description || '')
+  const [reportType, setReportType] = useState<'single_chart' | 'dashboard'>(
+    initialData?.type === 'dashboard' ? 'dashboard' : 'single_chart'
+  )
 
-  const dataSourceIcon = {
-    form: FileText,
-    spreadsheet: FileSpreadsheet,
-    event: Calendar,
-    player: Users,
-    note: StickyNote,
+  // Extract initial config values
+  const initialConfig = initialData?.config || {}
+  const initialFilters = initialConfig.filters || {}
+
+  // Determine initial data point
+  // This is tricky because config stores generic dataSource, but we need the specific dataPoint ID
+  // We might need to match by name or ID if it was preserved
+  const initialDataSource = initialConfig.dataSources?.[0]
+  const initialDataPointId = initialDataSource
+    ? dataPoints.find(dp => dp.sourceId === initialDataSource.id && dp.metricKey === initialConfig.yAxis)?.id || ''
+    : ''
+
+  const [selectedDataPointId, setSelectedDataPointId] = useState(initialDataPointId)
+
+  // Determine initial population
+  let initialPopulationId = 'all'
+  if (initialFilters.players && initialFilters.players.length > 0) {
+    initialPopulationId = `player:${initialFilters.players[0]}`
+  } else if (initialFilters.population) {
+    initialPopulationId = initialFilters.population
   }
 
-  const getAvailableDataSources = (): DataSource[] => {
-    switch (dataSourceType) {
-      case 'form':
-        return availableForms
-      case 'spreadsheet':
-        return availableSpreadsheets
-      case 'event':
-        return [{ id: 'all-events', name: 'All Events', type: 'event' }]
-      case 'player':
-        return [{ id: 'all-players', name: 'All Players', type: 'player' }]
-      default:
-        return []
-    }
-  }
+  const [selectedPopulationId, setSelectedPopulationId] = useState(initialPopulationId)
+
+  // Date Range
+  const initialDateRange = initialFilters.dateRange || { from: 'last_30_days' }
+  const isCustomDate = initialDateRange.from && !['last_7_days', 'last_30_days', 'last_90_days', 'this_year', 'all_time'].includes(initialDateRange.from)
+
+  const [dateRangePreset, setDateRangePreset] = useState<string>(
+    isCustomDate ? 'custom' : (initialDateRange.from || 'last_30_days')
+  )
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(
+    isCustomDate ? {
+      from: initialDateRange.from ? new Date(initialDateRange.from) : undefined,
+      to: initialDateRange.to ? new Date(initialDateRange.to) : undefined
+    } : undefined
+  )
+
+  const [visualization, setVisualization] = useState<'line' | 'bar' | 'pie' | 'area' | 'table'>(
+    (initialConfig.visualization as 'line' | 'bar' | 'pie' | 'area' | 'table') || 'bar'
+  )
+  const [xAxis, setXAxis] = useState(initialConfig.xAxis || 'createdAt')
+  const [aggregation, setAggregation] = useState<'sum' | 'average' | 'count'>(
+    (initialConfig.chartOptions?.aggregation as 'sum' | 'average' | 'count') || 'average'
+  )
+
+  const [dashboardSections, setDashboardSections] = useState<ReportSection[]>(
+    initialData?.sections || []
+  )
 
   const getXAxisOptions = () => {
-    switch (dataSourceType) {
+    const dp = dataPoints.find(d => d.id === selectedDataPointId)
+    if (!dp) return []
+
+    switch (dp.type) {
       case 'form':
         return [
           { value: 'createdAt', label: 'Date Submitted' },
@@ -126,84 +157,73 @@ export function ReportBuilderWizard({
         return []
     }
   }
-
-  const getYAxisOptions = () => {
-    switch (dataSourceType) {
-      case 'form':
-        return [
-          { value: 'data.wellness_score', label: 'Wellness Score' },
-          { value: 'data.sleep_hours', label: 'Sleep Hours' },
-          { value: 'data.soreness_level', label: 'Soreness Level' },
-          { value: 'data.energy_level', label: 'Energy Level' },
-        ]
-      case 'event':
-        return [
-          { value: 'attendanceRate', label: 'Attendance Rate (%)' },
-          { value: 'attended', label: 'Attended Count' },
-        ]
-      case 'player':
-      case 'spreadsheet':
-        return [
-          { value: 'value', label: 'Value' },
-        ]
-      default:
-        return []
-    }
-  }
-
   const handleComplete = () => {
-    // Build date range filter
-    let dateRangeFilter
-    if (dateRangePreset === 'custom' && customDateRange?.from) {
-      dateRangeFilter = {
-        from: customDateRange.from.toISOString(),
-        to: customDateRange.to?.toISOString(),
+    // Build filters
+    const filters: any = {}
+
+    // Date Range
+    if (dateRangePreset === 'custom' && customDateRange) {
+      filters.dateRange = {
+        from: customDateRange.from ? format(customDateRange.from, 'yyyy-MM-dd') : undefined,
+        to: customDateRange.to ? format(customDateRange.to, 'yyyy-MM-dd') : undefined,
       }
-    } else if (dateRangePreset !== 'all_time') {
-      dateRangeFilter = { from: dateRangePreset }
+    } else if (dateRangePreset !== 'custom') {
+      filters.dateRange = { from: dateRangePreset }
     }
 
-    // Build config based on report type
+    // Population
+    if (selectedPopulationId && selectedPopulationId !== 'all') {
+      if (selectedPopulationId.startsWith('player:')) {
+        // Individual player
+        filters.players = [selectedPopulationId.replace('player:', '')]
+      } else if (selectedPopulationId.startsWith('position:')) {
+        // Position group
+        filters.population = selectedPopulationId.replace('position:', '')
+      } else {
+        // Fallback
+        filters.population = selectedPopulationId
+      }
+    }
+
+    // Helper to build config from data point
+    const buildConfigFromDataPoint = (dpId: string) => {
+      const dp = dataPoints.find(d => d.id === dpId)
+      if (!dp) return null
+
+      return {
+        dataSources: [{
+          type: dp.type,
+          id: dp.sourceId,
+          name: dp.label, // Changed from label to name to match DataPoint interface
+        }],
+        yAxis: dp.metricKey,
+      }
+    }
+
     let config
     if (reportType === 'dashboard') {
       config = {
-        dataSources: selectedDataSource
-          ? [{
-              type: selectedDataSource.type,
-              id: selectedDataSource.id !== 'all-events' && selectedDataSource.id !== 'all-players'
-                ? selectedDataSource.id
-                : undefined,
-              name: selectedDataSource.name,
-            }]
-          : [],
-        filters: {
-          dateRange: dateRangeFilter,
-        },
-        sections: dashboardSections,
+        // For dashboard, we might want a default data source or just empty
+        // But if sections are defined, they have their own config
+        dataSources: [],
+        filters,
       }
     } else {
+      if (!selectedDataPointId) return
+      const baseConfig = buildConfigFromDataPoint(selectedDataPointId)
+      if (!baseConfig) return
+
       config = {
-        dataSources: selectedDataSource
-          ? [{
-              type: selectedDataSource.type,
-              id: selectedDataSource.id !== 'all-events' && selectedDataSource.id !== 'all-players'
-                ? selectedDataSource.id
-                : undefined,
-              name: selectedDataSource.name,
-            }]
-          : [],
+        ...baseConfig,
         visualization,
         xAxis,
-        yAxis,
-        filters: {
-          dateRange: dateRangeFilter,
-        },
         chartOptions: {
           title: reportName,
           showLegend: true,
           showDataLabels: false,
           aggregation,
         },
+        filters, // Add filters to config
       }
     }
 
@@ -212,43 +232,48 @@ export function ReportBuilderWizard({
       description: description || undefined,
       type: reportType === 'dashboard' ? 'dashboard' : visualization === 'table' ? 'table' : 'single_chart',
       config,
+      sections: reportType === 'dashboard' ? dashboardSections : undefined,
     }
 
     onComplete(reportData)
   }
 
   const canProceedToStep2 = reportName.trim().length > 0
-  const canProceedToStep3 = selectedDataSource !== null
+  const canProceedToStep3 = selectedDataPointId !== ''
   const canComplete = reportType === 'dashboard'
     ? canProceedToStep3 && dashboardSections.length > 0
     : canProceedToStep3 && visualization !== null
+
+  // Group data points
+  const groupedDataPoints = dataPoints.reduce((acc, dp) => {
+    if (!acc[dp.group]) acc[dp.group] = []
+    acc[dp.group].push(dp)
+    return acc
+  }, {} as Record<string, DataPoint[]>)
 
   return (
     <div className="space-y-6">
       {/* Progress Steps */}
       <div className="flex items-center justify-center gap-2 mb-8">
         <div className="flex items-center">
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-            step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-          }`}>
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+            }`}>
             {step > 1 ? <Check className="h-4 w-4" /> : '1'}
           </div>
           <span className="ms-2 text-sm font-medium">Basic Info</span>
         </div>
         <ChevronRight className="h-4 w-4 text-muted-foreground mx-2" />
         <div className="flex items-center">
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-            step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-          }`}>
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+            }`}>
             {step > 2 ? <Check className="h-4 w-4" /> : '2'}
           </div>
-          <span className="ms-2 text-sm font-medium">Data Source</span>
+          <span className="ms-2 text-sm font-medium">Data Selection</span>
         </div>
         <ChevronRight className="h-4 w-4 text-muted-foreground mx-2" />
         <div className="flex items-center">
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-            step >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-          }`}>
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+            }`}>
             3
           </div>
           <span className="ms-2 text-sm font-medium">Visualization</span>
@@ -295,9 +320,8 @@ export function ReportBuilderWizard({
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <Card
-                  className={`cursor-pointer transition-all hover:shadow-md ${
-                    reportType === 'single_chart' ? 'ring-2 ring-primary' : ''
-                  }`}
+                  className={`cursor-pointer transition-all hover:shadow-md ${reportType === 'single_chart' ? 'ring-2 ring-primary' : ''
+                    }`}
                   onClick={() => setReportType('single_chart')}
                 >
                   <CardContent className="p-4 text-center">
@@ -310,9 +334,8 @@ export function ReportBuilderWizard({
                 </Card>
 
                 <Card
-                  className={`cursor-pointer transition-all hover:shadow-md ${
-                    reportType === 'dashboard' ? 'ring-2 ring-primary' : ''
-                  }`}
+                  className={`cursor-pointer transition-all hover:shadow-md ${reportType === 'dashboard' ? 'ring-2 ring-primary' : ''
+                    }`}
                   onClick={() => setReportType('dashboard')}
                 >
                   <CardContent className="p-4 text-center">
@@ -329,155 +352,116 @@ export function ReportBuilderWizard({
         </div>
       )}
 
-      {/* Step 2: Data Source Selection */}
+      {/* Step 2: Data Selection */}
       {step === 2 && (
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Choose Data Source</CardTitle>
-              <CardDescription>Select what type of data you want to visualize</CardDescription>
+              <CardTitle>Select Data</CardTitle>
+              <CardDescription>Choose the data point and population you want to analyze</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                {(['form', 'spreadsheet', 'event', 'player'] as const).map((type) => {
-                  const Icon = dataSourceIcon[type]
-                  return (
-                    <Card
-                      key={type}
-                      className={`cursor-pointer transition-all hover:shadow-md ${
-                        dataSourceType === type ? 'ring-2 ring-primary' : ''
-                      }`}
-                      onClick={() => {
-                        setDataSourceType(type)
-                        setSelectedDataSource(null)
-                      }}
-                    >
-                      <CardContent className="p-4 text-center">
-                        <Icon className="h-8 w-8 mx-auto mb-2" />
-                        <p className="text-sm font-medium capitalize">{type}s</p>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
-              </div>
+            <CardContent className="space-y-6">
 
+              {/* Data Point Selection */}
               <div className="space-y-2">
-                <Label>Select {dataSourceType}</Label>
-                <Select
-                  value={selectedDataSource?.id || ''}
-                  onValueChange={(value) => {
-                    const source = getAvailableDataSources().find(s => s.id === value)
-                    setSelectedDataSource(source || null)
-                  }}
-                >
+                <Label>Data Point</Label>
+                <Select value={selectedDataPointId} onValueChange={setSelectedDataPointId}>
                   <SelectTrigger>
-                    <SelectValue placeholder={`Choose a ${dataSourceType}...`} />
+                    <SelectValue placeholder="Select a metric to visualize..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {getAvailableDataSources().map((source) => (
-                      <SelectItem key={source.id} value={source.id}>
-                        {source.name}
+                    {Object.entries(groupedDataPoints).map(([group, items]) => (
+                      <SelectGroup key={group}>
+                        <SelectLabel>{group}</SelectLabel>
+                        {items.map((item) => (
+                          <SelectItem key={item.id} value={item.id}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Select a specific metric from your forms, spreadsheets, or other sources.
+                </p>
+              </div>
+
+              {/* Population Selection */}
+              <div className="space-y-2">
+                <Label>Population</Label>
+                <Select value={selectedPopulationId} onValueChange={setSelectedPopulationId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select population..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {populations.map((pop) => (
+                      <SelectItem key={pop.id} value={pop.id}>
+                        {pop.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {getAvailableDataSources().length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    No {dataSourceType}s available. Create one first.
-                  </p>
-                )}
               </div>
 
-              {selectedDataSource && (
-                <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{selectedDataSource.type}</Badge>
-                    <p className="text-sm font-medium">{selectedDataSource.name}</p>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    This report will visualize data from this {selectedDataSource.type}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              {/* Date Range Selection */}
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <div className="flex flex-col gap-2">
+                  <Select value={dateRangePreset} onValueChange={setDateRangePreset}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="last_7_days">Last 7 days</SelectItem>
+                      <SelectItem value="last_30_days">Last 30 days</SelectItem>
+                      <SelectItem value="last_90_days">Last 90 days</SelectItem>
+                      <SelectItem value="last_365_days">Last year</SelectItem>
+                      <SelectItem value="all_time">All time</SelectItem>
+                      <SelectItem value="custom">Custom range</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Date Range</CardTitle>
-              <CardDescription>Filter data by time period</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Preset Range</Label>
-                <Select value={dateRangePreset} onValueChange={setDateRangePreset}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="last_7_days">Last 7 days</SelectItem>
-                    <SelectItem value="last_30_days">Last 30 days</SelectItem>
-                    <SelectItem value="last_90_days">Last 90 days</SelectItem>
-                    <SelectItem value="last_365_days">Last year</SelectItem>
-                    <SelectItem value="all_time">All time</SelectItem>
-                    <SelectItem value="custom">Custom range</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {dateRangePreset === 'custom' && (
-                <div>
-                  <Label>Custom Date Range</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          'w-full justify-start text-start font-normal mt-2',
-                          !customDateRange && 'text-muted-foreground'
-                        )}
-                      >
-                        <CalendarIcon className="me-2 h-4 w-4" />
-                        {customDateRange?.from ? (
-                          customDateRange.to ? (
-                            <>
-                              {format(customDateRange.from, 'LLL dd, y')} -{' '}
-                              {format(customDateRange.to, 'LLL dd, y')}
-                            </>
+                  {dateRangePreset === 'custom' && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'w-full justify-start text-start font-normal',
+                            !customDateRange && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="me-2 h-4 w-4" />
+                          {customDateRange?.from ? (
+                            customDateRange.to ? (
+                              <>
+                                {format(customDateRange.from, 'LLL dd, y')} -{' '}
+                                {format(customDateRange.to, 'LLL dd, y')}
+                              </>
+                            ) : (
+                              format(customDateRange.from, 'LLL dd, y')
+                            )
                           ) : (
-                            format(customDateRange.from, 'LLL dd, y')
-                          )
-                        ) : (
-                          <span>Pick a date range</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 min-w-[600px]" align="start">
-                      <CalendarComponent
-                        initialFocus
-                        mode="range"
-                        defaultMonth={customDateRange?.from}
-                        selected={customDateRange}
-                        onSelect={setCustomDateRange}
-                        numberOfMonths={2}
-                        className="flex"
-                      />
-                      {customDateRange && (
-                        <div className="border-t p-3 flex justify-end">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setCustomDateRange(undefined)}
-                            className="h-8"
-                          >
-                            Clear
-                          </Button>
-                        </div>
-                      )}
-                    </PopoverContent>
-                  </Popover>
+                            <span>Pick a date range</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          initialFocus
+                          mode="range"
+                          defaultMonth={customDateRange?.from}
+                          selected={customDateRange}
+                          onSelect={setCustomDateRange}
+                          numberOfMonths={2}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
                 </div>
-              )}
+              </div>
+
             </CardContent>
           </Card>
         </div>
@@ -490,8 +474,8 @@ export function ReportBuilderWizard({
             <DashboardBuilder
               sections={dashboardSections}
               onSectionsChange={setDashboardSections}
-              availableMetrics={getYAxisOptions()}
-              dataSourceType={dataSourceType}
+              availableMetrics={[]} // TODO: Pass all data points here for dashboard builder to use
+              dataSourceType="form" // Placeholder, dashboard builder needs update to handle unified data points
             />
           ) : (
             <>
@@ -513,9 +497,8 @@ export function ReportBuilderWizard({
                       return (
                         <Card
                           key={viz.value}
-                          className={`cursor-pointer transition-all hover:shadow-md ${
-                            visualization === viz.value ? 'ring-2 ring-primary' : ''
-                          }`}
+                          className={`cursor-pointer transition-all hover:shadow-md ${visualization === viz.value ? 'ring-2 ring-primary' : ''
+                            }`}
                           onClick={() => setVisualization(viz.value as any)}
                         >
                           <CardContent className="p-4 text-center">
@@ -553,20 +536,12 @@ export function ReportBuilderWizard({
                       </Select>
                     </div>
 
-                    <div>
-                      <Label>Y-Axis (Vertical)</Label>
-                      <Select value={yAxis} onValueChange={setYAxis}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getYAxisOptions().map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    {/* Y-Axis is now determined by the Data Point selection */}
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                      <Label className="text-muted-foreground">Y-Axis (Vertical)</Label>
+                      <p className="font-medium mt-1">
+                        {dataPoints.find(d => d.id === selectedDataPointId)?.label || 'Selected Metric'}
+                      </p>
                     </div>
 
                     <div>

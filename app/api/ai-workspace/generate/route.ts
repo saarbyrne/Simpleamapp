@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     // Build conversation history from workspace messages
     const conversationHistory = workspace.messages.map((msg: any) => ({
-      role: msg.role === 'user' ? 'user' : 'assistant',
+      role: (msg.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
       content: msg.content,
     }))
 
@@ -79,9 +79,10 @@ export async function POST(req: NextRequest) {
               const artifactData = extractArtifactData(fullResponse, workspace.artifactType)
 
               // Update workspace with artifact data
+              // If we couldn't parse a new config, keep the previous one
               await updateAIWorkspace(workspaceId, {
                 status: 'ready',
-                artifactData,
+                artifactData: artifactData ?? workspace.artifactData,
                 generatedContent: { response: fullResponse, timestamp: new Date().toISOString() }
               })
 
@@ -273,9 +274,9 @@ Then, at the END of your response, provide a JSON configuration like this:
   return basePrompt + (typeSpecificPrompts[workspace.artifactType as keyof typeof typeSpecificPrompts] || '')
 }
 
-function extractArtifactData(response: string, artifactType: string): any {
+function extractArtifactData(response: string, artifactType: string): any | null {
   // Try to extract JSON from code blocks
-  const jsonMatch = response.match(/```json\n([\s\S]*?)\n```/)
+  const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/)
 
   if (jsonMatch && jsonMatch[1]) {
     try {
@@ -285,42 +286,6 @@ function extractArtifactData(response: string, artifactType: string): any {
     }
   }
 
-  // Return default structure based on artifact type
-  const defaults: any = {
-    reports: {
-      reportConfig: {
-        title: "Generated Report",
-        timePeriod: "last7Days",
-        players: ["all"],
-        metrics: ["wellness"],
-        visualizationType: "line",
-        charts: [],
-        kpis: []
-      }
-    },
-    whiteboards: {
-      whiteboardConfig: {
-        title: "Tactical Plan",
-        sportType: "soccer",
-        elements: [],
-        annotations: []
-      }
-    },
-    uiPages: {
-      uiPageConfig: {
-        title: "Custom Page",
-        layout: "grid",
-        components: []
-      }
-    },
-    plans: {
-      planConfig: {
-        title: "Plan",
-        timeHorizon: "3months",
-        milestones: []
-      }
-    }
-  }
-
-  return defaults[artifactType] || {}
+  // Return null if no valid JSON found, so caller can decide to keep existing data
+  return null
 }

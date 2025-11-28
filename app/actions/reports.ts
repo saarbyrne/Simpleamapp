@@ -18,7 +18,7 @@ export interface ReportConfig {
   xAxis?: string
   yAxis?: string
   filters?: {
-    dateRange?: { from: string; to: string }
+    dateRange?: { from: string; to?: string }
     players?: string[]
     tags?: string[]
     [key: string]: any
@@ -406,13 +406,13 @@ export async function updateReportSchedule(
     // Calculate new next send time if frequency or time changed
     const nextSend = data.frequency || data.time
       ? calculateNextSendTime({
-          frequency: data.frequency || existing.frequency,
-          time: data.time || existing.time,
-          dayOfWeek: data.dayOfWeek ?? existing.dayOfWeek ?? undefined,
-          dayOfMonth: data.dayOfMonth ?? existing.dayOfMonth ?? undefined,
-          recipients: data.recipients || existing.recipients,
-          format: data.format || existing.format,
-        } as CreateReportScheduleData)
+        frequency: data.frequency || existing.frequency,
+        time: data.time || existing.time,
+        dayOfWeek: data.dayOfWeek ?? existing.dayOfWeek ?? undefined,
+        dayOfMonth: data.dayOfMonth ?? existing.dayOfMonth ?? undefined,
+        recipients: data.recipients || existing.recipients,
+        format: data.format || existing.format,
+      } as CreateReportScheduleData)
       : undefined
 
     const schedule = await prisma.reportSchedule.update({
@@ -660,6 +660,141 @@ export async function getAvailableDataSources() {
   } catch (error) {
     console.error('Error fetching data sources:', error)
     return { error: 'Failed to fetch data sources' }
+  }
+}
+
+export async function getReportBuilderData() {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+    const organizationId = dbUser.organizationId
+
+    const [forms, spreadsheets, players] = await Promise.all([
+      prisma.form.findMany({
+        where: { organizationId, isActive: true },
+        select: { id: true, name: true, schema: true },
+      }),
+      prisma.spreadsheet.findMany({
+        where: { organizationId },
+        select: { id: true, name: true, schema: true },
+      }),
+      prisma.personOrganization.findMany({
+        where: { organizationId },
+        include: { person: true },
+        orderBy: { person: { firstName: 'asc' } },
+      }),
+    ])
+
+    // Process Data Points
+    const dataPoints: any[] = []
+
+    // 1. Form Fields
+    forms.forEach(form => {
+      const fields = (form.schema as any[]) || []
+      if (Array.isArray(fields)) {
+        fields.forEach(field => {
+          if (['number', 'rating', 'scale', 'select', 'radio'].includes(field.type)) {
+            dataPoints.push({
+              id: `form:${form.id}:${field.id}`,
+              name: `${form.name} - ${field.label}`,
+              group: 'Forms',
+              type: 'form',
+              sourceId: form.id,
+              metricKey: `data.${field.id}`,
+            })
+          }
+        })
+      }
+    })
+
+    // 2. Spreadsheet Columns
+    spreadsheets.forEach(sheet => {
+      const columns = (sheet.schema as any[]) || []
+      if (Array.isArray(columns)) {
+        columns.forEach(col => {
+          if (['number', 'currency', 'percentage', 'text'].includes(col.type)) {
+            dataPoints.push({
+              id: `sheet:${sheet.id}:${col.id}`,
+              name: `${sheet.name} - ${col.name}`,
+              group: 'Spreadsheets',
+              type: 'spreadsheet',
+              sourceId: sheet.id,
+              metricKey: col.id, // Spreadsheets usually flatten data, key is column ID or name
+            })
+          }
+        })
+      }
+    })
+
+    // 3. Events
+    dataPoints.push({
+      id: 'event:attendance',
+      name: 'Attendance Rate',
+      group: 'Events',
+      type: 'event',
+      metricKey: 'attendance_rate',
+    })
+    dataPoints.push({
+      id: 'event:count',
+      name: 'Event Count',
+      group: 'Events',
+      type: 'event',
+      metricKey: 'count',
+    })
+
+    // 4. Players
+    dataPoints.push({
+      id: 'player:count',
+      name: 'Player Count',
+      group: 'Players',
+      type: 'player',
+      metricKey: 'count',
+    })
+
+    // Process Populations
+    const populations: any[] = []
+
+    // 1. All Players
+    populations.push({
+      id: 'all',
+      name: 'All Players',
+      type: 'all',
+    })
+
+    // 2. Positions (derived from players)
+    const positions = new Set<string>()
+    players.forEach(p => {
+      if (p.position) positions.add(p.position)
+    })
+
+    Array.from(positions).sort().forEach(pos => {
+      populations.push({
+        id: `position:${pos}`,
+        name: `Position: ${pos}`,
+        type: 'position',
+      })
+    })
+
+    // 3. Individual Players
+    players.forEach(p => {
+      const name = p.person.firstName + ' ' + p.person.lastName
+      populations.push({
+        id: `player:${p.personId}`,
+        name: name,
+        type: 'player',
+      })
+    })
+
+    return { success: true, dataPoints, populations }
+  } catch (error) {
+    console.error('Error fetching report builder data:', error)
+    return { error: 'Failed to fetch data' }
   }
 }
 

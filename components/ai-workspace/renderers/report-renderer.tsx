@@ -1,8 +1,15 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ChartContainer } from '@/components/ui/chart'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from '@/components/ui/chart'
 import {
   LineChart,
   Line,
@@ -12,15 +19,16 @@ import {
   Area,
   PieChart,
   Pie,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Cell,
 } from 'recharts'
-import { TrendingUp, TrendingDown, Activity, Users, Calendar } from 'lucide-react'
+import { Activity, TrendingUp, TrendingDown } from 'lucide-react'
+import { Spinner } from '@/components/ui/spinner'
 
 interface ReportRendererProps {
   workspace: any
@@ -34,33 +42,200 @@ const COLORS = [
   'hsl(var(--chart-5))',
 ]
 
-// Sample data for demonstration - in production this would come from the workspace config
-const generateSampleData = (timePeriod: string) => {
-  const periods = {
-    last7Days: 7,
-    last30Days: 30,
-    last90Days: 90,
-    custom: 14,
+export function ReportRenderer({ workspace }: ReportRendererProps) {
+  const reportConfig = workspace.artifactData?.reportConfig
+  const [data, setData] = useState<{
+    chartData: any[]
+    kpis?: any[]
+    metadata?: any
+  } | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // 1. Load real data from the new endpoint
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch(
+          `/api/reports/data?workspaceId=${workspace.id}`
+        )
+        if (!res.ok) throw new Error('Failed to load report data')
+        const json = await res.json()
+        setData(json)
+      } catch (e: any) {
+        console.error(e)
+        setError(e.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (workspace?.artifactData?.reportConfig) {
+      fetchData()
+    } else {
+      setLoading(false)
+    }
+  }, [workspace])
+
+  // 2. Render helpers
+  const renderKPIs = () => {
+    if (!data?.kpis) return null
+
+    // Convert KPIs object to array if needed, or use as is if it's already an array
+    // The API returns kpis as a Record<string, number>, so we need to transform it
+    // However, the reportConfig might have kpi definitions. 
+    // Let's try to map the data.kpis (values) to the reportConfig.kpis (definitions)
+
+    const kpiDefinitions = reportConfig?.kpis || []
+    const kpiValues: Record<string, any> = data.kpis || {}
+
+    // If we have definitions, use them to format the values
+    if (kpiDefinitions.length > 0) {
+      return (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {kpiDefinitions.map((kpiDef: any, i: number) => {
+            const value = kpiValues[kpiDef.id] !== undefined ? kpiValues[kpiDef.id] : 'N/A'
+            return (
+              <Card key={i}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">{kpiDef.label}</CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{value}</div>
+                  {/* We could add trend info here if available */}
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )
+    }
+
+    // Fallback: just show whatever keys are in the data
+    const kpiKeys = Object.keys(kpiValues)
+    if (kpiKeys.length === 0) return null
+
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {kpiKeys.map((key: string, i: number) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium capitalize">{key.replace(/_/g, ' ')}</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{kpiValues[key]}</div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
   }
 
-  const days = periods[timePeriod as keyof typeof periods] || 7
+  const renderChart = (chart: any, idx: number) => {
+    const chartType = chart?.type || reportConfig?.visualizationType || 'line'
+    // Use metrics from config or chart definition
+    const series = chart?.series || reportConfig?.metrics || []
+    const chartTitle = chart?.title || reportConfig?.title || 'Chart'
 
-  return Array.from({ length: days }, (_, i) => ({
-    date: new Date(Date.now() - (days - i - 1) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    }),
-    wellness: Math.floor(Math.random() * 40) + 60,
-    trainingLoad: Math.floor(Math.random() * 500) + 300,
-    fatigue: Math.floor(Math.random() * 30) + 20,
-    soreness: Math.floor(Math.random() * 25) + 15,
-  }))
-}
+    // Chart config for Recharts
+    const chartConfig = series.reduce((acc: any, metric: string, i: number) => {
+      acc[metric] = {
+        label: metric,
+        color: COLORS[i % COLORS.length],
+      }
+      return acc
+    }, {})
 
-export function ReportRenderer({ workspace }: ReportRendererProps) {
-  const artifactData = workspace.artifactData
-  const reportConfig = artifactData?.reportConfig
+    return (
+      <Card key={idx}>
+        <CardHeader>
+          <CardTitle>{chartTitle}</CardTitle>
+          <CardDescription>
+            Data for the {reportConfig?.timePeriod?.replace(/([A-Z])/g, ' $1').toLowerCase()}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={chartConfig} className="h-[300px] w-full">
+            <>
+              {chartType === 'line' && (
+                <LineChart data={data?.chartData ?? []}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
+                  {series.map((metric: string, i: number) => (
+                    <Line
+                      key={metric}
+                      type="monotone"
+                      dataKey={metric}
+                      stroke={COLORS[i % COLORS.length]}
+                      strokeWidth={2}
+                      dot={{ r: 3 }}
+                    />
+                  ))}
+                </LineChart>
+              )}
+              {chartType === 'bar' && (
+                <BarChart data={data?.chartData ?? []}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
+                  {series.map((metric: string, i: number) => (
+                    <Bar key={metric} dataKey={metric} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </BarChart>
+              )}
+              {chartType === 'area' && (
+                <AreaChart data={data?.chartData ?? []}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
+                  {series.map((metric: string, i: number) => (
+                    <Area
+                      key={metric}
+                      type="monotone"
+                      dataKey={metric}
+                      stroke={COLORS[i % COLORS.length]}
+                      fill={COLORS[i % COLORS.length]}
+                      fillOpacity={0.6}
+                    />
+                  ))}
+                </AreaChart>
+              )}
+              {chartType === 'pie' && (
+                <PieChart>
+                  <Pie
+                    data={data?.chartData ?? []}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {data?.chartData?.map((_c: any, i: number) => (
+                      <Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </PieChart>
+              )}
+            </>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+    )
+  }
 
+  // 3. Main render
   if (!reportConfig) {
     return (
       <div className="flex h-full items-center justify-center p-8">
@@ -75,194 +250,39 @@ export function ReportRenderer({ workspace }: ReportRendererProps) {
     )
   }
 
-  const {
-    title = 'Report',
-    timePeriod = 'last7Days',
-    metrics = [],
-    visualizationType = 'line',
-    charts = [],
-    kpis = [],
-  } = reportConfig
-
-  // Generate sample data based on time period
-  const sampleData = generateSampleData(timePeriod)
-
-  // Create chart config for recharts
-  const chartConfig = {
-    wellness: { label: 'Wellness', color: COLORS[0] },
-    trainingLoad: { label: 'Training Load', color: COLORS[1] },
-    fatigue: { label: 'Fatigue', color: COLORS[2] },
-    soreness: { label: 'Soreness', color: COLORS[3] },
-  }
-
-  const renderKPIs = () => {
-    if (!kpis || kpis.length === 0) {
-      // Generate default KPIs from metrics
-      const defaultKPIs = metrics.slice(0, 4).map((metric: string) => ({
-        label: `Average ${metric}`,
-        value: 'N/A',
-        format: 'number',
-      }))
-
-      if (defaultKPIs.length === 0) return null
-
-      return (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {defaultKPIs.map((kpi: any, index: number) => (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{kpi.label}</CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{kpi.value}</div>
-                <p className="text-xs text-muted-foreground">
-                  Connect to data source to populate
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )
-    }
-
+  if (loading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi: any, index: number) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{kpi.label}</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{kpi.value}</div>
-              {kpi.change && (
-                <div className="flex items-center text-xs text-muted-foreground">
-                  {kpi.change > 0 ? (
-                    <TrendingUp className="mr-1 h-3 w-3 text-green-500" />
-                  ) : (
-                    <TrendingDown className="mr-1 h-3 w-3 text-red-500" />
-                  )}
-                  <span>{Math.abs(kpi.change)}% from last period</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+      <div className="flex h-full items-center justify-center p-8">
+        <Spinner />
       </div>
     )
   }
 
-  const renderChart = (chartData: any, index: number) => {
-    const chartType = chartData?.type || visualizationType
-    const chartTitle = chartData?.title || `${metrics.join(', ')} Over Time`
-    const series = chartData?.series || metrics
-
+  if (error) {
     return (
-      <Card key={index}>
-        <CardHeader>
-          <CardTitle>{chartTitle}</CardTitle>
-          <CardDescription>
-            Data for the {timePeriod.replace(/([A-Z])/g, ' $1').toLowerCase()}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig} className="h-[300px] w-full">
-            {chartType === 'line' && (
-              <LineChart data={sampleData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                {series.map((metric: string, idx: number) => (
-                  <Line
-                    key={metric}
-                    type="monotone"
-                    dataKey={metric}
-                    stroke={COLORS[idx % COLORS.length]}
-                    strokeWidth={2}
-                    dot={{ r: 3 }}
-                  />
-                ))}
-              </LineChart>
-            )}
-
-            {chartType === 'bar' && (
-              <BarChart data={sampleData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                {series.map((metric: string, idx: number) => (
-                  <Bar key={metric} dataKey={metric} fill={COLORS[idx % COLORS.length]} />
-                ))}
-              </BarChart>
-            )}
-
-            {chartType === 'area' && (
-              <AreaChart data={sampleData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                {series.map((metric: string, idx: number) => (
-                  <Area
-                    key={metric}
-                    type="monotone"
-                    dataKey={metric}
-                    stroke={COLORS[idx % COLORS.length]}
-                    fill={COLORS[idx % COLORS.length]}
-                    fillOpacity={0.6}
-                  />
-                ))}
-              </AreaChart>
-            )}
-
-            {chartType === 'pie' && (
-              <PieChart>
-                <Pie
-                  data={series.map((metric: string, idx: number) => ({
-                    name: metric,
-                    value: sampleData.reduce((sum, d) => sum + (d[metric as keyof typeof d] as number || 0), 0) / sampleData.length,
-                  }))}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {series.map((metric: string, idx: number) => (
-                    <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            )}
-          </ChartContainer>
-        </CardContent>
-      </Card>
+      <div className="p-8 text-center text-red-600">
+        <p className="font-medium">Error loading report data</p>
+        <p className="text-sm">{error}</p>
+      </div>
     )
   }
+
+  // If we got data but it's empty, show a friendly placeholder
+  const hasCharts = data?.chartData && data.chartData.length > 0
+  const hasKPIs = data?.kpis && Object.keys(data.kpis).length > 0
 
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
-          <Badge variant="outline">{timePeriod.replace(/([A-Z])/g, ' $1')}</Badge>
+          <h2 className="text-3xl font-bold tracking-tight">{reportConfig.title ?? 'Report'}</h2>
+          <Badge variant="outline">{reportConfig.timePeriod?.replace(/([A-Z])/g, ' $1')}</Badge>
         </div>
-        {metrics.length > 0 && (
+        {reportConfig.metrics?.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            {metrics.map((metric: string) => (
-              <Badge key={metric} variant="secondary">
-                {metric}
-              </Badge>
+            {reportConfig.metrics.map((m: string) => (
+              <Badge key={m} variant="secondary">{m}</Badge>
             ))}
           </div>
         )}
@@ -273,14 +293,22 @@ export function ReportRenderer({ workspace }: ReportRendererProps) {
 
       {/* Charts */}
       <div className="grid gap-6">
-        {charts && charts.length > 0 ? (
-          charts.map((chart: any, index: number) => renderChart(chart, index))
+        {hasCharts ? (
+          (reportConfig.charts?.length ? reportConfig.charts : [{}, {}]).map((chart: any, index: number) => renderChart(chart, index))
         ) : (
-          // Default chart if none specified
-          <>{renderChart({}, 0)}</>
+          <Card className="p-8 text-center">
+            <div className="flex flex-col items-center justify-center space-y-3">
+              <Activity className="h-10 w-10 text-muted-foreground/50" />
+              <div className="space-y-1">
+                <h3 className="font-medium">No Data Available</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  We couldn't find any data matching your criteria. Try adjusting the time period or filters, or ensure your forms have responses.
+                </p>
+              </div>
+            </div>
+          </Card>
         )}
       </div>
-
     </div>
   )
 }
