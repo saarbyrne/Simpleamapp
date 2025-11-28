@@ -62,8 +62,16 @@ export async function POST(req: NextRequest) {
         const result = await enhancePrompt(prompt, classification.artifactType, entities, catalog)
         console.log('[EnhancePrompt] Prompt Enhanced:', result)
 
+        // Transform variables to ensure they have 'value' property (AI may return 'default')
+        const normalizedVariables = result.variables.map((v: any) => ({
+            ...v,
+            value: v.value ?? v.default ?? '',
+            label: v.label ?? v.id // Fallback to id if label is missing
+        }))
+
         return NextResponse.json({
             ...result,
+            variables: normalizedVariables,
             artifactType: classification.artifactType,
             confidence: classification.confidence
         })

@@ -60,7 +60,7 @@ export function VariableChip({ variable, onChange }: VariableChipProps) {
             case 'select':
                 return (
                     <Command>
-                        <CommandInput placeholder={`Search ${variable.label.toLowerCase()}...`} />
+                        <CommandInput placeholder={`Search ${variable.label?.toLowerCase() || 'options'}...`} />
                         <CommandList>
                             <CommandEmpty>No results found.</CommandEmpty>
                             <CommandGroup>
@@ -90,7 +90,7 @@ export function VariableChip({ variable, onChange }: VariableChipProps) {
             case 'multi-select':
                 return (
                     <Command>
-                        <CommandInput placeholder={`Search ${variable.label.toLowerCase()}...`} />
+                        <CommandInput placeholder={`Search ${variable.label?.toLowerCase() || 'options'}...`} />
                         <CommandList>
                             <CommandEmpty>No results found.</CommandEmpty>
                             <CommandGroup>

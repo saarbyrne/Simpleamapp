@@ -41,10 +41,19 @@ Use the extracted entities to pre-fill variables.
 Define variables for any missing but necessary information (e.g., time range, chart type).
 
 IMPORTANT: Output ONLY valid JSON. No explanatory text, markdown formatting, or code blocks.
-Return a JSON object with 'template' (using {variableId} syntax) and 'variables' array.`
+Return a JSON object with:
+- 'template' (string using {variableId} syntax)
+- 'variables' (array of objects, each MUST have: id, label, type, value, and optionally options for select/multi-select types)
+
+Each variable object MUST include:
+- id (string): unique identifier used in template
+- label (string): human-readable label
+- type (string): one of 'text', 'number', 'date', 'select', 'multi-select'
+- value (any): the default/current value
+- options (string[]): required for 'select' and 'multi-select' types`
 
     const response = await anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20240620',
+        model: 'claude-3-5-haiku-20241022',
         max_tokens: 2048,
         system: systemPrompt,
         messages: [

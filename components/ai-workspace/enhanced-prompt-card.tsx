@@ -59,7 +59,7 @@ export function EnhancedPromptCard({
         const parts = enhancedPromptTemplate.split(/({[^}]+})/g)
 
         return (
-            <p className="text-lg leading-relaxed text-foreground">
+            <div className="text-lg leading-relaxed text-foreground">
                 {parts.map((part, index) => {
                     if (part.startsWith('{') && part.endsWith('}')) {
                         const varId = part.slice(1, -1)
@@ -77,7 +77,7 @@ export function EnhancedPromptCard({
                     }
                     return <span key={index}>{part}</span>
                 })}
-            </p>
+            </div>
         )
     }
 

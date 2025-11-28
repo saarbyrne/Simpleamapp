@@ -201,8 +201,8 @@ export function ConversationPanel({
 
       enhancedMessage = enhancePrompt({
         freeText: userMessage,
-        criteria: finalStructuredState.criteria || [],
-        artifactInputs: finalStructuredState.artifactInputs,
+        criteria: structuredInputState.criteria || [],
+        artifactInputs: structuredInputState.artifactInputs,
         artifactType: workspace.artifactType,
         currentArtifactData: workspace.artifactData,
         playerNames,
