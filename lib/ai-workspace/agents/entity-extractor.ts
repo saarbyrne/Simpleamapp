@@ -25,7 +25,8 @@ Context:
 - Metrics: ${JSON.stringify(catalog.metrics)}
 - Glossary: ${JSON.stringify(glossary)}
 
-Output a JSON array of entities with 'key', 'originalText', and 'resolvedValue'.`
+IMPORTANT: Output ONLY a valid JSON array. Do not include any explanatory text, markdown formatting, or code blocks.
+Return an array of entities with 'key', 'originalText', and 'resolvedValue' fields.`
 
     const response = await anthropic.messages.create({
         model: 'claude-3-5-haiku-20241022',

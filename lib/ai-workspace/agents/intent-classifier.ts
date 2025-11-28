@@ -19,7 +19,8 @@ Your job is to categorize user prompts into one of the following artifact types:
 - 'plans': Schedules, rehab plans, periodization.
 - 'uiPages': Interface screens, forms, data entry views.
 
-Output JSON only.`
+IMPORTANT: Output ONLY valid JSON. No explanatory text, markdown, or code blocks.
+Return a JSON object with 'artifactType', 'confidence', and 'reasoning' fields.`
 
     const response = await anthropic.messages.create({
         model: 'claude-3-5-haiku-20241022',

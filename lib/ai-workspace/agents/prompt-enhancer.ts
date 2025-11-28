@@ -40,7 +40,8 @@ The user wants to create a "${artifactType}".
 Use the extracted entities to pre-fill variables.
 Define variables for any missing but necessary information (e.g., time range, chart type).
 
-Output JSON with 'template' (using {variableId} syntax) and 'variables' array.`
+IMPORTANT: Output ONLY valid JSON. No explanatory text, markdown formatting, or code blocks.
+Return a JSON object with 'template' (using {variableId} syntax) and 'variables' array.`
 
     const response = await anthropic.messages.create({
         model: 'claude-3-5-sonnet-20240620',
