@@ -134,7 +134,7 @@
                 "start_date"
             ]
         },
-        "uiPage": {
+        "uipage": {
             "typical_components": [
                 "form",
                 "table",

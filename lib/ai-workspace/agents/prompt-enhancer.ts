@@ -23,6 +23,16 @@ export async function enhancePrompt(
     entities: ExtractedEntity[],
     catalog: any
 ): Promise<EnhancedPromptResult> {
+    // Map plural artifact types to singular template keys
+    const templateKeyMap: Record<ArtifactType, string> = {
+        'reports': 'report',
+        'whiteboards': 'whiteboard',
+        'plans': 'plan',
+        'uiPages': 'uipage'
+    }
+    const templateKey = templateKeyMap[artifactType]
+    const template = catalog.artifact_templates?.[templateKey]
+
     const systemPrompt = `You are a prompt engineer assistant.
 Your goal is to take a vague user request and turn it into a structured, templated prompt with interactive variables.
 The user wants to create a "${artifactType}".
@@ -41,8 +51,8 @@ Output JSON with 'template' (using {variableId} syntax) and 'variables' array.`
                 role: 'user',
                 content: `Original: "${originalPrompt}"
         Entities: ${JSON.stringify(entities)}
-        Catalog: ${JSON.stringify(catalog.artifact_templates[artifactType.slice(0, -1)])} // remove 's' suffix
-        
+        Catalog: ${JSON.stringify(template || {})}
+
         Enhance this prompt.`
             }
         ]
