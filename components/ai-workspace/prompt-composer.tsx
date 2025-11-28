@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { ArrowUp, Loader2 } from 'lucide-react'
 import { EnhancedPromptCard } from './enhanced-prompt-card'
-import { Variable } from './variable-chip'
+import type { Variable } from './variable-chip'
 import { toast } from 'sonner'
 
 interface PromptComposerProps {

@@ -61,6 +61,7 @@ export interface Workspace {
     updatedAt: Date
     publishedAt?: Date
     publishedTo?: PublishDestination[]
+    structuredInputs?: any
 }
 
 export interface PublishDestination {

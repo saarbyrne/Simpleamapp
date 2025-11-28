@@ -34,15 +34,16 @@ export async function POST(req: NextRequest) {
                 artifactType: artifactType as string,
                 initialPrompt: prompt,
                 status: 'draft',
+                structuredInputs: {
+                    originalPrompt: prompt,
+                    variables,
+                    artifactType
+                },
                 artifactData: {
-                    intent: {
-                        prompt,
-                        variables,
-                        artifactType
-                    },
-                    // Initialize empty config based on type
-                    config: artifactType === 'reports' ? { sections: [] } :
-                        artifactType === 'whiteboards' ? { elements: [], appState: {} } : {}
+                    ...(artifactType === 'reports' ? { reportConfig: { sections: [] } } : {}),
+                    ...(artifactType === 'whiteboards' ? { whiteboardConfig: { elements: [], appState: {} } } : {}),
+                    ...(artifactType === 'uiPages' ? { uiPageConfig: { components: [], layout: 'grid' } } : {}),
+                    ...(artifactType === 'plans' ? { planConfig: { milestones: [], phases: [] } } : {})
                 },
                 messages: {
                     create: [
