@@ -22,7 +22,7 @@ Your job is to categorize user prompts into one of the following artifact types:
 Output JSON only.`
 
     const response = await anthropic.messages.create({
-        model: 'claude-haiku-4-20250514',
+        model: 'claude-3-5-haiku-20241022',
         max_tokens: 1024,
         system: systemPrompt,
         messages: [

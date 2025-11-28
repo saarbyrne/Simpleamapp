@@ -43,7 +43,7 @@ Define variables for any missing but necessary information (e.g., time range, ch
 Output JSON with 'template' (using {variableId} syntax) and 'variables' array.`
 
     const response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 2048,
         system: systemPrompt,
         messages: [
