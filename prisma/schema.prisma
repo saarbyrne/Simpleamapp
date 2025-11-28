@@ -1208,6 +1208,7 @@ model AIWorkspaceMessage {
 
   role        String // "user", "assistant", "system"
   content     String @db.Text
+  isSystem    Boolean @default(false)
 
   createdAt   DateTime @default(now())
 

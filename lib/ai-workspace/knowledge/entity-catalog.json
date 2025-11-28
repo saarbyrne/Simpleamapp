@@ -133,6 +133,17 @@
                 "phases",
                 "start_date"
             ]
+        },
+        "uiPage": {
+            "typical_components": [
+                "form",
+                "table",
+                "card_grid"
+            ],
+            "required_config": [
+                "layout",
+                "components"
+            ]
         }
     }
 }

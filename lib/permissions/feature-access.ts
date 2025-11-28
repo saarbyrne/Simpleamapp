@@ -80,11 +80,11 @@ export async function areFeaturesEnabled(
   features: (FeatureKey | SubFeatureKey)[]
 ): Promise<Record<string, boolean>> {
   const results: Record<string, boolean> = {}
-  
+
   for (const feature of features) {
     results[feature] = await isFeatureEnabled(orgId, feature)
   }
-  
+
   return results
 }
 
@@ -97,14 +97,14 @@ export async function getEnabledFeatures(orgId: string): Promise<FeatureKey[]> {
     if (!features) return Object.keys(FEATURE_METADATA) as FeatureKey[]
 
     const enabledFeatures: FeatureKey[] = []
-    
+
     for (const [key, metadata] of Object.entries(FEATURE_METADATA)) {
       const isEnabled = features[metadata.fieldName as keyof OrganizationFeatures] as boolean
       if (isEnabled) {
         enabledFeatures.push(key as FeatureKey)
       }
     }
-    
+
     return enabledFeatures
   } catch (error) {
     console.error('Error getting enabled features:', error)
@@ -146,6 +146,7 @@ export async function resetOrganizationFeatures(
       where: { organizationId: orgId },
       data: {
         // Main features
+        aiWorkspaceEnabled: true,
         aiEnabled: true,
         playersEnabled: true,
         formsEnabled: true,
@@ -205,6 +206,7 @@ export async function disableAllFeatures(orgId: string): Promise<OrganizationFea
       where: { organizationId: orgId },
       data: {
         // Main features
+        aiWorkspaceEnabled: false,
         aiEnabled: false,
         playersEnabled: false,
         formsEnabled: false,

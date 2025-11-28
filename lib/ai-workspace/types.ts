@@ -5,7 +5,7 @@
  * artifact types, workspace states, and data structures
  */
 
-export type ArtifactType = 'report' | 'tactics' | 'uiPage' | 'plan';
+export type ArtifactType = 'reports' | 'whiteboards' | 'uiPages' | 'plans';
 
 export type WorkspaceStatus = 'generating' | 'draft' | 'updating' | 'ready' | 'published' | 'syncing';
 
