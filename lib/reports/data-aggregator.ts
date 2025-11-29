@@ -183,7 +183,7 @@ export async function fetchEventData(
   }
 
   if (filters?.eventTypes && filters.eventTypes.length > 0) {
-    where.eventType = { in: filters.eventTypes }
+    where.type = { in: filters.eventTypes }
   }
 
   const events = await prisma.event.findMany({
@@ -297,7 +297,7 @@ export function aggregateByDateGroup(
   data: any[],
   dateField: string,
   valueField: string,
-  aggregation: 'sum' | 'average' | 'count',
+  aggregation: 'sum' | 'average' | 'count' | 'min' | 'max',
   interval: 'day' | 'week' | 'month' = 'day'
 ): { date: string; value: number }[] {
   const grouped = new Map<string, number[]>()
@@ -342,6 +342,12 @@ export function aggregateByDateGroup(
         break
       case 'count':
         aggregatedValue = values.length
+        break
+      case 'min':
+        aggregatedValue = Math.min(...values)
+        break
+      case 'max':
+        aggregatedValue = Math.max(...values)
         break
     }
     result.push({ date, value: aggregatedValue })

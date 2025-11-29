@@ -84,16 +84,16 @@ export class BaseAgent {
           },
           messages,
           system: step.systemPrompt,
-        })
+        } as any)
 
         // Extract thinking and response
         let thinkingContent = ''
         let responseContent = ''
 
         for (const block of response.content) {
-          if (block.type === 'thinking') {
-            thinkingContent += block.thinking
-            callbacks?.onThinking?.(block.thinking)
+          if ((block as any).type === 'thinking') {
+            thinkingContent += (block as any).thinking
+            callbacks?.onThinking?.((block as any).thinking)
           } else if (block.type === 'text') {
             responseContent += block.text
           }
