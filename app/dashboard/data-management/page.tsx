@@ -1,42 +1,61 @@
 import { DataManagementClient } from './data-management-client'
-import { getSpreadsheets, getSpreadsheetTemplates } from '@/app/actions/spreadsheets'
-import { ColumnDefinition, SpreadsheetRow } from '@/lib/types/spreadsheet'
+import { prisma } from '@/lib/db'
+import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { createServerClient } from '@/lib/supabase/server'
 
-type DataManagementPageProps = {
-  searchParams?: {
-    template?: string
+export default async function DataManagementPage() {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return <div className="container mx-auto p-6">Not authenticated</div>
   }
-}
 
-export default async function DataManagementPage({ searchParams }: DataManagementPageProps) {
-  // Load initial data server-side with parallel queries for better performance
-  const [sheetsResult, templatesResult] = await Promise.all([
-    getSpreadsheets(),
-    getSpreadsheetTemplates(),
+  const dbUser = await ensureUserWithOrganization(user)
+
+  // Load organization data summary
+  const [
+    playersCount,
+    staffCount,
+    eventsCount,
+    formsCount,
+    customTablesCount,
+  ] = await Promise.all([
+    prisma.personOrganization.count({
+      where: {
+        organizationId: dbUser.organizationId,
+        role: 'player',
+      },
+    }),
+    prisma.personOrganization.count({
+      where: {
+        organizationId: dbUser.organizationId,
+        role: { not: 'player' },
+      },
+    }),
+    prisma.event.count({
+      where: { organizationId: dbUser.organizationId },
+    }),
+    prisma.form.count({
+      where: { organizationId: dbUser.organizationId },
+    }),
+    prisma.spreadsheet.count({
+      where: {
+        organizationId: dbUser.organizationId,
+        isDeleted: false,
+      },
+    }),
   ])
-
-  // Handle type conversion for description field (null -> undefined) and schema (JsonValue -> ColumnDefinition[])
-  const spreadsheets = sheetsResult.success ? (sheetsResult.spreadsheets || []).map(sheet => ({
-    ...sheet,
-    description: sheet.description || undefined,
-    templateId: sheet.templateId || undefined,
-    createdById: sheet.createdById || undefined,
-    schema: (Array.isArray(sheet.schema) ? sheet.schema : []) as unknown as ColumnDefinition[],
-    data: (Array.isArray(sheet.data) ? sheet.data : []) as unknown as SpreadsheetRow[]
-  })) : []
-  const templates = templatesResult.success ? (templatesResult.templates || []).map(template => ({
-    ...template,
-    description: template.description || undefined,
-    organizationId: template.organizationId || undefined,
-    schema: (Array.isArray(template.schema) ? template.schema : []) as unknown as ColumnDefinition[],
-    sampleData: Array.isArray(template.sampleData) ? template.sampleData as unknown as SpreadsheetRow[] : undefined
-  })) : []
 
   return (
     <DataManagementClient
-      initialSpreadsheets={spreadsheets}
-      initialTemplates={templates}
-      templateParam={searchParams?.template}
+      dataSummary={{
+        players: playersCount,
+        staff: staffCount,
+        events: eventsCount,
+        forms: formsCount,
+        customTables: customTablesCount,
+      }}
     />
   )
 }

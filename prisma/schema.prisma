@@ -114,6 +114,8 @@ model User {
   communityTemplates CommunityTemplate[]
   templateReviews    TemplateReview[]
   templateUsages     TemplateUsage[]
+  dataChangeLogs     DataChangeLog[] @relation("DataChangeLogs")
+  deletedItems       TrashItem[]     @relation("DeletedItems")
 
   @@map("users")
 }
@@ -511,11 +513,23 @@ model Spreadsheet {
   // Versioning
   version Int @default(1)
 
+  // Soft delete
+  isDeleted    Boolean   @default(false)
+  deletedAt    DateTime?
+  deletedBy    String?
+
+  // Permissions
+  visibility       String   @default("org") // "org" | "restricted"
+  schemaLockedBy   String?  // if set, only this user can modify columns
+  schemaLockReason String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  versions SpreadsheetVersion[]
+  versions    SpreadsheetVersion[]
+  permissions SpreadsheetPermission[]
 
+  @@index([organizationId, isDeleted])
   @@map("spreadsheets")
 }
 
@@ -535,6 +549,95 @@ model SpreadsheetVersion {
   createdAt DateTime @default(now())
 
   @@map("spreadsheet_versions")
+}
+
+// ============================================
+// DATA MANAGEMENT & HISTORICAL TRENDS
+// ============================================
+
+// Row-level change tracking for audit trail and history
+model DataChangeLog {
+  id             String   @id @default(cuid())
+
+  // What changed
+  spreadsheetId  String
+  rowId          String   // The row that was modified
+
+  // Who changed it
+  userId         String
+  user           User     @relation("DataChangeLogs", fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+
+  // What happened
+  action         String   // "create" | "update" | "delete" | "restore"
+
+  // The data
+  previousData   Json?    // null for creates
+  newData        Json?    // null for deletes
+  changedFields  String[] // list of field names that changed (for updates)
+
+  // Metadata
+  timestamp      DateTime @default(now())
+
+  // For grouping bulk operations
+  batchId        String?  // same ID for all changes in a bulk operation
+
+  @@index([spreadsheetId, rowId])
+  @@index([spreadsheetId, timestamp])
+  @@index([userId, timestamp])
+  @@index([organizationId, timestamp])
+  @@map("data_change_logs")
+}
+
+// Soft delete tracking with trash recovery
+model TrashItem {
+  id            String   @id @default(cuid())
+  organizationId String
+
+  // What was deleted
+  entityType    String   // "spreadsheet" | "spreadsheet_row" | "form" | "note" | etc.
+  entityId      String
+  entityName    String   // human-readable name for display
+
+  // Context for restoration
+  parentId      String?  // e.g., spreadsheetId for rows
+  parentName    String?  // e.g., spreadsheet name
+  metadata      Json?    // any additional context needed for restore
+
+  // Who deleted and when
+  deletedBy     String
+  deletedByUser User     @relation("DeletedItems", fields: [deletedBy], references: [id], onDelete: Cascade)
+  deletedAt     DateTime @default(now())
+
+  // Auto-purge scheduling
+  expiresAt     DateTime // default: deletedAt + 30 days
+
+  @@index([organizationId, deletedAt])
+  @@index([organizationId, entityType])
+  @@index([expiresAt])
+  @@map("trash_items")
+}
+
+// Table-level permissions for data access control
+model SpreadsheetPermission {
+  id            String      @id @default(cuid())
+  spreadsheetId String
+  spreadsheet   Spreadsheet @relation(fields: [spreadsheetId], references: [id], onDelete: Cascade)
+
+  // Who has permission
+  grantType     String // "user" | "role" | "permission"
+  grantValue    String // userId, role name, or permission name
+
+  // What permission
+  accessLevel   String // "view" | "edit" | "admin"
+
+  // Audit
+  grantedBy     String
+  grantedAt     DateTime @default(now())
+
+  @@unique([spreadsheetId, grantType, grantValue])
+  @@index([spreadsheetId])
+  @@map("spreadsheet_permissions")
 }
 
 // ============================================

@@ -111,7 +111,7 @@ export async function updateSpreadsheet(
       // Update spreadsheet
       const updatedSchema = data.schema ?? current.schema
       const updatedData = data.data ?? current.data
-      
+
       const spreadsheet = await tx.spreadsheet.update({
         where: { id: spreadsheetId },
         data: {
@@ -137,11 +137,85 @@ export async function updateSpreadsheet(
         })
       }
 
+      // Track row-level changes if data changed
+      if (data.data) {
+        const { getChangedFields } = await import('@/lib/data-management')
+        const oldData = (current.data as any[]) || []
+        const newData = data.data || []
+        const batchId = Math.random().toString(36).substring(7)
+
+        // Track created, updated, and deleted rows
+        const oldRowIds = new Set(oldData.map((r: any) => r.id))
+        const newRowIds = new Set(newData.map((r: any) => r.id))
+
+        // Created rows
+        for (const row of newData) {
+          if (!oldRowIds.has(row.id)) {
+            await tx.dataChangeLog.create({
+              data: {
+                spreadsheetId: spreadsheet.id,
+                rowId: row.id,
+                userId: user.id,
+                organizationId: dbUser.organizationId,
+                action: 'create',
+                previousData: null,
+                newData: row as unknown as Prisma.InputJsonValue,
+                changedFields: [],
+                batchId,
+              }
+            })
+          }
+        }
+
+        // Updated rows
+        for (const newRow of newData) {
+          const oldRow = oldData.find((r: any) => r.id === newRow.id)
+          if (oldRow) {
+            const changedFields = getChangedFields(oldRow, newRow)
+            if (changedFields.length > 0) {
+              await tx.dataChangeLog.create({
+                data: {
+                  spreadsheetId: spreadsheet.id,
+                  rowId: newRow.id,
+                  userId: user.id,
+                  organizationId: dbUser.organizationId,
+                  action: 'update',
+                  previousData: oldRow as unknown as Prisma.InputJsonValue,
+                  newData: newRow as unknown as Prisma.InputJsonValue,
+                  changedFields,
+                  batchId,
+                }
+              })
+            }
+          }
+        }
+
+        // Deleted rows
+        for (const oldRow of oldData) {
+          if (!newRowIds.has(oldRow.id)) {
+            await tx.dataChangeLog.create({
+              data: {
+                spreadsheetId: spreadsheet.id,
+                rowId: oldRow.id,
+                userId: user.id,
+                organizationId: dbUser.organizationId,
+                action: 'delete',
+                previousData: oldRow as unknown as Prisma.InputJsonValue,
+                newData: null,
+                changedFields: [],
+                batchId,
+              }
+            })
+          }
+        }
+      }
+
       return spreadsheet
     })
 
     revalidatePath('/dashboard/spreadsheets')
     revalidatePath(`/dashboard/spreadsheets/${spreadsheetId}`)
+    revalidatePath('/dashboard/data-management')
 
     return { success: true, spreadsheet: result }
   } catch (error) {
@@ -170,11 +244,16 @@ export async function deleteSpreadsheet(spreadsheetId: string) {
       return { error: 'Spreadsheet not found or access denied' }
     }
 
-    await prisma.spreadsheet.delete({
-      where: { id: spreadsheetId },
-    })
+    // Use soft delete instead of hard delete
+    const { softDeleteSpreadsheet } = await import('./data-management')
+    const result = await softDeleteSpreadsheet(spreadsheetId)
+
+    if (result.error) {
+      return { error: result.error }
+    }
 
     revalidatePath('/dashboard/spreadsheets')
+    revalidatePath('/dashboard/data-management')
 
     return { success: true }
   } catch (error) {
@@ -198,6 +277,7 @@ export async function getSpreadsheets() {
     const spreadsheets = await prisma.spreadsheet.findMany({
       where: {
         organizationId: dbUser.organizationId,
+        isDeleted: false, // Exclude soft-deleted spreadsheets
       },
       include: {
         template: true,
