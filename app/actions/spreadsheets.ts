@@ -2,24 +2,13 @@
 
 import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
-import { revalidatePath } from 'next/cache'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { revalidatePath, unstable_cache } from 'next/cache'
+import { getCachedUserWithOrganization, ensureUserWithOrganization } from '@/lib/auth/cached-user'
 import { Prisma } from '@prisma/client'
+import type { ColumnDefinition, SpreadsheetRow } from '@/lib/types/spreadsheet'
 
-// Types
-export interface ColumnDefinition {
-  id: string
-  name: string
-  type: 'text' | 'number' | 'date' | 'person' | 'event' | 'team' | 'formula'
-  settings?: {
-    filter?: string // For person type: 'players', 'staff', 'all'
-    formula?: string // For formula type
-  }
-}
-
-export interface SpreadsheetRow {
-  [key: string]: any
-}
+// Note: Cannot export constants in "use server" files - they only allow async functions
+// Cache is configured inline within each function using unstable_cache with revalidate option
 
 export interface CreateSpreadsheetData {
   name: string
@@ -59,6 +48,9 @@ export async function createSpreadsheet(data: CreateSpreadsheetData) {
         organizationId: dbUser.organizationId,
         createdById: user.id,
         version: 1,
+        tags: [],
+        starred: false,
+        sharedWith: [],
       },
     })
 
@@ -137,7 +129,7 @@ export async function updateSpreadsheet(
         })
       }
 
-      // Track row-level changes if data changed
+      // Track row-level changes if data changed - OPTIMIZED with batch inserts
       if (data.data) {
         const { getChangedFields } = await import('@/lib/data-management')
         const oldData = (current.data as any[]) || []
@@ -148,21 +140,22 @@ export async function updateSpreadsheet(
         const oldRowIds = new Set(oldData.map((r: any) => r.id))
         const newRowIds = new Set(newData.map((r: any) => r.id))
 
+        // Collect all change logs to insert in a single batch
+        const changeLogs: any[] = []
+
         // Created rows
         for (const row of newData) {
           if (!oldRowIds.has(row.id)) {
-            await tx.dataChangeLog.create({
-              data: {
-                spreadsheetId: spreadsheet.id,
-                rowId: row.id,
-                userId: user.id,
-                organizationId: dbUser.organizationId,
-                action: 'create',
-                previousData: null,
-                newData: row as unknown as Prisma.InputJsonValue,
-                changedFields: [],
-                batchId,
-              }
+            changeLogs.push({
+              spreadsheetId: spreadsheet.id,
+              rowId: row.id,
+              userId: user.id,
+              organizationId: dbUser.organizationId,
+              action: 'create',
+              previousData: Prisma.JsonNull,
+              newData: row as unknown as Prisma.InputJsonValue,
+              changedFields: [],
+              batchId,
             })
           }
         }
@@ -173,18 +166,16 @@ export async function updateSpreadsheet(
           if (oldRow) {
             const changedFields = getChangedFields(oldRow, newRow)
             if (changedFields.length > 0) {
-              await tx.dataChangeLog.create({
-                data: {
-                  spreadsheetId: spreadsheet.id,
-                  rowId: newRow.id,
-                  userId: user.id,
-                  organizationId: dbUser.organizationId,
-                  action: 'update',
-                  previousData: oldRow as unknown as Prisma.InputJsonValue,
-                  newData: newRow as unknown as Prisma.InputJsonValue,
-                  changedFields,
-                  batchId,
-                }
+              changeLogs.push({
+                spreadsheetId: spreadsheet.id,
+                rowId: newRow.id,
+                userId: user.id,
+                organizationId: dbUser.organizationId,
+                action: 'update',
+                previousData: oldRow as unknown as Prisma.InputJsonValue,
+                newData: newRow as unknown as Prisma.InputJsonValue,
+                changedFields,
+                batchId,
               })
             }
           }
@@ -193,20 +184,25 @@ export async function updateSpreadsheet(
         // Deleted rows
         for (const oldRow of oldData) {
           if (!newRowIds.has(oldRow.id)) {
-            await tx.dataChangeLog.create({
-              data: {
-                spreadsheetId: spreadsheet.id,
-                rowId: oldRow.id,
-                userId: user.id,
-                organizationId: dbUser.organizationId,
-                action: 'delete',
-                previousData: oldRow as unknown as Prisma.InputJsonValue,
-                newData: null,
-                changedFields: [],
-                batchId,
-              }
+            changeLogs.push({
+              spreadsheetId: spreadsheet.id,
+              rowId: oldRow.id,
+              userId: user.id,
+              organizationId: dbUser.organizationId,
+              action: 'delete',
+              previousData: oldRow as unknown as Prisma.InputJsonValue,
+              newData: Prisma.JsonNull,
+              changedFields: [],
+              batchId,
             })
           }
+        }
+
+        // Batch insert all change logs in a single query - MUCH FASTER!
+        if (changeLogs.length > 0) {
+          await tx.dataChangeLog.createMany({
+            data: changeLogs,
+          })
         }
       }
 
@@ -264,28 +260,35 @@ export async function deleteSpreadsheet(spreadsheetId: string) {
 
 // Get all spreadsheets for the organization
 export async function getSpreadsheets() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const dbUser = await getCachedUserWithOrganization()
 
-    const spreadsheets = await prisma.spreadsheet.findMany({
-      where: {
-        organizationId: dbUser.organizationId,
-        isDeleted: false, // Exclude soft-deleted spreadsheets
+    if (!dbUser) {
+      return { error: 'Not authenticated' }
+    }
+
+    // Cache spreadsheet list for 60 seconds per organization
+    const getCachedSpreadsheets = unstable_cache(
+      async (organizationId: string) => {
+        return await prisma.spreadsheet.findMany({
+          where: {
+            organizationId,
+            isDeleted: false, // Exclude soft-deleted spreadsheets
+          },
+          include: {
+            template: true,
+            folder: true,
+          },
+          orderBy: {
+            updatedAt: 'desc',
+          },
+        })
       },
-      include: {
-        template: true,
-      },
-      orderBy: {
-        updatedAt: 'desc',
-      },
-    })
+      [`spreadsheets-${dbUser.organizationId}`],
+      { revalidate: 60, tags: ['spreadsheets', `org-${dbUser.organizationId}`] }
+    )
+
+    const spreadsheets = await getCachedSpreadsheets(dbUser.organizationId)
 
     return { success: true, spreadsheets }
   } catch (error) {
@@ -294,8 +297,8 @@ export async function getSpreadsheets() {
   }
 }
 
-// Get a single spreadsheet
-export async function getSpreadsheet(spreadsheetId: string) {
+// Toggle starred status
+export async function toggleSpreadsheetStar(spreadsheetId: string, starred: boolean) {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -305,6 +308,71 @@ export async function getSpreadsheet(spreadsheetId: string) {
 
   try {
     const dbUser = await ensureUserWithOrganization(user)
+
+    const spreadsheet = await prisma.spreadsheet.findUnique({
+      where: { id: spreadsheetId },
+    })
+
+    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+      return { error: 'Spreadsheet not found or access denied' }
+    }
+
+    await prisma.spreadsheet.update({
+      where: { id: spreadsheetId },
+      data: { starred },
+    })
+
+    revalidatePath('/dashboard/spreadsheets')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error toggling star:', error)
+    return { error: 'Failed to update spreadsheet' }
+  }
+}
+
+// Update spreadsheet tags
+export async function updateSpreadsheetTags(spreadsheetId: string, tags: string[]) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    const spreadsheet = await prisma.spreadsheet.findUnique({
+      where: { id: spreadsheetId },
+    })
+
+    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+      return { error: 'Spreadsheet not found or access denied' }
+    }
+
+    await prisma.spreadsheet.update({
+      where: { id: spreadsheetId },
+      data: { tags },
+    })
+
+    revalidatePath('/dashboard/spreadsheets')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating tags:', error)
+    return { error: 'Failed to update tags' }
+  }
+}
+
+// Get a single spreadsheet
+export async function getSpreadsheet(spreadsheetId: string) {
+  try {
+    const dbUser = await getCachedUserWithOrganization()
+
+    if (!dbUser) {
+      return { error: 'Not authenticated' }
+    }
 
     const spreadsheet = await prisma.spreadsheet.findUnique({
       where: { id: spreadsheetId },
@@ -330,15 +398,12 @@ export async function getSpreadsheet(spreadsheetId: string) {
 
 // Get spreadsheet templates
 export async function getSpreadsheetTemplates() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const dbUser = await getCachedUserWithOrganization()
+
+    if (!dbUser) {
+      return { error: 'Not authenticated' }
+    }
 
     const templates = await prisma.spreadsheetTemplate.findMany({
       where: {

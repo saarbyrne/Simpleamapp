@@ -80,7 +80,7 @@ export function SpreadsheetGrid({
                   ...rowData,
                   [col.id]: e.target.value ? Number(e.target.value) : null,
                 })}
-                onFocus={focus}
+                {...(focus && typeof focus === 'function' ? { onFocus: focus } : {})}
               />
             ),
           }

@@ -23,7 +23,6 @@ export function AuthAwareLink({
   dashboardHref = "/dashboard"
 }: AuthAwareLinkProps) {
   const [href, setHref] = useState(loginHref);
-  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     async function checkAuth() {
@@ -34,19 +33,13 @@ export function AuthAwareLink({
       } catch (error) {
         // On error, default to login
         setHref(loginHref);
-      } finally {
-        setIsChecking(false);
       }
     }
 
     checkAuth();
   }, [loginHref, dashboardHref]);
 
-  // Prevent flash of wrong link while checking
-  if (isChecking) {
-    return <span className={className}>{children}</span>;
-  }
-
+  // Always return a Link element so it works with Button's asChild prop
   return (
     <Link href={href} className={className}>
       {children}

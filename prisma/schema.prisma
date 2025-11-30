@@ -36,6 +36,7 @@ model Organization {
   formTemplates      FormTemplate[]
   spreadsheets       Spreadsheet[]
   spreadsheetTemplates SpreadsheetTemplate[]
+  spreadsheetFolders SpreadsheetFolder[]
   canvasBoards       CanvasBoard[]
   drawings           Drawing[]
   drawingTemplates   DrawingTemplate[]
@@ -492,12 +493,48 @@ model SpreadsheetTemplate {
   @@map("spreadsheet_templates")
 }
 
+model SpreadsheetFolder {
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  icon           String?  // Optional icon/emoji
+  color          String?  // Optional color for UI
+
+  // Hierarchy - allow nested folders
+  parentId       String?
+  parent         SpreadsheetFolder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  subfolders     SpreadsheetFolder[] @relation("FolderHierarchy")
+
+  // Organization
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Sort order
+  sortOrder      Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  spreadsheets Spreadsheet[]
+
+  @@index([organizationId])
+  @@index([parentId])
+  @@map("spreadsheet_folders")
+}
+
 model Spreadsheet {
   id             String   @id @default(cuid())
   name           String
   description    String?
   schema         Json // Column definitions
   data           Json // Row data
+
+  // Organization & Folder
+  folderId       String?
+  folder         SpreadsheetFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  // Tags for filtering
+  tags           String[]
 
   // Template reference
   templateId String?
@@ -509,6 +546,10 @@ model Spreadsheet {
 
   // Creator
   createdById String?
+
+  // Tabs - future support for multiple sheets in one spreadsheet
+  // For now, each spreadsheet is single-tab, but schema prepared for expansion
+  tabs           Json?    @default("[]") // Array of {id, name, schema, data}
 
   // Versioning
   version Int @default(1)
@@ -523,6 +564,11 @@ model Spreadsheet {
   schemaLockedBy   String?  // if set, only this user can modify columns
   schemaLockReason String?
 
+  // Metadata
+  starred        Boolean  @default(false) // User can star important spreadsheets
+  lastOpenedAt   DateTime? // Track recent usage
+  sharedWith     String[] // User IDs who have access
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -530,6 +576,8 @@ model Spreadsheet {
   permissions SpreadsheetPermission[]
 
   @@index([organizationId, isDeleted])
+  @@index([folderId])
+  @@index([tags])
   @@map("spreadsheets")
 }
 

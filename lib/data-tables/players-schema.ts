@@ -9,56 +9,67 @@ export const playersSchema: ColumnDefinition[] = [
     id: 'firstName',
     name: 'First Name',
     type: 'text',
+    settings: { width: 150 },
   },
   {
     id: 'lastName',
     name: 'Last Name',
     type: 'text',
+    settings: { width: 150 },
   },
   {
     id: 'dateOfBirth',
     name: 'Date of Birth',
     type: 'date',
+    settings: { width: 140 },
   },
   {
     id: 'nationality',
     name: 'Nationality',
     type: 'text',
+    settings: { width: 130 },
   },
   {
     id: 'position',
     name: 'Position',
     type: 'text',
+    settings: { width: 130 },
   },
   {
     id: 'jerseyNumber',
     name: 'Jersey #',
     type: 'number',
+    settings: { width: 100 },
   },
   {
     id: 'status',
     name: 'Status',
     type: 'text',
+    settings: { width: 120 },
   },
   {
     id: 'phone',
     name: 'Phone',
     type: 'text',
+    settings: { width: 150 },
   },
   {
     id: 'email',
     name: 'Email',
     type: 'text',
+    settings: { width: 200 },
   },
   {
     id: 'joinedAt',
     name: 'Joined',
     type: 'date',
+    settings: { width: 130 },
   },
   {
     id: 'tags',
     name: 'Tags',
     type: 'text',
+    settings: { width: 180 },
   },
 ]
 

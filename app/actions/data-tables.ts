@@ -2,38 +2,52 @@
 
 import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
-import { playersSchema, playerToRow } from '@/lib/data-tables/players-schema'
+import { unstable_cache } from 'next/cache'
+import { getCachedUserWithOrganization, ensureUserWithOrganization } from '@/lib/auth/cached-user'
+import { playersSchema, playerToRow, rowToPlayer } from '@/lib/data-tables/players-schema'
+import { SpreadsheetRow } from '@/lib/types/spreadsheet'
+
+// Note: Cannot export constants in "use server" files - cache configured inline per function
 
 /**
  * Get Players data as spreadsheet format
+ * Now with pagination support for better performance
  */
-export async function getPlayersData() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
-
+export async function getPlayersData(page: number = 1, limit: number = 100) {
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const dbUser = await getCachedUserWithOrganization()
 
-    // Fetch all players with their person data
-    const players = await prisma.personOrganization.findMany({
-      where: {
-        organizationId: dbUser.organizationId,
-        role: 'player',
-      },
-      include: {
-        person: true,
-      },
-      orderBy: {
-        person: {
-          lastName: 'asc',
+    if (!dbUser) {
+      return { error: 'Not authenticated' }
+    }
+
+    const skip = (page - 1) * limit
+
+    // Fetch players with pagination
+    const [players, totalCount] = await Promise.all([
+      prisma.personOrganization.findMany({
+        where: {
+          organizationId: dbUser.organizationId,
+          role: 'player',
         },
-      },
-    })
+        include: {
+          person: true,
+        },
+        orderBy: {
+          person: {
+            lastName: 'asc',
+          },
+        },
+        take: limit,
+        skip,
+      }),
+      prisma.personOrganization.count({
+        where: {
+          organizationId: dbUser.organizationId,
+          role: 'player',
+        },
+      }),
+    ])
 
     // Transform to spreadsheet rows
     const rows = players.map(playerToRow)
@@ -45,7 +59,10 @@ export async function getPlayersData() {
       meta: {
         tableName: 'Players',
         description: 'All players in your organization',
-        recordCount: players.length,
+        recordCount: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
       },
     }
   } catch (error) {
@@ -58,15 +75,12 @@ export async function getPlayersData() {
  * Get Staff data as spreadsheet format
  */
 export async function getStaffData() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const dbUser = await getCachedUserWithOrganization()
+
+    if (!dbUser) {
+      return { error: 'Not authenticated' }
+    }
 
     const staff = await prisma.personOrganization.findMany({
       where: {
@@ -120,15 +134,12 @@ export async function getStaffData() {
  * Get Events data as spreadsheet format
  */
 export async function getEventsData() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const dbUser = await getCachedUserWithOrganization()
+
+    if (!dbUser) {
+      return { error: 'Not authenticated' }
+    }
 
     const events = await prisma.event.findMany({
       where: {
@@ -146,8 +157,8 @@ export async function getEventsData() {
       type: e.type,
       startTime: e.startTime,
       endTime: e.endTime,
-      location: e.location,
-      status: e.status,
+      location: e.location || '',
+      isRecurring: e.isRecurring,
     }))
 
     return {
@@ -158,7 +169,7 @@ export async function getEventsData() {
         { id: 'startTime', name: 'Start Time', type: 'date' },
         { id: 'endTime', name: 'End Time', type: 'date' },
         { id: 'location', name: 'Location', type: 'text' },
-        { id: 'status', name: 'Status', type: 'text' },
+        { id: 'isRecurring', name: 'Recurring', type: 'text' },
       ],
       data: rows,
       meta: {
@@ -170,5 +181,62 @@ export async function getEventsData() {
   } catch (error) {
     console.error('Error fetching events data:', error)
     return { error: 'Failed to fetch events data' }
+  }
+}
+
+/**
+ * Save changes to players data
+ */
+export async function savePlayersData(changes: SpreadsheetRow[]) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  try {
+    const dbUser = await ensureUserWithOrganization(user)
+
+    // Process each changed row
+    for (const row of changes) {
+      if (!row.id) continue
+
+      const playerData = rowToPlayer(row)
+
+      // Get the PersonOrganization record to find personId
+      const personOrg = await prisma.personOrganization.findUnique({
+        where: { id: row.id as string },
+        select: { personId: true },
+      })
+
+      if (!personOrg) continue
+
+      // Update Person data
+      await prisma.person.update({
+        where: { id: personOrg.personId },
+        data: playerData.person,
+      })
+
+      // Update PersonOrganization data
+      await prisma.personOrganization.update({
+        where: { id: row.id as string },
+        data: {
+          ...playerData.personOrg,
+          joinedAt: row.joinedAt ? new Date(row.joinedAt as string) : undefined,
+        },
+      })
+
+      // Note: DataChangeLog is currently designed for spreadsheet changes
+      // For player data changes, we would need to either:
+      // 1. Link to a spreadsheet (if player data is in a spreadsheet)
+      // 2. Create a separate audit log table for non-spreadsheet entities
+      // TODO: Implement proper audit logging for player data changes
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error saving players data:', error)
+    return { success: false, error: 'Failed to save changes' }
   }
 }

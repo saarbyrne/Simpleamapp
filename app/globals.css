@@ -3147,9 +3147,180 @@ html {
   padding: 0.5rem;
 }
 
+
+/* DataSheetGrid custom styling for data management tables */
+.dsg-container {
+  --dsg-header-bg: hsl(var(--muted));
+  --dsg-header-text: hsl(var(--foreground));
+  --dsg-border-color: hsl(var(--border));
+  --dsg-selection-border-color: hsl(var(--primary));
+  --dsg-selection-bg: hsl(var(--primary) / 0.1);
+}
+
+/* Column header backgrounds - using correct class names */
+.dsg-row-header {
+  background: hsl(var(--muted)) !important;
+  background-color: hsl(var(--muted)) !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 40 !important;
+}
+
+.dsg-cell-header {
+  background: hsl(var(--muted)) !important;
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+  font-weight: 600 !important;
+  border-right: 1px solid hsl(var(--border)) !important;
+  border-bottom: 2px solid hsl(var(--border)) !important;
+  padding: 0 8px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Header cell content container */
+.dsg-cell-header-container {
+  background: hsl(var(--muted)) !important;
+  background-color: hsl(var(--muted)) !important;
+  padding: 0 8px !important;
+}
+
+/* Ensure all header nested elements have background */
+.dsg-cell-header *,
+.dsg-cell-header-container * {
+  background: inherit !important;
+}
+
+/* Gutter cells (row numbers) should also have muted background */
+.dsg-cell-gutter {
+  background: hsl(var(--muted)) !important;
+  background-color: hsl(var(--muted)) !important;
+}
+
+/* Dark mode header backgrounds */
+.dark .dsg-row-header,
+.dark .dsg-cell-header,
+.dark .dsg-cell-header-container,
+.dark .dsg-cell-gutter {
+  background: hsl(var(--muted)) !important;
+  background-color: hsl(var(--muted)) !important;
+}
+
+/* First column white background (row numbers/IDs) */
+.dsg-cell:first-child,
+.dsg-row .dsg-cell:first-child {
+  background-color: white !important;
+}
+
+.dark .dsg-cell:first-child,
+.dark .dsg-row .dsg-cell:first-child {
+  background-color: hsl(var(--background)) !important;
+}
+
+/* Better cell borders and prevent overlap */
+.dsg-cell {
+  border-style: solid !important;
+  border-width: 0 1px 1px 0 !important;
+  border-color: hsl(var(--border)) !important;
+  border-right: 1px solid hsl(var(--border)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  padding: 0 8px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  box-sizing: border-box !important;
+}
+
+/* Cell content wrapper */
+.dsg-cell-container {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+}
+
+/* Input fields should respect cell boundaries */
+.dsg-input {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  box-sizing: border-box !important;
+}
+
 .dsg-input:focus {
-  outline: 2px solid hsl(var(--primary));
-  outline-offset: -2px;
+  outline: 2px solid hsl(var(--primary)) !important;
+  outline-offset: -2px !important;
+}
+
+.dark .dsg-input {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Selection styling */
+.dsg-cell-selected {
+  box-shadow: inset 0 0 0 2px var(--dsg-selection-border-color) !important;
+}
+
+/* Ensure columns respect their width settings */
+.dsg-cell,
+.dsg-header-cell {
+  min-width: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+/* Grid container should scroll properly */
+.dsg-viewport {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
+/* Ensure all rows have visible horizontal borders */
+.dsg-row {
+  border-bottom: 1px solid var(--dsg-border-color) !important;
+}
+
+/* Make sure data cells also have borders on all sides */
+.dsg-cell-container {
+  border: none !important;
+}
+
+/* Row styling */
+[role="row"] {
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+/* Force border widths on all grid elements - using lighter border colors */
+.dsg-cell,
+.dsg-cell-header,
+.dsg-cell-header-container,
+.dsg-cell-gutter {
+  border-right-width: 1px !important;
+  border-bottom-width: 1px !important;
+  border-right-style: solid !important;
+  border-bottom-style: solid !important;
+  border-right-color: hsl(var(--border) / 0.5) !important;
+  border-bottom-color: hsl(var(--border) / 0.5) !important;
+}
+
+/* Dark mode support - ensure everything adapts */
+.dark .dsg-container {
+  --dsg-border-color: hsl(var(--border));
+  --dsg-background-color: hsl(var(--background));
+  --dsg-cell-background-color: hsl(var(--background));
+  --dsg-cell-color: hsl(var(--foreground));
+}
+
+.dark .dsg-cell {
+  border-right-color: hsl(var(--border)) !important;
+  border-bottom-color: hsl(var(--border)) !important;
 }
 
 /* EMERGENCY FIX: Hide Excalidraw hand tool lock indicator */

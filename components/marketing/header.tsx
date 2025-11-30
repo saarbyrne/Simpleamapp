@@ -52,10 +52,10 @@ export function Header() {
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             <Button variant="ghost" className="text-[#1E1E1E] hover:text-[#142978]" asChild>
-              <AuthAwareLink>Log In</AuthAwareLink>
+              <AuthAwareLink loginHref="/login">Log In</AuthAwareLink>
             </Button>
             <Button className="bg-[#142978] hover:bg-[#142978]/90 text-white rounded-md" asChild>
-              <AuthAwareLink>GET STARTED</AuthAwareLink>
+              <AuthAwareLink loginHref="/signup">GET STARTED</AuthAwareLink>
             </Button>
           </div>
 
@@ -107,10 +107,10 @@ export function Header() {
               </Link>
               <div className="flex flex-col space-y-2 pt-4">
                 <Button variant="ghost" className="text-[#1E1E1E] hover:text-[#142978]" asChild>
-                  <AuthAwareLink>Log In</AuthAwareLink>
+                  <AuthAwareLink loginHref="/login">Log In</AuthAwareLink>
                 </Button>
                 <Button className="bg-[#142978] hover:bg-[#142978]/90 text-white rounded-md" asChild>
-                  <AuthAwareLink>GET STARTED</AuthAwareLink>
+                  <AuthAwareLink loginHref="/signup">GET STARTED</AuthAwareLink>
                 </Button>
               </div>
             </nav>

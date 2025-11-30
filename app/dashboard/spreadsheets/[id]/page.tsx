@@ -36,7 +36,7 @@ import {
   FileText,
   Clock,
 } from 'lucide-react'
-import { SpreadsheetGrid } from '@/components/spreadsheets/spreadsheet-grid'
+import { SpreadsheetGridLazy as SpreadsheetGrid } from '@/components/spreadsheets/spreadsheet-grid-lazy'
 import { CSVImportDialog } from '@/components/spreadsheets/csv-import-dialog'
 import { AIAssistantDialog } from '@/components/spreadsheets/ai-assistant-dialog'
 import {

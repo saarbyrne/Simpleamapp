@@ -26,7 +26,7 @@ interface DataSummary {
 }
 
 interface DataManagementClientProps {
-  dataSummary: DataSummary
+  dataSummary?: DataSummary
 }
 
 interface DataTable {
@@ -43,13 +43,22 @@ interface DataTable {
 export function DataManagementClient({ dataSummary }: DataManagementClientProps) {
   const router = useRouter()
 
+  // Provide default values if dataSummary is undefined
+  const summary = dataSummary || {
+    players: 0,
+    staff: 0,
+    events: 0,
+    forms: 0,
+    customTables: 0,
+  }
+
   const dataTables: DataTable[] = [
     {
       id: 'players',
       name: 'Players',
       description: 'Manage player profiles, performance data, and history',
       icon: <Users className="h-6 w-6" />,
-      count: dataSummary.players,
+      count: summary.players,
       route: '/dashboard/data-management/players',
       color: 'text-blue-600 dark:text-blue-400',
       features: ['Profiles', 'Performance', 'Medical', 'History'],
@@ -59,7 +68,7 @@ export function DataManagementClient({ dataSummary }: DataManagementClientProps)
       name: 'Staff',
       description: 'Coaches, medical staff, and administrative personnel',
       icon: <UserCog className="h-6 w-6" />,
-      count: dataSummary.staff,
+      count: summary.staff,
       route: '/dashboard/data-management/staff',
       color: 'text-purple-600 dark:text-purple-400',
       features: ['Roles', 'Responsibilities', 'Schedules'],
@@ -69,7 +78,7 @@ export function DataManagementClient({ dataSummary }: DataManagementClientProps)
       name: 'Events',
       description: 'Training sessions, matches, and organizational events',
       icon: <Calendar className="h-6 w-6" />,
-      count: dataSummary.events,
+      count: summary.events,
       route: '/dashboard/data-management/events',
       color: 'text-green-600 dark:text-green-400',
       features: ['Training', 'Matches', 'Attendance'],
@@ -79,7 +88,7 @@ export function DataManagementClient({ dataSummary }: DataManagementClientProps)
       name: 'Forms & Responses',
       description: 'Data collection forms and submitted responses',
       icon: <FileText className="h-6 w-6" />,
-      count: dataSummary.forms,
+      count: summary.forms,
       route: '/dashboard/forms',
       color: 'text-orange-600 dark:text-orange-400',
       features: ['Custom Fields', 'Responses', 'Analytics'],
@@ -89,7 +98,7 @@ export function DataManagementClient({ dataSummary }: DataManagementClientProps)
       name: 'Custom Data Tables',
       description: 'User-defined spreadsheets for any additional data',
       icon: <Table className="h-6 w-6" />,
-      count: dataSummary.customTables,
+      count: summary.customTables,
       route: '/dashboard/data-management/custom-tables',
       color: 'text-cyan-600 dark:text-cyan-400',
       features: ['Flexible Schema', 'Version Control', 'Permissions'],

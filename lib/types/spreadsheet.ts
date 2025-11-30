@@ -16,16 +16,57 @@ export interface SpreadsheetRow {
   [key: string]: any
 }
 
+// Future: Multi-tab support
+export interface SpreadsheetTab {
+  id: string
+  name: string
+  schema: ColumnDefinition[]
+  data: SpreadsheetRow[]
+  sortOrder?: number
+}
+
+export interface SpreadsheetFolder {
+  id: string
+  name: string
+  description?: string
+  icon?: string
+  color?: string
+  parentId?: string
+  organizationId: string
+  sortOrder: number
+  createdAt: Date
+  updatedAt: Date
+  subfolders?: SpreadsheetFolder[]
+  spreadsheetCount?: number // For display purposes
+}
+
 export interface SpreadsheetData {
   id: string
   name: string
   description?: string
   schema: ColumnDefinition[]
   data: SpreadsheetRow[]
+
+  // Organization & Folder
+  folderId?: string
+  folder?: SpreadsheetFolder
+
+  // Tags
+  tags: string[]
+
+  // Tabs (future multi-sheet support)
+  tabs?: SpreadsheetTab[]
+
   version: number
   templateId?: string
   organizationId: string
   createdById?: string
+
+  // Metadata
+  starred: boolean
+  lastOpenedAt?: Date
+  sharedWith: string[]
+
   createdAt: Date
   updatedAt: Date
 }
