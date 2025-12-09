@@ -51,11 +51,6 @@ export async function POST(req: NextRequest) {
                             role: 'user',
                             content: prompt,
                             isSystem: false
-                        },
-                        {
-                            role: 'assistant',
-                            content: `I've understood your intent to create a ${artifactType}. I've set up the initial workspace based on your requirements.`,
-                            isSystem: true
                         }
                     ]
                 }

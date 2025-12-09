@@ -39,6 +39,7 @@ Chart Type Guidelines:
 - Bar charts → Use for comparisons between categories
 - Area charts → Use for cumulative data over time
 - Pie charts → Use for proportions/distributions (percentages)
+- Scatter charts → Use for showing relationships between two variables
 - Table charts → Use for detailed data listings with multiple columns
 
 Chart Type Examples:
@@ -62,7 +63,7 @@ Provide your response ending with:
     "timePeriod": "last7Days|last30Days|last90Days",
     "players": ["all"] or ["player-id-1", "player-id-2"],
     "metrics": ["wellness", "trainingLoad", "recovery", "performance"],
-    "visualizationType": "line|bar|area|pie",
+    "visualizationType": "line|bar|area|pie|scatter",
     "charts": [
       {
         "type": "line",
@@ -113,7 +114,7 @@ const VALIDATION_RULES = [
   'Time period must be one of: last7Days, last30Days, last90Days, custom',
   'Charts array should have 1-3 visualizations (not empty, not excessive)',
   'Each chart must have: type, title, series',
-  'Chart types must be: line, bar, area, pie, or table',
+  'Chart types must be: line, bar, area, pie, scatter, or table',
   'Each KPI must have: label, value, format',
   'KPI labels must be descriptive and specific',
   'No duplicate chart titles',

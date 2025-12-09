@@ -31,6 +31,8 @@ export interface StreamCallback {
  */
 export class BaseAgent {
   private client: Anthropic
+  // Agentic generation requires extended thinking, which Haiku doesn't support
+  // Keep Sonnet 4 for this critical path, while using Haiku for simpler tasks
   private model: string = 'claude-sonnet-4-20250514'
 
   constructor(apiKey: string) {

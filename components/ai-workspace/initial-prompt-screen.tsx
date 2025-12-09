@@ -18,6 +18,7 @@ export function InitialPromptScreen({ workspaces = [] }: InitialPromptScreenProp
   const router = useRouter()
   const [isCreating, setIsCreating] = useState(false)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+  const [isNavigating, setIsNavigating] = useState(false)
 
   const handleWorkspacesChange = () => {
     router.refresh()
@@ -47,8 +48,14 @@ export function InitialPromptScreen({ workspaces = [] }: InitialPromptScreenProp
         throw new Error('No workspace ID returned')
       }
 
-      router.push(`/dashboard/ai-workspace/${result.workspaceId}`)
+      // Show immediate loading overlay before navigation starts
+      setIsNavigating(true)
       toast.success(t('messages.workspaceCreated'))
+
+      // Small delay to ensure overlay is visible before navigation
+      setTimeout(() => {
+        router.push(`/dashboard/ai-workspace/${result.workspaceId}`)
+      }, 50)
     } catch (error) {
       console.error('Error creating workspace:', error)
       toast.error(t('messages.failedToCreate'))
@@ -57,6 +64,22 @@ export function InitialPromptScreen({ workspaces = [] }: InitialPromptScreenProp
   }
 
   return (
+    <>
+      {/* Full-screen loading overlay during navigation */}
+      {isNavigating && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background">
+          <div className="text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="h-12 w-12 animate-spin rounded-full border-4 border-muted border-t-primary" />
+            </div>
+            <div className="space-y-2">
+              <p className="text-lg font-medium">Setting up your workspace...</p>
+              <p className="text-sm text-muted-foreground">AI generation will start automatically</p>
+            </div>
+          </div>
+        </div>
+      )}
+
     <div className="relative flex min-h-[calc(100vh-4rem)]">
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-6 bg-gradient-to-b from-background to-muted/20">
@@ -121,5 +144,6 @@ export function InitialPromptScreen({ workspaces = [] }: InitialPromptScreenProp
         </div>
       )}
     </div>
+    </>
   )
 }

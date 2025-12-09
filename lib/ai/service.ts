@@ -52,7 +52,7 @@ Available data includes:
 
   try {
     const stream = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-3-5-haiku-20241022', // Switched to Haiku for cost savings during testing
       max_tokens: 4096,
       temperature: 0.7,
       system: systemPrompt || defaultSystemPrompt,
@@ -133,7 +133,7 @@ Available data includes:
 export async function generateChatTitle(messages: Message[]): Promise<string> {
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-3-5-haiku-20241022', // Switched to Haiku for cost savings during testing
       max_tokens: 50,
       messages: [
         {
@@ -155,9 +155,9 @@ export async function generateChatTitle(messages: Message[]): Promise<string> {
 }
 
 export function calculateCost(inputTokens: number, outputTokens: number): number {
-  // Claude Sonnet 4 pricing
-  const INPUT_COST_PER_MILLION = 3.0
-  const OUTPUT_COST_PER_MILLION = 15.0
+  // Claude Haiku 3.5 pricing (switched from Sonnet 4 for cost savings)
+  const INPUT_COST_PER_MILLION = 1.0  // Was 3.0 for Sonnet 4
+  const OUTPUT_COST_PER_MILLION = 5.0  // Was 15.0 for Sonnet 4
 
   const inputCost = (inputTokens / 1_000_000) * INPUT_COST_PER_MILLION
   const outputCost = (outputTokens / 1_000_000) * OUTPUT_COST_PER_MILLION

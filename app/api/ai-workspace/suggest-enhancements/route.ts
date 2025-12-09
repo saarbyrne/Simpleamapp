@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     // Get suggestions from Claude
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-3-5-haiku-20241022', // Switched to Haiku for cost savings during testing
       max_tokens: 1000,
       messages: [
         {

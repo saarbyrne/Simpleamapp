@@ -53,17 +53,37 @@ export function ConversationPanel({
 
   // Auto-trigger generation on first load if workspace is new and has no artifact
   useEffect(() => {
+    // Check if this is a newly created workspace that needs initial generation
+    // A new workspace will have:
+    // - status: 'draft'
+    // - no artifactData or empty artifactData
+    // - only 1 initial message (the user's prompt)
+    const hasOnlyInitialMessage = workspace.messages.length === 1 &&
+      workspace.messages[0].role === 'user'
+
+    const hasNoArtifact = !workspace.artifactData ||
+      (typeof workspace.artifactData === 'object' &&
+       Object.keys(workspace.artifactData).length === 0) ||
+      (workspace.artifactData.reportConfig?.sections?.length === 0) ||
+      (workspace.artifactData.whiteboardConfig?.elements?.length === 0) ||
+      (workspace.artifactData.uiPageConfig?.components?.length === 0) ||
+      (workspace.artifactData.planConfig?.milestones?.length === 0)
+
     const shouldAutoGenerate =
       !hasTriggeredInitialGeneration.current &&
       workspace.status === 'draft' &&
-      workspace.messages.length === 1 &&
-      workspace.messages[0].role === 'user' &&
-      !workspace.artifactData
+      hasOnlyInitialMessage &&
+      hasNoArtifact
 
     if (shouldAutoGenerate) {
       hasTriggeredInitialGeneration.current = true
-      // Start generation directly with the initial prompt
-      proceedWithGeneration(workspace.messages[0].content)
+
+      // For initial auto-generation, we already have the user message stored
+      // We just need to trigger the AI generation without adding a new message
+      const initialPrompt = workspace.messages[0].content
+
+      // Trigger generation directly without adding a new user message
+      triggerGeneration(initialPrompt, initialPrompt)
     }
   }, [])
 
