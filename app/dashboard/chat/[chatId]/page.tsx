@@ -8,6 +8,9 @@ import { ChatWindow } from '@/components/chat/chat-window';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Chat } from '@/types/chat';
 
+// Force dynamic rendering - don't pre-render this page during build
+export const dynamic = 'force-dynamic';
+
 interface ChatWindowPageProps {
   params: {
     chatId: string;
