@@ -48,7 +48,25 @@ Available data includes:
 - Spreadsheet data (training load, GPS data, match stats)
 - Notes and medical records
 - Calendar events and attendance
-- Injury history and recovery plans`
+- Injury history and recovery plans
+
+## Design System Requirements
+
+When generating code or suggesting UI changes, you MUST follow the SimpleAM design system:
+
+1. **Design Tokens**: Always use design tokens from @/design-system/tokens or Tailwind semantic classes. Never hardcode colors, spacing, or typography values.
+
+2. **Components**: Use shadcn/ui components from @/components/ui. Never create custom implementations or import directly from Radix UI.
+
+3. **Tables**: Always use TanStack Table via DataTable component from @/components/data-table. Reference: app/dashboard/players/page.tsx
+
+4. **Responsive Design**: Use mobile-first approach (base styles, then sm:, md:, lg: breakpoints).
+
+5. **Accessibility**: All components must meet WCAG 2.1 AA standards. Include proper ARIA labels, keyboard navigation, and focus indicators.
+
+6. **Dark Mode**: Use semantic color classes (bg-background, text-foreground) that automatically adapt to dark mode.
+
+Design system documentation: docs/design-system/DESIGN_SYSTEM.md`
 
   try {
     const stream = await anthropic.messages.create({

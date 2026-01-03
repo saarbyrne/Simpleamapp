@@ -113,6 +113,42 @@ const rules = {
     suggestion: 'Add @media (prefers-reduced-motion: reduce) { ... } or use motion utilities',
     severity: 'warning' as const,
   },
+
+  // Token usage validation
+  missingTokenImport: {
+    pattern: /(?:duration|easing|colors|spacing|typography):\s*['"]?\d+/g,
+    exclude: [/\/\/ @design-system-ignore/, /from ['"]@\/design-system\/tokens/],
+    message: 'Use design tokens instead of hardcoded values. Import from @/design-system/tokens',
+    suggestion: 'Import { motion, colors, spacing, typography } from "@/design-system/tokens"',
+    severity: 'warning' as const,
+  },
+
+  // Dark mode checks
+  missingDarkMode: {
+    pattern: /className=["'][^"']*bg-(?:white|black|gray-\d+|slate-\d+|zinc-\d+|neutral-\d+|stone-\d+)/g,
+    exclude: [/\/\/ @design-system-ignore/, /dark:/],
+    message: 'Use semantic color classes that support dark mode. Avoid hardcoded color names.',
+    suggestion: 'Use bg-background, bg-card, bg-primary, etc. which automatically adapt to dark mode',
+    severity: 'warning' as const,
+  },
+
+  // Component import validation
+  directRadixImport: {
+    pattern: /from ['"]@radix-ui\//g,
+    exclude: [/\/\/ @design-system-ignore/, /components\/ui\//],
+    message: 'Import components from @/components/ui instead of directly from @radix-ui',
+    suggestion: 'Use shadcn/ui components from @/components/ui which include proper styling',
+    severity: 'error' as const,
+  },
+
+  // Table implementation check
+  incorrectTableImplementation: {
+    pattern: /<table|<thead|<tbody/g,
+    exclude: [/\/\/ @design-system-ignore/, /DataTable/, /@tanstack\/react-table/],
+    message: 'Use TanStack Table (DataTable component) instead of native HTML tables for data tables.',
+    suggestion: 'Use DataTable from @/components/data-table. See app/dashboard/players/page.tsx for reference.',
+    severity: 'warning' as const,
+  },
 };
 
 async function lintFile(filePath: string): Promise<LintResult> {
@@ -159,6 +195,7 @@ async function lintFile(filePath: string): Promise<LintResult> {
 
 async function lintDesignSystem() {
   console.log('🎨 Running design system lint...\n');
+  console.log('📚 Design system documentation: docs/design-system/DESIGN_SYSTEM.md\n');
 
   // Find all component and story files
   const componentFiles = await glob('components/**/*.{tsx,ts}', {
@@ -171,7 +208,13 @@ async function lintDesignSystem() {
     cwd: process.cwd(),
   });
 
-  const files = [...componentFiles, ...storyFiles];
+  // Also check app directory for pages
+  const appFiles = await glob('app/**/*.{tsx,ts}', {
+    ignore: ['**/*.test.*', '**/*.spec.*', '**/node_modules/**', '**/layout.tsx', '**/loading.tsx', '**/error.tsx'],
+    cwd: process.cwd(),
+  });
+
+  const files = [...componentFiles, ...storyFiles, ...appFiles];
 
   const results: LintResult[] = [];
   let totalViolations = 0;

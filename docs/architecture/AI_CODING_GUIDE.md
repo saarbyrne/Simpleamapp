@@ -561,10 +561,51 @@ Types:
   - types/forms.ts         # Form types
 ```
 
+## Design System Usage
+
+SimpleAM uses a comprehensive design system built on shadcn/ui and Radix primitives. When writing code:
+
+### Quick Reference
+
+**Design Tokens:**
+```typescript
+import { motion, colors, spacing, typography } from '@/design-system/tokens'
+```
+
+**Components:**
+```typescript
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { DataTable } from '@/components/data-table'
+```
+
+**Tables:**
+- Always use TanStack Table via `DataTable` component
+- Reference: `app/dashboard/players/page.tsx`
+
+**Colors:**
+- Use semantic classes: `bg-primary`, `text-foreground`, `border-border`
+- Never hardcode: `bg-blue-500`, `#3b82f6`
+
+**Spacing:**
+- Use Tailwind scale: `p-4`, `m-2`, `gap-6`
+- Never hardcode: `padding: 13px`
+
+**Responsive:**
+- Mobile-first: `p-4 md:p-6 lg:p-8`
+
+**Accessibility:**
+- Images need `alt` text
+- Icon buttons need `aria-label`
+- Form inputs need associated `Label`
+
+For complete guidelines, see: `/docs/design-system/DESIGN_SYSTEM.md`
+
 ## Getting Help
 
 ```
 Documentation:   /docs/
+Design System:   /docs/design-system/DESIGN_SYSTEM.md
 Architecture:    /docs/architecture/ARCHITECTURE.md
 Setup Guide:     /docs/setup/
 API Reference:   /app/README.md

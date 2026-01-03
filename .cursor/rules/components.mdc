@@ -1,4 +1,46 @@
 ---
 alwaysApply: true
 ---
-always us our components and theme - tables should be tanstack - use the players list page as a reference
+
+# Component Usage Rules
+
+Always use our component library and design system. See `docs/design-system/DESIGN_SYSTEM.md` for full guidelines.
+
+## Core Rules
+
+1. **Use shadcn/ui Components**: Import from `@/components/ui` - never create custom implementations or import directly from Radix UI.
+
+2. **Tables**: Always use TanStack Table via `DataTable` component. Reference implementation: `app/dashboard/players/page.tsx`
+
+3. **Design Tokens**: Use design tokens from `@/design-system/tokens` or Tailwind semantic classes. Never hardcode values.
+
+4. **Theme**: Use semantic color classes that support dark mode: `bg-background`, `text-foreground`, `border-border`
+
+## Reference Implementation
+
+The players list page (`app/dashboard/players/page.tsx`) demonstrates:
+- TanStack Table implementation with `DataTable` component
+- Proper component composition
+- Server component patterns
+- Responsive design
+- Design token usage
+
+## Quick Reference
+
+```tsx
+// Tables - use DataTable
+import { DataTable } from '@/components/data-table'
+import { useReactTable } from '@tanstack/react-table'
+
+// Buttons
+import { Button } from '@/components/ui/button'
+
+// Forms
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+
+// Cards
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+```
+
+For detailed guidelines, see `.cursor/rules/design-system.mdc` and `docs/design-system/DESIGN_SYSTEM.md`.
