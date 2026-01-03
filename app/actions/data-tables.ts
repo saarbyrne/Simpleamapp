@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db'
 import { unstable_cache } from 'next/cache'
 import { getCachedUserWithOrganization, ensureUserWithOrganization } from '@/lib/auth/cached-user'
 import { playersSchema, playerToRow, rowToPlayer } from '@/lib/data-tables/players-schema'
-import { SpreadsheetRow } from '@/lib/types/spreadsheet'
+import { SpreadsheetRow, ColumnDefinition } from '@/lib/types/spreadsheet'
 
 // Note: Cannot export constants in "use server" files - cache configured inline per function
 
@@ -107,16 +107,18 @@ export async function getStaffData() {
       joinedAt: s.joinedAt,
     }))
 
+    const schema: ColumnDefinition[] = [
+      { id: 'firstName', name: 'First Name', type: 'text' },
+      { id: 'lastName', name: 'Last Name', type: 'text' },
+      { id: 'role', name: 'Role', type: 'text' },
+      { id: 'phone', name: 'Phone', type: 'text' },
+      { id: 'email', name: 'Email', type: 'text' },
+      { id: 'joinedAt', name: 'Joined', type: 'date' },
+    ]
+
     return {
       success: true,
-      schema: [
-        { id: 'firstName', name: 'First Name', type: 'text' },
-        { id: 'lastName', name: 'Last Name', type: 'text' },
-        { id: 'role', name: 'Role', type: 'text' },
-        { id: 'phone', name: 'Phone', type: 'text' },
-        { id: 'email', name: 'Email', type: 'text' },
-        { id: 'joinedAt', name: 'Joined', type: 'date' },
-      ],
+      schema,
       data: rows,
       meta: {
         tableName: 'Staff',
@@ -161,16 +163,18 @@ export async function getEventsData() {
       isRecurring: e.isRecurring,
     }))
 
+    const schema: ColumnDefinition[] = [
+      { id: 'title', name: 'Title', type: 'text' },
+      { id: 'type', name: 'Type', type: 'text' },
+      { id: 'startTime', name: 'Start Time', type: 'date' },
+      { id: 'endTime', name: 'End Time', type: 'date' },
+      { id: 'location', name: 'Location', type: 'text' },
+      { id: 'isRecurring', name: 'Recurring', type: 'text' },
+    ]
+
     return {
       success: true,
-      schema: [
-        { id: 'title', name: 'Title', type: 'text' },
-        { id: 'type', name: 'Type', type: 'text' },
-        { id: 'startTime', name: 'Start Time', type: 'date' },
-        { id: 'endTime', name: 'End Time', type: 'date' },
-        { id: 'location', name: 'Location', type: 'text' },
-        { id: 'isRecurring', name: 'Recurring', type: 'text' },
-      ],
+      schema,
       data: rows,
       meta: {
         tableName: 'Events',

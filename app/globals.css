@@ -1,10 +1,10 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Optional animation utilities. Remove if package not installed. */
 /*---break--- */
 @import "tw-animate-css";
-
-@custom-variant dark (&:is(.dark *));
 
 /* Custom prose styles for rich text editor */
 .prose {
@@ -3060,7 +3060,7 @@ html {
 
 /*---break--- */
 
-@theme inline {
+:root {
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -3071,23 +3071,23 @@ html {
   --color-sidebar-ring: var(--sidebar-ring);
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
-  /*---break--- */
-  @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-    to {
-      height: var(--radix-accordion-content-height);
-    }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
   }
-  /*---break--- */
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-    to {
-      height: 0;
-    }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
   }
 }
 

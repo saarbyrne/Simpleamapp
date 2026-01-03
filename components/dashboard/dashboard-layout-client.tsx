@@ -182,9 +182,9 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
       <SidebarProvider>
         <AppSidebar userName={userName} userEmail={userEmail} userAvatar={userAvatar} />
         <SidebarInset className="flex flex-col">
-          <div className="sticky top-0 z-10 shrink-0 w-full overflow-x-hidden bg-nav-background">
-            <header className="flex h-16 items-center gap-2 border-b px-4">
-              <SidebarTrigger className="-ms-1 shrink-0" />
+          <div className="sticky top-0 z-50 shrink-0 w-full overflow-x-hidden bg-nav-background">
+            <header className="flex h-16 items-center gap-2 border-b px-4 bg-nav-background">
+              <SidebarTrigger className="-ms-1 shrink-0 text-foreground hover:bg-accent" />
               <Separator orientation="vertical" className="me-2 h-4 shrink-0" />
               <div className="flex-1 min-w-0">
                 <DashboardBreadcrumb />
