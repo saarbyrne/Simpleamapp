@@ -199,15 +199,29 @@ Provide your response as JSON only.
 
       const textContent = response.content.find((block) => block.type === 'text')
       if (textContent && textContent.type === 'text') {
-        const jsonMatch = textContent.text.match(/\{[\s\S]*\}/)
+        // Try to extract JSON - handle both raw JSON and markdown code blocks
+        let jsonText = textContent.text.trim()
+
+        // Remove markdown code block if present
+        const codeBlockMatch = jsonText.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/)
+        if (codeBlockMatch) {
+          jsonText = codeBlockMatch[1].trim()
+        }
+
+        // Find the JSON object boundaries
+        const jsonMatch = jsonText.match(/\{[\s\S]*?\}(?=\s*$|\s*\n\s*[^}\s]|$)/)
         if (jsonMatch) {
-          const result = JSON.parse(jsonMatch[0])
-          callbacks?.onProgress?.({
-            step: 'validation',
-            description: result.valid ? 'Validation passed' : 'Validation found issues',
-            complete: true,
-          })
-          return result
+          try {
+            const result = JSON.parse(jsonMatch[0])
+            callbacks?.onProgress?.({
+              step: 'validation',
+              description: result.valid ? 'Validation passed' : 'Validation found issues',
+              complete: true,
+            })
+            return result
+          } catch (parseError) {
+            console.error('JSON parse error in validation:', parseError)
+          }
         }
       }
     } catch (error) {

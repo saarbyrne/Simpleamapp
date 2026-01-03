@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import {
   DataSheetGrid,
   checkboxColumn,
@@ -55,6 +55,11 @@ export function SpreadsheetGrid({
   const t = useTranslations('spreadsheets.grid')
   const tSpreadsheets = useTranslations('spreadsheets')
   const [selection, setSelection] = useState<{ min: { row: number; col: number }; max: { row: number; col: number } } | null>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Convert our schema to DataSheetGrid columns
   const columns = useMemo<DSGColumn[]>(() => {
@@ -220,16 +225,18 @@ export function SpreadsheetGrid({
 
       {/* Grid */}
       <div className="flex-1 overflow-auto">
-        <DataSheetGrid
-          value={data}
-          onChange={onChange}
-          columns={columns}
-          height={600}
-          rowHeight={40}
-          headerRowHeight={40}
-          addRowsComponent={false}
-          lockRows={false}
-        />
+        {isClient ? (
+          <DataSheetGrid
+            value={data}
+            onChange={onChange}
+            columns={columns}
+            height={600}
+            rowHeight={48}
+            headerRowHeight={48}
+            addRowsComponent={false}
+            lockRows={false}
+          />
+        ) : null}
       </div>
 
       {/* Footer */}

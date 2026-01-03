@@ -108,14 +108,14 @@ export function ConversationHistory({
                       {conversation.title || 'AI Conversation'}
                     </h4>
                   </div>
-                  <button
-                    type="button"
-                    className="h-6 w-6 p-1 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 rounded transition-colors"
-                    onClick={(e) => handleDelete(conversation.id, e)}
-                    title="Delete conversation"
+                  <span
+                    role="button"
+                    aria-label="Delete conversation"
+                    className="h-6 w-6 p-1 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 rounded transition-colors flex items-center justify-center"
+                    onClick={(e) => handleDelete(conversation.id, e as unknown as React.MouseEvent)}
                   >
                     <Trash2 className="h-3 w-3 text-destructive" />
-                  </button>
+                  </span>
                 </div>
                 <p className="text-xs text-muted-foreground line-clamp-2">
                   {conversation.preview || 'No messages yet'}

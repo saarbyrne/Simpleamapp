@@ -3149,9 +3149,10 @@ html {
 
 
 /* DataSheetGrid custom styling for data management tables */
+/* CSS variables automatically adapt to dark mode - no separate dark rules needed */
 .dsg-container {
   --dsg-header-bg: hsl(var(--muted));
-  --dsg-header-text: hsl(var(--foreground));
+  --dsg-header-text: hsl(var(--muted-foreground));
   --dsg-border-color: hsl(var(--border));
   --dsg-selection-border-color: hsl(var(--primary));
   --dsg-selection-bg: hsl(var(--primary) / 0.1);
@@ -3164,26 +3165,29 @@ html {
   position: sticky !important;
   top: 0 !important;
   z-index: 40 !important;
+  height: 3rem !important;
 }
 
 .dsg-cell-header {
   background: hsl(var(--muted)) !important;
   background-color: hsl(var(--muted)) !important;
-  color: hsl(var(--foreground)) !important;
-  font-weight: 600 !important;
+  color: hsl(var(--muted-foreground)) !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
   border-right: 1px solid hsl(var(--border)) !important;
-  border-bottom: 2px solid hsl(var(--border)) !important;
-  padding: 0 8px !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  padding: 0 1rem !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+  height: 3rem !important;
 }
 
 /* Header cell content container */
 .dsg-cell-header-container {
   background: hsl(var(--muted)) !important;
   background-color: hsl(var(--muted)) !important;
-  padding: 0 8px !important;
+  padding: 0 1rem !important;
 }
 
 /* Ensure all header nested elements have background */
@@ -3196,40 +3200,36 @@ html {
 .dsg-cell-gutter {
   background: hsl(var(--muted)) !important;
   background-color: hsl(var(--muted)) !important;
+  font-size: 0.875rem !important;
+  color: hsl(var(--muted-foreground)) !important;
+  padding: 0 1rem !important;
+  height: 3rem !important;
 }
 
-/* Dark mode header backgrounds */
-.dark .dsg-row-header,
-.dark .dsg-cell-header,
-.dark .dsg-cell-header-container,
-.dark .dsg-cell-gutter {
-  background: hsl(var(--muted)) !important;
-  background-color: hsl(var(--muted)) !important;
-}
-
-/* First column white background (row numbers/IDs) */
+/* First column background (row numbers/IDs) - match card background */
+/* CSS variables automatically adapt to dark mode */
 .dsg-cell:first-child,
 .dsg-row .dsg-cell:first-child {
-  background-color: white !important;
-}
-
-.dark .dsg-cell:first-child,
-.dark .dsg-row .dsg-cell:first-child {
-  background-color: hsl(var(--background)) !important;
+  background-color: hsl(var(--card)) !important;
 }
 
 /* Better cell borders and prevent overlap */
+/* Background and colors automatically adapt via CSS variables */
 .dsg-cell {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
   border-style: solid !important;
   border-width: 0 1px 1px 0 !important;
   border-color: hsl(var(--border)) !important;
   border-right: 1px solid hsl(var(--border)) !important;
   border-bottom: 1px solid hsl(var(--border)) !important;
-  padding: 0 8px !important;
+  padding: 0 1rem !important;
+  font-size: 0.875rem !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   box-sizing: border-box !important;
+  height: 3rem !important;
 }
 
 /* Cell content wrapper */
@@ -3239,6 +3239,7 @@ html {
   display: flex !important;
   align-items: center !important;
   box-sizing: border-box !important;
+  padding: 0 !important;
 }
 
 /* Input fields should respect cell boundaries */
@@ -3251,7 +3252,7 @@ html {
   background: transparent !important;
   color: inherit !important;
   font-family: inherit !important;
-  font-size: inherit !important;
+  font-size: 0.875rem !important;
   box-sizing: border-box !important;
 }
 
@@ -3260,9 +3261,7 @@ html {
   outline-offset: -2px !important;
 }
 
-.dark .dsg-input {
-  color: hsl(var(--foreground)) !important;
-}
+/* Input color inherits from parent cell - CSS variables adapt automatically */
 
 /* Selection styling */
 .dsg-cell-selected {
@@ -3283,8 +3282,9 @@ html {
 }
 
 /* Ensure all rows have visible horizontal borders */
+/* Using CSS variables directly - automatically adapts to dark mode */
 .dsg-row {
-  border-bottom: 1px solid var(--dsg-border-color) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
 }
 
 /* Make sure data cells also have borders on all sides */
@@ -3297,7 +3297,13 @@ html {
   border-bottom: 1px solid hsl(var(--border)) !important;
 }
 
-/* Force border widths on all grid elements - using lighter border colors */
+/* Row hover effect matching standard table */
+.dsg-row:hover {
+  background-color: hsl(var(--muted) / 0.5) !important;
+  transition: background-color 150ms ease-in-out !important;
+}
+
+/* Force border widths on all grid elements - matching standard table borders */
 .dsg-cell,
 .dsg-cell-header,
 .dsg-cell-header-container,
@@ -3306,22 +3312,12 @@ html {
   border-bottom-width: 1px !important;
   border-right-style: solid !important;
   border-bottom-style: solid !important;
-  border-right-color: hsl(var(--border) / 0.5) !important;
-  border-bottom-color: hsl(var(--border) / 0.5) !important;
-}
-
-/* Dark mode support - ensure everything adapts */
-.dark .dsg-container {
-  --dsg-border-color: hsl(var(--border));
-  --dsg-background-color: hsl(var(--background));
-  --dsg-cell-background-color: hsl(var(--background));
-  --dsg-cell-color: hsl(var(--foreground));
-}
-
-.dark .dsg-cell {
   border-right-color: hsl(var(--border)) !important;
   border-bottom-color: hsl(var(--border)) !important;
 }
+
+/* All colors use CSS variables which automatically adapt to dark mode */
+/* No separate dark mode rules needed - CSS variables handle it */
 
 /* EMERGENCY FIX: Hide Excalidraw hand tool lock indicator */
 .excalidraw .HintViewer,
