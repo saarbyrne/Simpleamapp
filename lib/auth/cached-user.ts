@@ -10,6 +10,7 @@
 import { cache } from 'react'
 import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
+import { slugify } from '@/lib/utils'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import type { User, Organization } from '@prisma/client'
 
@@ -68,18 +69,33 @@ export async function ensureUserWithOrganization(supabaseUser: SupabaseUser): Pr
 
   // Create user if doesn't exist
   if (!dbUser) {
+    // First, create the organization (required for user creation)
+    const userEmail = supabaseUser.email!
+    const defaultOrgName = userEmail.includes('@')
+      ? `${userEmail.split('@')[0]}'s Organization`
+      : 'My Organization'
+
+    const organization = await prisma.organization.create({
+      data: {
+        name: defaultOrgName,
+        slug: slugify(defaultOrgName),
+      },
+    })
+
+    // Then create the user with the organizationId
     const newUser = await prisma.user.create({
       data: {
         id: supabaseUser.id,
-        email: supabaseUser.email!,
-        name: supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0] || 'User',
+        email: userEmail,
+        name: supabaseUser.user_metadata?.name || userEmail.split('@')[0] || 'User',
+        organizationId: organization.id,
       },
       include: { organization: true },
     })
     dbUser = newUser
   }
 
-  // Ensure organization exists
+  // Ensure organization exists (shouldn't happen after above fix, but keeping for safety)
   if (!dbUser.organization) {
     const userEmail = dbUser.email
     const defaultOrgName = userEmail.includes('@')
@@ -89,14 +105,16 @@ export async function ensureUserWithOrganization(supabaseUser: SupabaseUser): Pr
     const organization = await prisma.organization.create({
       data: {
         name: defaultOrgName,
-        users: {
-          connect: { id: dbUser.id },
-        },
+        slug: slugify(defaultOrgName),
       },
     })
 
-    dbUser = await prisma.user.findUnique({
+    // Update user with organizationId
+    dbUser = await prisma.user.update({
       where: { id: dbUser.id },
+      data: {
+        organizationId: organization.id,
+      },
       include: { organization: true },
     }) as UserWithOrganization
   }
