@@ -2,17 +2,10 @@ import { differenceInYears } from 'date-fns'
 import { PlayersTable, type PlayerRow } from '@/components/dashboard/players-table-new'
 import { getPlayers } from '@/app/actions/players'
 
-type PlayersPageProps = {
-  searchParams: {
-    page?: string
-    pageSize?: string
-  }
-}
-
 // ISR: Regenerate page every 5 minutes for frequently accessed data
 export const revalidate = 300
 
-export default async function PlayersPage({ searchParams }: PlayersPageProps) {
+export default async function PlayersPage() {
   // For small datasets (< 100 players), fetch all at once for better client-side performance
   // This eliminates pagination delays and enables instant filtering/sorting
   const result = await getPlayers(0, 1000) // Fetch up to 1000 players

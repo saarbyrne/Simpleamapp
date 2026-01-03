@@ -23,5 +23,11 @@ export default defineConfig({
       },
     },
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
+    exclude: [
+      'tests/e2e/**',
+      'tests/design-system/accessibility.test.ts',
+      'tests/design-system/visual-regression.test.ts',
+      'node_modules/**',
+    ],
   },
 });

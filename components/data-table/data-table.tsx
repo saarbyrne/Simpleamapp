@@ -142,7 +142,7 @@ export function DataTable<TData>({
   const [internalRowSelection, setInternalRowSelection] = useState<RowSelectionState>({})
   const [internalPagination, setInternalPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 1000, // Large page size to show all rows when pagination not explicitly controlled
   })
 
   // Use controlled or internal state

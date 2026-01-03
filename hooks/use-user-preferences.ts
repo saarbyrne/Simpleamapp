@@ -72,7 +72,7 @@ export function useUserPreferences() {
       try {
         const result = await getCurrentUserProfile();
         // Only update state if component is still mounted
-        if (isMountedRef.current && result.success && result.data) {
+        if (isMountedRef.current && result?.success && result.data) {
           const newPreferences = {
             timezone: result.data.timezone,
             dateFormat: result.data.dateFormat,
@@ -83,7 +83,7 @@ export function useUserPreferences() {
           setPreferences(newPreferences);
           // Store in localStorage for next time
           storePreferences(newPreferences);
-        } else if (isMountedRef.current && result.success === false) {
+        } else if (isMountedRef.current && result?.success === false) {
           // Server action returned an error, but we can still use localStorage
           // Don't log connection errors as they're expected in some scenarios
           if (!result.error?.includes("connection") && !result.error?.includes("refused")) {

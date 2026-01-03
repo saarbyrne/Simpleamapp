@@ -3,6 +3,8 @@
  * 
  * Validates that all design system components meet WCAG 2.1 AA standards.
  * Uses @axe-core/playwright for automated accessibility testing.
+ * 
+ * Run with: npm run test:a11y
  */
 
 import { test, expect } from '@playwright/test'
@@ -10,10 +12,6 @@ import AxeBuilder from '@axe-core/playwright'
 
 test.describe('Design System Accessibility', () => {
   test('Button component should have no accessibility violations', async ({ page }) => {
-    // This would test against a component showcase page
-    // await page.goto('/design-system/components/button')
-    
-    // For now, test a simple button render
     await page.setContent(`
       <button type="button">Click me</button>
     `)
@@ -125,10 +123,3 @@ test.describe('Design System Accessibility', () => {
     expect(focused).toBe('Second')
   })
 })
-
-/**
- * Note: These tests use @axe-core/playwright which must be installed:
- * npm install --save-dev @axe-core/playwright
- * 
- * Run with: npm run test:a11y
- */

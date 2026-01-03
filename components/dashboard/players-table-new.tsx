@@ -10,7 +10,6 @@ import {
   GroupingState,
   ExpandedState,
   RowSelectionState,
-  type PaginationState,
 } from '@tanstack/react-table'
 import { createPlayer, bulkUpdatePlayers } from '@/app/actions/players'
 import { useRouter, usePathname } from 'next/navigation'
@@ -367,10 +366,6 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
   const [grouping, setGrouping] = useState<GroupingState>([])
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 20, // Match server default
-  })
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [newPlayer, setNewPlayer] = useState({
@@ -403,8 +398,6 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     position: string
     status: string
     nationality: string
-    pageIndex: number
-    pageSize: number
     sorting: SortingState
     visibility: VisibilityState
   }) => {
@@ -451,15 +444,12 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     const urlPosition = params.get('position')
     const urlStatus = params.get('status')
     const urlNationality = params.get('nationality')
-    const urlPage = params.get('page')
-    const urlPageSize = params.get('pageSize')
     const urlSort = params.get('sort')
     const urlVisibility = params.get('visibility')
 
     // Check if URL has any filter params
     const hasUrlParams = urlSearch !== null || urlPosition !== null || urlStatus !== null ||
-                         urlNationality !== null || urlPage !== null || urlPageSize !== null ||
-                         urlSort !== null || urlVisibility !== null
+                         urlNationality !== null || urlSort !== null || urlVisibility !== null
 
     // Create a signature of current state to compare
     const currentStateSignature = `${currentSearch}-${hasUrlParams}`
@@ -491,13 +481,6 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
         setStatusFilter(urlStatus || 'all')
         setNationalityFilter(urlNationality || 'all')
 
-        const pageNum = urlPage ? parseInt(urlPage, 10) : 0
-        const pageSizeNum = urlPageSize ? parseInt(urlPageSize, 10) : 20
-        setPagination({
-          pageIndex: !isNaN(pageNum) ? pageNum : 0,
-          pageSize: !isNaN(pageSizeNum) ? pageSizeNum : 20,
-        })
-
         if (urlSort) {
           try {
             setSorting(JSON.parse(urlSort))
@@ -526,10 +509,6 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
           setPositionFilter(stored.position || 'all')
           setStatusFilter(stored.status || 'all')
           setNationalityFilter(stored.nationality || 'all')
-          setPagination({
-            pageIndex: stored.pageIndex || 0,
-            pageSize: stored.pageSize || 20,
-          })
           setSorting(stored.sorting || [])
           setColumnVisibility(stored.visibility || {})
         } else {
@@ -539,7 +518,6 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
           setPositionFilter('all')
           setStatusFilter('all')
           setNationalityFilter('all')
-          setPagination({ pageIndex: 0, pageSize: 20 })
           setSorting([])
           setColumnVisibility({})
         }
@@ -636,53 +614,39 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     } else {
       params.delete('nationality')
     }
-    
-    if (pagination.pageIndex > 0) {
-      params.set('page', String(pagination.pageIndex))
-    } else {
-      params.delete('page')
-    }
-    
-    if (pagination.pageSize !== 8) {
-      params.set('pageSize', String(pagination.pageSize))
-    } else {
-      params.delete('pageSize')
-    }
-    
+
     if (sorting.length > 0) {
       params.set('sort', JSON.stringify(sorting))
     } else {
       params.delete('sort')
     }
-    
+
     if (Object.keys(columnVisibility).length > 0) {
       params.set('visibility', JSON.stringify(columnVisibility))
     } else {
       params.delete('visibility')
     }
-    
-    const newURL = params.toString() 
+
+    const newURL = params.toString()
       ? `${window.location.pathname}?${params.toString()}`
       : window.location.pathname
-    
+
     // Only update if URL actually changed to avoid unnecessary navigation
     const currentURL = window.location.pathname + window.location.search
     if (newURL !== currentURL) {
       router.replace(newURL, { scroll: false })
     }
-    
+
     // Also save to localStorage as backup
     saveFiltersToStorage({
       search,
       position: positionFilter,
       status: statusFilter,
       nationality: nationalityFilter,
-      pageIndex: pagination.pageIndex,
-      pageSize: pagination.pageSize,
       sorting,
       visibility: columnVisibility,
     })
-  }, [search, positionFilter, statusFilter, nationalityFilter, pagination.pageIndex, pagination.pageSize, sorting, columnVisibility, router, saveFiltersToStorage])
+  }, [search, positionFilter, statusFilter, nationalityFilter, sorting, columnVisibility, router, saveFiltersToStorage])
 
   const handleAddPlayer = async () => {
     if (!newPlayer.firstName || !newPlayer.lastName) {
@@ -861,14 +825,12 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     columns,
     state: {
       sorting,
-      pagination,
       columnVisibility,
       rowSelection,
       columnOrder: columnOrder.length > 0 ? columnOrder : undefined,
       columnSizing: Object.keys(columnSizing).length > 0 ? columnSizing : undefined,
     },
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     onColumnOrderChange: setColumnOrder,
@@ -876,7 +838,6 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     enableRowSelection: true,
-    autoResetPageIndex: false, // Prevent auto-reset pagination during render
   })
 
   // Handle bulk update
@@ -913,33 +874,6 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
       setIsBulkUpdating(false)
     }
   }, [tableInstance, router, setRowSelection, t])
-
-  const { pageIndex, pageSize } = pagination
-  const totalPlayers = serverTotal ?? filteredPlayers.length
-  const totalPages = Math.ceil(totalPlayers / pageSize)
-
-  // Handle pagination change - navigate to new URL
-  const handlePaginationChange = useCallback((newPagination: PaginationState) => {
-    const params = new URLSearchParams(window.location.search)
-    
-    if (newPagination.pageIndex > 0) {
-      params.set('page', String(newPagination.pageIndex))
-    } else {
-      params.delete('page')
-    }
-    
-    if (newPagination.pageSize !== 20) {
-      params.set('pageSize', String(newPagination.pageSize))
-    } else {
-      params.delete('pageSize')
-    }
-    
-    const newURL = params.toString() 
-      ? `${window.location.pathname}?${params.toString()}`
-      : window.location.pathname
-    
-    router.push(newURL)
-  }, [router])
 
   return (
     <div className="w-full min-w-0 max-w-full">
@@ -1094,8 +1028,6 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
             onExpandedChange={setExpanded}
             rowSelection={rowSelection}
             onRowSelectionChange={setRowSelection}
-            pagination={pagination}
-            onPaginationChange={setPagination}
             enableRowSelection={true}
             enableGrouping={true}
             enableColumnResizing={true}
@@ -1109,48 +1041,6 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
             isBulkUpdating={isBulkUpdating}
             emptyMessage={t('players.noPlayersMatchFilters')}
           />
-
-          <div className="flex items-center justify-between min-w-0">
-            <div className="flex items-center gap-3 min-w-0">
-              <Select
-                value={String(pageSize)}
-                onValueChange={(value) => handlePaginationChange({ pageIndex: 0, pageSize: Number(value) })}
-              >
-                <SelectTrigger className="h-9 w-[120px]">
-                  <SelectValue placeholder={t('common.rowsPerPage')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {[10, 20, 50, 100].map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {size} {t('common.rows')}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-sm text-muted-foreground">
-                {t('common.showing')} {filteredPlayers.length} {t('common.of')} {totalPlayers} {t('players.players')} · {t('common.page')} {pageIndex + 1} {t('common.of')}{' '}
-                <strong>{totalPages}</strong>
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handlePaginationChange({ ...pagination, pageIndex: pageIndex - 1 })}
-                disabled={pageIndex === 0}
-              >
-                {t('common.previous')}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handlePaginationChange({ ...pagination, pageIndex: pageIndex + 1 })}
-                disabled={pageIndex >= totalPages - 1}
-              >
-                {t('common.next')}
-              </Button>
-            </div>
-          </div>
       </PageCard>
 
       {/* Note Editor Dialog */}
