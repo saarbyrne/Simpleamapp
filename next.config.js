@@ -5,6 +5,17 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Linting: Fail build on ESLint errors (warnings won't fail, but errors will)
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors. We run linting explicitly before build.
+    ignoreDuringBuilds: false,
+  },
+  // TypeScript: Fail build on type errors
+  typescript: {
+    // Same as above - we run typecheck explicitly, but this provides double protection
+    ignoreBuildErrors: false,
+  },
   // Performance: Enable gzip compression
   compress: true,
 
