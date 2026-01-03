@@ -16,6 +16,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
+// Type assertion: after validation, these are guaranteed to be strings
+const validatedSupabaseUrl: string = supabaseUrl
+const validatedSupabaseAnonKey: string = supabaseAnonKey
+
 export function createClient(request: NextRequest) {
   let response = NextResponse.next({
     request: {
@@ -24,8 +28,8 @@ export function createClient(request: NextRequest) {
   })
 
   const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
+    validatedSupabaseUrl,
+    validatedSupabaseAnonKey,
     {
       cookies: {
         get(name: string) {

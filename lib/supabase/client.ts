@@ -15,6 +15,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
+// Type assertion: after validation, these are guaranteed to be strings
+const validatedSupabaseUrl: string = supabaseUrl
+const validatedSupabaseAnonKey: string = supabaseAnonKey
+
 export function createClient() {
-  return createBrowserClient(supabaseUrl, supabaseAnonKey)
+  return createBrowserClient(validatedSupabaseUrl, validatedSupabaseAnonKey)
 }

@@ -16,12 +16,16 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
+// Type assertion: after validation, these are guaranteed to be strings
+const validatedSupabaseUrl: string = supabaseUrl
+const validatedSupabaseAnonKey: string = supabaseAnonKey
+
 export async function createServerClient() {
   const cookieStore = await cookies()
 
   return createSupabaseServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
+    validatedSupabaseUrl,
+    validatedSupabaseAnonKey,
     {
       cookies: {
         get(name: string) {
