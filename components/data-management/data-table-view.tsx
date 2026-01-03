@@ -292,7 +292,7 @@ function formatPreviewValue(value: unknown) {
   }
 
   if (typeof value === 'number') {
-    return Number.isInteger(value) ? value : value.toFixed(2)
+    return Number.isInteger(value) ? value.toString() : value.toFixed(2)
   }
 
   if (value instanceof Date) {
