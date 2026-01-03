@@ -1,31 +1,17 @@
-'use client'
-
-import React from 'react'
-import { useRouter } from 'next/navigation'
 import { differenceInYears } from 'date-fns'
 import { getPlayer } from '@/app/actions/players'
-import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { getCurrentUserProfile } from '@/app/actions/profile'
 import { formatDate } from '@/lib/date'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PageCard } from '@/components/ui/page-card'
-import { useBreadcrumb } from '@/lib/breadcrumb-context'
 import { NotesList } from '@/components/notes/notes-list'
-import { createClient } from '@/lib/supabase/client'
-import {
-  FileText,
-  Calendar,
-  BarChart3,
-  StickyNote,
-  FolderOpen,
-  Table,
-  Mail,
-  Phone,
-  Edit,
-} from 'lucide-react'
+import { createServerClient } from '@/lib/supabase/server'
+import { Mail, Phone, Edit } from 'lucide-react'
+import { PlayerProfileHeader } from '@/components/dashboard/player-profile-header'
+import { PlayerProfileTabs } from '@/components/dashboard/player-profile-tabs'
 
 const statusColors: Record<string, string> = {
   active: 'bg-green-600 text-white hover:bg-green-700',
@@ -62,49 +48,40 @@ const titleCase = (value: string | null | undefined) => {
     .join(' ')
 }
 
-export default function PlayerProfilePage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const { setCustomLabel } = useBreadcrumb()
-  const { preferences } = useUserPreferences()
-  const [player, setPlayer] = React.useState<Awaited<ReturnType<typeof getPlayer>>['player'] | null>(null)
-  const [isLoading, setIsLoading] = React.useState(true)
-  const [currentUser, setCurrentUser] = React.useState<{ id: string } | null>(null)
+export default async function PlayerProfilePage({ params }: { params: { id: string } }) {
+  // Fetch player data, current user, and preferences in parallel
+  const supabase = await createServerClient()
+  const [result, { data: { user } }, profileResult] = await Promise.all([
+    getPlayer(params.id),
+    supabase.auth.getUser(),
+    getCurrentUserProfile(),
+  ])
 
-  React.useEffect(() => {
-    async function loadPlayer() {
-      const result = await getPlayer(params.id)
-      if (!result.success || !result.player) {
-        router.push('/dashboard/players')
-        return
-      }
-      setPlayer(result.player)
-      const playerName = `${result.player.firstName} ${result.player.lastName}`
-      setCustomLabel(params.id, playerName)
-      setIsLoading(false)
-    }
-    loadPlayer()
-  }, [params.id, setCustomLabel, router])
+  // Extract preferences from profile result
+  const preferences = profileResult.success && profileResult.data ? {
+    timezone: profileResult.data.timezone,
+    dateFormat: profileResult.data.dateFormat,
+    timeFormat: profileResult.data.timeFormat,
+    language: profileResult.data.language,
+  } : null
 
-  React.useEffect(() => {
-    async function loadCurrentUser() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setCurrentUser({ id: user.id })
-      }
-    }
-    loadCurrentUser()
-  }, [])
-
-  if (isLoading || !player) {
-    return null // Will show loading.tsx
+  // Redirect if player not found
+  if (!result.success || !result.player) {
+    // In server components, we use redirect from next/navigation
+    const { redirect } = await import('next/navigation')
+    redirect('/dashboard/players')
   }
+
+  // TypeScript guard: player is guaranteed to exist here
+  const player = result.player!
+  const currentUser = user ? { id: user.id } : null
 
   const organization = player.organizations?.[0]
   const status = organization?.status ?? 'active'
   const normalizedStatus = status.toLowerCase()
   const statusColorClass = statusColors[normalizedStatus] ?? 'bg-muted text-muted-foreground'
-  
+
+  // Calculate age server-side once
   const age = player.dateOfBirth
     ? differenceInYears(new Date(), new Date(player.dateOfBirth))
     : null
@@ -112,6 +89,9 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
   const playerName = `${player.firstName} ${player.lastName}`
 
   return (
+    <>
+      {/* Client component for breadcrumb state management */}
+      <PlayerProfileHeader playerId={params.id} playerName={playerName} />
     <PageCard
       title={
         <div className="flex items-center gap-4">
@@ -162,39 +142,9 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
       }
     >
       {/* Tabs */}
-      <Tabs defaultValue="overview" className="flex-1 flex flex-col">
-        <TabsList>
-          <TabsTrigger value="overview">
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="forms">
-            <FileText className="me-2 h-4 w-4" />
-            Forms
-          </TabsTrigger>
-          <TabsTrigger value="events">
-            <Calendar className="me-2 h-4 w-4" />
-            Events
-          </TabsTrigger>
-          <TabsTrigger value="performance">
-            <BarChart3 className="me-2 h-4 w-4" />
-            Performance
-          </TabsTrigger>
-          <TabsTrigger value="notes">
-            <StickyNote className="me-2 h-4 w-4" />
-            Notes
-          </TabsTrigger>
-          <TabsTrigger value="files">
-            <FolderOpen className="me-2 h-4 w-4" />
-            Files
-          </TabsTrigger>
-          <TabsTrigger value="spreadsheets">
-            <Table className="me-2 h-4 w-4" />
-            Spreadsheets
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="mt-6 space-y-6">
+      <PlayerProfileTabs
+        overviewTab={
+          <>
           <Card>
             <CardHeader>
               <CardTitle>Personal Information</CardTitle>
@@ -268,10 +218,9 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Forms Tab */}
-        <TabsContent value="forms" className="mt-6">
+          </>
+        }
+        formsTab={
           <Card>
             <CardHeader>
               <CardTitle>Form Responses</CardTitle>
@@ -283,10 +232,8 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Events Tab */}
-        <TabsContent value="events" className="mt-6">
+        }
+        eventsTab={
           <Card>
             <CardHeader>
               <CardTitle>Event History</CardTitle>
@@ -298,10 +245,8 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Performance Tab */}
-        <TabsContent value="performance" className="mt-6">
+        }
+        performanceTab={
           <Card>
             <CardHeader>
               <CardTitle>Performance Data</CardTitle>
@@ -313,20 +258,16 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Notes Tab */}
-        <TabsContent value="notes" className="mt-6">
+        }
+        notesTab={
           <NotesList
             linkedPersonId={params.id}
             currentUserId={currentUser?.id}
             showFilters={true}
             showCreateButton={true}
           />
-        </TabsContent>
-
-        {/* Files Tab */}
-        <TabsContent value="files" className="mt-6">
+        }
+        filesTab={
           <Card>
             <CardHeader>
               <CardTitle>Files</CardTitle>
@@ -338,10 +279,8 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Spreadsheets Tab */}
-        <TabsContent value="spreadsheets" className="mt-6">
+        }
+        spreadsheetsTab={
           <Card>
             <CardHeader>
               <CardTitle>Spreadsheets</CardTitle>
@@ -353,8 +292,9 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        }
+      />
     </PageCard>
+    </>
   )
 }

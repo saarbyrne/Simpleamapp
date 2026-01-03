@@ -15,6 +15,7 @@ import {
 import { createPlayer, bulkUpdatePlayers } from '@/app/actions/players'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import {
   Badge,
 } from '@/components/ui/badge'
@@ -114,6 +115,7 @@ const createColumns = (
   t: ReturnType<typeof useTranslations>,
   onNavigateToProfile: (playerId: string) => void,
   onAddNote: (playerId: string) => void,
+  router: ReturnType<typeof useRouter>,
   preferences?: { timezone: string | null; dateFormat: string | null; timeFormat: string | null } | null
 ): ColumnDef<PlayerRow>[] => {
   // Check which columns have data
@@ -148,15 +150,17 @@ const createColumns = (
               )}
             </Avatar>
             <div className="flex flex-col">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onNavigateToProfile(player.id)
-                }}
+              <Link
+                href={`/dashboard/players/${player.id}`}
                 className="font-medium text-foreground hover:text-primary hover:underline text-start"
+                prefetch={false}
+                onMouseEnter={() => {
+                  // Prefetch the player profile on hover
+                  router.prefetch(`/dashboard/players/${player.id}`)
+                }}
               >
                 {player.name}
-              </button>
+              </Link>
             </div>
           </div>
         )
@@ -786,10 +790,11 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
 
   const columns = useMemo(
     () => createColumns(
-      players, 
-      t, 
+      players,
+      t,
       (playerId) => router.push(`/dashboard/players/${playerId}`),
       handleAddNote,
+      router,
       preferences || null
     ),
     [players, t, router, handleAddNote, preferences]

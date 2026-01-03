@@ -2,7 +2,7 @@
 
 import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
 import { getTranslations } from 'next-intl/server'
 
@@ -76,7 +76,8 @@ export async function createPlayer(data: CreatePlayerData) {
       return { person, personOrg }
     })
 
-    revalidatePath('/dashboard')
+    // Granular cache invalidation - only invalidate players list
+    revalidateTag('players-list')
 
     return { success: true, player: result.person }
   } catch (error) {
@@ -143,7 +144,9 @@ export async function updatePlayer(
       return person
     })
 
-    revalidatePath('/dashboard')
+    // Granular cache invalidation - invalidate specific player and list
+    revalidateTag(`player-${personId}`)
+    revalidateTag('players-list')
 
     return { success: true, player: result }
   } catch (error) {
@@ -285,8 +288,9 @@ export async function bulkUpdatePlayers(
       return updatedCount
     })
 
-    revalidatePath('/dashboard/players')
-    revalidatePath('/dashboard')
+    // Granular cache invalidation - invalidate affected players and list
+    personIds.forEach(id => revalidateTag(`player-${id}`))
+    revalidateTag('players-list')
 
     return { success: true, updatedCount: result }
   } catch (error) {
@@ -371,6 +375,46 @@ export async function getPlayers(page: number = 0, pageSize: number = 20) {
 }
 
 /**
+ * Internal cached function to fetch player data from database
+ */
+const getPlayerFromDB = (playerId: string, organizationId: string) =>
+  unstable_cache(
+    async () => {
+      return await prisma.person.findFirst({
+        where: {
+          id: playerId,
+          organizations: {
+            some: {
+              organizationId,
+              role: 'player',
+            }
+          }
+        },
+        include: {
+          organizations: {
+            where: {
+              organizationId,
+            },
+            select: {
+              position: true,
+              jerseyNumber: true,
+              status: true,
+              tags: true,
+              joinedAt: true,
+              leftAt: true,
+            }
+          }
+        }
+      })
+    },
+    ['player-data', playerId, organizationId],
+    {
+      revalidate: 300, // 5 minutes
+      tags: [`player-${playerId}`, 'players-list']
+    }
+  )()
+
+/**
  * Get a single player by ID with full details
  */
 export async function getPlayer(playerId: string) {
@@ -385,32 +429,8 @@ export async function getPlayer(playerId: string) {
   try {
     const dbUser = await ensureUserWithOrganization(user)
 
-    const player = await prisma.person.findFirst({
-      where: {
-        id: playerId,
-        organizations: {
-          some: {
-            organizationId: dbUser.organizationId,
-            role: 'player',
-          }
-        }
-      },
-      include: {
-        organizations: {
-          where: {
-            organizationId: dbUser.organizationId,
-          },
-          select: {
-            position: true,
-            jerseyNumber: true,
-            status: true,
-            tags: true,
-            joinedAt: true,
-            leftAt: true,
-          }
-        }
-      }
-    })
+    // Use cached database query
+    const player = await getPlayerFromDB(playerId, dbUser.organizationId)
 
     if (!player) {
       return { error: t('playerNotFound') }

@@ -13,10 +13,9 @@ type PlayersPageProps = {
 export const revalidate = 300
 
 export default async function PlayersPage({ searchParams }: PlayersPageProps) {
-  const page = searchParams.page ? parseInt(searchParams.page, 10) : 0
-  const pageSize = searchParams.pageSize ? parseInt(searchParams.pageSize, 10) : 20
-
-  const result = await getPlayers(page, pageSize)
+  // For small datasets (< 100 players), fetch all at once for better client-side performance
+  // This eliminates pagination delays and enables instant filtering/sorting
+  const result = await getPlayers(0, 1000) // Fetch up to 1000 players
 
   // Handle errors
   if (result.error) {
