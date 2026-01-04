@@ -114,7 +114,7 @@ export function BulkActionsBar({
   }
 
   return (
-    <div className={cn('flex flex-col gap-3 px-4 py-3 bg-muted/50 border-b', className)}>
+    <div className={cn('flex flex-col gap-3 py-3 bg-muted border-b', className)}>
       {/* Inputs Row */}
       <div className="flex items-center gap-2 flex-wrap">
         {fields.map((field) => {

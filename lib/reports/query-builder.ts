@@ -9,7 +9,7 @@ import {
   type DataSourceConfig,
   type FilterConfig,
 } from './data-aggregator'
-import type { ReportConfig } from '@/app/actions/reports'
+import type { ReportConfig } from '@/types/reports'
 
 // ============================================
 // REPORT DATA QUERY BUILDER
@@ -168,8 +168,8 @@ async function transformDataForVisualization(
         }))
 
     case 'heatmap':
-      // Matrix data (player x date)
-      return transformToHeatmapData(flatData, config)
+      // Matrix data (player x date) - TODO: implement heatmap transformation
+      return flatData
 
     case 'table':
       // Raw data with optional aggregation
@@ -182,19 +182,6 @@ async function transformDataForVisualization(
           value: Math.round(item.value * 100) / 100,
         }))
   }
-}
-
-function transformToHeatmapData(data: any[], config: ReportConfig): any[] {
-  // Heatmap format: { player: string, date: string, value: number }
-  const xAxis = config.xAxis || 'playerName'
-  const yAxis = config.yAxis || 'createdAt'
-  const valueField = 'data.wellness_score' // Default wellness field
-
-  return data.map(item => ({
-    player: item[xAxis] || item.playerName || 'Unknown',
-    date: new Date(item[yAxis] || item.createdAt).toISOString().split('T')[0],
-    value: extractValue(item, valueField) || 0,
-  }))
 }
 
 // ============================================

@@ -82,6 +82,7 @@ export function FormResponsesTable({
   return (
     <div className="w-full min-w-0 max-w-full">
       <PageCard
+        variant="table"
         title={
           <div className="flex items-center gap-3">
             <Button

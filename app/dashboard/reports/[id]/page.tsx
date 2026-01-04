@@ -705,6 +705,7 @@ export default function ReportViewPage() {
   return (
     <div className="container mx-auto py-8">
       <PageCard
+        variant="table"
         title={report.name}
         description={report.description || undefined}
         headerActions={

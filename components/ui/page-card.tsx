@@ -14,7 +14,7 @@ export interface PageCardProps {
   headerClassName?: string
   toolbarClassName?: string
   contentClassName?: string
-  variant?: 'default' | 'compact'
+  variant?: 'default' | 'compact' | 'table'
 }
 
 export function PageCard({
@@ -30,13 +30,19 @@ export function PageCard({
   variant = 'default',
 }: PageCardProps) {
   const isCompact = variant === 'compact'
+  const isTable = variant === 'table'
 
   return (
-    <Card className={cn('w-full max-w-full min-w-0 rounded-2xl border', className)}>
+    <Card className={cn(
+      'w-full max-w-full min-w-0',
+      isTable ? 'border-0 bg-transparent shadow-none' : 'rounded-2xl border',
+      className
+    )}>
       {/* Header Section */}
       <div className={cn(
-        'flex items-center justify-between p-6 min-w-0',
-        isCompact && 'p-4',
+        'flex items-center justify-between min-w-0',
+        isTable ? 'px-0 py-6' : 'p-6',
+        isCompact && !isTable && 'p-4',
         !description && !toolbar && 'pb-4',
         description && !toolbar && 'pb-4',
         headerClassName
@@ -58,15 +64,33 @@ export function PageCard({
 
       {/* Toolbar Section (filters, actions, etc.) */}
       {toolbar && (
-        <CardHeader className={cn('space-y-4 pt-0 min-w-0 overflow-x-hidden', toolbarClassName)}>
-          {toolbar}
-        </CardHeader>
+        isTable ? (
+          <div className={cn(
+            'space-y-4 min-w-0 overflow-x-hidden pb-6',
+            toolbarClassName
+          )}>
+            {toolbar}
+          </div>
+        ) : (
+          <CardHeader className={cn('space-y-4 pt-0 min-w-0 overflow-x-hidden', toolbarClassName)}>
+            {toolbar}
+          </CardHeader>
+        )
       )}
 
       {/* Content Section */}
-      <CardContent className={cn('space-y-4 min-w-0 overflow-x-hidden', contentClassName)}>
-        {children}
-      </CardContent>
+      {isTable ? (
+        <div className={cn(
+          'space-y-4 min-w-0 overflow-x-hidden',
+          contentClassName
+        )}>
+          {children}
+        </div>
+      ) : (
+        <CardContent className={cn('space-y-4 min-w-0 overflow-x-hidden', contentClassName)}>
+          {children}
+        </CardContent>
+      )}
     </Card>
   )
 }

@@ -24,7 +24,7 @@ import {
   GripVertical,
   LayoutGrid,
 } from 'lucide-react'
-import type { ReportSection } from '@/app/actions/reports'
+import type { ReportSection } from '@/types/reports'
 
 interface DashboardBuilderProps {
   sections: ReportSection[]

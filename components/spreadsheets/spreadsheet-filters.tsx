@@ -67,13 +67,13 @@ export function SpreadsheetFilters({
   return (
     <div className="flex items-center gap-2 flex-wrap">
       {/* Search */}
-      <div className="relative flex-1 min-w-[200px]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <div className="relative w-[240px] flex items-center border border-input rounded-md px-3 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/50 h-10 bg-background">
+        <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
         <Input
           placeholder="Search spreadsheets..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-9"
+          className="border-0 shadow-none focus-visible:ring-0 px-0 py-0 h-full flex-1"
         />
       </div>
 

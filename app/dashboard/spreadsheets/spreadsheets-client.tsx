@@ -128,6 +128,7 @@ export function SpreadsheetsClient({
   return (
     <div className="container mx-auto py-8">
       <PageCard
+        variant="table"
         title={t('title')}
         description={t('description')}
         headerActions={

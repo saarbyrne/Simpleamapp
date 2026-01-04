@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect, useRef, useCallback, startTransition } from 'react'
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import {
   ColumnDef,
   SortingState,
@@ -43,7 +43,8 @@ import {
   DataTableExport,
   type FilterConfig,
 } from '@/components/data-table'
-import { BulkActionsBar, type BulkField } from '@/components/ui/bulk-actions-bar'
+import { BulkActionsBar } from '@/components/ui/bulk-actions-bar'
+import type { BulkField } from '@/components/ui/bulk-actions-bar'
 import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/react-table'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { formatDate } from '@/lib/date'
@@ -289,17 +290,17 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
   const syncStateFromURL = useCallback(() => {
     if (typeof window === 'undefined') return
     if (!isMounted.current) return
-    
+
     const currentSearch = window.location.search
     const currentPathname = window.location.pathname
-    
+
     if (currentPathname !== lastPathnameRef.current) {
       lastPathnameRef.current = currentPathname
       lastUrlSearchRef.current = ''
     }
-    
+
     const params = new URLSearchParams(currentSearch)
-    
+
     const urlSearch = params.get('search')
     const urlCategory = params.get('category')
     const urlStatus = params.get('status')
@@ -308,93 +309,91 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
     const urlPageSize = params.get('pageSize')
     const urlSort = params.get('sort')
     const urlVisibility = params.get('visibility')
-    
-    const hasUrlParams = urlSearch !== null || urlCategory !== null || urlStatus !== null || 
+
+    const hasUrlParams = urlSearch !== null || urlCategory !== null || urlStatus !== null ||
                          urlOwner !== null || urlPage !== null || urlPageSize !== null ||
                          urlSort !== null || urlVisibility !== null
-    
+
     const currentStateSignature = `${currentSearch}-${hasUrlParams}`
-    
+
     if (currentStateSignature === lastUrlSearchRef.current) return
-    
+
     lastUrlSearchRef.current = currentStateSignature
-    
-    startTransition(() => {
-      if (hasUrlParams) {
-        setSearch(urlSearch || '')
-        setCategoryFilter(urlCategory || 'all')
-        setStatusFilter(urlStatus || 'all')
-        setOwnerFilter(urlOwner || 'all')
-        
-        const pageNum = urlPage ? parseInt(urlPage, 10) : 0
-        const pageSizeNum = urlPageSize ? parseInt(urlPageSize, 10) : 20
-        setPagination({
-          pageIndex: !isNaN(pageNum) ? pageNum : 0,
-          pageSize: !isNaN(pageSizeNum) ? pageSizeNum : 20,
-        })
-        
-        if (urlSort) {
-          try {
-            setSorting(JSON.parse(urlSort))
-          } catch {
-            setSorting([])
-          }
-        } else {
+
+    if (hasUrlParams) {
+      setSearch(urlSearch || '')
+      setCategoryFilter(urlCategory || 'all')
+      setStatusFilter(urlStatus || 'all')
+      setOwnerFilter(urlOwner || 'all')
+
+      const pageNum = urlPage ? parseInt(urlPage, 10) : 0
+      const pageSizeNum = urlPageSize ? parseInt(urlPageSize, 10) : 20
+      setPagination({
+        pageIndex: !isNaN(pageNum) ? pageNum : 0,
+        pageSize: !isNaN(pageSizeNum) ? pageSizeNum : 20,
+      })
+
+      if (urlSort) {
+        try {
+          setSorting(JSON.parse(urlSort))
+        } catch {
           setSorting([])
         }
-        
-        if (urlVisibility) {
-          try {
-            setColumnVisibility(JSON.parse(urlVisibility))
-          } catch {
-            setColumnVisibility({})
-          }
-        } else {
+      } else {
+        setSorting([])
+      }
+
+      if (urlVisibility) {
+        try {
+          setColumnVisibility(JSON.parse(urlVisibility))
+        } catch {
           setColumnVisibility({})
         }
       } else {
-        const stored = loadFiltersFromStorage()
-        if (stored) {
-          setSearch(stored.search || '')
-          setCategoryFilter(stored.category || 'all')
-          setStatusFilter(stored.status || 'all')
-          setOwnerFilter(stored.owner || 'all')
-          setPagination({
-            pageIndex: stored.pageIndex || 0,
-            pageSize: stored.pageSize || 20,
-          })
-          setSorting(stored.sorting || [])
-          setColumnVisibility(stored.visibility || {})
-        } else {
-          setSearch('')
-          setCategoryFilter('all')
-          setStatusFilter('all')
-          setOwnerFilter('all')
-          setPagination({ pageIndex: 0, pageSize: 20 })
-          setSorting([])
-          setColumnVisibility({})
-        }
+        setColumnVisibility({})
       }
-    })
+    } else {
+      const stored = loadFiltersFromStorage()
+      if (stored) {
+        setSearch(stored.search || '')
+        setCategoryFilter(stored.category || 'all')
+        setStatusFilter(stored.status || 'all')
+        setOwnerFilter(stored.owner || 'all')
+        setPagination({
+          pageIndex: stored.pageIndex || 0,
+          pageSize: stored.pageSize || 20,
+        })
+        setSorting(stored.sorting || [])
+        setColumnVisibility(stored.visibility || {})
+      } else {
+        setSearch('')
+        setCategoryFilter('all')
+        setStatusFilter('all')
+        setOwnerFilter('all')
+        setPagination({ pageIndex: 0, pageSize: 20 })
+        setSorting([])
+        setColumnVisibility({})
+      }
+    }
   }, [loadFiltersFromStorage])
 
   // Read URL params on mount and when URL/pathname changes
   useEffect(() => {
     if (typeof window === 'undefined') return
-    
+
     isMounted.current = true
-    
+
     const timeoutId = setTimeout(() => {
       lastPathnameRef.current = pathname
       syncStateFromURL()
     }, 0)
-    
+
     const handlePopState = () => {
       syncStateFromURL()
     }
-    
+
     window.addEventListener('popstate', handlePopState)
-    
+
     return () => {
       clearTimeout(timeoutId)
       window.removeEventListener('popstate', handlePopState)
@@ -415,64 +414,64 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
   useEffect(() => {
     if (!isMounted.current || typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
-    
+
     if (search) {
       params.set('search', search)
     } else {
       params.delete('search')
     }
-    
+
     if (categoryFilter !== 'all') {
       params.set('category', categoryFilter)
     } else {
       params.delete('category')
     }
-    
+
     if (statusFilter !== 'all') {
       params.set('status', statusFilter)
     } else {
       params.delete('status')
     }
-    
+
     if (ownerFilter !== 'all') {
       params.set('owner', ownerFilter)
     } else {
       params.delete('owner')
     }
-    
+
     if (pagination.pageIndex > 0) {
       params.set('page', String(pagination.pageIndex))
     } else {
       params.delete('page')
     }
-    
+
     if (pagination.pageSize !== 20) {
       params.set('pageSize', String(pagination.pageSize))
     } else {
       params.delete('pageSize')
     }
-    
+
     if (sorting.length > 0) {
       params.set('sort', JSON.stringify(sorting))
     } else {
       params.delete('sort')
     }
-    
+
     if (Object.keys(columnVisibility).length > 0) {
       params.set('visibility', JSON.stringify(columnVisibility))
     } else {
       params.delete('visibility')
     }
-    
-    const newURL = params.toString() 
+
+    const newURL = params.toString()
       ? `${window.location.pathname}?${params.toString()}`
       : window.location.pathname
-    
+
     const currentURL = window.location.pathname + window.location.search
     if (newURL !== currentURL) {
       router.replace(newURL, { scroll: false })
     }
-    
+
     saveFiltersToStorage({
       search,
       category: categoryFilter,
@@ -693,23 +692,23 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
   // Handle pagination change
   const handlePaginationChange = useCallback((newPagination: PaginationState) => {
     const params = new URLSearchParams(window.location.search)
-    
+
     if (newPagination.pageIndex > 0) {
       params.set('page', String(newPagination.pageIndex))
     } else {
       params.delete('page')
     }
-    
+
     if (newPagination.pageSize !== 20) {
       params.set('pageSize', String(newPagination.pageSize))
     } else {
       params.delete('pageSize')
     }
-    
-    const newURL = params.toString() 
+
+    const newURL = params.toString()
       ? `${window.location.pathname}?${params.toString()}`
       : window.location.pathname
-    
+
     router.push(newURL)
   }, [router])
 
@@ -759,10 +758,11 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
         />
       )}
       <PageCard
+        variant="table"
         title={t('forms.title')}
         description={t('forms.manageDescription')}
         headerActions={
-          <Button 
+          <Button
             onClick={() => setIsFormBuilderOpen(true)}
             className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
             type="button"
@@ -823,15 +823,15 @@ export function FormsTable({ forms, total: serverTotal }: FormsTableProps) {
                   status?: 'Active' | 'Draft' | 'Archived' | null
                   category?: string | null
                 } = {}
-                
+
                 if (values.status && typeof values.status === 'string' && ['Active', 'Draft', 'Archived'].includes(values.status)) {
                   updates.status = values.status as 'Active' | 'Draft' | 'Archived'
                 }
-                
+
                 if (values.category !== undefined) {
                   updates.category = typeof values.category === 'string' ? values.category : null
                 }
-                
+
                 await handleBulkUpdate(updates)
               }}
               onClear={() => setRowSelection({})}

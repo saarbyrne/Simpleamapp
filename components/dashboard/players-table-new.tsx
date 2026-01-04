@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect, useRef, useCallback, startTransition } from 'react'
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import {
   ColumnDef,
   SortingState,
@@ -467,62 +467,55 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
 
     lastUrlSearchRef.current = currentStateSignature
 
-    // Use startTransition to batch state updates and avoid hydration issues
-    // Double-check mounted state inside the transition to prevent updates after unmount
-    startTransition(() => {
-      // Ensure component is still mounted before updating state
-      if (!isMounted.current) return
+    // Ensure component is still mounted before updating state
+    if (!isMounted.current) return
 
-      // Batch all state updates together to avoid hydration issues
-      if (hasUrlParams) {
-        // Use URL params - batch updates
-        setSearch(urlSearch || '')
-        setPositionFilter(urlPosition || 'all')
-        setStatusFilter(urlStatus || 'all')
-        setNationalityFilter(urlNationality || 'all')
+    if (hasUrlParams) {
+      // Use URL params
+      setSearch(urlSearch || '')
+      setPositionFilter(urlPosition || 'all')
+      setStatusFilter(urlStatus || 'all')
+      setNationalityFilter(urlNationality || 'all')
 
-        if (urlSort) {
-          try {
-            setSorting(JSON.parse(urlSort))
-          } catch {
-            setSorting([])
-          }
-        } else {
+      if (urlSort) {
+        try {
+          setSorting(JSON.parse(urlSort))
+        } catch {
           setSorting([])
         }
+      } else {
+        setSorting([])
+      }
 
-        if (urlVisibility) {
-          try {
-            setColumnVisibility(JSON.parse(urlVisibility))
-          } catch {
-            setColumnVisibility({})
-          }
-        } else {
+      if (urlVisibility) {
+        try {
+          setColumnVisibility(JSON.parse(urlVisibility))
+        } catch {
           setColumnVisibility({})
         }
       } else {
-        // No URL params, try localStorage
-        const stored = loadFiltersFromStorage()
-        if (stored) {
-          // Batch updates from localStorage
-          setSearch(stored.search || '')
-          setPositionFilter(stored.position || 'all')
-          setStatusFilter(stored.status || 'all')
-          setNationalityFilter(stored.nationality || 'all')
-          setSorting(stored.sorting || [])
-          setColumnVisibility(stored.visibility || {})
-        } else {
-          // No URL params and no localStorage - reset to defaults (only if not already defaults)
-          // Don't update if already at defaults to avoid unnecessary re-renders
-          setSearch('')
-          setPositionFilter('all')
-          setStatusFilter('all')
-          setNationalityFilter('all')
-          setSorting([])
-          setColumnVisibility({})
-        }
+        setColumnVisibility({})
       }
-    })
+    } else {
+      // No URL params, try localStorage
+      const stored = loadFiltersFromStorage()
+      if (stored) {
+        setSearch(stored.search || '')
+        setPositionFilter(stored.position || 'all')
+        setStatusFilter(stored.status || 'all')
+        setNationalityFilter(stored.nationality || 'all')
+        setSorting(stored.sorting || [])
+        setColumnVisibility(stored.visibility || {})
+      } else {
+        // No URL params and no localStorage - reset to defaults
+        setSearch('')
+        setPositionFilter('all')
+        setStatusFilter('all')
+        setNationalityFilter('all')
+        setSorting([])
+        setColumnVisibility({})
+      }
+    }
 
     // Mark initial URL sync as complete after a delay to ensure state updates are processed
     setTimeout(() => {
@@ -980,10 +973,11 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
       </Dialog>
 
       <PageCard
+        variant="table"
         title={t('players.title')}
         description={t('players.manageDescription')}
         headerActions={
-          <Button 
+          <Button
             onClick={() => setIsAddPlayerOpen(true)}
             className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
             type="button"

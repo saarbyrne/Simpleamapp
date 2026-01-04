@@ -46,9 +46,9 @@ export default async function PlayersDataPage() {
  */
 function PlayersTableSkeleton() {
   return (
-    <Card className="p-6">
-      {/* Table toolbar */}
-      <div className="flex items-center justify-between mb-4">
+    <div className="space-y-4">
+      {/* Table toolbar - no padding, transparent */}
+      <div className="flex items-center justify-between">
         <Skeleton className="h-10 w-64" />
         <div className="flex gap-2">
           <Skeleton className="h-10 w-32" />
@@ -56,34 +56,37 @@ function PlayersTableSkeleton() {
         </div>
       </div>
 
-      {/* Table header */}
-      <div className="border-b pb-3 mb-3">
-        <div className="grid grid-cols-6 gap-4">
-          {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-4 w-full" />
+      {/* Table - white background with border */}
+      <div className="w-full rounded-lg border bg-card p-0">
+        {/* Table header */}
+        <div className="border-b p-4">
+          <div className="grid grid-cols-6 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-4 w-full" />
+            ))}
+          </div>
+        </div>
+
+        {/* Table rows */}
+        <div className="p-4 space-y-3">
+          {[...Array(10)].map((_, i) => (
+            <div key={i} className="grid grid-cols-6 gap-4">
+              {[...Array(6)].map((_, j) => (
+                <Skeleton key={j} className="h-8 w-full" />
+              ))}
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Table rows */}
-      <div className="space-y-3">
-        {[...Array(10)].map((_, i) => (
-          <div key={i} className="grid grid-cols-6 gap-4 py-2">
-            {[...Array(6)].map((_, j) => (
-              <Skeleton key={j} className="h-8 w-full" />
-            ))}
-          </div>
-        ))}
-      </div>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-between mt-6 pt-4 border-t">
+      {/* Pagination - no padding, transparent */}
+      <div className="flex items-center justify-between">
         <Skeleton className="h-4 w-40" />
         <div className="flex gap-2">
           <Skeleton className="h-9 w-24" />
           <Skeleton className="h-9 w-24" />
         </div>
       </div>
-    </Card>
+    </div>
   )
 }

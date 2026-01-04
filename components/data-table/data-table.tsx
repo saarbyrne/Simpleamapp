@@ -111,7 +111,7 @@ export function DataTable<TData>({
   // Feature flags
   enableRowSelection = false,
   enableGrouping = false,
-  enableColumnResizing = false,
+  enableColumnResizing = true,
   enableColumnReordering = false,
   enableColumnVisibility = true,
   enableBulkActions = false,
@@ -142,7 +142,7 @@ export function DataTable<TData>({
   const [internalRowSelection, setInternalRowSelection] = useState<RowSelectionState>({})
   const [internalPagination, setInternalPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 1000, // Large page size to show all rows when pagination not explicitly controlled
+    pageSize: 10,
   })
 
   // Use controlled or internal state

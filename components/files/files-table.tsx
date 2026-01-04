@@ -483,6 +483,7 @@ export function FilesTable({ files, total: serverTotal }: FilesTableProps) {
   return (
     <div className="w-full min-w-0 max-w-full">
       <PageCard
+        variant="table"
         title={t('files.title')}
         description={t('files.description')}
         headerActions={

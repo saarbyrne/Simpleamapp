@@ -37,6 +37,7 @@ export default function NotesPage() {
 
   return (
     <PageCard
+      variant="table"
       title="Notes"
       description="Create and manage notes with rich text formatting, privacy controls, and entity linking"
       headerActions={
@@ -67,14 +68,14 @@ function NotesListSkeleton() {
   return (
     <div className="space-y-4">
       {[1, 2, 3].map((i) => (
-        <Card key={i}>
-          <CardContent className="p-6">
+        <Card key={i} className="rounded-lg border bg-card">
+          <div className="p-6">
             <div className="space-y-3">
               <Skeleton className="h-4 w-1/3" />
               <Skeleton className="h-20 w-full" />
               <Skeleton className="h-4 w-1/4" />
             </div>
-          </CardContent>
+          </div>
         </Card>
       ))}
     </div>

@@ -87,7 +87,7 @@ export function ReportsClient({
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('deleteConfirmation'))) return
+    if (typeof window !== 'undefined' && !confirm(t('deleteConfirmation'))) return
 
     setDeletingId(id)
     
@@ -137,6 +137,7 @@ export function ReportsClient({
   return (
     <div className="container mx-auto py-8">
       <PageCard
+        variant="table"
         title={t('title')}
         description={t('description')}
         headerActions={

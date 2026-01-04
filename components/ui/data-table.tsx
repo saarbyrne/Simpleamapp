@@ -34,7 +34,7 @@ export function DataTable<TData>({
   columns,
   enableRowSelection = false,
   enableGrouping = false,
-  enableColumnResizing = false,
+  enableColumnResizing = true,
   emptyMessage = 'No results found.',
   className,
   headerClassName,
@@ -46,7 +46,7 @@ export function DataTable<TData>({
     : columns
 
   return (
-    <div className={cn('w-full min-w-0 overflow-x-auto rounded-lg border', className)}>
+    <div className={cn('w-full min-w-0 overflow-x-auto rounded-lg border bg-card', className)}>
       <div className="min-w-max">
         <Table>
           <TableHeader className={headerClassName}>
@@ -61,6 +61,7 @@ export function DataTable<TData>({
                   const headerStyle =
                     column && columnDef
                       ? {
+                          width: header.getSize(),
                           minWidth: columnDef.minSize,
                           maxWidth: columnDef.maxSize,
                         }
@@ -70,6 +71,7 @@ export function DataTable<TData>({
                       key={header.id}
                       className={cn(
                         'relative',
+                        canResize && 'group',
                         columnId === 'actions' && 'text-end',
                         columnId === 'select' && 'w-10 !px-2 !py-0'
                       )}
@@ -116,8 +118,8 @@ export function DataTable<TData>({
                           onMouseDown={header.getResizeHandler()}
                           onTouchStart={header.getResizeHandler()}
                           className={cn(
-                            'absolute end-0 top-0 h-full w-1 cursor-col-resize touch-none select-none bg-border hover:bg-primary/50',
-                            column.getIsResizing() && 'bg-primary'
+                            'absolute end-0 top-0 h-full w-px cursor-col-resize touch-none select-none bg-border opacity-0 transition-opacity group-hover:opacity-100 hover:bg-primary/50',
+                            column.getIsResizing() && 'bg-primary opacity-100'
                           )}
                         />
                       )}
@@ -174,6 +176,13 @@ export function DataTable<TData>({
                     {row.getVisibleCells().map((cell) => {
                       const cellColumn = cell.column
                       const cellColumnId = cellColumn?.id
+                      const cellStyle = enableColumnResizing
+                        ? {
+                            width: cell.column.getSize(),
+                            minWidth: cellColumn?.columnDef?.minSize,
+                            maxWidth: cellColumn?.columnDef?.maxSize,
+                          }
+                        : undefined
                       return (
                         <TableCell
                           key={cell.id}
@@ -181,6 +190,7 @@ export function DataTable<TData>({
                             cellColumnId === 'actions' && 'text-end',
                             cellColumnId === 'select' && 'w-10 !px-2 !py-0'
                           )}
+                          style={cellStyle}
                         >
                           {cellColumnId === 'select' && cellColumn ? (
                             <div className="flex items-center justify-center">

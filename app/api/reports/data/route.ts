@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { getAIWorkspace } from '@/app/actions/ai-workspace'
 import { buildReportData } from '@/lib/reports/query-builder'
-import { ReportConfig } from '@/app/actions/reports'
+import { ReportConfig } from '@/types/reports'
 
 export const runtime = 'nodejs'
 

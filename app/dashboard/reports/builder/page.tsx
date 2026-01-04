@@ -110,6 +110,7 @@ export default function ReportBuilderPage() {
   return (
     <div className="container mx-auto py-8">
       <PageCard
+        variant="table"
         title={editId ? t('builder.editTitle') : t('builder.title')}
         description={t('builder.wizardDescription')}
         headerActions={

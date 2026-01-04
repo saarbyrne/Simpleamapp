@@ -37,7 +37,8 @@ import {
 import { DateRange } from 'react-day-picker'
 import { format } from 'date-fns'
 import { cn } from '@/components/ui/utils'
-import type { CreateReportData, ReportSection } from '@/app/actions/reports'
+import type { CreateReportData } from '@/app/actions/reports'
+import type { ReportSection } from '@/types/reports'
 import { DashboardBuilder } from './DashboardBuilder'
 
 export interface DataPoint {

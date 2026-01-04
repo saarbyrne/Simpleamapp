@@ -524,6 +524,7 @@ export function StaffTable({ staff, total: serverTotal, organizationRoles }: Sta
   return (
     <>
       <PageCard
+        variant="table"
         title={translate('staff.title', 'Staff')}
         description={translate('staff.description', 'Manage team roles, permissions, and contact details.')}
         toolbar={

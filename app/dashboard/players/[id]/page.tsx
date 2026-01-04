@@ -93,6 +93,7 @@ export default async function PlayerProfilePage({ params }: { params: { id: stri
       {/* Client component for breadcrumb state management */}
       <PlayerProfileHeader playerId={params.id} playerName={playerName} />
     <PageCard
+      variant="table"
       title={
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">

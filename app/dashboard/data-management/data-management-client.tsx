@@ -108,6 +108,7 @@ export function DataManagementClient({ dataSummary }: DataManagementClientProps)
   return (
     <div className="container mx-auto py-8">
       <PageCard
+        variant="table"
         title="Data Management"
         description="View and manage all your organization's data. Every change is tracked, versioned, and recoverable."
         headerActions={

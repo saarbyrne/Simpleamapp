@@ -152,8 +152,8 @@ function MyTemplatesLoading() {
   return (
     <div className="space-y-4">
       {[1, 2, 3].map((i) => (
-        <Card key={i}>
-          <CardHeader>
+        <Card key={i} className="rounded-lg border bg-card">
+          <div className="p-6">
             <Skeleton className="h-6 w-3/4" />
             <Skeleton className="h-4 w-full mt-2" />
             <div className="flex gap-2 mt-3">
@@ -161,15 +161,15 @@ function MyTemplatesLoading() {
               <Skeleton className="h-6 w-20" />
               <Skeleton className="h-6 w-20" />
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div className="px-6 pb-6 pt-0">
             <div className="grid grid-cols-4 gap-4">
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
             </div>
-          </CardContent>
+          </div>
         </Card>
       ))}
     </div>
@@ -179,6 +179,7 @@ function MyTemplatesLoading() {
 export default async function MyTemplatesPage() {
   return (
     <PageCard
+      variant="table"
       title="My Templates"
       description="Manage your published templates and track their performance"
       headerActions={

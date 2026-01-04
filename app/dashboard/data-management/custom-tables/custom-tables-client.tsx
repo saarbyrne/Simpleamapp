@@ -129,6 +129,7 @@ export function CustomTablesClient({
   return (
     <div className="container mx-auto py-8">
       <PageCard
+        variant="table"
         title="Custom Data Tables"
         description="Create flexible spreadsheets for any data that doesn't fit into standard categories. All changes are tracked and reversible."
         headerActions={
