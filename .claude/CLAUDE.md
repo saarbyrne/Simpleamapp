@@ -149,6 +149,34 @@ import { Label } from '@/components/ui/label'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 ```
 
+### Loading States - use Skeleton Wrappers
+```tsx
+import { TablePageSkeleton, CardListSkeleton, CardGridSkeleton } from '@/components/ui/skeleton-wrappers'
+import { Suspense } from 'react'
+
+// For table pages
+<Suspense fallback={<TablePageSkeleton rows={10} />}>
+  <DataTable />
+</Suspense>
+
+// For card lists
+<Suspense fallback={<CardListSkeleton count={3} showFilters={true} />}>
+  <NotesList />
+</Suspense>
+
+// For card grids
+<Suspense fallback={<CardGridSkeleton count={6} columns={3} />}>
+  <ReportsList />
+</Suspense>
+```
+
+**Rules:**
+- Always use skeleton wrappers from `@/components/ui/skeleton-wrappers`, never create inline skeletons
+- Skeletons must match the final content structure (no extra padding)
+- No horizontal padding (rely on PageFrame's global p-4)
+- Use plain divs with bg-card inside skeletons, not Card components
+- Prefer partial Suspense boundaries (header → filters → content) over full-page loading
+
 ## Coding Standards
 
 - Use functional components with hooks

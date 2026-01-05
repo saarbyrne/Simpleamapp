@@ -5,6 +5,7 @@ import { getTemplates, getFeaturedTemplates } from '@/app/actions/templates'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/ui/page-header'
 import Link from 'next/link'
 import { Star, Download } from 'lucide-react'
 
@@ -29,7 +30,7 @@ async function FeaturedTemplates() {
 
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-bold mb-4">Featured Templates</h2>
+      <PageHeader title="Featured Templates" className="mb-4" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {templates.slice(0, 6).map((template: any) => (
           <Link key={template.id} href={`/dashboard/templates/${template.id}`}>
@@ -136,7 +137,7 @@ function TemplatesLoading() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-4">Featured Templates</h2>
+        <PageHeader title="Featured Templates" className="mb-4" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Card key={i}>

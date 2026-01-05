@@ -7,6 +7,7 @@ import { useState, useCallback, useMemo, memo } from 'react'
 import { useTranslations } from 'next-intl'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -84,7 +85,7 @@ const eventStyleGetter = (event: CalendarEvent) => {
 
 // Memoized toolbar component
 const Toolbar = memo(({ label, onNavigate: navigate, onView, view, t }: any) => (
-  <div className="mb-4 flex items-center justify-between rounded-lg border bg-card p-4">
+  <div className="mb-0 flex items-center justify-between border-b bg-card p-4 rounded-t-lg">
     <div className="flex items-center gap-2">
       <Button
         variant="outline"
@@ -183,27 +184,53 @@ export function EventCalendar({
   }, [view, t])
 
   return (
-    <div className="h-full w-full">
+    <Card className="h-full w-full p-0 overflow-hidden">
       <style jsx global>{`
         .rbc-calendar {
           font-family: inherit;
           height: 100%;
+          background-color: var(--card);
         }
 
         .rbc-header {
           padding: 8px 4px;
           font-weight: 600;
           font-size: 0.875rem;
-          border-bottom: 1px solid hsl(var(--border));
-          background: hsl(var(--muted) / 0.3);
+          border-bottom: 1px solid var(--border);
+          background-color: var(--card);
+        }
+
+        .rbc-day-bg {
+          background-color: var(--card) !important;
+        }
+
+        .rbc-day-slot {
+          background-color: var(--card) !important;
+        }
+
+        .rbc-time-slot {
+          border-top: 1px solid var(--border);
+          background-color: var(--card) !important;
+        }
+
+        .rbc-month-row {
+          background-color: var(--card) !important;
+        }
+
+        .rbc-month-row .rbc-day-bg {
+          background-color: var(--card) !important;
         }
 
         .rbc-today {
-          background-color: hsl(var(--accent) / 0.1);
+          background-color: color-mix(in oklch, var(--accent) 10%, transparent) !important;
+        }
+
+        .rbc-today .rbc-day-bg {
+          background-color: color-mix(in oklch, var(--accent) 10%, transparent) !important;
         }
 
         .rbc-off-range-bg {
-          background: hsl(var(--muted) / 0.2);
+          background: color-mix(in oklch, var(--muted) 20%, transparent) !important;
         }
 
         .rbc-event {
@@ -230,33 +257,30 @@ export function EventCalendar({
         }
 
         .rbc-day-bg:hover {
-          background-color: hsl(var(--muted) / 0.5);
-        }
-
-        .rbc-time-slot {
-          border-top: 1px solid hsl(var(--border));
+          background-color: color-mix(in oklch, var(--muted) 50%, transparent) !important;
         }
 
         .rbc-time-header-content {
-          border-left: 1px solid hsl(var(--border));
+          border-left: 1px solid var(--border);
         }
 
         .rbc-day-slot .rbc-time-slot {
-          border-top: 1px solid hsl(var(--border));
+          border-top: 1px solid var(--border);
         }
 
         .rbc-time-content {
-          border-top: 1px solid hsl(var(--border));
+          border-top: 1px solid var(--border);
         }
 
         .rbc-current-time-indicator {
-          background-color: hsl(var(--primary));
+          background-color: var(--primary);
           height: 2px;
         }
 
         .rbc-agenda-view {
-          border: 1px solid hsl(var(--border));
-          border-radius: 0.5rem;
+          border: none;
+          border-radius: 0;
+          background-color: var(--card);
         }
 
         .rbc-agenda-view table {
@@ -274,26 +298,32 @@ export function EventCalendar({
         }
 
         .rbc-time-header.rbc-overflowing {
-          border-right: 1px solid hsl(var(--border));
+          border-right: 1px solid var(--border);
         }
 
         .rbc-timeslot-group {
-          border-left: 1px solid hsl(var(--border));
+          border-left: 1px solid var(--border);
         }
 
         .rbc-month-view,
         .rbc-time-view {
-          border: 1px solid hsl(var(--border));
-          border-radius: 0.5rem;
+          border: none;
+          border-radius: 0;
           overflow: hidden;
+          background-color: var(--card);
         }
 
         .rbc-header + .rbc-header {
-          border-left: 1px solid hsl(var(--border));
+          border-left: 1px solid var(--border);
         }
 
         .rbc-month-row + .rbc-month-row {
-          border-top: 1px solid hsl(var(--border));
+          border-top: 1px solid var(--border);
+        }
+
+        .rbc-toolbar {
+          background-color: var(--card);
+          border-bottom: 1px solid var(--border);
         }
 
         .rbc-date-cell {
@@ -331,6 +361,6 @@ export function EventCalendar({
         timeslots={2}
         defaultView={defaultView}
       />
-    </div>
+    </Card>
   )
 }

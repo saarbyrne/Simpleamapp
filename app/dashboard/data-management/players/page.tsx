@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 import { PlayersTable } from './_components/players-table'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Card } from '@/components/ui/card'
+import { TablePageSkeleton } from '@/components/ui/skeleton-wrappers'
 
 export const metadata = {
   title: 'Players | SAM',
@@ -33,60 +32,9 @@ export default async function PlayersDataPage() {
       </div>
 
       {/* STREAMED: Player table loads independently */}
-      <Suspense fallback={<PlayersTableSkeleton />}>
+      <Suspense fallback={<TablePageSkeleton rows={10} />}>
         <PlayersTable />
       </Suspense>
-    </div>
-  )
-}
-
-/**
- * Skeleton for players table
- * Shows while player data is streaming from server
- */
-function PlayersTableSkeleton() {
-  return (
-    <div className="space-y-4">
-      {/* Table toolbar - no padding, transparent */}
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-10 w-64" />
-        <div className="flex gap-2">
-          <Skeleton className="h-10 w-32" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-      </div>
-
-      {/* Table - white background with border */}
-      <div className="w-full rounded-lg border bg-card p-0">
-        {/* Table header */}
-        <div className="border-b p-4">
-          <div className="grid grid-cols-6 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="h-4 w-full" />
-            ))}
-          </div>
-        </div>
-
-        {/* Table rows */}
-        <div className="p-4 space-y-3">
-          {[...Array(10)].map((_, i) => (
-            <div key={i} className="grid grid-cols-6 gap-4">
-              {[...Array(6)].map((_, j) => (
-                <Skeleton key={j} className="h-8 w-full" />
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Pagination - no padding, transparent */}
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-4 w-40" />
-        <div className="flex gap-2">
-          <Skeleton className="h-9 w-24" />
-          <Skeleton className="h-9 w-24" />
-        </div>
-      </div>
     </div>
   )
 }

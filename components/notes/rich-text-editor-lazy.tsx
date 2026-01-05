@@ -9,7 +9,10 @@ import { Skeleton } from '@/components/ui/skeleton'
  * Editor only loads when notes feature is accessed
  */
 export const RichTextEditor = dynamic(
-  () => import('./rich-text-editor').then(mod => mod.RichTextEditor),
+  async () => {
+    const mod = await import('./rich-text-editor')
+    return mod.RichTextEditor
+  },
   {
     loading: () => (
       <div className="border rounded-md p-4 space-y-2">

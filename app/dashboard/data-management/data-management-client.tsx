@@ -106,7 +106,7 @@ export function DataManagementClient({ dataSummary }: DataManagementClientProps)
   ]
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto pb-8">
       <PageCard
         variant="table"
         title="Data Management"

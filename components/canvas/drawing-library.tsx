@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef, forwardRef, useImperativeHandle } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
@@ -101,7 +101,11 @@ function LazyImage({ src, alt, className }: { src: string; alt: string; classNam
   )
 }
 
-export function DrawingLibrary() {
+export interface DrawingLibraryHandle {
+  openCreateDialog: () => void
+}
+
+export const DrawingLibrary = forwardRef<DrawingLibraryHandle>((props, ref) => {
   const router = useRouter()
   const [drawings, setDrawings] = useState<Drawing[]>([])
   const [loading, setLoading] = useState(true)
@@ -116,6 +120,11 @@ export function DrawingLibrary() {
   const [hasMore, setHasMore] = useState(false)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const pageSize = 20 // Match server default
+
+  // Expose method to open create dialog
+  useImperativeHandle(ref, () => ({
+    openCreateDialog: () => setShowCreateDialog(true),
+  }))
 
   // Debounce search query to avoid too many API calls
   useEffect(() => {
@@ -306,7 +315,7 @@ export function DrawingLibrary() {
                 setSearchQuery(e.target.value)
                 // Page will be reset by the debounced effect
               }}
-              className="border-0 shadow-none focus-visible:ring-0 px-0 h-10"
+              className="border-0 shadow-none focus-visible:ring-0 px-0 py-0 h-full"
             />
           </div>
           <Select
@@ -329,10 +338,6 @@ export function DrawingLibrary() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4 me-2" />
-          New Drawing
-        </Button>
       </div>
 
       {/* Drawing grid */}
@@ -524,4 +529,6 @@ export function DrawingLibrary() {
       </AlertDialog>
     </div>
   )
-}
+})
+
+DrawingLibrary.displayName = 'DrawingLibrary'

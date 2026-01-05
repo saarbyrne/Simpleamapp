@@ -3,7 +3,6 @@ import { prisma } from '@/lib/db'
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
 import { FilesTable } from '@/components/files/files-table'
 import { redirect } from 'next/navigation'
-import { PageFrame } from '@/components/dashboard/page-frame'
 
 export default async function FilesPage() {
   const supabase = await createServerClient()
@@ -43,9 +42,5 @@ export default async function FilesPage() {
     },
   })
 
-  return (
-    <PageFrame>
-      <FilesTable files={files} total={total} />
-    </PageFrame>
-  )
+  return <FilesTable files={files} total={total} />
 }

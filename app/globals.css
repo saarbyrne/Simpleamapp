@@ -3347,3 +3347,51 @@ html {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+/* React Big Calendar - Unified white card background */
+.rbc-calendar {
+  background-color: var(--card) !important;
+}
+
+.rbc-day-bg {
+  background-color: var(--card) !important;
+}
+
+.rbc-day-slot {
+  background-color: var(--card) !important;
+}
+
+.rbc-time-slot {
+  background-color: var(--card) !important;
+}
+
+.rbc-month-row {
+  background-color: var(--card) !important;
+}
+
+.rbc-month-row .rbc-day-bg {
+  background-color: var(--card) !important;
+}
+
+.rbc-header {
+  background-color: var(--card) !important;
+}
+
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+  background-color: var(--card) !important;
+  border: none !important;
+}
+
+.rbc-today .rbc-day-bg {
+  background-color: color-mix(in oklch, var(--accent) 10%, transparent) !important;
+}
+
+.rbc-off-range-bg {
+  background: color-mix(in oklch, var(--muted) 20%, transparent) !important;
+}
+
+.rbc-day-bg:hover {
+  background-color: color-mix(in oklch, var(--muted) 50%, transparent) !important;
+}

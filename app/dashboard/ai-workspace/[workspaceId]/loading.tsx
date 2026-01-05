@@ -1,12 +1,22 @@
+import { Skeleton } from '@/components/ui/skeleton'
+
+/**
+ * AI Workspace loading skeleton
+ *
+ * Matches the actual AI workspace layout:
+ * - Top bar with title and actions
+ * - Split panel layout (left: conversation, right: canvas)
+ * - Bottom input area
+ */
 export default function Loading() {
   return (
     <div className="flex h-screen flex-col bg-background">
       {/* Top Bar Skeleton */}
       <div className="flex h-16 items-center justify-between border-b px-6">
-        <div className="h-6 w-48 animate-pulse rounded bg-muted" />
+        <Skeleton className="h-6 w-48" />
         <div className="flex gap-2">
-          <div className="h-9 w-24 animate-pulse rounded bg-muted" />
-          <div className="h-9 w-24 animate-pulse rounded bg-muted" />
+          <Skeleton className="h-9 w-24" />
+          <Skeleton className="h-9 w-24" />
         </div>
       </div>
 
@@ -17,17 +27,17 @@ export default function Loading() {
           {/* Messages Skeleton */}
           <div className="flex-1 space-y-4 p-4">
             <div className="flex gap-3">
-              <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-muted" />
+              <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
               <div className="max-w-[80%] space-y-2">
-                <div className="h-4 w-64 animate-pulse rounded bg-muted" />
-                <div className="h-4 w-48 animate-pulse rounded bg-muted" />
+                <Skeleton className="h-4 w-64" />
+                <Skeleton className="h-4 w-48" />
               </div>
             </div>
           </div>
 
           {/* Input Area Skeleton */}
           <div className="border-t p-4">
-            <div className="h-20 animate-pulse rounded bg-muted" />
+            <Skeleton className="h-20 w-full rounded" />
           </div>
         </div>
 
@@ -38,11 +48,11 @@ export default function Loading() {
         <div className="flex flex-1 items-center justify-center bg-muted/30">
           <div className="text-center space-y-3">
             <div className="flex justify-center">
-              <div className="h-12 w-12 animate-spin rounded-full border-4 border-muted border-t-primary" />
+              <Skeleton className="h-12 w-12 rounded-full" />
             </div>
             <div className="space-y-2">
-              <div className="h-5 w-48 mx-auto animate-pulse rounded bg-muted" />
-              <div className="h-4 w-64 mx-auto animate-pulse rounded bg-muted/60" />
+              <Skeleton className="h-5 w-48 mx-auto" />
+              <Skeleton className="h-4 w-64 mx-auto" />
             </div>
           </div>
         </div>

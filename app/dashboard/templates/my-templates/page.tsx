@@ -3,7 +3,7 @@ import { getUserTemplates } from '@/app/actions/templates'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+import { CardListSkeleton } from '@/components/ui/skeleton-wrappers'
 import Link from 'next/link'
 import { Star, Download, Eye, Edit, Trash2 } from 'lucide-react'
 import { PageCard } from '@/components/ui/page-card'
@@ -148,34 +148,6 @@ async function MyTemplatesData() {
   )
 }
 
-function MyTemplatesLoading() {
-  return (
-    <div className="space-y-4">
-      {[1, 2, 3].map((i) => (
-        <Card key={i} className="rounded-lg border bg-card">
-          <div className="p-6">
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-full mt-2" />
-            <div className="flex gap-2 mt-3">
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-6 w-20" />
-            </div>
-          </div>
-          <div className="px-6 pb-6 pt-0">
-            <div className="grid grid-cols-4 gap-4">
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-            </div>
-          </div>
-        </Card>
-      ))}
-    </div>
-  )
-}
-
 export default async function MyTemplatesPage() {
   return (
     <PageCard
@@ -188,7 +160,7 @@ export default async function MyTemplatesPage() {
         </Link>
       }
     >
-      <Suspense fallback={<MyTemplatesLoading />}>
+      <Suspense fallback={<CardListSkeleton count={3} showFilters={false} />}>
         <MyTemplatesData />
       </Suspense>
     </PageCard>

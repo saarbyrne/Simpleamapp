@@ -316,6 +316,70 @@ Key features:
 - Export functionality
 - Responsive design
 
+#### Loading States & Skeletons
+
+Skeleton loading states provide visual feedback while content is loading. All skeletons must match the final rendered structure's padding and spacing.
+
+**Key Principles:**
+
+1. **Match Layout Structure**: Skeletons must match the exact spacing/padding of real content
+2. **Respect Page Context**: Account for PageFrame padding and PageCard variants
+3. **Use Standardized Components**: Import from `@/components/ui/skeleton-wrappers`
+4. **Progressive Loading**: Prefer partial Suspense boundaries (header → filters → content)
+
+**Available Skeleton Components:**
+
+- `TablePageSkeleton` - Table pages with filters, toolbar, and pagination
+- `CardListSkeleton` - Vertical list of cards (Notes, Templates)
+- `CardGridSkeleton` - Grid layout cards (Reports, Dashboard)
+- `DetailPageSkeleton` - Detail/profile pages with header and sections
+
+**Usage Example:**
+
+```tsx
+import { TablePageSkeleton } from '@/components/ui/skeleton-wrappers'
+import { Suspense } from 'react'
+
+<Suspense fallback={<TablePageSkeleton rows={10} />}>
+  <DataTable />
+</Suspense>
+
+// For card lists
+import { CardListSkeleton } from '@/components/ui/skeleton-wrappers'
+
+<Suspense fallback={<CardListSkeleton count={3} showFilters={true} />}>
+  <NotesList />
+</Suspense>
+
+// For card grids
+import { CardGridSkeleton } from '@/components/ui/skeleton-wrappers'
+
+<Suspense fallback={<CardGridSkeleton count={6} columns={3} />}>
+  <ReportsList />
+</Suspense>
+```
+
+**Padding Context:**
+
+- PageFrame provides global `p-4` padding
+- PageCard variant="table" has `px-0` (no horizontal padding)
+- Skeletons inherit this context and must not add extra padding
+- Content elements (cards, tables) have their own internal padding
+
+**Do's:**
+
+- ✅ Use skeleton wrappers from `@/components/ui/skeleton-wrappers`
+- ✅ Match toolbar, filters, pagination structure
+- ✅ Use `space-y-4` for vertical spacing
+- ✅ Add white `bg-card` backgrounds to content areas
+
+**Don'ts:**
+
+- ❌ Add extra horizontal padding to skeletons
+- ❌ Use Card components in skeletons (use plain divs with bg-card)
+- ❌ Create custom inline skeletons
+- ❌ Wrap entire pages in Suspense (prefer partial boundaries)
+
 ### Responsive Design
 
 Follow mobile-first approach:

@@ -5,6 +5,7 @@ import { getCurrentUserProfile } from "@/app/actions/profile";
 import { ProfileTabs } from "./profile-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTranslations } from "next-intl/server";
+import { PageHeader } from "@/components/ui/page-header";
 
 export async function generateMetadata() {
   const t = await getTranslations('profile');
@@ -33,7 +34,7 @@ export default async function ProfilePage() {
 
   if (!profileResult.success || !profileResult.data) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto">
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
           <p className="text-sm font-medium text-destructive mb-2">
             {t('failedToLoadProfile')}
@@ -52,13 +53,12 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto max-w-5xl p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="mt-2 text-muted-foreground">
-          {t('description')}
-        </p>
-      </div>
+    <div className="container mx-auto max-w-5xl">
+      <PageHeader
+        title={t('title')}
+        description={t('description')}
+        className="mb-6"
+      />
 
       <Suspense fallback={<ProfileSkeleton />}>
         <ProfileTabs user={profileResult.data} />

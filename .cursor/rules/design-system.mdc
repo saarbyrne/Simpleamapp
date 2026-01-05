@@ -78,6 +78,45 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 </Card>
 ```
 
+### Loading States & Skeletons
+
+Skeleton loading states provide visual feedback while content is loading. All skeletons must match the final rendered structure's padding and spacing.
+
+**Available Skeleton Components:**
+- `TablePageSkeleton` - Table pages with filters, toolbar, and pagination
+- `CardListSkeleton` - Vertical list of cards (Notes, Templates)
+- `CardGridSkeleton` - Grid layout cards (Reports, Dashboard)
+- `DetailPageSkeleton` - Detail/profile pages with header and sections
+
+**Usage Example:**
+```tsx
+import { TablePageSkeleton, CardListSkeleton, CardGridSkeleton } from '@/components/ui/skeleton-wrappers'
+import { Suspense } from 'react'
+
+// For table pages
+<Suspense fallback={<TablePageSkeleton rows={10} />}>
+  <DataTable />
+</Suspense>
+
+// For card lists
+<Suspense fallback={<CardListSkeleton count={3} showFilters={true} />}>
+  <NotesList />
+</Suspense>
+
+// For card grids
+<Suspense fallback={<CardGridSkeleton count={6} columns={3} />}>
+  <ReportsList />
+</Suspense>
+```
+
+**Rules:**
+- ✅ Use skeleton wrappers from `@/components/ui/skeleton-wrappers`
+- ✅ Match toolbar, filters, pagination structure
+- ✅ Use `space-y-4` for vertical spacing
+- ❌ Never create custom inline skeletons
+- ❌ Never add extra horizontal padding
+- ❌ Never use Card components in skeletons
+
 ## Responsive Patterns
 
 ```tsx

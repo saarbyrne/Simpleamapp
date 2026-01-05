@@ -1,8 +1,8 @@
 import { Suspense } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { PageFrame } from '@/components/dashboard/page-frame'
+import { Card, CardContent } from '@/components/ui/card'
+import { PageHeader } from '@/components/ui/page-header'
 import { PlansTable } from '@/components/planner/plans-table'
 import { CreatePlanDialog } from '@/components/planner/create-plan-dialog'
 import { getPlans } from '@/app/actions/plans'
@@ -41,27 +41,26 @@ export default async function PlannerPage({ searchParams }: PlannerPageProps) {
   const pageSize = searchParams.pageSize ? parseInt(searchParams.pageSize, 10) : 20
 
   return (
-    <PageFrame>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Plans</h1>
-          <p className="text-muted-foreground">
-            Create and manage plans for seasons, player development, rehabilitation, and more.
-          </p>
-        </div>
-        <CreatePlanDialog
-          trigger={
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Plan
-            </Button>
-          }
-        />
-      </div>
+    <>
+      <PageHeader
+        title="Plans"
+        description="Create and manage plans for seasons, player development, rehabilitation, and more."
+        headerActions={
+          <CreatePlanDialog
+            trigger={
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Plan
+              </Button>
+            }
+          />
+        }
+        className="mb-6"
+      />
 
       <Suspense fallback={<PlansLoading />}>
         <PlansData page={page} pageSize={pageSize} />
       </Suspense>
-    </PageFrame>
+    </>
   )
 }

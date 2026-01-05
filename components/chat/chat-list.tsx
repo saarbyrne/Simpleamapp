@@ -100,7 +100,7 @@ export function ChatList({ userId, userName, orgId }: ChatListProps) {
               placeholder="Search chats..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="border-0 shadow-none focus-visible:ring-0 px-0 h-10"
+              className="border-0 shadow-none focus-visible:ring-0 px-0 h-auto flex-1 min-w-0"
             />
           </div>
         </div>

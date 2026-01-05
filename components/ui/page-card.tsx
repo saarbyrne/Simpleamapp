@@ -41,7 +41,7 @@ export function PageCard({
       {/* Header Section */}
       <div className={cn(
         'flex items-center justify-between min-w-0',
-        isTable ? 'px-0 py-6' : 'p-6',
+        isTable ? 'px-0 pt-0 pb-6' : 'p-6',
         isCompact && !isTable && 'p-4',
         !description && !toolbar && 'pb-4',
         description && !toolbar && 'pb-4',

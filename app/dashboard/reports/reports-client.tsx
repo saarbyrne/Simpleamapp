@@ -135,7 +135,7 @@ export function ReportsClient({
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <>
       <PageCard
         variant="table"
         title={t('title')}
@@ -334,6 +334,6 @@ export function ReportsClient({
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   )
 }

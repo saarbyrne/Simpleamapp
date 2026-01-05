@@ -20,7 +20,7 @@ export default async function ChatPage() {
   const dbUser = await ensureUserWithOrganization(user);
 
   return (
-    <div className="h-[calc(100vh-4rem)] p-6">
+    <div className="h-[calc(100vh-4rem)]">
       <Suspense fallback={<ChatSkeleton />}>
         <ChatMasterDetail
           userId={dbUser.id}

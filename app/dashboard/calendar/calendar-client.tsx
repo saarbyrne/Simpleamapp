@@ -7,6 +7,7 @@ import { EventQuickView } from '@/components/calendar/event-quick-view'
 import { CalendarSkeleton } from '@/components/calendar/calendar-skeleton'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
+import { PageHeader } from '@/components/ui/page-header'
 
 // Import lazy-loaded calendar (includes dynamic import and proper loading state)
 import { EventCalendar, type CalendarEvent } from '@/components/calendar/event-calendar-lazy'
@@ -330,21 +331,19 @@ export function CalendarClient() {
   return (
     <div className="flex h-full flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t('calendar.title')}</h2>
-          <p className="text-muted-foreground">
-            {t('calendar.description')}
-          </p>
-        </div>
-        <Button onClick={() => {
-          setFormDefaultValues(null)
-          setShowEventForm(true)
-        }}>
-          <Plus className="me-2 h-4 w-4" />
-          {t('calendar.newEvent')}
-        </Button>
-      </div>
+      <PageHeader
+        title={t('calendar.title')}
+        description={t('calendar.description')}
+        headerActions={
+          <Button onClick={() => {
+            setFormDefaultValues(null)
+            setShowEventForm(true)
+          }}>
+            <Plus className="me-2 h-4 w-4" />
+            {t('calendar.newEvent')}
+          </Button>
+        }
+      />
 
       {/* Calendar */}
       <div className="flex-1 overflow-hidden">
