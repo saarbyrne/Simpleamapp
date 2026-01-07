@@ -82,7 +82,7 @@ export interface DataTableProps<TData> {
   isBulkUpdating?: boolean
   exportFilename?: string
   // UI customization
-  emptyMessage?: string
+  emptyMessage?: ReactNode
   className?: string
   headerClassName?: string
   bodyClassName?: string

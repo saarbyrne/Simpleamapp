@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -99,7 +99,7 @@ export function PlansTable({ plans, total }: PlansTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
 
-  const handleDelete = async (id: string, name: string) => {
+  const handleDelete = useCallback(async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
       return
     }
@@ -118,7 +118,7 @@ export function PlansTable({ plans, total }: PlansTableProps) {
     } finally {
       setDeletingId(null)
     }
-  }
+  }, [router])
 
   const columns = useMemo<ColumnDef<PlanRow>[]>(
     () => [
@@ -293,7 +293,7 @@ export function PlansTable({ plans, total }: PlansTableProps) {
         },
       },
     ],
-    [router, deletingId]
+    [router, deletingId, handleDelete]
   )
 
   return (

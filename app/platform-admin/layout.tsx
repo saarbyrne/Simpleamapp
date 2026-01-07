@@ -14,7 +14,7 @@ export default async function PlatformAdminLayout({ children }: PlatformAdminLay
     return (
       <div className="flex h-screen overflow-hidden">
         <PlatformAdminSidebar adminName={admin.name} adminEmail={admin.email} />
-        <main className="flex-1 overflow-y-auto bg-background">
+        <main className="flex-1 overflow-y-auto bg-page-background">
           {children}
         </main>
       </div>

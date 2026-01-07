@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect, useRef, useCallback, startTransition } from 'react'
+import { useMemo, useState, useEffect, useRef, useCallback, useTransition } from 'react'
 import Image from 'next/image'
 import {
   ColumnDef,
@@ -13,7 +13,7 @@ import {
   RowSelectionState,
   type PaginationState,
 } from '@tanstack/react-table'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -39,6 +39,7 @@ import { formatBytes, getFileIcon, getFileCategory } from '@/lib/files'
 import { toast } from 'sonner'
 import { FileUploadDialog } from './file-upload-dialog'
 import { FilePreviewDialog } from './file-preview-dialog'
+import { TablePageSkeleton } from '@/components/ui/skeleton-wrappers'
 import {
   Select,
   SelectContent,
@@ -286,8 +287,8 @@ const createColumns = (
 
 export function FilesTable({ files, total: serverTotal }: FilesTableProps) {
   const router = useRouter()
-  const pathname = usePathname()
   const t = useTranslations()
+  const [isRefreshing, startRefreshTransition] = useTransition()
 
   // State
   const [search, setSearch] = useState('')
@@ -319,6 +320,10 @@ export function FilesTable({ files, total: serverTotal }: FilesTableProps) {
       isMounted.current = false
     }
   }, [])
+
+  const refreshData = useCallback(() => {
+    startRefreshTransition(() => router.refresh())
+  }, [router, startRefreshTransition])
 
   // Filter files
   const filteredFiles = useMemo(() => {
@@ -379,7 +384,7 @@ export function FilesTable({ files, total: serverTotal }: FilesTableProps) {
         toast.error(result.error)
       } else {
         toast.success(t('files.deleteSuccess'))
-        router.refresh()
+        refreshData()
       }
     } catch (error) {
       console.error('Delete error:', error)
@@ -479,6 +484,10 @@ export function FilesTable({ files, total: serverTotal }: FilesTableProps) {
   const { pageIndex, pageSize } = pagination
   const totalFiles = serverTotal ?? filteredFiles.length
   const totalPages = Math.ceil(totalFiles / pageSize)
+
+  if (isRefreshing) {
+    return <TablePageSkeleton rows={pageSize} />
+  }
 
   return (
     <div className="w-full min-w-0 max-w-full">
@@ -593,7 +602,7 @@ export function FilesTable({ files, total: serverTotal }: FilesTableProps) {
       <FileUploadDialog
         open={isUploadOpen}
         onOpenChange={setIsUploadOpen}
-        onSuccess={() => router.refresh()}
+        onSuccess={refreshData}
       />
 
       {/* Preview Dialog */}

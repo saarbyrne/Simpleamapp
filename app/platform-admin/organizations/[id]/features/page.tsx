@@ -4,166 +4,232 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { PageHeader } from '@/components/platform-admin/page-header'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Save } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ArrowLeft, Save, Package, Info } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { FeatureToggleCard } from '@/components/platform-admin/FeatureToggleCard'
-import { BulkFeatureActions } from '@/components/platform-admin/BulkFeatureActions'
-import { getAllFeatures } from '@/lib/permissions/feature-metadata'
-import {
-  getOrganizationFeaturesAction,
-  updateOrganizationFeaturesAction,
-  enableAllFeaturesAction,
-  disableAllFeaturesAction,
-  resetOrganizationFeaturesAction,
-} from '@/app/actions/organization-features'
+import { getAllFeatures, FeatureKey } from '@/lib/permissions/feature-metadata'
+import { TIER_DISPLAY_INFO, SubscriptionTier } from '@/lib/permissions/subscription-tiers'
 import { OrganizationFeatures } from '@prisma/client'
-import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
+
+// Server actions
+async function getOrganizationDetails(orgId: string) {
+  const response = await fetch(`/api/platform-admin/organizations/${orgId}/features`)
+  if (!response.ok) throw new Error('Failed to fetch organization')
+  return response.json()
+}
+
+async function updateFeatures(orgId: string, updates: Partial<OrganizationFeatures>) {
+  const response = await fetch(`/api/platform-admin/organizations/${orgId}/features`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+  })
+  if (!response.ok) throw new Error('Failed to update features')
+  return response.json()
+}
+
+async function applyPackage(orgId: string) {
+  const response = await fetch(`/api/platform-admin/organizations/${orgId}/features/apply-package`, {
+    method: 'POST',
+  })
+  if (!response.ok) throw new Error('Failed to apply package')
+  return response.json()
+}
+
+type OrgData = {
+  id: string
+  name: string
+  tier: SubscriptionTier
+  features: OrganizationFeatures
+}
 
 export default function OrganizationFeaturesPage() {
   const params = useParams()
   const router = useRouter()
   const orgId = params.id as string
 
-  const [features, setFeatures] = useState<OrganizationFeatures | null>(null)
+  const [org, setOrg] = useState<OrgData | null>(null)
+  const [localFeatures, setLocalFeatures] = useState<Record<string, boolean>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const [hasChanges, setHasChanges] = useState(false)
-  const [localFeatures, setLocalFeatures] = useState<Partial<OrganizationFeatures>>({})
+  const [isApplyingPackage, setIsApplyingPackage] = useState(false)
 
   const allFeatures = getAllFeatures()
 
-  // Load features on mount
+  // Load organization data
   useEffect(() => {
-    loadFeatures()
+    loadOrg()
   }, [orgId])
 
-  async function loadFeatures() {
-    setIsLoading(true)
-    const result = await getOrganizationFeaturesAction(orgId)
-    
-    if (result.success && result.features) {
-      setFeatures(result.features)
-      setLocalFeatures(result.features)
-    } else {
-      toast.error(result.error || 'Failed to load features')
+  async function loadOrg() {
+    try {
+      setIsLoading(true)
+      const data = await getOrganizationDetails(orgId)
+      setOrg(data)
+      
+      // Initialize local state
+      const initial: Record<string, boolean> = {}
+      for (const feature of allFeatures) {
+        initial[feature.fieldName] = data.features[feature.fieldName] ?? false
+      }
+      setLocalFeatures(initial)
+    } catch (error) {
+      toast.error('Failed to load organization')
+      console.error(error)
+    } finally {
+      setIsLoading(false)
     }
-    
-    setIsLoading(false)
   }
 
-  function handleFeatureToggle(fieldName: string, checked: boolean) {
-    setLocalFeatures((prev) => ({
+  // Toggle feature
+  function toggleFeature(fieldName: string) {
+    setLocalFeatures(prev => ({
       ...prev,
-      [fieldName]: checked,
+      [fieldName]: !prev[fieldName],
     }))
-    setHasChanges(true)
   }
 
+  // Check if there are unsaved changes
+  const hasChanges = org
+    ? allFeatures.some(feature => {
+        const current = localFeatures[feature.fieldName]
+        const original = org.features[feature.fieldName as keyof OrganizationFeatures]
+        return current !== original
+      })
+    : false
+
+  // Save changes
   async function handleSave() {
-    if (!hasChanges) return
+    if (!org) return
 
-    setIsSaving(true)
-    const result = await updateOrganizationFeaturesAction(orgId, localFeatures)
-    
-    if (result.success && result.features) {
-      setFeatures(result.features)
-      setLocalFeatures(result.features)
-      setHasChanges(false)
+    try {
+      setIsSaving(true)
+      
+      // Build updates object
+      const updates: Record<string, boolean> = {}
+      for (const feature of allFeatures) {
+        if (localFeatures[feature.fieldName] !== org.features[feature.fieldName as keyof OrganizationFeatures]) {
+          updates[feature.fieldName] = localFeatures[feature.fieldName]
+        }
+      }
+
+      await updateFeatures(orgId, updates)
       toast.success('Features updated successfully')
-    } else {
-      toast.error(result.error || 'Failed to update features')
+      await loadOrg() // Reload to sync
+    } catch (error) {
+      toast.error('Failed to save changes')
+      console.error(error)
+    } finally {
+      setIsSaving(false)
     }
-    
-    setIsSaving(false)
   }
 
-  async function handleEnableAll() {
-    setIsSaving(true)
-    const result = await enableAllFeaturesAction(orgId)
-    
-    if (result.success && result.features) {
-      setFeatures(result.features)
-      setLocalFeatures(result.features)
-      setHasChanges(false)
-      toast.success('All features enabled')
-    } else {
-      toast.error(result.error || 'Failed to enable all features')
+  // Apply package defaults
+  async function handleApplyPackage() {
+    if (!org) return
+
+    try {
+      setIsApplyingPackage(true)
+      await applyPackage(orgId)
+      toast.success(`Applied ${org.tier} package defaults`)
+      await loadOrg() // Reload to show new values
+    } catch (error) {
+      toast.error('Failed to apply package')
+      console.error(error)
+    } finally {
+      setIsApplyingPackage(false)
     }
-    
-    setIsSaving(false)
   }
 
-  async function handleDisableAll() {
-    setIsSaving(true)
-    const result = await disableAllFeaturesAction(orgId)
+  // Reset changes
+  function handleReset() {
+    if (!org) return
     
-    if (result.success && result.features) {
-      setFeatures(result.features)
-      setLocalFeatures(result.features)
-      setHasChanges(false)
-      toast.success('All features disabled')
-    } else {
-      toast.error(result.error || 'Failed to disable all features')
+    const reset: Record<string, boolean> = {}
+    for (const feature of allFeatures) {
+      reset[feature.fieldName] = org.features[feature.fieldName as keyof OrganizationFeatures] as boolean
     }
-    
-    setIsSaving(false)
-  }
-
-  async function handleReset() {
-    setIsSaving(true)
-    const result = await resetOrganizationFeaturesAction(orgId)
-    
-    if (result.success && result.features) {
-      setFeatures(result.features)
-      setLocalFeatures(result.features)
-      setHasChanges(false)
-      toast.success('Features reset to defaults')
-    } else {
-      toast.error(result.error || 'Failed to reset features')
-    }
-    
-    setIsSaving(false)
+    setLocalFeatures(reset)
+    toast.info('Changes discarded')
   }
 
   if (isLoading) {
     return (
-      <div className="flex flex-col">
-        <PageHeader
-          title="Feature Management"
-          description="Loading..."
-        >
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/platform-admin/organizations/${orgId}`}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Link>
-          </Button>
-        </PageHeader>
-
-        <div className="flex-1 space-y-6 p-8">
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
+      <div className="flex items-center justify-center h-96">
+        <div className="text-muted-foreground">Loading...</div>
       </div>
     )
   }
 
+  if (!org) {
+    return (
+      <div className="flex flex-col items-center justify-center h-96 gap-4">
+        <div className="text-muted-foreground">Organization not found</div>
+        <Button asChild variant="outline">
+          <Link href="/platform-admin/organizations">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Organizations
+          </Link>
+        </Button>
+      </div>
+    )
+  }
+
+  const tierInfo = TIER_DISPLAY_INFO[org.tier]
+
+  const headerActions = (
+    <Button
+      variant="outline"
+      onClick={handleApplyPackage}
+      disabled={isApplyingPackage || isSaving}
+    >
+      <Package className="mr-2 h-4 w-4" />
+      Apply {tierInfo.label} Package
+    </Button>
+  )
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       <PageHeader
-        title="Feature Management"
-        description="Control which features are available for this organization"
+        title={`Features: ${org.name}`}
+        description="Manage feature access for this organization"
       >
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/platform-admin/organizations/${orgId}`}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Link>
-          </Button>
-          {hasChanges && (
+        <Button asChild variant="outline" size="sm">
+          <Link href="/platform-admin/organizations">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Organizations
+          </Link>
+        </Button>
+      </PageHeader>
+
+      <div className="flex-1 overflow-auto p-8 space-y-6">
+        {/* Info Alert */}
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            Toggle features on or off for this organization. Click "Apply {tierInfo.label} Package" to reset all features to the tier's default configuration.
+          </AlertDescription>
+        </Alert>
+
+        {/* Unsaved Changes Banner */}
+        {hasChanges && (
+          <div className="flex items-center gap-3 rounded-lg border bg-amber-50 dark:bg-amber-950 p-4">
+            <span className="text-sm font-medium flex-1">You have unsaved changes</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReset}
+              disabled={isSaving}
+            >
+              Discard
+            </Button>
             <Button
               size="sm"
               onClick={handleSave}
@@ -172,67 +238,84 @@ export default function OrganizationFeaturesPage() {
               <Save className="mr-2 h-4 w-4" />
               Save Changes
             </Button>
-          )}
-        </div>
-      </PageHeader>
-
-      <div className="flex-1 space-y-6 p-8">
-        {/* Bulk Actions */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold">Quick Actions</h3>
-            <p className="text-sm text-muted-foreground">
-              Apply changes to all features at once
-            </p>
           </div>
-          <BulkFeatureActions
-            onEnableAll={handleEnableAll}
-            onDisableAll={handleDisableAll}
-            onReset={handleReset}
-            isLoading={isSaving}
-          />
-        </div>
+        )}
 
-        {/* Feature Cards */}
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Main Features</h3>
-            <div className="grid gap-4">
-              {allFeatures.map((feature) => {
-                const mainFeatureChecked = localFeatures[feature.fieldName as keyof OrganizationFeatures] as boolean ?? true
-                
-                // Build sub-feature states
-                const subFeatureStates: Record<string, boolean> = {}
-                feature.subFeatures.forEach((sf) => {
-                  subFeatureStates[sf.fieldName] = localFeatures[sf.fieldName as keyof OrganizationFeatures] as boolean ?? true
-                })
-
-                return (
-                  <FeatureToggleCard
-                    key={feature.key}
-                    feature={feature}
-                    checked={mainFeatureChecked}
-                    onCheckedChange={(checked) =>
-                      handleFeatureToggle(feature.fieldName, checked)
-                    }
-                    subFeatureStates={subFeatureStates}
-                    onSubFeatureChange={(subFeatureKey, checked) =>
-                      handleFeatureToggle(subFeatureKey, checked)
-                    }
-                  />
-                )
-              })}
+        {/* Features Card */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Features</CardTitle>
+                <CardDescription className="mt-2">
+                  Subscription Tier:{' '}
+                  <Badge className={tierInfo.color}>
+                    {tierInfo.label}
+                  </Badge>
+                </CardDescription>
+              </div>
+              {headerActions}
             </div>
-          </div>
-        </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {allFeatures.map((feature, index) => {
+              const isEnabled = localFeatures[feature.fieldName]
+              
+              return (
+                <div key={feature.key}>
+                  {index > 0 && <Separator className="my-4" />}
+                  <div
+                    className={cn(
+                      'flex items-center justify-between gap-4 rounded-lg p-4 transition-colors',
+                      !feature.released && 'bg-amber-50 dark:bg-amber-950',
+                      isEnabled && 'bg-muted/50'
+                    )}
+                  >
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Label
+                          htmlFor={feature.key}
+                          className="text-base font-medium cursor-pointer"
+                        >
+                          {feature.label}
+                        </Label>
+                        {!feature.released && (
+                          <Badge
+                            variant="outline"
+                            className="text-xs bg-amber-100 dark:bg-amber-900"
+                          >
+                            In Development
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {feature.description}
+                      </p>
+                    </div>
+                    <Switch
+                      id={feature.key}
+                      checked={isEnabled}
+                      onCheckedChange={() => toggleFeature(feature.fieldName)}
+                      disabled={isSaving || isApplyingPackage}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </CardContent>
+        </Card>
 
-        {/* Save Button at Bottom */}
+        {/* Bottom Save Button */}
         {hasChanges && (
-          <div className="flex justify-end pt-4 border-t">
+          <div className="flex justify-end gap-3">
             <Button
-              onClick={handleSave}
+              variant="outline"
+              onClick={handleReset}
               disabled={isSaving}
             >
+              Discard Changes
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
               <Save className="mr-2 h-4 w-4" />
               Save Changes
             </Button>
@@ -242,4 +325,3 @@ export default function OrganizationFeaturesPage() {
     </div>
   )
 }
-

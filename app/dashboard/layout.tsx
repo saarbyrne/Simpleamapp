@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getCurrentUserProfile } from '@/app/actions/profile'
+import { getCachedUserWithOrganization } from '@/lib/auth/cached-user'
 
 import { DashboardLayoutClient } from '@/components/dashboard/dashboard-layout-client'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -27,12 +28,23 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     user?.email?.split('@')[0] ||
     'Team member'
 
+  // Try to get organization name (cached, fast)
+  let organizationName: string | null = null
+  try {
+    const dbUser = await getCachedUserWithOrganization()
+    organizationName = dbUser?.organization?.name ?? null
+  } catch (error) {
+    // Silently fail - organization name is optional
+    console.error('Failed to fetch organization name:', error)
+  }
+
   return (
     <Suspense fallback={
       <DashboardLayoutClient 
         userName={fallbackUserName} 
         userEmail={user?.email ?? null}
         userAvatar={null}
+        organizationName={organizationName}
       >
         {children}
       </DashboardLayoutClient>
@@ -40,6 +52,7 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
       <UserProfileWrapper 
         fallbackUserName={fallbackUserName}
         userEmail={user?.email ?? null}
+        organizationName={organizationName}
       >
         {children}
       </UserProfileWrapper>
@@ -50,10 +63,12 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
 async function UserProfileWrapper({
   fallbackUserName,
   userEmail,
+  organizationName,
   children
 }: {
   fallbackUserName: string
   userEmail: string | null
+  organizationName?: string | null
   children: React.ReactNode
 }) {
   // Skip database call for now to avoid connectivity issues
@@ -62,6 +77,7 @@ async function UserProfileWrapper({
       userName={fallbackUserName}
       userEmail={userEmail}
       userAvatar={null}
+      organizationName={organizationName}
     >
       {children}
     </DashboardLayoutClient>

@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
 import { FilesTable } from '@/components/files/files-table'
 import { redirect } from 'next/navigation'
+import { TablePageSkeleton } from '@/components/ui/skeleton-wrappers'
 
 export default async function FilesPage() {
   const supabase = await createServerClient()
@@ -42,5 +44,9 @@ export default async function FilesPage() {
     },
   })
 
-  return <FilesTable files={files} total={total} />
+  return (
+    <Suspense fallback={<TablePageSkeleton rows={20} />}>
+      <FilesTable files={files} total={total} />
+    </Suspense>
+  )
 }

@@ -49,32 +49,67 @@ import {
 import { signOut } from '@/app/actions/profile'
 import { toast } from 'sonner'
 import { getUserEnabledFeatures } from '@/app/actions/user-features'
-import { FeatureKey } from '@/lib/permissions/feature-metadata'
+import { FeatureKey, isFeatureReleased } from '@/lib/permissions/feature-metadata'
+import { Badge } from '@/components/ui/badge'
 
 type AppSidebarProps = {
   userName: string
   userEmail?: string | null
   userAvatar?: string | null
+  organizationName?: string | null
 }
 
-function LogoBadge() {
+/**
+ * Generate initials from organization name
+ * Examples: "Manchester United" -> "MU", "FC Barcelona" -> "FC", "Arsenal" -> "AR"
+ */
+function getInitials(name: string): string {
+  if (!name) return 'CL'
+  
+  // Split by spaces and filter out common words
+  const words = name
+    .split(/\s+/)
+    .filter(word => {
+      const lower = word.toLowerCase()
+      // Filter out common prefixes/suffixes
+      return !['fc', 'cf', 'ac', 'sc', 'united', 'city', 'town', 'athletic', 'athletics'].includes(lower)
+    })
+  
+  if (words.length === 0) {
+    // If all words were filtered, use first 2 characters
+    return name.substring(0, 2).toUpperCase()
+  }
+  
+  if (words.length === 1) {
+    // Single word: take first 2 letters
+    return words[0].substring(0, 2).toUpperCase()
+  }
+  
+  // Multiple words: take first letter of first 2 words
+  return (words[0][0] + words[1][0]).toUpperCase()
+}
+
+function LogoBadge({ organizationName }: { organizationName?: string | null }) {
+  const displayName = organizationName || 'Club'
+  const initials = getInitials(displayName)
+  
   return (
     <Link
       href="/dashboard"
       className="flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-sidebar-accent group-data-[collapsible=icon]:justify-center"
     >
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary text-sm font-bold uppercase text-sidebar-primary-foreground">
-        L
+        {initials}
       </div>
       <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
-        <span className="text-sm font-semibold">Logo</span>
-        <span className="text-xs text-sidebar-foreground/70">Enterprise</span>
+        <span className="text-sm font-semibold">{displayName}</span>
+        <span className="text-xs text-sidebar-foreground/70">Club</span>
       </div>
     </Link>
   )
 }
 
-export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAvatar }: AppSidebarProps) {
+export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAvatar, organizationName }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const t = useTranslations()
@@ -85,11 +120,14 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
   useEffect(() => {
     async function loadFeatures() {
       const result = await getUserEnabledFeatures()
+      console.log('getUserEnabledFeatures result:', result)
       if (result.success && result.features) {
+        console.log('Setting enabled features:', result.features)
         setEnabledFeatures(new Set(result.features))
       } else {
-        // On error, enable all features (fail open)
-        setEnabledFeatures(new Set(['aiWorkspace', 'ai', 'players', 'forms', 'reports', 'calendar', 'messages', 'notes', 'spreadsheets', 'canvas', 'files', 'planner', 'templates']))
+        console.error('Failed to load features, showing defaults:', result.error)
+        // Default to schema defaults (what new orgs get)
+        setEnabledFeatures(new Set(['players', 'calendar', 'notes', 'spreadsheets', 'files']))
       }
       setIsLoadingFeatures(false)
     }
@@ -110,16 +148,20 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
     { labelKey: 'nav.files', href: '/dashboard/files', icon: Folder, featureKey: 'files' as FeatureKey },
     { labelKey: 'nav.planner', href: '/dashboard/planner', icon: CalendarCheck, featureKey: 'planner' as FeatureKey },
     { labelKey: 'nav.templates', href: '/dashboard/templates', icon: Layout, featureKey: 'templates' as FeatureKey },
+    { labelKey: 'settings.dataManagement', href: '/dashboard/data-management', icon: Database, featureKey: 'dataManagement' as FeatureKey },
   ]
 
   // Filter navigation items based on enabled features
-  const navItems = isLoadingFeatures 
+  const filteredNavItems = isLoadingFeatures 
     ? allNavItems // Show all while loading
     : allNavItems.filter(item => enabledFeatures.has(item.featureKey))
 
+  // Separate released and unreleased features
+  const releasedItems = filteredNavItems.filter(item => isFeatureReleased(item.featureKey))
+  const unreleasedItems = filteredNavItems.filter(item => !isFeatureReleased(item.featureKey))
+
   const settingsItems = [
     { labelKey: 'settings.profile', href: '/dashboard/profile', icon: UserCircle },
-    { labelKey: 'settings.dataManagement', href: '/dashboard/data-management', icon: Database },
     { labelKey: 'settings.systemSettings', href: '/dashboard/system-settings', icon: Settings },
   ]
 
@@ -136,7 +178,7 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <LogoBadge />
+        <LogoBadge organizationName={organizationName} />
       </SidebarHeader>
 
       <SidebarContent>
@@ -144,15 +186,15 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
           <SidebarGroupLabel>Main</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
+              {releasedItems.map((item) => {
                 const isActive = pathname?.startsWith(item.href)
                 const label = t(item.labelKey)
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
-                      <Link href={item.href}>
+                      <Link href={item.href} className="relative flex items-center gap-2 min-w-0">
                         <item.icon />
-                        <span>{label}</span>
+                        <span className="truncate flex-1">{label}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -161,6 +203,36 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {unreleasedItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Development</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {unreleasedItems.map((item) => {
+                  const isActive = pathname?.startsWith(item.href)
+                  const label = t(item.labelKey)
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
+                        <Link href={item.href} className="relative flex items-center gap-2 min-w-0">
+                          <item.icon />
+                          <span className="truncate flex-1">{label}</span>
+                          <Badge 
+                            variant="secondary" 
+                            className="shrink-0 text-[10px] px-1.5 py-0 h-4 font-normal opacity-70 group-data-[collapsible=icon]:hidden"
+                          >
+                            Dev
+                          </Badge>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         <SidebarGroup>
           <SidebarGroupLabel>Settings</SidebarGroupLabel>

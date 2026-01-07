@@ -28,6 +28,7 @@ type DashboardLayoutClientProps = {
   userName: string
   userEmail: string | null
   userAvatar?: string | null
+  organizationName?: string | null
   children: React.ReactNode
   /**
    * Set to true to disable the PageFrame wrapper (no padding/spacing).
@@ -145,6 +146,7 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
   userName,
   userEmail,
   userAvatar,
+  organizationName,
   children,
   disablePageFrame = false,
 }: DashboardLayoutClientProps) {
@@ -180,7 +182,12 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
   return (
     <BreadcrumbProvider>
       <SidebarProvider>
-        <AppSidebar userName={userName} userEmail={userEmail} userAvatar={userAvatar} />
+        <AppSidebar 
+          userName={userName} 
+          userEmail={userEmail} 
+          userAvatar={userAvatar}
+          organizationName={organizationName}
+        />
         <SidebarInset className="flex flex-col">
           <div className="sticky top-0 z-50 shrink-0 w-full overflow-x-hidden bg-nav-background">
             <header className="flex h-16 items-center gap-2 border-b px-4 bg-nav-background">

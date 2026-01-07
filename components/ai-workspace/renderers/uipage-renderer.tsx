@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { LayoutGrid, Table as TableIcon, BarChart3, FileText, Image, Code } from 'lucide-react'
+import { LayoutGrid, Table as TableIcon, BarChart3, FileText, Image as ImageIcon, Code } from 'lucide-react'
 
 interface UIPageRendererProps {
   workspace: any
@@ -49,7 +49,7 @@ export function UIPageRenderer({ workspace }: UIPageRendererProps) {
       case 'text':
         return <FileText className="h-5 w-5" />
       case 'image':
-        return <Image className="h-5 w-5" />
+        return <ImageIcon className="h-5 w-5" />
       default:
         return <Code className="h-5 w-5" />
     }

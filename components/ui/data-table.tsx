@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import {
   ColumnDef,
   flexRender,
@@ -23,7 +24,7 @@ export interface DataTableProps<TData> {
   enableRowSelection?: boolean
   enableGrouping?: boolean
   enableColumnResizing?: boolean
-  emptyMessage?: string
+  emptyMessage?: React.ReactNode
   className?: string
   headerClassName?: string
   bodyClassName?: string

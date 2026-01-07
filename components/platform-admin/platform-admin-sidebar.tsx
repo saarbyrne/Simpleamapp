@@ -11,6 +11,7 @@ import {
   FileText,
   Settings,
   ArrowLeft,
+  ToggleLeft,
 } from 'lucide-react'
 
 const navigation = [
@@ -28,6 +29,11 @@ const navigation = [
     name: 'Users',
     href: '/platform-admin/users',
     icon: Users,
+  },
+  {
+    name: 'Feature Management',
+    href: '/platform-admin/features',
+    icon: ToggleLeft,
   },
   {
     name: 'Billing',

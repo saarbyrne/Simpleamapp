@@ -10,6 +10,7 @@ import {
   GroupingState,
   ExpandedState,
   RowSelectionState,
+  PaginationState,
 } from '@tanstack/react-table'
 import { createPlayer, bulkUpdatePlayers } from '@/app/actions/players'
 import { useRouter, usePathname } from 'next/navigation'
@@ -366,6 +367,10 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
   const [grouping, setGrouping] = useState<GroupingState>([])
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 1000, // Show all players (up to 1000)
+  })
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [newPlayer, setNewPlayer] = useState({
@@ -1022,6 +1027,8 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
             onExpandedChange={setExpanded}
             rowSelection={rowSelection}
             onRowSelectionChange={setRowSelection}
+            pagination={pagination}
+            onPaginationChange={setPagination}
             enableRowSelection={true}
             enableGrouping={true}
             enableColumnResizing={true}

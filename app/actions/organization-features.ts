@@ -16,7 +16,12 @@ import {
   disableAllFeatures as disableAll,
   getFeatureCounts,
   getEnabledFeatures,
+  getFeatureStatusDetails,
+  getOrganizationTier,
+  setFeatureOverride,
 } from '@/lib/permissions/feature-access'
+import { FeatureKey } from '@/lib/permissions/feature-metadata'
+import { SubscriptionTier } from '@/lib/permissions/subscription-tiers'
 import { logPlatformAdminAction } from '@/lib/platform-admin'
 import { createClient } from '@/lib/supabase/server'
 
@@ -238,3 +243,95 @@ export async function getEnabledFeaturesAction(orgId: string): Promise<{
   }
 }
 
+/**
+ * Get detailed feature status including tier defaults and overrides
+ */
+export async function getFeatureStatusDetailsAction(orgId: string): Promise<{
+  success: boolean
+  data?: {
+    tier: SubscriptionTier
+    features: Array<{
+      key: FeatureKey
+      tierDefault: boolean
+      hasOverride: boolean
+      overrideValue: boolean | null
+      effectiveValue: boolean
+      released: boolean
+    }>
+  }
+  error?: string
+}> {
+  try {
+    const authCheck = await verifyPlatformAdmin()
+    if (!authCheck.success) {
+      return { success: false, error: authCheck.error }
+    }
+
+    const data = await getFeatureStatusDetails(orgId)
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Error in getFeatureStatusDetailsAction:', error)
+    return { success: false, error: 'Failed to get feature status details' }
+  }
+}
+
+/**
+ * Get organization's subscription tier
+ */
+export async function getOrganizationTierAction(orgId: string): Promise<{
+  success: boolean
+  tier?: SubscriptionTier
+  error?: string
+}> {
+  try {
+    const authCheck = await verifyPlatformAdmin()
+    if (!authCheck.success) {
+      return { success: false, error: authCheck.error }
+    }
+
+    const tier = await getOrganizationTier(orgId)
+
+    return { success: true, tier }
+  } catch (error) {
+    console.error('Error in getOrganizationTierAction:', error)
+    return { success: false, error: 'Failed to get organization tier' }
+  }
+}
+
+/**
+ * Set a feature override for an organization
+ * Pass null to clear override and use tier default
+ */
+export async function setFeatureOverrideAction(
+  orgId: string,
+  feature: FeatureKey,
+  value: boolean | null
+): Promise<{
+  success: boolean
+  error?: string
+}> {
+  try {
+    const authCheck = await verifyPlatformAdmin()
+    if (!authCheck.success) {
+      return { success: false, error: authCheck.error }
+    }
+
+    const result = await setFeatureOverride(orgId, feature, value)
+
+    if (!result) {
+      return { success: false, error: 'Failed to set feature override' }
+    }
+
+    await logPlatformAdminAction('set_feature_override', {
+      organizationId: orgId,
+      feature,
+      value,
+    })
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error in setFeatureOverrideAction:', error)
+    return { success: false, error: 'Failed to set feature override' }
+  }
+}

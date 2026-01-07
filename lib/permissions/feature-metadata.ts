@@ -2,7 +2,8 @@
  * Feature Metadata Configuration
  * 
  * Defines all features available in the platform with their metadata,
- * including labels, descriptions, icons, and sub-feature relationships.
+ * including labels, descriptions, icons, sub-feature relationships,
+ * and release status.
  */
 
 import {
@@ -19,6 +20,7 @@ import {
   CalendarCheck,
   Layout,
   Wand2,
+  Database,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -36,6 +38,7 @@ export type FeatureKey =
   | 'files'
   | 'planner'
   | 'templates'
+  | 'dataManagement'
 
 export type SubFeatureKey =
   // Reports sub-features
@@ -75,6 +78,12 @@ export interface FeatureMetadata {
   fieldName: string // Database field name
   subFeatures: SubFeatureMetadata[]
   navPath: string // Navigation path
+  /**
+   * Whether the feature is released and available to end users.
+   * - true: Feature is production-ready and visible based on subscription tier
+   * - false: Feature is in development and only visible to platform admins
+   */
+  released: boolean
 }
 
 export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
@@ -86,6 +95,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'aiWorkspaceEnabled',
     subFeatures: [],
     navPath: '/dashboard/ai-workspace',
+    released: false, // In development
   },
   ai: {
     key: 'ai',
@@ -95,6 +105,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'aiEnabled',
     subFeatures: [],
     navPath: '/dashboard/ai',
+    released: false, // In development
   },
   players: {
     key: 'players',
@@ -123,6 +134,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
       },
     ],
     navPath: '/dashboard/players',
+    released: true,
   },
   forms: {
     key: 'forms',
@@ -151,6 +163,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
       },
     ],
     navPath: '/dashboard/forms',
+    released: false, // In development
   },
   reports: {
     key: 'reports',
@@ -191,6 +204,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
       },
     ],
     navPath: '/dashboard/reports',
+    released: false, // In development
   },
   calendar: {
     key: 'calendar',
@@ -237,6 +251,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
       },
     ],
     navPath: '/dashboard/calendar',
+    released: true,
   },
   messages: {
     key: 'messages',
@@ -246,6 +261,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'messagesEnabled',
     subFeatures: [],
     navPath: '/dashboard/chat',
+    released: false, // In development
   },
   notes: {
     key: 'notes',
@@ -255,6 +271,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'notesEnabled',
     subFeatures: [],
     navPath: '/dashboard/notes',
+    released: true,
   },
   spreadsheets: {
     key: 'spreadsheets',
@@ -264,6 +281,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'spreadsheetsEnabled',
     subFeatures: [],
     navPath: '/dashboard/spreadsheets',
+    released: true,
   },
   canvas: {
     key: 'canvas',
@@ -273,6 +291,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'canvasEnabled',
     subFeatures: [],
     navPath: '/dashboard/canvas',
+    released: false, // In development (Whiteboard)
   },
   files: {
     key: 'files',
@@ -282,6 +301,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'filesEnabled',
     subFeatures: [],
     navPath: '/dashboard/files',
+    released: true,
   },
   planner: {
     key: 'planner',
@@ -291,6 +311,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'plannerEnabled',
     subFeatures: [],
     navPath: '/dashboard/planner',
+    released: false, // In development
   },
   templates: {
     key: 'templates',
@@ -300,6 +321,17 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'templatesEnabled',
     subFeatures: [],
     navPath: '/dashboard/templates',
+    released: false, // In development
+  },
+  dataManagement: {
+    key: 'dataManagement',
+    label: 'Data Management',
+    description: 'Advanced data tables, import/export, and data organization',
+    icon: Database,
+    fieldName: 'dataManagementEnabled',
+    subFeatures: [],
+    navPath: '/dashboard/data-management',
+    released: false, // In development
   },
 }
 
@@ -308,6 +340,27 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
  */
 export function getAllFeatures(): FeatureMetadata[] {
   return Object.values(FEATURE_METADATA)
+}
+
+/**
+ * Get only released features
+ */
+export function getReleasedFeatures(): FeatureMetadata[] {
+  return getAllFeatures().filter(feature => feature.released)
+}
+
+/**
+ * Get only unreleased (in development) features
+ */
+export function getUnreleasedFeatures(): FeatureMetadata[] {
+  return getAllFeatures().filter(feature => !feature.released)
+}
+
+/**
+ * Check if a feature is released
+ */
+export function isFeatureReleased(key: FeatureKey): boolean {
+  return FEATURE_METADATA[key]?.released ?? false
 }
 
 /**
@@ -346,4 +399,3 @@ export function getFeatureKeyFromPath(path: string): FeatureKey | null {
   const feature = getAllFeatures().find(f => path.startsWith(f.navPath))
   return feature?.key || null
 }
-

@@ -42,12 +42,48 @@ async function ensureOrganizationForUser(user: User, displayName: string) {
 
 export async function ensureUserWithOrganization(user: User) {
   try {
+    // Check for existing user by Supabase ID
     const existing = await prisma.user.findUnique({
       where: { id: user.id },
     })
 
     if (existing?.organizationId) {
-      return existing
+      // User exists with organization, just update last login
+      return prisma.user.update({
+        where: { id: user.id },
+        data: {
+          lastLoginAt: new Date(),
+          authProvider: user.app_metadata?.provider ?? existing.authProvider,
+        },
+      })
+    }
+
+    // Check if another user exists with same email (account linking scenario)
+    const existingByEmail = await prisma.user.findUnique({
+      where: { email: user.email || '' },
+    })
+
+    if (existingByEmail && existingByEmail.id !== user.id) {
+      // Account linking: Email exists but different Supabase ID
+      // This happens when user signs up with email/password, then uses OAuth with same email
+      // Supabase automatically links identities, so we should use the existing user record
+      // and update it with the new Supabase ID
+      console.log('Account linking detected:', {
+        existingUserId: existingByEmail.id,
+        newSupabaseId: user.id,
+        email: user.email,
+        provider: user.app_metadata?.provider
+      })
+
+      // Update existing user with new Supabase ID and auth info
+      return prisma.user.update({
+        where: { id: existingByEmail.id },
+        data: {
+          id: user.id, // Update to new Supabase ID
+          lastLoginAt: new Date(),
+          authProvider: user.app_metadata?.provider ?? existingByEmail.authProvider,
+        },
+      })
     }
 
     const displayName = buildDefaultName(user)
@@ -80,7 +116,9 @@ export async function ensureUserWithOrganization(user: User) {
         id: user.id,
         email: user.email || `${user.id}@placeholder.local`,
         name: displayName,
-        avatar: user.user_metadata?.avatar_url ?? null,
+        avatar: user.user_metadata?.avatar_url ??
+                user.user_metadata?.picture ??
+                null,
         authProvider: user.app_metadata?.provider ?? "email",
         authProviderId: user.user_metadata?.provider_id ?? null,
         organizationId,

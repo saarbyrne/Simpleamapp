@@ -1425,26 +1425,27 @@ model OrganizationFeatures {
   organizationId String       @unique
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  // Main Navigation Features (13 sections - added aiWorkspace)
-  aiWorkspaceEnabled  Boolean @default(true)
-  aiEnabled           Boolean @default(true)
-  playersEnabled      Boolean @default(true)
-  formsEnabled        Boolean @default(true)
-  reportsEnabled      Boolean @default(true)
-  calendarEnabled     Boolean @default(true)
-  messagesEnabled     Boolean @default(true)
-  notesEnabled        Boolean @default(true)
-  spreadsheetsEnabled Boolean @default(true)
-  canvasEnabled       Boolean @default(true)
-  filesEnabled        Boolean @default(true)
-  plannerEnabled      Boolean @default(true)
-  templatesEnabled    Boolean @default(true)
+  // Main Navigation Features (14 sections) - Simple on/off
+  aiWorkspaceEnabled     Boolean @default(false)
+  aiEnabled              Boolean @default(false)
+  playersEnabled         Boolean @default(true)
+  formsEnabled           Boolean @default(false)
+  reportsEnabled         Boolean @default(false)
+  calendarEnabled        Boolean @default(true)
+  messagesEnabled        Boolean @default(false)
+  notesEnabled           Boolean @default(true)
+  spreadsheetsEnabled    Boolean @default(true)
+  canvasEnabled          Boolean @default(false)
+  filesEnabled           Boolean @default(true)
+  plannerEnabled         Boolean @default(false)
+  templatesEnabled       Boolean @default(false)
+  dataManagementEnabled  Boolean @default(false)
 
   // Sub-features: Reports
   reportsBuilderEnabled    Boolean @default(true)
   reportsTemplatesEnabled  Boolean @default(true)
-  reportsSchedulingEnabled Boolean @default(true)
-  reportsAiInsightsEnabled Boolean @default(true)
+  reportsSchedulingEnabled Boolean @default(false)
+  reportsAiInsightsEnabled Boolean @default(false)
   reportsSharingEnabled    Boolean @default(true)
 
   // Sub-features: Calendar
@@ -1458,7 +1459,7 @@ model OrganizationFeatures {
   // Sub-features: Forms
   formsBuilderEnabled    Boolean @default(true)
   formsResponsesEnabled  Boolean @default(true)
-  formsSchedulingEnabled Boolean @default(true)
+  formsSchedulingEnabled Boolean @default(false)
 
   // Sub-features: Players
   playersNotesEnabled       Boolean @default(true)
@@ -1470,6 +1471,17 @@ model OrganizationFeatures {
 
   @@index([organizationId])
   @@map("organization_features")
+}
+
+// Package Defaults - defines which features are included in each subscription tier
+model PackageDefaults {
+  id        String   @id @default(cuid())
+  tier      String   @unique // "free", "pro", "enterprise"
+  features  String[] // Array of enabled feature keys (e.g., ["players", "calendar", "notes"])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("package_defaults")
 }
 
 // ============================================

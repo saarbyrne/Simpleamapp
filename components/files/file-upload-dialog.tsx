@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
   Dialog,
@@ -25,7 +24,7 @@ import {
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Upload, X, File, Image, Video, FileText } from 'lucide-react'
+import { Upload, X, File, Image as ImageIcon, Video, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import { uploadFile } from '@/app/actions/files'
 import { MAX_FILE_SIZE, formatBytes, FILE_VISIBILITY_OPTIONS, getFileIcon } from '@/lib/files'
@@ -55,7 +54,6 @@ export function FileUploadDialog({
   defaultLinkedEntity,
   onSuccess,
 }: FileUploadDialogProps) {
-  const router = useRouter()
   const t = useTranslations()
   const [files, setFiles] = useState<UploadingFile[]>([])
   const [description, setDescription] = useState('')
@@ -108,6 +106,7 @@ export function FileUploadDialog({
     setIsUploading(true)
 
     try {
+      let successCount = 0
       // Upload files one by one
       for (let i = 0; i < files.length; i++) {
         const fileItem = files[i]
@@ -157,6 +156,7 @@ export function FileUploadDialog({
           )
           toast.error(`Failed to upload ${fileItem.file.name}: ${result.error}`)
         } else {
+          successCount += 1
           setFiles((prev) =>
             prev.map((f, idx) =>
               idx === i ? { ...f, status: 'success', progress: 100 } : f
@@ -166,11 +166,8 @@ export function FileUploadDialog({
       }
 
       // Check if all successful
-      const allSuccessful = files.every((f) => f.status === 'success')
-
-      if (allSuccessful) {
+      if (successCount === files.length) {
         toast.success(`Successfully uploaded ${files.length} file(s)`)
-        router.refresh()
         onSuccess?.()
         onOpenChange(false)
         // Reset form
@@ -191,7 +188,7 @@ export function FileUploadDialog({
     const iconName = getFileIcon(file.type)
     switch (iconName) {
       case 'Image':
-        return <Image className="h-8 w-8 text-blue-500" />
+        return <ImageIcon className="h-8 w-8 text-blue-500" />
       case 'Video':
         return <Video className="h-8 w-8 text-purple-500" />
       case 'FileText':

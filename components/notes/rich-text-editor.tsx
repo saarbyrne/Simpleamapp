@@ -178,7 +178,7 @@ export function RichTextEditor({
           levels: [1, 2, 3, 4, 5, 6],
         },
       }),
-      Underline,
+      // Underline, // Temporarily removed to fix duplicate extension error
     ],
     []
   )

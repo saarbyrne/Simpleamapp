@@ -65,12 +65,27 @@ export function NotesList({
 
   // Virtualization setup
   const parentRef = useRef<HTMLDivElement>(null)
+  const CARD_SPACING = 16 // spacing between cards (gap-4 = 16px)
+  const ESTIMATED_CARD_HEIGHT = 200
+  
   const virtualizer = useVirtualizer({
     count: filteredNotes.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 200, // Estimated height of each note card (adjust as needed)
+    estimateSize: () => ESTIMATED_CARD_HEIGHT + CARD_SPACING,
     overscan: 5, // Render 5 extra items above/below viewport
+    // Measure actual element height including padding (don't round to avoid precision loss)
+    measureElement: (element) => {
+      if (!element) return ESTIMATED_CARD_HEIGHT + CARD_SPACING
+      const rect = element.getBoundingClientRect()
+      // Return precise height without rounding to maintain accuracy
+      return rect.height || ESTIMATED_CARD_HEIGHT + CARD_SPACING
+    },
   })
+
+  // Force virtualizer to remeasure when filteredNotes change
+  useEffect(() => {
+    virtualizer.measure()
+  }, [filteredNotes.length, virtualizer])
 
   // Optimized filter configuration
   const filterConfig: FilterConfig[] = useMemo(
@@ -430,15 +445,20 @@ export function NotesList({
             >
               {virtualizer.getVirtualItems().map((virtualRow) => {
                 const note = filteredNotes[virtualRow.index]
+                const isLastItem = virtualRow.index === filteredNotes.length - 1
                 return (
                   <div
                     key={note.id}
+                    data-index={virtualRow.index}
+                    ref={virtualizer.measureElement}
                     style={{
                       position: 'absolute',
                       top: 0,
                       left: 0,
                       width: '100%',
                       transform: `translateY(${virtualRow.start}px)`,
+                      paddingBottom: isLastItem ? 0 : `${CARD_SPACING}px`,
+                      boxSizing: 'border-box',
                     }}
                   >
                     <div className="flex items-start gap-3">
