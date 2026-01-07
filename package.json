@@ -116,6 +116,7 @@
     "webpack-bundle-analyzer": "^5.0.1"
   },
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "next dev",
     "build": "npm run lint && next build",
     "start": "next start",
