@@ -21,6 +21,7 @@ const updatePreferencesSchema = z.object({
   timezone: z.string().optional().nullable(),
   dateFormat: z.enum(["DD/MM/YYYY", "MM/DD/YYYY", "YYYY-MM-DD"]).optional().nullable(),
   timeFormat: z.enum(["12", "24"]).optional().nullable(),
+  theme: z.enum(["light", "dark", "system"]).optional().nullable(),
 });
 
 const updateNotificationSettingsSchema = z.object({
@@ -128,6 +129,7 @@ export async function getCurrentUserProfile() {
         timezone: user.timezone,
         dateFormat: user.dateFormat,
         timeFormat: user.timeFormat,
+        theme: user.theme,
         notificationSettings: user.notificationSettings,
         organization: user.organization,
         roles: user.roles.map((ur) => ur.role),
@@ -232,6 +234,7 @@ export async function updatePreferences(data: z.infer<typeof updatePreferencesSc
       timezone?: string | null;
       dateFormat?: string | null;
       timeFormat?: string | null;
+      theme?: string | null;
       updatedAt: Date;
     } = {
       updatedAt: new Date(),
@@ -249,14 +252,19 @@ export async function updatePreferences(data: z.infer<typeof updatePreferencesSc
     if (validation.data.timeFormat !== undefined) {
       updateData.timeFormat = validation.data.timeFormat || null;
     }
+    if (validation.data.theme !== undefined) {
+      updateData.theme = validation.data.theme || null;
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id: dbUser.id },
       data: updateData,
     });
 
-    revalidatePath("/dashboard/profile");
-    revalidatePath("/dashboard");
+    // Don't revalidate paths - UI updates instantly via localStorage
+    // Data will be fresh on next navigation
+    // revalidatePath("/dashboard/profile");
+    // revalidatePath("/dashboard");
 
     return {
       success: true,

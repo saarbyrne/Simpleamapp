@@ -202,6 +202,23 @@ export function EventCalendar({
 
         .rbc-day-bg {
           background-color: var(--card) !important;
+          min-width: 80px;
+          max-width: 250px;
+        }
+
+        /* Responsive min/max widths for calendar cells */
+        @media (max-width: 768px) {
+          .rbc-day-bg {
+            min-width: 60px;
+            max-width: 150px;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .rbc-day-bg {
+            min-width: 100px;
+            max-width: 300px;
+          }
         }
 
         .rbc-day-slot {
@@ -219,6 +236,8 @@ export function EventCalendar({
 
         .rbc-month-row .rbc-day-bg {
           background-color: var(--card) !important;
+          min-width: 80px;
+          max-width: 250px;
         }
 
         .rbc-today {
@@ -311,6 +330,24 @@ export function EventCalendar({
           border-radius: 0;
           overflow: hidden;
           background-color: var(--card);
+        }
+
+        /* Ensure month view handles cell width constraints properly */
+        .rbc-month-view {
+          min-width: 0;
+        }
+
+        .rbc-month-view table {
+          table-layout: auto;
+          width: 100%;
+        }
+
+        .rbc-month-row {
+          min-width: 0;
+        }
+
+        .rbc-month-row table {
+          table-layout: auto;
         }
 
         .rbc-header + .rbc-header {

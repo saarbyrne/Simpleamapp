@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SpreadsheetFolder } from '@/lib/types/spreadsheet'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,6 +13,8 @@ import {
   Edit,
   Trash2,
   FolderPlus,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -49,13 +51,32 @@ type FolderSidebarProps = {
 
 type FolderDialogMode = 'create' | 'edit' | null
 
+const FOLDER_SIDEBAR_STORAGE_KEY = 'spreadsheet-folder-sidebar-collapsed'
+
 export function FolderSidebar({
   folders,
   selectedFolderId,
   onSelectFolder,
   onFoldersChange,
 }: FolderSidebarProps) {
+  // Initialize with false to avoid hydration mismatch, then load from localStorage
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
+  
+  // Load collapsed state from localStorage after mount (client-side only)
+  useEffect(() => {
+    const stored = localStorage.getItem(FOLDER_SIDEBAR_STORAGE_KEY)
+    if (stored === 'true') {
+      setIsCollapsed(true)
+    }
+  }, [])
+  
+  // Persist collapsed state to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(FOLDER_SIDEBAR_STORAGE_KEY, String(isCollapsed))
+    }
+  }, [isCollapsed])
   const [dialogMode, setDialogMode] = useState<FolderDialogMode>(null)
   const [editingFolder, setEditingFolder] = useState<SpreadsheetFolder | null>(null)
   const [parentId, setParentId] = useState<string | undefined>(undefined)
@@ -156,29 +177,25 @@ export function FolderSidebar({
       <div key={folder.id}>
         <div
           className={cn(
-            'group flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-accent',
+            'group relative flex items-center py-1.5 rounded-md cursor-pointer hover:bg-accent',
             isSelected && 'bg-accent'
           )}
-          style={{ paddingLeft: `${level * 12 + 8}px` }}
         >
-          {hasSubfolders ? (
+          {hasSubfolders && (
             <button
               onClick={(e) => {
                 e.stopPropagation()
                 toggleFolder(folder.id)
               }}
-              className="p-0.5 hover:bg-accent-foreground/10 rounded"
+              className="absolute left-0 top-1/2 -translate-y-1/2 p-0.5 hover:bg-accent-foreground/10 rounded z-10"
             >
               {isExpanded ? (
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-3.5 w-3.5" />
               ) : (
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5" />
               )}
             </button>
-          ) : (
-            <div className="w-5" />
           )}
-
           <div
             onClick={() => onSelectFolder(folder.id)}
             className="flex items-center gap-2 flex-1 min-w-0"
@@ -188,7 +205,6 @@ export function FolderSidebar({
             ) : (
               <Folder className="h-4 w-4 shrink-0" />
             )}
-            {folder.icon && <span className="shrink-0">{folder.icon}</span>}
             <span className="text-sm truncate flex-1">{folder.name}</span>
             {count > 0 && (
               <span className="text-xs text-muted-foreground shrink-0">{count}</span>
@@ -241,26 +257,57 @@ export function FolderSidebar({
 
   return (
     <>
-      <div className="w-64 border-r bg-muted/20 h-full overflow-y-auto">
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-sm">Folders</h3>
-            <Button variant="ghost" size="sm" onClick={() => openCreateDialog()}>
-              <Plus className="h-4 w-4" />
+      <div className={cn(
+        "border-r bg-background overflow-hidden -mt-4 -mb-4 -ml-4 transition-all duration-200 flex relative",
+        isCollapsed ? "w-8" : "w-64",
+        "h-[calc(100%+2rem)]"
+      )}>
+        {!isCollapsed ? (
+          <div className="h-full overflow-y-auto w-full">
+            <div className="p-4 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-sm">Folders</h3>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => openCreateDialog()}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 w-6 p-0"
+                    onClick={() => setIsCollapsed(true)}
+                    aria-label="Collapse sidebar"
+                  >
+                    <PanelLeftClose className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-0.5 flex-1 overflow-y-auto">
+                {/* Only show user-created folders */}
+                {rootFolders.map((folder) => renderFolder(folder))}
+
+                {rootFolders.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-4">
+                    No folders yet. Click + to create one.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="h-full w-full flex items-start justify-center pt-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-6 w-6 p-0"
+              onClick={() => setIsCollapsed(false)}
+              aria-label="Expand sidebar"
+            >
+              <PanelLeftOpen className="h-4 w-4" />
             </Button>
           </div>
-
-          <div className="space-y-0.5">
-            {/* Only show user-created folders */}
-            {rootFolders.map((folder) => renderFolder(folder))}
-
-            {rootFolders.length === 0 && (
-              <p className="text-xs text-muted-foreground text-center py-4">
-                No folders yet. Click + to create one.
-              </p>
-            )}
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Create/Edit Dialog */}

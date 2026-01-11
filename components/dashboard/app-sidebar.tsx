@@ -109,7 +109,7 @@ function LogoBadge({ organizationName }: { organizationName?: string | null }) {
   )
 }
 
-export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAvatar, organizationName }: AppSidebarProps) {
+function AppSidebarComponent({ userName, userEmail, userAvatar, organizationName }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const t = useTranslations()
@@ -318,4 +318,8 @@ export const AppSidebar = memo(function AppSidebar({ userName, userEmail, userAv
       </SidebarFooter>
     </Sidebar>
   )
-})
+}
+
+AppSidebarComponent.displayName = 'AppSidebar'
+
+export const AppSidebar = memo(AppSidebarComponent)

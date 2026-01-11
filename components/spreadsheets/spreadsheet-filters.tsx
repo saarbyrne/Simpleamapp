@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Search, Filter, Grid3x3, List, SlidersHorizontal } from 'lucide-react'
+import { Search, Grid3x3, List } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export type ViewMode = 'grid' | 'list'
@@ -62,7 +62,12 @@ export function SpreadsheetFilters({
     }
   }
 
-  const hasActiveFilters = selectedTags.length > 0 || showStarred
+  // Determine current filter value for the select
+  const getFilterValue = () => {
+    if (showStarred) return 'starred'
+    if (selectedTags.length > 0) return selectedTags[0]
+    return 'all'
+  }
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -77,64 +82,35 @@ export function SpreadsheetFilters({
         />
       </div>
 
-      {/* Filters Dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2">
-            <SlidersHorizontal className="h-4 w-4" />
-            Filter
-            {hasActiveFilters && (
-              <span className="ml-1 rounded-full bg-primary text-primary-foreground text-xs px-1.5">
-                {selectedTags.length + (showStarred ? 1 : 0)}
-              </span>
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-
-          <DropdownMenuCheckboxItem
-            checked={showStarred}
-            onCheckedChange={onShowStarredChange}
-          >
-            Starred only
-          </DropdownMenuCheckboxItem>
-
-          {availableTags.length > 0 && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Tags</DropdownMenuLabel>
-              {availableTags.map((tag) => (
-                <DropdownMenuCheckboxItem
-                  key={tag}
-                  checked={selectedTags.includes(tag)}
-                  onCheckedChange={() => toggleTag(tag)}
-                >
-                  {tag}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </>
-          )}
-
-          {hasActiveFilters && (
-            <>
-              <DropdownMenuSeparator />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full"
-                onClick={() => {
-                  onTagsChange([])
-                  onShowStarredChange(false)
-                }}
-              >
-                Clear filters
-              </Button>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {/* Filter Select */}
+      <Select 
+        value={getFilterValue()} 
+        onValueChange={(value) => {
+          if (value === 'all') {
+            onShowStarredChange(false)
+            onTagsChange([])
+          } else if (value === 'starred') {
+            onShowStarredChange(true)
+            onTagsChange([])
+          } else {
+            onShowStarredChange(false)
+            onTagsChange([value])
+          }
+        }}
+      >
+        <SelectTrigger className="w-[140px] h-10">
+          <SelectValue placeholder="Filter" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All</SelectItem>
+          <SelectItem value="starred">Starred</SelectItem>
+          {availableTags.map((tag) => (
+            <SelectItem key={tag} value={tag}>
+              {tag}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       {/* Sort */}
       <Select value={sortBy} onValueChange={(value) => onSortChange(value as SortOption)}>
@@ -150,14 +126,14 @@ export function SpreadsheetFilters({
       </Select>
 
       {/* View Mode Toggle */}
-      <div className="flex border rounded-md">
+      <div className="flex border border-input rounded-md overflow-hidden bg-background">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onViewModeChange('grid')}
           className={cn(
-            'rounded-r-none',
-            viewMode === 'grid' && 'bg-muted'
+            'rounded-none border-0 h-10',
+            viewMode === 'grid' ? 'bg-background' : 'bg-transparent hover:bg-accent'
           )}
         >
           <Grid3x3 className="h-4 w-4" />
@@ -167,8 +143,8 @@ export function SpreadsheetFilters({
           size="sm"
           onClick={() => onViewModeChange('list')}
           className={cn(
-            'rounded-l-none border-l',
-            viewMode === 'list' && 'bg-muted'
+            'rounded-none border-0 border-l border-input h-10',
+            viewMode === 'list' ? 'bg-background' : 'bg-transparent hover:bg-accent'
           )}
         >
           <List className="h-4 w-4" />

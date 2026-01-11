@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "darwin"]
@@ -12,389 +9,287 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ============================================
-// ORGANIZATIONS & USERS
-// ============================================
-
 model Organization {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  sport     String? // e.g., "soccer", "basketball", null = multi-sport
-  logo      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  users                User[]
-  persons              PersonOrganization[]
-  forms                Form[]
-  events               Event[]
+  id                   String                @id @default(cuid())
+  name                 String
+  slug                 String                @unique
+  sport                String?
+  logo                 String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  aiWorkspaces         AIWorkspace[]
+  canvasBoards         CanvasBoard[]
+  drawingTemplates     DrawingTemplate[]
+  drawings             Drawing[]
   eventTemplates       EventTemplate[]
-  notes                Note[]
+  events               Event[]
   files                File[]
   formTemplates        FormTemplate[]
-  spreadsheets         Spreadsheet[]
-  spreadsheetTemplates SpreadsheetTemplate[]
-  spreadsheetFolders   SpreadsheetFolder[]
-  canvasBoards         CanvasBoard[]
-  drawings             Drawing[]
-  drawingTemplates     DrawingTemplate[]
-  plans                Plan[]
-  subscriptions        Subscription[]
-  organizationRoles    OrganizationRole[]
-  reports              Report[]
-  reportTemplates      ReportTemplate[]
-  features             OrganizationFeatures?
-  aiWorkspaces         AIWorkspace[]
+  forms                Form[]
+  notes                Note[]
   orgDataSources       OrgDataSource[]
+  features             OrganizationFeatures?
+  organizationRoles    OrganizationRole[]
+  persons              PersonOrganization[]
+  plans                Plan[]
+  reportTemplates      ReportTemplate[]
+  reports              Report[]
+  spreadsheetFolders   SpreadsheetFolder[]
+  spreadsheetTemplates SpreadsheetTemplate[]
+  spreadsheets         Spreadsheet[]
+  subscriptions        Subscription?
+  users                User[]
 
   @@map("organizations")
 }
 
 model User {
-  id             String    @id @default(cuid())
-  email          String    @unique
-  name           String
-  avatar         String?
-  phone          String?
-  authProvider   String    @default("email") // email, google, facebook, instagram
-  authProviderId String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  lastLoginAt    DateTime?
-
-  // Preferences
-  language   String? // User language preference (overrides org default)
-  timezone   String? // User timezone (overrides org default)
-  dateFormat String? // DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD
-  timeFormat String? // 12 or 24 hour format
-
-  // Notification Settings (stored as JSON)
-  notificationSettings Json? // {email: {...}, push: {...}, sms: {...}}
-
-  // Staff Management
-  roleNames   String[] @default([]) // Flexible role tags: "Head Coach", "Physiotherapist", etc.
-  permissions String[] @default([]) // System permissions: "admin", "medical_access", etc.
-
-  // Security
-  // Note: Password is managed by Supabase Auth
-  // Two-Factor Authentication (TOTP)
-  twoFactorEnabled   Boolean   @default(false) // User has enabled 2FA
-  twoFactorSecret    String? // TOTP secret (encrypted)
-  backupCodes        String[]  @default([]) // Recovery codes (hashed)
-  twoFactorEnabledAt DateTime? // When 2FA was enabled
-
-  // Platform Admin (for SaaS provider team only)
-  isPlatformAdmin Boolean @default(false) // Only set manually for vendor team members
-
-  // Relations
-  // Relations
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // Org Context (AI Workspace)
-  reportsToId      String?
-  reportsTo        User?   @relation("UserReportsTo", fields: [reportsToId], references: [id])
-  subordinates     User[]  @relation("UserReportsTo")
-  roleAbbreviation String? // e.g. "HOP", "HC"
-
-  personId String?
-  person   Person? @relation(fields: [personId], references: [id])
-
-  roles              UserRole[]
-  notes              Note[]
-  files              File[]
-  activities         Activity[]
-  formResponses      FormResponse[]
-  eventAttendance    EventAttendance[]
-  plans              Plan[]
-  milestones         Milestone[]
-  milestoneComments  MilestoneComment[]
-  aiConversations    AIConversation[]
-  communityTemplates CommunityTemplate[]
-  templateReviews    TemplateReview[]
-  templateUsages     TemplateUsage[]
-  dataChangeLogs     DataChangeLog[]     @relation("DataChangeLogs")
-  deletedItems       TrashItem[]         @relation("DeletedItems")
+  id                   String              @id @default(cuid())
+  email                String              @unique
+  name                 String
+  avatar               String?
+  authProvider         String              @default("email")
+  authProviderId       String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  lastLoginAt          DateTime?
+  organizationId       String
+  personId             String?
+  phone                String?
+  language             String?
+  timezone             String?
+  dateFormat           String?
+  timeFormat           String?
+  theme                String?
+  notificationSettings Json?
+  roleNames            String[]            @default([])
+  permissions          String[]            @default([])
+  isPlatformAdmin      Boolean             @default(false)
+  twoFactorEnabled     Boolean             @default(false)
+  twoFactorSecret      String?
+  backupCodes          String[]            @default([])
+  twoFactorEnabledAt   DateTime?
+  reportsToId          String?
+  roleAbbreviation     String?
+  activities           Activity[]
+  aiConversations      AIConversation[]
+  communityTemplates   CommunityTemplate[]
+  dataChangeLogs       DataChangeLog[]     @relation("DataChangeLogs")
+  eventAttendance      EventAttendance[]
+  files                File[]
+  formResponses        FormResponse[]
+  milestoneComments    MilestoneComment[]
+  milestones           Milestone[]
+  notes                Note[]
+  plans                Plan[]
+  templateReviews      TemplateReview[]
+  templateUsages       TemplateUsage[]
+  deletedItems         TrashItem[]         @relation("DeletedItems")
+  roles                UserRole[]
+  organization         Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  person               Person?             @relation(fields: [personId], references: [id])
+  reportsTo            User?               @relation("UserReportsTo", fields: [reportsToId], references: [id])
+  subordinates         User[]              @relation("UserReportsTo")
 
   @@map("users")
 }
 
 model Person {
-  id          String    @id @default(cuid())
-  firstName   String
-  lastName    String
-  dateOfBirth DateTime?
-  nationality String?
-  phone       String?
-  email       String?
-  photo       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  // Full-text search (managed outside Prisma)
+  id            String                   @id @default(cuid())
+  firstName     String
+  lastName      String
+  dateOfBirth   DateTime?
+  nationality   String?
+  phone         String?
+  email         String?
+  photo         String?
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
   search_vector Unsupported("tsvector")?
-
-  // Relations
-  users         User[]
-  organizations PersonOrganization[]
-  notes         Note[]
-  files         File[]
   activities    Activity[]
+  files         File[]
+  notes         Note[]
+  organizations PersonOrganization[]
+  users         User[]
 
   @@map("persons")
 }
 
-// Junction table for many-to-many Person <-> Organization
 model PersonOrganization {
-  id             String    @id @default(cuid())
-  personId       String
-  organizationId String
-  role           String    @default("player") // player, coach, medical_staff, admin
-  position       String? // Forward, Midfielder, etc.
-  jerseyNumber   Int?
-  status         String    @default("active") // active, injured, inactive
-  joinedAt       DateTime  @default(now())
-  leftAt         DateTime?
-  tags           String[] // Captain, Starter, Young Talent, etc.
-
-  person       Person       @relation(fields: [personId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  formResponses   FormResponse[]
+  id              String            @id @default(cuid())
+  personId        String
+  organizationId  String
+  role            String            @default("player")
+  position        String?
+  jerseyNumber    Int?
+  status          String            @default("active")
+  joinedAt        DateTime          @default(now())
+  leftAt          DateTime?
+  tags            String[]
   eventAttendance EventAttendance[]
+  formResponses   FormResponse[]
+  organization    Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  person          Person            @relation(fields: [personId], references: [id], onDelete: Cascade)
 
   @@unique([personId, organizationId])
   @@map("person_organizations")
 }
 
-// ============================================
-// ROLES & PERMISSIONS
-// ============================================
-
 model OrganizationRole {
   id             String       @id @default(cuid())
-  name           String // Admin, Coach, Medical Staff, Viewer
-  permissions    String[] // manage_players, view_medical_notes, create_forms, etc.
+  name           String
+  permissions    String[]
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  userRoles UserRole[]
+  userRoles      UserRole[]
 
   @@unique([name, organizationId])
   @@map("organization_roles")
 }
 
 model UserRole {
-  id     String @id @default(cuid())
+  id     String           @id @default(cuid())
   userId String
   roleId String
-
-  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role OrganizationRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  role   OrganizationRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, roleId])
   @@map("user_roles")
 }
 
-// ============================================
-// FORMS
-// ============================================
-
 model FormTemplate {
-  id             String        @id @default(cuid())
+  id             String                   @id @default(cuid())
   name           String
   description    String?
-  category       String // wellness, medical, performance, custom
-  schema         Json // Form field definitions
+  category       String
+  schema         Json
   organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  isPublic       Boolean       @default(false) // Global templates
-  createdAt      DateTime      @default(now())
-
-  // Full-text search (managed outside Prisma)
-  search_vector Unsupported("tsvector")?
-
-  forms Form[]
+  isPublic       Boolean                  @default(false)
+  createdAt      DateTime                 @default(now())
+  search_vector  Unsupported("tsvector")?
+  organization   Organization?            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  forms          Form[]
 
   @@map("form_templates")
 }
 
 model Form {
-  id             String       @id @default(cuid())
+  id             String                   @id @default(cuid())
   name           String
   description    String?
-  schema         Json // Array of field definitions with conditional logic
+  schema         Json
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  templateId String?
-  template   FormTemplate? @relation(fields: [templateId], references: [id])
-
-  // Scheduling
-  scheduleType  String    @default("one_time") // one_time, daily, weekly, monthly
-  scheduledAt   DateTime?
-  recurringRule Json? // cron-like rule for recurring forms
-
-  // Targeting
-  targetType String   @default("all") // all, specific, group
-  targetIds  String[] // Person/Group IDs
-
-  // Status
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Full-text search (managed outside Prisma)
-  search_vector Unsupported("tsvector")?
-
-  responses FormResponse[]
+  templateId     String?
+  scheduleType   String                   @default("one_time")
+  scheduledAt    DateTime?
+  recurringRule  Json?
+  targetType     String                   @default("all")
+  targetIds      String[]
+  isActive       Boolean                  @default(true)
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  search_vector  Unsupported("tsvector")?
+  responses      FormResponse[]
+  organization   Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template       FormTemplate?            @relation(fields: [templateId], references: [id])
 
   @@map("forms")
 }
 
 model FormResponse {
-  id     String @id @default(cuid())
-  formId String
-  form   Form   @relation(fields: [formId], references: [id], onDelete: Cascade)
-
+  id          String             @id @default(cuid())
+  formId      String
   personOrgId String
+  userId      String?
+  responses   Json
+  submittedAt DateTime           @default(now())
+  form        Form               @relation(fields: [formId], references: [id], onDelete: Cascade)
   personOrg   PersonOrganization @relation(fields: [personOrgId], references: [id], onDelete: Cascade)
-
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id])
-
-  responses   Json // Key-value pairs of field responses
-  submittedAt DateTime @default(now())
+  user        User?              @relation(fields: [userId], references: [id])
 
   @@map("form_responses")
 }
 
-// ============================================
-// EVENTS & CALENDAR
-// ============================================
-
-// Event Templates for pre-configured workflows
 model EventTemplate {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  type        String // training, match, medical, meeting, other
-
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // What sections are enabled
-  sections Json @default("{}") // {spreadsheets: true, notes: true, drawings: true, forms: true, files: true}
-
-  // Pre-configured sections
-  sectionConfigs Json @default("{}") // {spreadsheets: [{name: "Match Stats"}], forms: [{name: "Post-Match Report", trigger: "after", delay: 30}]}
-
-  // Duration defaults (in minutes)
-  defaultDuration Int @default(120)
-
-  isGlobal  Boolean  @default(false) // Global templates available to all orgs
-  createdBy String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Full-text search (managed outside Prisma)
-  search_vector Unsupported("tsvector")?
-
-  events Event[]
+  id              String                   @id @default(cuid())
+  name            String
+  description     String?
+  type            String
+  organizationId  String
+  sections        Json                     @default("{}")
+  sectionConfigs  Json                     @default("{}")
+  defaultDuration Int                      @default(120)
+  isGlobal        Boolean                  @default(false)
+  createdBy       String?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  search_vector   Unsupported("tsvector")?
+  organization    Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  events          Event[]
 
   @@map("event_templates")
 }
 
 model Event {
-  id             String       @id @default(cuid())
+  id             String                   @id @default(cuid())
   title          String
   description    String?
-  type           String // training, match, medical, other
+  type           String
   startTime      DateTime
   endTime        DateTime
   location       String?
-  isRecurring    Boolean      @default(false)
-  recurringRule  String? // RRule string
-  seriesId       String? // Links instances of recurring events
+  isRecurring    Boolean                  @default(false)
+  recurringRule  String?
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // Based on template (optional)
-  templateId String?
-  template   EventTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
-
-  // Linked form (e.g., post-training wellness form)
-  linkedFormId String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Full-text search (managed outside Prisma)
-  search_vector Unsupported("tsvector")?
-
-  attendance EventAttendance[]
-  notes      Note[]
+  linkedFormId   String?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  templateId     String?
+  seriesId       String?
+  search_vector  Unsupported("tsvector")?
+  attendance     EventAttendance[]
+  organization   Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template       EventTemplate?           @relation(fields: [templateId], references: [id])
+  notes          Note[]
 
   @@map("events")
 }
 
 model EventAttendance {
-  id      String @id @default(cuid())
-  eventId String
-  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
+  id          String             @id @default(cuid())
+  eventId     String
   personOrgId String
+  userId      String?
+  status      String             @default("invited")
+  notes       String?
+  recordedAt  DateTime           @default(now())
+  event       Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
   personOrg   PersonOrganization @relation(fields: [personOrgId], references: [id], onDelete: Cascade)
-
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id])
-
-  status     String   @default("invited") // invited, attending, absent, excused
-  notes      String?
-  recordedAt DateTime @default(now())
+  user        User?              @relation(fields: [userId], references: [id])
 
   @@unique([eventId, personOrgId])
   @@map("event_attendance")
 }
 
-// ============================================
-// NOTES
-// ============================================
-
 model Note {
-  id      String  @id @default(cuid())
-  title   String?
-  content Json // Tiptap JSON document format
-
-  // Privacy/Visibility
-  privacyLevel String @default("public") // public, medical, mental_health, coaches, private
-
+  id             String                   @id @default(cuid())
+  title          String?
+  content        Json
+  privacyLevel   String                   @default("public")
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  // Linked entities (deprecated - kept for backward compatibility during migration)
+  authorId       String
   linkedPersonId String?
-  linkedPerson   Person? @relation(fields: [linkedPersonId], references: [id], onDelete: SetNull)
-
-  linkedEventId String?
-  linkedEvent   Event?  @relation(fields: [linkedEventId], references: [id], onDelete: SetNull)
-
-  // New: Multi-entity linking
-  links NoteLink[]
-
-  // Tags for organization
-  tags String[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Full-text search (managed outside Prisma)
-  search_vector Unsupported("tsvector")?
+  linkedEventId  String?
+  tags           String[]
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  search_vector  Unsupported("tsvector")?
+  links          NoteLink[]
+  author         User                     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  linkedEvent    Event?                   @relation(fields: [linkedEventId], references: [id])
+  linkedPerson   Person?                  @relation(fields: [linkedPersonId], references: [id])
+  organization   Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
   @@index([authorId])
@@ -405,14 +300,12 @@ model Note {
 }
 
 model NoteLink {
-  id     String @id @default(cuid())
-  noteId String
-  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
-
-  targetType String // "person" or "event"
+  id         String   @id @default(cuid())
+  noteId     String
+  targetType String
   targetId   String
-
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  note       Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
 
   @@unique([noteId, targetType, targetId])
   @@index([noteId])
@@ -420,51 +313,30 @@ model NoteLink {
   @@map("note_links")
 }
 
-// ============================================
-// FILES
-// ============================================
-
 model File {
-  id           String  @id @default(cuid())
-  name         String
-  originalName String // before sanitization
-  path         String // Supabase Storage path
-  bucket       String  @default("files")
-  size         Int
-  mimeType     String
-  url          String? // Public URL from Supabase Storage
-
-  // Metadata
-  description String?
-  tags        String[]
-
-  // Organization
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // Upload info
-  uploadedById String
-  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
-
-  // Linked entities (deprecated - kept for backward compatibility)
-  linkedPersonId String?
-  linkedPerson   Person? @relation(fields: [linkedPersonId], references: [id], onDelete: SetNull)
-
-  // New: Multi-entity linking
-  links FileLink[]
-
-  // Visibility/Access Control
-  visibility String @default("public") // "public", "medical", "coaches", "private"
-
-  // Version control (optional)
-  version           Int     @default(1)
+  id                String                   @id @default(cuid())
+  name              String
+  path              String
+  size              Int
+  mimeType          String
+  organizationId    String
+  uploadedById      String
+  linkedPersonId    String?
+  tags              String[]
+  createdAt         DateTime                 @default(now())
+  search_vector     Unsupported("tsvector")?
+  originalName      String
+  bucket            String                   @default("files")
+  url               String?
+  description       String?
+  visibility        String                   @default("public")
+  version           Int                      @default(1)
   previousVersionId String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Full-text search (managed outside Prisma)
-  search_vector Unsupported("tsvector")?
+  updatedAt         DateTime                 @updatedAt
+  links             FileLink[]
+  linkedPerson      Person?                  @relation(fields: [linkedPersonId], references: [id])
+  organization      Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  uploadedBy        User                     @relation(fields: [uploadedById], references: [id])
 
   @@index([organizationId])
   @@index([uploadedById])
@@ -476,14 +348,12 @@ model File {
 }
 
 model FileLink {
-  id     String @id @default(cuid())
-  fileId String
-  file   File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
-
-  targetType String // "person", "event", "note", "plan", "drawing"
+  id         String   @id @default(cuid())
+  fileId     String
+  targetType String
   targetId   String
-
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  file       File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
 
   @@unique([fileId, targetType, targetId])
   @@index([fileId])
@@ -491,55 +361,39 @@ model FileLink {
   @@map("file_links")
 }
 
-// ============================================
-// SPREADSHEETS
-// ============================================
-
 model SpreadsheetTemplate {
-  id             String        @id @default(cuid())
+  id             String                   @id @default(cuid())
   name           String
   description    String?
-  category       String // performance, wellness, injury, match, attendance, gps
-  schema         Json // Column definitions
-  sampleData     Json? // Optional sample rows
-  isPublic       Boolean       @default(false) // Global templates available to all orgs
+  category       String
+  schema         Json
+  sampleData     Json?
+  isPublic       Boolean                  @default(false)
   organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Full-text search (managed outside Prisma)
-  search_vector Unsupported("tsvector")?
-
-  spreadsheets Spreadsheet[]
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  search_vector  Unsupported("tsvector")?
+  organization   Organization?            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  spreadsheets   Spreadsheet[]
 
   @@map("spreadsheet_templates")
 }
 
 model SpreadsheetFolder {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  icon        String? // Optional icon/emoji
-  color       String? // Optional color for UI
-
-  // Hierarchy - allow nested folders
-  parentId   String?
-  parent     SpreadsheetFolder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  subfolders SpreadsheetFolder[] @relation("FolderHierarchy")
-
-  // Organization
+  id             String              @id @default(cuid())
+  name           String
+  description    String?
+  icon           String?
+  color          String?
+  parentId       String?
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // Sort order
-  sortOrder Int @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  spreadsheets Spreadsheet[]
+  sortOrder      Int                 @default(0)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  parent         SpreadsheetFolder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  subfolders     SpreadsheetFolder[] @relation("FolderHierarchy")
+  spreadsheets   Spreadsheet[]
 
   @@index([organizationId])
   @@index([parentId])
@@ -547,60 +401,35 @@ model SpreadsheetFolder {
 }
 
 model Spreadsheet {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  schema      Json // Column definitions
-  data        Json // Row data
-
-  // Organization & Folder
-  folderId String?
-  folder   SpreadsheetFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
-
-  // Tags for filtering
-  tags String[]
-
-  // Template reference
-  templateId String?
-  template   SpreadsheetTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
-
-  // Organization
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // Creator
-  createdById String?
-
-  // Tabs - future support for multiple sheets in one spreadsheet
-  // For now, each spreadsheet is single-tab, but schema prepared for expansion
-  tabs Json? @default("[]") // Array of {id, name, schema, data}
-
-  // Versioning
-  version Int @default(1)
-
-  // Soft delete
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime?
-  deletedBy String?
-
-  // Permissions
-  visibility       String  @default("org") // "org" | "restricted"
-  schemaLockedBy   String? // if set, only this user can modify columns
+  id               String                   @id @default(cuid())
+  name             String
+  description      String?
+  schema           Json
+  data             Json
+  organizationId   String
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  templateId       String?
+  createdById      String?
+  version          Int                      @default(1)
+  search_vector    Unsupported("tsvector")?
+  isDeleted        Boolean                  @default(false)
+  deletedAt        DateTime?
+  deletedBy        String?
+  visibility       String                   @default("org")
+  schemaLockedBy   String?
   schemaLockReason String?
-
-  // Metadata
-  starred      Boolean   @default(false) // User can star important spreadsheets
-  lastOpenedAt DateTime? // Track recent usage
-  sharedWith   String[] // User IDs who have access
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Full-text search (managed outside Prisma)
-  search_vector Unsupported("tsvector")?
-
-  versions    SpreadsheetVersion[]
-  permissions SpreadsheetPermission[]
+  folderId         String?
+  tags             String[]
+  tabs             Json?                    @default("[]")
+  starred          Boolean                  @default(false)
+  lastOpenedAt     DateTime?
+  sharedWith       String[]
+  permissions      SpreadsheetPermission[]
+  versions         SpreadsheetVersion[]
+  folder           SpreadsheetFolder?       @relation(fields: [folderId], references: [id])
+  organization     Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template         SpreadsheetTemplate?     @relation(fields: [templateId], references: [id])
 
   @@index([organizationId, isDeleted])
   @@index([folderId])
@@ -611,51 +440,30 @@ model Spreadsheet {
 model SpreadsheetVersion {
   id            String      @id @default(cuid())
   spreadsheetId String
+  version       Int
+  schema        Json
+  data          Json
+  createdById   String?
+  changeNote    String?
+  createdAt     DateTime    @default(now())
   spreadsheet   Spreadsheet @relation(fields: [spreadsheetId], references: [id], onDelete: Cascade)
-
-  version Int
-  schema  Json // Column definitions at this version
-  data    Json // Row data at this version
-
-  // Who made this change
-  createdById String?
-  changeNote  String? // Optional description of what changed
-
-  createdAt DateTime @default(now())
 
   @@map("spreadsheet_versions")
 }
 
-// ============================================
-// DATA MANAGEMENT & HISTORICAL TRENDS
-// ============================================
-
-// Row-level change tracking for audit trail and history
 model DataChangeLog {
-  id String @id @default(cuid())
-
-  // What changed
-  spreadsheetId String
-  rowId         String // The row that was modified
-
-  // Who changed it
+  id             String   @id @default(cuid())
+  spreadsheetId  String
+  rowId          String
   userId         String
-  user           User   @relation("DataChangeLogs", fields: [userId], references: [id], onDelete: Cascade)
   organizationId String
-
-  // What happened
-  action String // "create" | "update" | "delete" | "restore"
-
-  // The data
-  previousData  Json? // null for creates
-  newData       Json? // null for deletes
-  changedFields String[] // list of field names that changed (for updates)
-
-  // Metadata
-  timestamp DateTime @default(now())
-
-  // For grouping bulk operations
-  batchId String? // same ID for all changes in a bulk operation
+  action         String
+  previousData   Json?
+  newData        Json?
+  changedFields  String[]
+  timestamp      DateTime @default(now())
+  batchId        String?
+  user           User     @relation("DataChangeLogs", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([spreadsheetId, rowId])
   @@index([spreadsheetId, timestamp])
@@ -664,28 +472,19 @@ model DataChangeLog {
   @@map("data_change_logs")
 }
 
-// Soft delete tracking with trash recovery
 model TrashItem {
-  id             String @id @default(cuid())
+  id             String   @id @default(cuid())
   organizationId String
-
-  // What was deleted
-  entityType String // "spreadsheet" | "spreadsheet_row" | "form" | "note" | etc.
-  entityId   String
-  entityName String // human-readable name for display
-
-  // Context for restoration
-  parentId   String? // e.g., spreadsheetId for rows
-  parentName String? // e.g., spreadsheet name
-  metadata   Json? // any additional context needed for restore
-
-  // Who deleted and when
-  deletedBy     String
-  deletedByUser User     @relation("DeletedItems", fields: [deletedBy], references: [id], onDelete: Cascade)
-  deletedAt     DateTime @default(now())
-
-  // Auto-purge scheduling
-  expiresAt DateTime // default: deletedAt + 30 days
+  entityType     String
+  entityId       String
+  entityName     String
+  parentId       String?
+  parentName     String?
+  metadata       Json?
+  deletedBy      String
+  deletedAt      DateTime @default(now())
+  expiresAt      DateTime
+  deletedByUser  User     @relation("DeletedItems", fields: [deletedBy], references: [id], onDelete: Cascade)
 
   @@index([organizationId, deletedAt])
   @@index([organizationId, entityType])
@@ -693,74 +492,51 @@ model TrashItem {
   @@map("trash_items")
 }
 
-// Table-level permissions for data access control
 model SpreadsheetPermission {
   id            String      @id @default(cuid())
   spreadsheetId String
+  grantType     String
+  grantValue    String
+  accessLevel   String
+  grantedBy     String
+  grantedAt     DateTime    @default(now())
   spreadsheet   Spreadsheet @relation(fields: [spreadsheetId], references: [id], onDelete: Cascade)
-
-  // Who has permission
-  grantType  String // "user" | "role" | "permission"
-  grantValue String // userId, role name, or permission name
-
-  // What permission
-  accessLevel String // "view" | "edit" | "admin"
-
-  // Audit
-  grantedBy String
-  grantedAt DateTime @default(now())
 
   @@unique([spreadsheetId, grantType, grantValue])
   @@index([spreadsheetId])
   @@map("spreadsheet_permissions")
 }
 
-// ============================================
-// CANVAS
-// ============================================
-
 model CanvasBoard {
-  id             String       @id @default(cuid())
+  id             String                   @id @default(cuid())
   name           String
-  data           Json // Drawing data
+  data           Json
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Full-text search (managed outside Prisma)
-  search_vector Unsupported("tsvector")?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  search_vector  Unsupported("tsvector")?
+  organization   Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@map("canvas_boards")
 }
 
-// Tactical drawings/whiteboard templates
 model DrawingTemplate {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  category    String // "formation", "drill", "set_piece", "tactics"
-  sport       String  @default("football") // "football", "rugby", "basketball"
-
-  // Template data
-  data         Json // Excalidraw scene data
-  thumbnailUrl String?
-
-  // Global vs organization-specific
+  id             String        @id @default(cuid())
+  name           String
+  description    String?
+  category       String
+  sport          String        @default("football")
+  data           Json
+  thumbnailUrl   String?
   isGlobal       Boolean       @default(false)
   organizationId String?
+  downloads      Int           @default(0)
+  rating         Float?
+  createdBy      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // Community features
-  downloads Int    @default(0)
-  rating    Float?
-
-  createdBy String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  drawings Drawing[]
+  drawings       Drawing[]
 
   @@index([isGlobal, category])
   @@index([organizationId, category])
@@ -768,42 +544,26 @@ model DrawingTemplate {
   @@map("drawing_templates")
 }
 
-// Tactical drawings/whiteboard instances
 model Drawing {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-
-  // Type/category
-  type String? // "formation", "drill", "tactics", "set_piece", "session_plan"
-  tags String[]
-
-  // Excalidraw data
-  data Json // Excalidraw scene data
-
-  // Preview image
-  thumbnailUrl String? // PNG preview for library view
-
-  // Linked to entities
-  linkedToType String? // "event", "plan", "note"
-  linkedToId   String?
-
-  // Template reference
-  isTemplate Boolean          @default(false)
-  templateId String?
-  template   DrawingTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
-
-  // Sharing
-  isPublic   Boolean @default(false)
-  shareToken String? @unique
-
-  // Organization
+  id             String           @id @default(cuid())
+  name           String
+  description    String?
+  type           String?
+  tags           String[]
+  data           Json
+  thumbnailUrl   String?
+  linkedToType   String?
+  linkedToId     String?
+  isTemplate     Boolean          @default(false)
+  templateId     String?
+  isPublic       Boolean          @default(false)
+  shareToken     String?          @unique
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  createdBy String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdBy      String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template       DrawingTemplate? @relation(fields: [templateId], references: [id])
 
   @@index([organizationId, updatedAt])
   @@index([organizationId, type])
@@ -814,52 +574,28 @@ model Drawing {
   @@map("drawings")
 }
 
-// ============================================
-// PLANNER
-// ============================================
-
 model Plan {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-
-  // Type/category
-  type String // "season", "player_development", "rehabilitation", "event_prep", "custom"
-
-  // Duration
-  startDate DateTime
-  endDate   DateTime
-
-  // Status
-  status String @default("not_started") // "not_started", "in_progress", "complete", "on_hold"
-
-  // Linked to entities
-  linkedToType String? // "player", "event", "team", "person"
-  linkedToId   String?
-
-  // Ownership
-  ownerId String // who's responsible
-  owner   User   @relation(fields: [ownerId], references: [id])
-
-  // Organization
+  id             String                   @id @default(cuid())
+  name           String
+  description    String?
+  startDate      DateTime
+  endDate        DateTime
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // Milestones
-  milestones Milestone[]
-
-  // Visibility & Publishing
-  isPublic    Boolean   @default(false)
-  isTemplate  Boolean   @default(false)
-  publishedAt DateTime?
-
-  // Metadata
-  createdBy String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Full-text search (managed outside Prisma)
-  search_vector Unsupported("tsvector")?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  search_vector  Unsupported("tsvector")?
+  type           String
+  status         String                   @default("not_started")
+  linkedToType   String?
+  linkedToId     String?
+  ownerId        String
+  isPublic       Boolean                  @default(false)
+  isTemplate     Boolean                  @default(false)
+  publishedAt    DateTime?
+  createdBy      String
+  milestones     Milestone[]
+  organization   Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  owner          User                     @relation(fields: [ownerId], references: [id])
 
   @@index([organizationId, type])
   @@index([organizationId, status])
@@ -869,44 +605,26 @@ model Plan {
 }
 
 model Milestone {
-  id     String @id @default(cuid())
-  planId String
-  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
-
-  title       String
-  description String?
-
-  // Timeline
-  startDate DateTime?
-  endDate   DateTime?
-  dueDate   DateTime? // if single deadline
-
-  // Order
-  order Int @default(0) // for sorting
-
-  // Status
-  status      String    @default("pending") // "pending", "in_progress", "complete", "blocked"
-  completedAt DateTime?
-  completedBy String?
-
-  // Assignment
-  assignedTo String? // user ID
-  assignee   User?   @relation(fields: [assignedTo], references: [id])
-
-  // Progress (0-100)
-  progress Int @default(0)
-
-  // Links to other entities
-  links MilestoneLink[]
-
-  // Comments/updates
-  comments MilestoneComment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Full-text search (managed outside Prisma)
+  id            String                   @id @default(cuid())
+  planId        String
+  title         String
+  description   String?
+  startDate     DateTime?
+  endDate       DateTime?
+  dueDate       DateTime?
+  order         Int                      @default(0)
+  status        String                   @default("pending")
+  completedAt   DateTime?
+  completedBy   String?
+  assignedTo    String?
+  progress      Int                      @default(0)
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
   search_vector Unsupported("tsvector")?
+  comments      MilestoneComment[]
+  links         MilestoneLink[]
+  assignee      User?                    @relation(fields: [assignedTo], references: [id])
+  plan          Plan                     @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@index([planId, order])
   @@index([planId, status])
@@ -916,12 +634,10 @@ model Milestone {
 model MilestoneLink {
   id          String    @id @default(cuid())
   milestoneId String
+  targetType  String
+  targetId    String
+  createdAt   DateTime  @default(now())
   milestone   Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
-
-  targetType String // "note", "form", "event", "file", "spreadsheet", "drawing"
-  targetId   String
-
-  createdAt DateTime @default(now())
 
   @@unique([milestoneId, targetType, targetId])
   @@index([milestoneId])
@@ -932,91 +648,63 @@ model MilestoneLink {
 model MilestoneComment {
   id          String    @id @default(cuid())
   milestoneId String
+  content     String
+  authorId    String
+  createdAt   DateTime  @default(now())
+  author      User      @relation(fields: [authorId], references: [id])
   milestone   Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
-
-  content  String
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id])
-
-  createdAt DateTime @default(now())
 
   @@index([milestoneId])
   @@map("milestone_comments")
 }
 
-// ============================================
-// SUBSCRIPTIONS & BILLING
-// ============================================
-
 model Subscription {
-  id             String       @id @default(cuid())
-  organizationId String       @unique // One subscription per organization
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  plan               String // free, pro, enterprise
-  status             String // active, cancelled, past_due
-  currentPeriodStart DateTime
-  currentPeriodEnd   DateTime
-
+  id                   String       @id @default(cuid())
+  organizationId       String       @unique
+  plan                 String
+  status               String
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
   stripeCustomerId     String?
-  stripeSubscriptionId String? @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  stripeSubscriptionId String?      @unique
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([plan])
   @@map("subscriptions")
 }
 
-// ============================================
-// ACTIVITY LOG
-// ============================================
-
 model Activity {
-  id     String  @id @default(cuid())
-  type   String // player_created, form_submitted, event_created, etc.
-  data   Json
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id])
-
-  personId String?
-  person   Person? @relation(fields: [personId], references: [id])
-
+  id        String   @id @default(cuid())
+  type      String
+  data      Json
+  userId    String?
+  personId  String?
   createdAt DateTime @default(now())
+  person    Person?  @relation(fields: [personId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
 
   @@map("activities")
 }
 
-// ============================================
-// REPORTS
-// ============================================
-
 model ReportTemplate {
-  id          String @id @default(cuid())
-  name        String
-  description String
-  category    String // "player", "team", "medical", "performance"
-
-  // Template config
-  config   Json // {dataSources, visualization, filters, etc.}
-  sections Json? // For multi-section dashboards
-
-  // Global vs user-created
+  id             String        @id @default(cuid())
+  name           String
+  description    String
+  category       String
+  config         Json
+  sections       Json?
   isGlobal       Boolean       @default(false)
   organizationId String?
+  createdBy      String?
+  downloads      Int           @default(0)
+  rating         Float?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  createdBy String?
-
-  // Community Hub
-  downloads Int    @default(0)
-  rating    Float?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  reports Report[]
+  reports        Report[]
 
   @@index([organizationId])
   @@index([isGlobal, category])
@@ -1024,40 +712,23 @@ model ReportTemplate {
 }
 
 model Report {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-
-  // Type
-  type String // "single_chart", "dashboard", "table"
-
-  // Based on template?
-  templateId String?
-  template   ReportTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
-
-  // Report configuration
-  config Json // {dataSources, visualization, xAxis, yAxis, filters, chartOptions}
-
-  // Multi-section dashboard
-  sections Json? // [{type: "chart", config: {...}}, {type: "table", config: {...}}]
-
-  // AI Insights
-  insights Json? // AI-generated insights
-
-  // Organization
+  id             String          @id @default(cuid())
+  name           String
+  description    String?
+  type           String
+  templateId     String?
+  config         Json
+  sections       Json?
+  insights       Json?
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // Access
-  isPublic   Boolean @default(false)
-  shareToken String? @unique
-
-  // Scheduling
-  schedule ReportSchedule?
-
-  createdBy String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isPublic       Boolean         @default(false)
+  shareToken     String?         @unique
+  createdBy      String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  schedule       ReportSchedule?
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template       ReportTemplate? @relation(fields: [templateId], references: [id])
 
   @@index([organizationId])
   @@index([organizationId, type])
@@ -1067,31 +738,25 @@ model Report {
 }
 
 model ReportSchedule {
-  id       String @id @default(cuid())
-  reportId String @unique
-  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
-
-  frequency  String // "daily", "weekly", "monthly"
-  time       String // "09:00"
-  dayOfWeek  Int? // 1-7 for weekly
-  dayOfMonth Int? // 1-31 for monthly
-
-  // Who gets it
-  recipients String[] // user IDs or email addresses
-  format     String // "pdf", "link"
-
-  isActive Boolean   @default(true)
-  lastSent DateTime?
-  nextSend DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String    @id @default(cuid())
+  reportId   String    @unique
+  frequency  String
+  time       String
+  dayOfWeek  Int?
+  dayOfMonth Int?
+  recipients String[]
+  format     String
+  isActive   Boolean   @default(true)
+  lastSent   DateTime?
+  nextSend   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  report     Report    @relation(fields: [reportId], references: [id], onDelete: Cascade)
 
   @@index([isActive, nextSend])
   @@map("report_schedules")
 }
 
-// Legacy reportTemplates table (managed outside Prisma, preserved for backward compatibility)
 model reportTemplates {
   id             String   @id @default(cuid())
   name           String
@@ -1108,25 +773,17 @@ model reportTemplates {
   @@ignore
 }
 
-// ============================================
-// AI ASSISTANT & TOOLING
-// ============================================
-
 model AIConversation {
-  id     String @id @default(cuid())
-  orgId  String
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  title    String // auto-generated summary
-  messages AIMessage[]
-
-  // Context
-  contextType String? // "player", "event", "report"
+  id          String      @id @default(cuid())
+  orgId       String
+  userId      String
+  title       String
+  contextType String?
   contextId   String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages    AIMessage[]
 
   @@index([orgId, userId])
   @@index([orgId, createdAt])
@@ -1136,44 +793,29 @@ model AIConversation {
 model AIMessage {
   id             String         @id @default(cuid())
   conversationId String
+  role           String
+  content        String
+  actions        Json?
+  toolCalls      Json?
+  inputTokens    Int            @default(0)
+  outputTokens   Int            @default(0)
+  createdAt      DateTime       @default(now())
   conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  role    String // "user" or "assistant"
-  content String @db.Text
-
-  // If AI took actions
-  actions Json? // [{type: "event_created", id: "event_123"}]
-
-  // Tool calls made
-  toolCalls Json?
-
-  // Token usage for cost tracking
-  inputTokens  Int @default(0)
-  outputTokens Int @default(0)
-
-  createdAt DateTime @default(now())
 
   @@index([conversationId])
   @@map("ai_messages")
 }
 
 model AIInsight {
-  id    String @id @default(cuid())
-  orgId String
-
-  type     String // "injury_risk", "wellness_decline", "load_spike"
-  priority String // "high", "medium", "low"
-
+  id          String    @id @default(cuid())
+  orgId       String
+  type        String
+  priority    String
   title       String
-  description String @db.Text
-  data        Json // detailed data backing insight
-
-  // Related entities
-  playerIds String[]
-
-  // Status
-  status String @default("active") // "active", "dismissed", "acted_on"
-
+  description String
+  data        Json
+  playerIds   String[]
+  status      String    @default("active")
   createdAt   DateTime  @default(now())
   dismissedAt DateTime?
 
@@ -1184,116 +826,73 @@ model AIInsight {
 }
 
 model AISettings {
-  id     String @id @default(cuid())
-  orgId  String @unique
-  userId String @unique
-
-  // Proactive Insights
-  injuryRiskAlerts     Boolean @default(true)
-  wellnessAlerts       Boolean @default(true)
-  loadAlerts           Boolean @default(true)
-  formCompletionAlerts Boolean @default(true)
-
-  // Alert Frequency
-  alertFrequency String @default("real_time") // "real_time", "daily_digest", "weekly_summary"
-
-  // Data Access Control
-  dataAccess Json @default("{\"playerWellness\": true, \"loadData\": true, \"medicalNotes\": false, \"formResponses\": true, \"eventAttendance\": true, \"privateNotes\": false}")
-
-  // Cost Controls
-  monthlyTokenLimit   Int      @default(1000000) // 1M tokens per month
-  tokensUsedThisMonth Int      @default(0)
-  lastResetAt         DateTime @default(now())
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  orgId                String   @unique
+  userId               String   @unique
+  injuryRiskAlerts     Boolean  @default(true)
+  wellnessAlerts       Boolean  @default(true)
+  loadAlerts           Boolean  @default(true)
+  formCompletionAlerts Boolean  @default(true)
+  alertFrequency       String   @default("real_time")
+  dataAccess           Json     @default("{\"loadData\": true, \"medicalNotes\": false, \"privateNotes\": false, \"formResponses\": true, \"playerWellness\": true, \"eventAttendance\": true}")
+  monthlyTokenLimit    Int      @default(1000000)
+  tokensUsedThisMonth  Int      @default(0)
+  lastResetAt          DateTime @default(now())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   @@map("ai_settings")
 }
 
 model AICostTracking {
-  id             String  @id @default(cuid())
+  id             String   @id @default(cuid())
   orgId          String
   userId         String
   conversationId String?
-
-  inputTokens  Int
-  outputTokens Int
-  totalCost    Float // in USD
-
-  // Metadata
-  model    String @default("claude-sonnet-4")
-  endpoint String // "chat", "tool_call", "insight_generation"
-
-  createdAt DateTime @default(now())
+  inputTokens    Int
+  outputTokens   Int
+  totalCost      Float
+  model          String   @default("claude-sonnet-4")
+  endpoint       String
+  createdAt      DateTime @default(now())
 
   @@index([orgId, createdAt])
   @@index([userId, createdAt])
   @@map("ai_cost_tracking")
 }
 
-// ============================================
-// COMMUNITY TEMPLATES HUB
-// ============================================
-
 model CommunityTemplate {
-  id String @id @default(cuid())
-
-  // Type
-  type String // "form", "report", "drawing", "plan", "spreadsheet"
-
-  // Info
-  name            String
-  description     String
-  longDescription String? @db.Text
-
-  // Categorization
-  category String // "wellness", "performance", "medical", "tactics", "training"
-  sport    String // "football", "rugby", "basketball", "multi-sport"
-  tags     String[]
-  features String[] // what's included
-
-  // Template data
-  config Json // the actual template configuration
-
-  // Preview
-  previewImage String?
-  thumbnailUrl String?
-
-  // Author
-  authorId   String?
-  author     User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  authorName String? // cached author name for display
-  orgName    String? // author's org name (for display)
-
-  // Official templates
-  isOfficial Boolean @default(false)
-  isFeatured Boolean @default(false)
-
-  // Publishing settings
-  isPublic           Boolean @default(true)
-  allowModifications Boolean @default(true)
-
-  // Stats
-  downloads   Int    @default(0)
-  usageCount  Int    @default(0)
-  rating      Float?
-  reviewCount Int    @default(0)
-
-  // Reviews
-  reviews TemplateReview[]
-
-  // Status
-  status          String  @default("published") // "draft", "pending_review", "published", "archived", "rejected"
-  moderationNotes String? @db.Text
-
-  // Timestamps
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  publishedAt DateTime?
-
-  // Usage tracking
-  usages TemplateUsage[]
+  id                 String           @id @default(cuid())
+  type               String
+  name               String
+  description        String
+  longDescription    String?
+  category           String
+  sport              String
+  tags               String[]
+  features           String[]
+  config             Json
+  previewImage       String?
+  thumbnailUrl       String?
+  authorId           String?
+  authorName         String?
+  orgName            String?
+  isOfficial         Boolean          @default(false)
+  isFeatured         Boolean          @default(false)
+  isPublic           Boolean          @default(true)
+  allowModifications Boolean          @default(true)
+  downloads          Int              @default(0)
+  usageCount         Int              @default(0)
+  rating             Float?
+  reviewCount        Int              @default(0)
+  status             String           @default("published")
+  moderationNotes    String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  publishedAt        DateTime?
+  author             User?            @relation(fields: [authorId], references: [id])
+  reviews            TemplateReview[]
+  usages             TemplateUsage[]
 
   @@index([type, status])
   @@index([category, status])
@@ -1305,22 +904,18 @@ model CommunityTemplate {
 }
 
 model TemplateReview {
-  id         String            @id @default(cuid())
-  templateId String
-  template   CommunityTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  id           String            @id @default(cuid())
+  templateId   String
+  userId       String
+  rating       Int
+  content      String
+  helpfulCount Int               @default(0)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  template     CommunityTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  rating  Int // 1-5
-  content String @db.Text
-
-  helpfulCount Int @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([templateId, userId]) // one review per user per template
+  @@unique([templateId, userId])
   @@index([templateId])
   @@index([userId])
   @@index([rating])
@@ -1328,19 +923,15 @@ model TemplateReview {
 }
 
 model TemplateUsage {
-  id         String            @id @default(cuid())
-  templateId String
-  template   CommunityTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // What they created from it
-  createdType String // "form", "report", "drawing", "plan", "spreadsheet"
+  id          String            @id @default(cuid())
+  templateId  String
+  userId      String
+  createdType String
   createdId   String?
-  createdName String? // name of the item they created
-
-  usedAt DateTime @default(now())
+  createdName String?
+  usedAt      DateTime          @default(now())
+  template    CommunityTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([templateId])
   @@index([userId])
@@ -1348,54 +939,24 @@ model TemplateUsage {
   @@map("template_usages")
 }
 
-// ============================================
-// ORGANIZATION FEATURES
-// ============================================
-
-// ============================================
-// AI WORKSPACE
-// ============================================
-
 model AIWorkspace {
-  id   String @id @default(cuid())
-  name String
-
-  // Artifact type
-  artifactType String // "reports", "whiteboards", "uiPages", "plans"
-
-  // Status
-  status String @default("draft") // "generating", "draft", "updating", "ready", "published", "syncing"
-
-  // Initial prompt
-  initialPrompt String @db.Text
-
-  // Artifact configuration and data (JSON)
-  artifactData Json? // stores reportConfig, whiteboardConfig, uiPageConfig, or planConfig
-
-  // Structured inputs from user (JSON)
-  structuredInputs Json? // stores criteria, artifact-specific inputs, etc.
-
-  // Generated content
+  id               String               @id @default(cuid())
+  name             String
+  artifactType     String
+  status           String               @default("draft")
+  initialPrompt    String
+  artifactData     Json?
   generatedContent Json?
-
-  // Publishing
-  publishedAt DateTime?
-  publishedTo Json? // Array of {type, id, name} destinations
-
-  // Version control
-  version Int @default(1)
-
-  // Organization and ownership
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  userId String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  messages AIWorkspaceMessage[]
+  publishedAt      DateTime?
+  publishedTo      Json?
+  version          Int                  @default(1)
+  organizationId   String
+  userId           String
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  structuredInputs Json?
+  messages         AIWorkspaceMessage[]
+  organization     Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
   @@index([userId])
@@ -1407,13 +968,11 @@ model AIWorkspace {
 model AIWorkspaceMessage {
   id          String      @id @default(cuid())
   workspaceId String
+  role        String
+  content     String
+  createdAt   DateTime    @default(now())
+  isSystem    Boolean     @default(false)
   workspace   AIWorkspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  role     String // "user", "assistant", "system"
-  content  String  @db.Text
-  isSystem Boolean @default(false)
-
-  createdAt DateTime @default(now())
 
   @@index([workspaceId])
   @@index([createdAt])
@@ -1421,84 +980,66 @@ model AIWorkspaceMessage {
 }
 
 model OrganizationFeatures {
-  id             String       @id @default(cuid())
-  organizationId String       @unique
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // Main Navigation Features (14 sections) - Simple on/off
-  aiWorkspaceEnabled     Boolean @default(false)
-  aiEnabled              Boolean @default(false)
-  playersEnabled         Boolean @default(true)
-  formsEnabled           Boolean @default(false)
-  reportsEnabled         Boolean @default(false)
-  calendarEnabled        Boolean @default(true)
-  messagesEnabled        Boolean @default(false)
-  notesEnabled           Boolean @default(true)
-  spreadsheetsEnabled    Boolean @default(true)
-  canvasEnabled          Boolean @default(false)
-  filesEnabled           Boolean @default(true)
-  plannerEnabled         Boolean @default(false)
-  templatesEnabled       Boolean @default(false)
-  dataManagementEnabled  Boolean @default(false)
-
-  // Sub-features: Reports
-  reportsBuilderEnabled    Boolean @default(true)
-  reportsTemplatesEnabled  Boolean @default(true)
-  reportsSchedulingEnabled Boolean @default(false)
-  reportsAiInsightsEnabled Boolean @default(false)
-  reportsSharingEnabled    Boolean @default(true)
-
-  // Sub-features: Calendar
-  calendarAttendanceEnabled   Boolean @default(true)
-  calendarFormsEnabled        Boolean @default(true)
-  calendarDrawingsEnabled     Boolean @default(true)
-  calendarSpreadsheetsEnabled Boolean @default(true)
-  calendarNotesEnabled        Boolean @default(true)
-  calendarFilesEnabled        Boolean @default(true)
-
-  // Sub-features: Forms
-  formsBuilderEnabled    Boolean @default(true)
-  formsResponsesEnabled  Boolean @default(true)
-  formsSchedulingEnabled Boolean @default(false)
-
-  // Sub-features: Players
-  playersNotesEnabled       Boolean @default(true)
-  playersFilesEnabled       Boolean @default(true)
-  playersMedicalDataEnabled Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                          String       @id @default(cuid())
+  organizationId              String       @unique
+  aiEnabled                   Boolean      @default(false)
+  playersEnabled              Boolean      @default(true)
+  formsEnabled                Boolean      @default(false)
+  reportsEnabled              Boolean      @default(false)
+  calendarEnabled             Boolean      @default(true)
+  messagesEnabled             Boolean      @default(false)
+  notesEnabled                Boolean      @default(true)
+  spreadsheetsEnabled         Boolean      @default(true)
+  canvasEnabled               Boolean      @default(false)
+  filesEnabled                Boolean      @default(true)
+  plannerEnabled              Boolean      @default(false)
+  templatesEnabled            Boolean      @default(false)
+  reportsBuilderEnabled       Boolean      @default(true)
+  reportsTemplatesEnabled     Boolean      @default(true)
+  reportsSchedulingEnabled    Boolean      @default(false)
+  reportsAiInsightsEnabled    Boolean      @default(false)
+  reportsSharingEnabled       Boolean      @default(true)
+  calendarAttendanceEnabled   Boolean      @default(true)
+  calendarFormsEnabled        Boolean      @default(true)
+  calendarDrawingsEnabled     Boolean      @default(true)
+  calendarSpreadsheetsEnabled Boolean      @default(true)
+  calendarNotesEnabled        Boolean      @default(true)
+  calendarFilesEnabled        Boolean      @default(true)
+  formsBuilderEnabled         Boolean      @default(true)
+  formsResponsesEnabled       Boolean      @default(true)
+  formsSchedulingEnabled      Boolean      @default(false)
+  playersNotesEnabled         Boolean      @default(true)
+  playersFilesEnabled         Boolean      @default(true)
+  playersMedicalDataEnabled   Boolean      @default(true)
+  createdAt                   DateTime     @default(now())
+  updatedAt                   DateTime     @updatedAt
+  aiWorkspaceEnabled          Boolean      @default(false)
+  dataManagementEnabled       Boolean      @default(false)
+  organization                Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
   @@map("organization_features")
 }
 
-// Package Defaults - defines which features are included in each subscription tier
 model PackageDefaults {
   id        String   @id @default(cuid())
-  tier      String   @unique // "free", "pro", "enterprise"
-  features  String[] // Array of enabled feature keys (e.g., ["players", "calendar", "notes"])
+  tier      String   @unique
+  features  String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("package_defaults")
 }
 
-// ============================================
-// AI WORKSPACE CONTEXT
-// ============================================
-
 model OrgDataSource {
-  id             String       @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  sourceType       String // wellness, gps, medical, match_stats, video
-  availableMetrics String[] // ["rpe", "wellness_score", "load"]
-  isActive         Boolean  @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String       @id @default(cuid())
+  organizationId   String
+  sourceType       String
+  availableMetrics String[]
+  isActive         Boolean      @default(true)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
   @@map("org_data_sources")

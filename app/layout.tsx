@@ -8,6 +8,7 @@ import '@/app/globals.css'
 import { ThemeProvider } from 'next-themes'
 import { AnalyticsProviders } from '@/lib/analytics/providers'
 import { ErrorBoundary } from '@/components/error-boundary'
+import { ThemeSync } from '@/components/theme-sync'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -62,13 +63,14 @@ export default async function RootLayout({
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ThemeProvider
               attribute="class"
-              defaultTheme="system"
               enableSystem
               disableTransitionOnChange={false}
             >
-              <AnalyticsProviders>
-                {children}
-              </AnalyticsProviders>
+              <ThemeSync>
+                <AnalyticsProviders>
+                  {children}
+                </AnalyticsProviders>
+              </ThemeSync>
             </ThemeProvider>
           </NextIntlClientProvider>
         </ErrorBoundary>

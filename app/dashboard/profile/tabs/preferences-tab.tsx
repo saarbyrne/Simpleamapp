@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -38,6 +37,7 @@ const preferencesFormSchema = z.object({
   timezone: z.string().optional(),
   dateFormat: z.enum(["DD/MM/YYYY", "MM/DD/YYYY", "YYYY-MM-DD"]).optional(),
   timeFormat: z.enum(["12", "24"]).optional(),
+  theme: z.enum(["light", "dark", "system"]).optional(),
 });
 
 type PreferencesFormValues = z.infer<typeof preferencesFormSchema>;
@@ -47,6 +47,7 @@ interface User {
   timezone: string | null;
   dateFormat: string | null;
   timeFormat: string | null;
+  theme: string | null;
 }
 
 interface PreferencesTabProps {
@@ -84,7 +85,6 @@ const LANGUAGES = [
 ];
 
 export function PreferencesTab({ user }: PreferencesTabProps) {
-  const router = useRouter();
   const t = useTranslations();
 
   const form = useForm<PreferencesFormValues>({
@@ -94,24 +94,31 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
       timezone: user.timezone || "UTC",
       dateFormat: (user.dateFormat as any) || "DD/MM/YYYY",
       timeFormat: (user.timeFormat as any) || "24",
+      theme: (user.theme as any) || "system",
     },
   });
 
   const { isSubmitting } = form.formState;
 
-  async function onSubmit(data: PreferencesFormValues) {
+  async function onSubmit(data: PreferencesFormValues, e?: React.BaseSyntheticEvent) {
+    // Prevent default form submission behavior
+    e?.preventDefault();
+    
     // Convert empty strings to null for optional fields
     const preferencesData = {
       language: data.language || null,
       timezone: data.timezone || null,
       dateFormat: data.dateFormat || null,
       timeFormat: data.timeFormat || null,
+      theme: data.theme || null,
     };
 
     // Store in localStorage immediately for instant UI update
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem("user-preferences", JSON.stringify(preferencesData));
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new Event('preferencesUpdated'));
       } catch (error) {
         console.error("Failed to store preferences in localStorage:", error);
       }
@@ -121,7 +128,7 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
 
     if (result.success) {
       toast.success(t('profile.preferencesUpdated'));
-      router.refresh();
+      // No need to refresh - UI already updated via localStorage and events
     } else {
       toast.error(result.error || t('profile.failedToUpdatePreferences'));
     }
@@ -261,6 +268,36 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
                   </Select>
                   <FormDescription>
                     {t('profile.timeFormatDescription')}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Theme */}
+            <FormField
+              control={form.control}
+              name="theme"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('profile.theme')}</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('profile.selectTheme')} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="light">{t('profile.themeLight')}</SelectItem>
+                      <SelectItem value="dark">{t('profile.themeDark')}</SelectItem>
+                      <SelectItem value="system">{t('profile.themeSystem')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    {t('profile.themeDescription')}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

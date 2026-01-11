@@ -252,7 +252,7 @@ export function SpreadsheetsClientNew({
   }
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full gap-4">
       {/* Folder Sidebar */}
       <FolderSidebar
         folders={folders}
@@ -270,10 +270,6 @@ export function SpreadsheetsClientNew({
             description={t('description')}
             headerActions={
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setShowTemplateDialog(true)}>
-                  <Sparkles className="h-4 w-4 me-2" />
-                  {t('useTemplate')}
-                </Button>
                 <Button onClick={handleCreateBlank}>
                   <Plus className="h-4 w-4 me-2" />
                   {t('newSpreadsheet')}
@@ -314,10 +310,6 @@ export function SpreadsheetsClientNew({
                 </p>
                 {!searchQuery && selectedTags.length === 0 && !showStarred && (
                   <div className="flex gap-4 justify-center">
-                    <Button variant="outline" onClick={() => setShowTemplateDialog(true)}>
-                      <Sparkles className="h-4 w-4 me-2" />
-                      {t('browseTemplates')}
-                    </Button>
                     <Button onClick={handleCreateBlank}>
                       <Plus className="h-4 w-4 me-2" />
                       {t('createBlank')}

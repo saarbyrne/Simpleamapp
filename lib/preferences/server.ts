@@ -7,6 +7,7 @@ export interface UserPreferences {
   dateFormat: string | null;
   timeFormat: string | null;
   language: string | null;
+  theme: string | null;
 }
 
 /**
@@ -22,6 +23,7 @@ export async function getUserPreferences(): Promise<UserPreferences | null> {
         dateFormat: result.data.dateFormat,
         timeFormat: result.data.timeFormat,
         language: result.data.language,
+        theme: result.data.theme,
       };
     }
     return null;

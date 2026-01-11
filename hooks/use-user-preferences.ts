@@ -8,6 +8,7 @@ export interface UserPreferences {
   dateFormat: string | null;
   timeFormat: string | null;
   language: string | null;
+  theme: string | null;
 }
 
 const PREFERENCES_STORAGE_KEY = "user-preferences";
@@ -78,8 +79,9 @@ export function useUserPreferences() {
             dateFormat: result.data.dateFormat,
             timeFormat: result.data.timeFormat,
             language: result.data.language,
+            theme: result.data.theme,
           };
-          
+
           setPreferences(newPreferences);
           // Store in localStorage for next time
           storePreferences(newPreferences);
@@ -117,9 +119,37 @@ export function useUserPreferences() {
 
     fetchPreferences();
 
+    // Listen for localStorage changes (when preferences are updated)
+    function handleStorageChange(e: StorageEvent) {
+      if (e.key === PREFERENCES_STORAGE_KEY && e.newValue && isMountedRef.current) {
+        try {
+          const newPrefs = JSON.parse(e.newValue);
+          setPreferences(newPrefs);
+        } catch (error) {
+          console.error('Failed to parse localStorage change:', error);
+        }
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also listen for custom events (for same-tab updates)
+    function handleCustomStorageChange() {
+      if (isMountedRef.current) {
+        const storedPrefs = getStoredPreferences();
+        if (storedPrefs) {
+          setPreferences(storedPrefs);
+        }
+      }
+    }
+
+    window.addEventListener('preferencesUpdated', handleCustomStorageChange);
+
     // Cleanup: mark as unmounted
     return () => {
       isMountedRef.current = false;
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('preferencesUpdated', handleCustomStorageChange);
     };
   }, []);
 
