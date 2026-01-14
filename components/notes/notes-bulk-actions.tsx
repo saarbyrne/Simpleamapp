@@ -80,7 +80,7 @@ export function NotesBulkActions({
   }
 
   return (
-    <div className="flex flex-col gap-3 px-4 py-3 bg-muted/50 border-b">
+    <div className="flex flex-col gap-3 px-0 py-3 bg-muted/50 border-b">
       {/* Inputs Row */}
       <div className="flex items-center gap-2 flex-wrap">
         <Select

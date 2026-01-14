@@ -15,6 +15,8 @@ model Organization {
   slug                 String                @unique
   sport                String?
   logo                 String?
+  primaryColor         String?
+  secondaryColor       String?
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   aiWorkspaces         AIWorkspace[]
@@ -61,6 +63,7 @@ model User {
   dateFormat           String?
   timeFormat           String?
   theme                String?
+  experimentalTheme    String?
   notificationSettings Json?
   roleNames            String[]            @default([])
   permissions          String[]            @default([])

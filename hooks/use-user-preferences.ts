@@ -9,6 +9,7 @@ export interface UserPreferences {
   timeFormat: string | null;
   language: string | null;
   theme: string | null;
+  experimentalTheme: string | null;
 }
 
 const PREFERENCES_STORAGE_KEY = "user-preferences";

@@ -22,6 +22,7 @@ const updatePreferencesSchema = z.object({
   dateFormat: z.enum(["DD/MM/YYYY", "MM/DD/YYYY", "YYYY-MM-DD"]).optional().nullable(),
   timeFormat: z.enum(["12", "24"]).optional().nullable(),
   theme: z.enum(["light", "dark", "system"]).optional().nullable(),
+  experimentalTheme: z.enum(["default", "liquid-glass", "flat"]).optional().nullable(),
 });
 
 const updateNotificationSettingsSchema = z.object({
@@ -235,6 +236,7 @@ export async function updatePreferences(data: z.infer<typeof updatePreferencesSc
       dateFormat?: string | null;
       timeFormat?: string | null;
       theme?: string | null;
+      experimentalTheme?: string | null;
       updatedAt: Date;
     } = {
       updatedAt: new Date(),
@@ -254,6 +256,9 @@ export async function updatePreferences(data: z.infer<typeof updatePreferencesSc
     }
     if (validation.data.theme !== undefined) {
       updateData.theme = validation.data.theme || null;
+    }
+    if (validation.data.experimentalTheme !== undefined) {
+      updateData.experimentalTheme = validation.data.experimentalTheme || null;
     }
 
     const updatedUser = await prisma.user.update({

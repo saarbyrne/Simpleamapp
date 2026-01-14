@@ -99,7 +99,7 @@ export function SpreadsheetFilters({
         }}
       >
         <SelectTrigger className="w-[140px] h-10">
-          <SelectValue placeholder="Filter" />
+          <SelectValue placeholder="Filter by tag" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All</SelectItem>
@@ -115,7 +115,7 @@ export function SpreadsheetFilters({
       {/* Sort */}
       <Select value={sortBy} onValueChange={(value) => onSortChange(value as SortOption)}>
         <SelectTrigger className="w-[140px]">
-          <SelectValue />
+          <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="recent">Recent</SelectItem>

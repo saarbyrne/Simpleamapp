@@ -731,13 +731,17 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
             .some((value) => value?.toLowerCase().includes(search.toLowerCase()))
 
       const matchesPosition =
+        !positionFilter ||
         positionFilter === 'all' ||
         normalizeFilter(player.position) === positionFilter
 
       const matchesStatus =
-        statusFilter === 'all' || normalizeFilter(player.status) === statusFilter
+        !statusFilter ||
+        statusFilter === 'all' ||
+        normalizeFilter(player.status) === statusFilter
 
       const matchesNationality =
+        !nationalityFilter ||
         nationalityFilter === 'all' ||
         normalizeFilter(player.nationality) === nationalityFilter
 

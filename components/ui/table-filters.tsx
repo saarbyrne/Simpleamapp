@@ -72,17 +72,31 @@ export function TableFilters({
 
         if (filter.type === 'select' && filter.options) {
           const width = filter.width || 'w-[130px]'
+          // Use placeholder if provided, otherwise create descriptive placeholder from label
+          // This helps identify what the filter is for
+          const placeholder = filter.placeholder || `Filter by ${filter.label.toLowerCase()}`
+          
+          // Get current value - if it's "all" or empty, use undefined to show placeholder
+          // This ensures the placeholder is visible when no specific filter is selected
+          const currentValue = values[filter.key]
+          const selectValue = currentValue && currentValue !== 'all' ? currentValue : undefined
           
           return (
             <Select
               key={filter.key}
-              value={values[filter.key] || 'all'}
-              onValueChange={(value) => onFilterChange(filter.key, value)}
+              value={selectValue}
+              onValueChange={(value) => {
+                // If "All" is selected, pass "all" to clear the filter and show placeholder
+                // Otherwise pass the selected value
+                onFilterChange(filter.key, value === '__clear__' ? 'all' : value)
+              }}
             >
               <SelectTrigger className={cn('h-10 shrink-0 [&>span]:text-start [&>span]:justify-start', width)}>
-                <SelectValue placeholder={filter.placeholder || filter.label} />
+                <SelectValue placeholder={placeholder} />
               </SelectTrigger>
               <SelectContent>
+                {/* Add "All" option to allow clearing the filter and show placeholder */}
+                <SelectItem value="__clear__">All</SelectItem>
                 {filter.options.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}

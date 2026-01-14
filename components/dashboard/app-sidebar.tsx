@@ -57,6 +57,7 @@ type AppSidebarProps = {
   userEmail?: string | null
   userAvatar?: string | null
   organizationName?: string | null
+  organizationLogo?: string | null
 }
 
 /**
@@ -89,18 +90,28 @@ function getInitials(name: string): string {
   return (words[0][0] + words[1][0]).toUpperCase()
 }
 
-function LogoBadge({ organizationName }: { organizationName?: string | null }) {
+function LogoBadge({ organizationName, organizationLogo }: { organizationName?: string | null, organizationLogo?: string | null }) {
   const displayName = organizationName || 'Club'
   const initials = getInitials(displayName)
-  
+
   return (
     <Link
       href="/dashboard"
       className="flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-sidebar-accent group-data-[collapsible=icon]:justify-center"
     >
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary text-sm font-bold uppercase text-sidebar-primary-foreground">
-        {initials}
-      </div>
+      {organizationLogo ? (
+        <div className="flex h-10 w-10 items-center justify-center">
+          <img
+            src={organizationLogo}
+            alt={displayName}
+            className="h-10 w-10 object-contain"
+          />
+        </div>
+      ) : (
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary text-sm font-bold uppercase text-sidebar-primary-foreground">
+          {initials}
+        </div>
+      )}
       <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
         <span className="text-sm font-semibold">{displayName}</span>
         <span className="text-xs text-sidebar-foreground/70">Club</span>
@@ -109,7 +120,7 @@ function LogoBadge({ organizationName }: { organizationName?: string | null }) {
   )
 }
 
-function AppSidebarComponent({ userName, userEmail, userAvatar, organizationName }: AppSidebarProps) {
+function AppSidebarComponent({ userName, userEmail, userAvatar, organizationName, organizationLogo }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const t = useTranslations()
@@ -178,7 +189,7 @@ function AppSidebarComponent({ userName, userEmail, userAvatar, organizationName
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <LogoBadge organizationName={organizationName} />
+        <LogoBadge organizationName={organizationName} organizationLogo={organizationLogo} />
       </SidebarHeader>
 
       <SidebarContent>

@@ -1917,6 +1917,55 @@
     }
   }
 
+  /* Button hover states - using color-mix for reliable darkening */
+  @media (hover: hover) {
+    button.bg-primary:hover,
+    [data-slot="button"].bg-primary:hover,
+    .hover\:bg-primary-hover:hover {
+      background-color: var(--primary-hover) !important;
+    }
+
+    @supports (color: color-mix(in oklab, red, black)) {
+      button.bg-primary:hover,
+      [data-slot="button"].bg-primary:hover,
+      .hover\:bg-primary-hover:hover {
+        background-color: color-mix(in oklab, var(--primary) 85%, black) !important;
+      }
+    }
+  }
+
+  @media (hover: hover) {
+    button.bg-destructive:hover,
+    [data-slot="button"].bg-destructive:hover,
+    .hover\:bg-destructive-hover:hover {
+      background-color: var(--destructive-hover) !important;
+    }
+
+    @supports (color: color-mix(in oklab, red, black)) {
+      button.bg-destructive:hover,
+      [data-slot="button"].bg-destructive:hover,
+      .hover\:bg-destructive-hover:hover {
+        background-color: color-mix(in oklab, var(--destructive) 85%, black) !important;
+      }
+    }
+  }
+
+  @media (hover: hover) {
+    button.bg-secondary:hover,
+    [data-slot="button"].bg-secondary:hover,
+    .hover\:bg-secondary-hover:hover {
+      background-color: var(--secondary-hover) !important;
+    }
+
+    @supports (color: color-mix(in oklab, red, black)) {
+      button.bg-secondary:hover,
+      [data-slot="button"].bg-secondary:hover,
+      .hover\:bg-secondary-hover:hover {
+        background-color: color-mix(in oklab, var(--secondary) 80%, black) !important;
+      }
+    }
+  }
+
   @media (hover: hover) {
     .hover\:bg-secondary\/80:hover {
       background-color: var(--secondary);
@@ -2753,6 +2802,10 @@
   --sidebar-ring: oklch(0.75 0.183 55.934);
   --page-background: oklch(0.97 0.002 286.375);
   --nav-background: oklch(1 0 0);
+  /* Hover states - darker shades for better contrast */
+  --primary-hover: oklch(0.58 0.222 41.116);
+  --destructive-hover: oklch(0.52 0.245 27.325);
+  --secondary-hover: oklch(0.90 0.001 286.375);
 }
 
 .dark {
@@ -2789,6 +2842,59 @@
   --sidebar-ring: oklch(0.408 0.123 38.172);
   --page-background: oklch(0.141 0.005 285.823);
   --nav-background: oklch(0.21 0.006 285.885);
+  /* Hover states - darker shades for better contrast */
+  --primary-hover: oklch(0.65 0.213 47.604);
+  --destructive-hover: oklch(0.64 0.191 22.216);
+  --secondary-hover: oklch(0.24 0.006 286.033);
+}
+
+/* ========================================
+   EXPERIMENTAL THEME PRESETS (Dev Only)
+   ======================================== */
+
+/* Liquid Glass Theme - Rounded, semi-transparent, softer */
+.theme-liquid-glass {
+  --radius: 1.2rem;
+  --card: oklch(0.98 0.005 286.375 / 0.85);
+  --popover: oklch(0.98 0.005 286.375 / 0.9);
+  --border: oklch(0.9 0.01 286.32 / 0.3);
+  --input: oklch(0.9 0.01 286.32 / 0.5);
+  --primary: oklch(0.55 0.22 270);
+  --primary-foreground: oklch(0.98 0.016 73.684);
+}
+
+.theme-liquid-glass.dark {
+  --card: oklch(0.2 0.01 285.885 / 0.7);
+  --popover: oklch(0.22 0.01 285.885 / 0.8);
+  --background: oklch(0.12 0.01 285.885);
+  --border: oklch(1 0 0 / 0.15);
+  --input: oklch(1 0 0 / 0.1);
+  --primary: oklch(0.65 0.22 270);
+}
+
+/* Flat Theme - Minimal rounded corners, high contrast, sharp */
+.theme-flat {
+  --radius: 0.125rem;
+  --border: oklch(0.8 0.01 286.32);
+  --card: oklch(1 0 0);
+  --primary: oklch(0.4 0.25 260);
+  --primary-foreground: oklch(0.98 0.016 73.684);
+  --secondary: oklch(0.92 0.01 286.033);
+  --accent: oklch(0.95 0.01 286.375);
+}
+
+.theme-flat.dark {
+  --border: oklch(0.35 0.01 285.885);
+  --card: oklch(0.18 0.01 285.885);
+  --background: oklch(0.1 0.01 285.885);
+  --primary: oklch(0.5 0.25 260);
+  --secondary: oklch(0.2 0.01 286.033);
+  --accent: oklch(0.25 0.01 286.375);
+}
+
+/* Default theme - no overrides */
+.theme-default {
+  /* Uses base theme variables */
 }
 
 html {

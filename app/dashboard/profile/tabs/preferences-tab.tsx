@@ -38,6 +38,7 @@ const preferencesFormSchema = z.object({
   dateFormat: z.enum(["DD/MM/YYYY", "MM/DD/YYYY", "YYYY-MM-DD"]).optional(),
   timeFormat: z.enum(["12", "24"]).optional(),
   theme: z.enum(["light", "dark", "system"]).optional(),
+  experimentalTheme: z.enum(["default", "liquid-glass", "flat"]).optional(),
 });
 
 type PreferencesFormValues = z.infer<typeof preferencesFormSchema>;
@@ -48,6 +49,7 @@ interface User {
   dateFormat: string | null;
   timeFormat: string | null;
   theme: string | null;
+  experimentalTheme: string | null;
 }
 
 interface PreferencesTabProps {
@@ -95,6 +97,7 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
       dateFormat: (user.dateFormat as any) || "DD/MM/YYYY",
       timeFormat: (user.timeFormat as any) || "24",
       theme: (user.theme as any) || "system",
+      experimentalTheme: (user.experimentalTheme as any) || "default",
     },
   });
 
@@ -111,6 +114,7 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
       dateFormat: data.dateFormat || null,
       timeFormat: data.timeFormat || null,
       theme: data.theme || null,
+      experimentalTheme: data.experimentalTheme || null,
     };
 
     // Store in localStorage immediately for instant UI update
@@ -303,6 +307,38 @@ export function PreferencesTab({ user }: PreferencesTabProps) {
                 </FormItem>
               )}
             />
+
+            {/* Development Only: Experimental Theme Presets */}
+            {process.env.NODE_ENV === 'development' && (
+              <FormField
+                control={form.control}
+                name="experimentalTheme"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Experimental Theme (Dev Only)</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select theme preset" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="default">Default</SelectItem>
+                        <SelectItem value="liquid-glass">Liquid Glass</SelectItem>
+                        <SelectItem value="flat">Flat</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Switch between visual theme presets for assessment
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (

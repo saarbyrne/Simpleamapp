@@ -9,6 +9,7 @@ import { ThemeProvider } from 'next-themes'
 import { AnalyticsProviders } from '@/lib/analytics/providers'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { ThemeSync } from '@/components/theme-sync'
+import { ThemePresetSync } from '@/components/theme-preset-sync'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -67,6 +68,7 @@ export default async function RootLayout({
               disableTransitionOnChange={false}
             >
               <ThemeSync>
+                <ThemePresetSync />
                 <AnalyticsProviders>
                   {children}
                 </AnalyticsProviders>

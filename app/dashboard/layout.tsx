@@ -28,31 +28,35 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     user?.email?.split('@')[0] ||
     'Team member'
 
-  // Try to get organization name (cached, fast)
+  // Try to get organization data (cached, fast)
   let organizationName: string | null = null
+  let organizationLogo: string | null = null
   try {
     const dbUser = await getCachedUserWithOrganization()
     organizationName = dbUser?.organization?.name ?? null
+    organizationLogo = dbUser?.organization?.logo ?? null
   } catch (error) {
-    // Silently fail - organization name is optional
-    console.error('Failed to fetch organization name:', error)
+    // Silently fail - organization data is optional
+    console.error('Failed to fetch organization data:', error)
   }
 
   return (
     <Suspense fallback={
-      <DashboardLayoutClient 
-        userName={fallbackUserName} 
+      <DashboardLayoutClient
+        userName={fallbackUserName}
         userEmail={user?.email ?? null}
         userAvatar={null}
         organizationName={organizationName}
+        organizationLogo={organizationLogo}
       >
         {children}
       </DashboardLayoutClient>
     }>
-      <UserProfileWrapper 
+      <UserProfileWrapper
         fallbackUserName={fallbackUserName}
         userEmail={user?.email ?? null}
         organizationName={organizationName}
+        organizationLogo={organizationLogo}
       >
         {children}
       </UserProfileWrapper>
@@ -64,11 +68,13 @@ async function UserProfileWrapper({
   fallbackUserName,
   userEmail,
   organizationName,
+  organizationLogo,
   children
 }: {
   fallbackUserName: string
   userEmail: string | null
   organizationName?: string | null
+  organizationLogo?: string | null
   children: React.ReactNode
 }) {
   // Skip database call for now to avoid connectivity issues
@@ -78,6 +84,7 @@ async function UserProfileWrapper({
       userEmail={userEmail}
       userAvatar={null}
       organizationName={organizationName}
+      organizationLogo={organizationLogo}
     >
       {children}
     </DashboardLayoutClient>
