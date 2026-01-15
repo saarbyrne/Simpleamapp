@@ -15,6 +15,7 @@ export {
   featureStatusColors,
   billingStatusColors,
   generalStatusColors,
+  getPlayerStatusColor,
   type PlayerStatus,
   type PasswordStrength,
   type FeatureStatus,

@@ -2,7 +2,7 @@ import { differenceInYears } from 'date-fns'
 import { getPlayer } from '@/app/actions/players'
 import { getCurrentUserProfile } from '@/app/actions/profile'
 import { formatDate } from '@/lib/date'
-import { statusColors } from '@/design-system/tokens/status-colors'
+import { getPlayerStatusColor } from '@/design-system/tokens/status-colors'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -72,7 +72,7 @@ export default async function PlayerProfilePage({ params }: { params: { id: stri
   const organization = player.organizations?.[0]
   const status = organization?.status ?? 'active'
   const normalizedStatus = status.toLowerCase()
-  const statusColorClass = statusColors[normalizedStatus] ?? 'bg-muted text-muted-foreground'
+  const statusColorClass = getPlayerStatusColor(status)
 
   // Calculate age server-side once
   const age = player.dateOfBirth

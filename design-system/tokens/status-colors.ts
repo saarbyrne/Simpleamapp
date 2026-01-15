@@ -22,6 +22,17 @@ export const statusColors = {
 export type PlayerStatus = keyof typeof statusColors
 
 /**
+ * Helper function to safely get player status colors
+ * @param status - The player status (will be normalized to lowercase)
+ * @returns The status color classes or a fallback
+ */
+export function getPlayerStatusColor(status: string | undefined | null): string {
+  if (!status) return 'bg-muted text-muted-foreground hover:bg-muted/80'
+  const normalized = status.toLowerCase() as PlayerStatus
+  return statusColors[normalized] ?? 'bg-muted text-muted-foreground hover:bg-muted/80'
+}
+
+/**
  * Password strength indicators
  */
 export const passwordStrengthColors = {

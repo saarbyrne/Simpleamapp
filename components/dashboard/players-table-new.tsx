@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
-import { statusColors } from '@/design-system/tokens/status-colors'
+import { getPlayerStatusColor } from '@/design-system/tokens/status-colors'
 import {
   ColumnDef,
   SortingState,
@@ -211,11 +211,10 @@ const createColumns = (
     enableHiding: true,
     cell: ({ getValue }) => {
       const status = (getValue() as string) ?? ''
-      const normalized = status.toLowerCase()
-      const colorClass = statusColors[normalized] ?? 'bg-muted text-muted-foreground'
+      const colorClass = getPlayerStatusColor(status)
       return (
         <Badge className={colorClass}>
-          {statusLabel(normalized, t)}
+          {statusLabel(status.toLowerCase(), t)}
         </Badge>
       )
     },
