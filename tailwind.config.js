@@ -74,10 +74,6 @@ module.exports = {
         },
         'page-background': 'hsl(var(--page-background))',
         'nav-background': 'hsl(var(--nav-background))',
-        'marketing-brand-primary': 'hsl(var(--marketing-brand-primary))',
-        'marketing-brand-dark': 'hsl(var(--marketing-brand-dark))',
-        'marketing-brand-light': 'hsl(var(--marketing-brand-light))',
-        'marketing-brand-accent': 'hsl(var(--marketing-brand-accent))',
       },
       borderRadius: {
         lg: 'var(--radius)',

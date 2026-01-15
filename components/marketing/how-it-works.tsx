@@ -20,7 +20,7 @@ export function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="bg-marketing-brand-primary py-24 lg:py-32">
+    <section id="how-it-works" className="bg-primary py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left - Image */}
@@ -51,7 +51,7 @@ export function HowItWorks() {
               {steps.map((step) => (
                 <div key={step.number} className="flex gap-6">
                   <div className="flex-shrink-0">
-                    <div className="w-16 h-16 bg-marketing-brand-accent rounded-lg flex items-center justify-center">
+                    <div className="w-16 h-16 bg-accent rounded-lg flex items-center justify-center">
                       <span className="text-white text-xl font-bold">{step.number}</span>
                     </div>
                   </div>

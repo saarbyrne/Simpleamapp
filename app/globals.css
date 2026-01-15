@@ -2809,11 +2809,6 @@
   --sidebar-ring: oklch(0.75 0.183 55.934);
   --page-background: oklch(0.97 0.002 286.375);
   --nav-background: oklch(1 0 0);
-  /* Marketing brand colors */
-  --marketing-brand-primary: oklch(0.29 0.12 274);
-  --marketing-brand-dark: oklch(0.18 0.002 286);
-  --marketing-brand-light: oklch(0.97 0.001 286);
-  --marketing-brand-accent: oklch(0.68 0.19 35);
   /* Hover states - darker shades for better contrast */
   --primary-hover: oklch(0.58 0.222 41.116);
   --destructive-hover: oklch(0.52 0.245 27.325);
@@ -2864,11 +2859,6 @@
   --sidebar-ring: oklch(0.408 0.123 38.172);
   --page-background: oklch(0.141 0.005 285.823);
   --nav-background: oklch(0.21 0.006 285.885);
-  /* Marketing brand colors */
-  --marketing-brand-primary: oklch(0.29 0.12 274);
-  --marketing-brand-dark: oklch(0.92 0.001 286);
-  --marketing-brand-light: oklch(0.18 0.002 286);
-  --marketing-brand-accent: oklch(0.68 0.19 35);
   /* Hover states - darker shades for better contrast */
   --primary-hover: oklch(0.65 0.213 47.604);
   --destructive-hover: oklch(0.64 0.191 22.216);

@@ -161,54 +161,6 @@ export const UIColors: Story = {
   ),
 };
 
-export const MarketingColors: Story = {
-  render: () => (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Marketing Brand Colors</h2>
-        <p className="text-muted-foreground mb-6">
-          Brand colors specifically for marketing pages and external-facing content.
-        </p>
-      </div>
-
-      <div className="grid gap-4">
-        <ColorSwatch
-          name="Brand Primary"
-          cssVar="marketing-brand-primary"
-          description="Deep blue brand color (#142978)"
-        />
-        <ColorSwatch
-          name="Brand Dark"
-          cssVar="marketing-brand-dark"
-          description="Dark text and backgrounds (#1E1E1E)"
-        />
-        <ColorSwatch
-          name="Brand Light"
-          cssVar="marketing-brand-light"
-          description="Light gray backgrounds (#F5F5F5)"
-        />
-        <ColorSwatch
-          name="Brand Accent"
-          cssVar="marketing-brand-accent"
-          description="Orange accent color (#FF6A1F)"
-        />
-      </div>
-
-      <div className="mt-8 p-6 rounded-lg bg-marketing-brand-light">
-        <p className="text-marketing-brand-dark font-semibold mb-2">Example Usage:</p>
-        <div className="flex gap-4">
-          <button className="px-6 py-3 bg-marketing-brand-primary text-white rounded-md font-semibold hover:opacity-90">
-            Get Started
-          </button>
-          <button className="px-6 py-3 bg-marketing-brand-accent text-white rounded-md font-semibold hover:opacity-90">
-            Learn More
-          </button>
-        </div>
-      </div>
-    </div>
-  ),
-};
-
 export const ColorUsageGuide: Story = {
   render: () => (
     <div className="space-y-6">
@@ -225,7 +177,7 @@ export const ColorUsageGuide: Story = {
           <ul className="space-y-2 text-sm">
             <li>• Use semantic color classes: <code className="bg-background px-1 rounded">bg-primary</code>, <code className="bg-background px-1 rounded">text-foreground</code></li>
             <li>• Always pair colors with their foreground variants for proper contrast</li>
-            <li>• Use marketing colors only on marketing pages</li>
+            <li>• Use the same design tokens across dashboard and marketing pages</li>
             <li>• Test colors in both light and dark modes</li>
           </ul>
         </div>
@@ -235,7 +187,7 @@ export const ColorUsageGuide: Story = {
           <ul className="space-y-2 text-sm">
             <li>• Never hardcode hex colors: <code className="bg-background px-1 rounded line-through">bg-[#142978]</code></li>
             <li>• Don't use Tailwind color scale: <code className="bg-background px-1 rounded line-through">bg-blue-500</code></li>
-            <li>• Avoid mixing marketing and app UI colors</li>
+            <li>• Don't create separate color systems for different parts of the app</li>
             <li>• Don't use inline styles for colors</li>
           </ul>
         </div>
