@@ -68,3 +68,6 @@ canvas-test-script.js
 /docs/security/
 /docs/business/
 /docs/internal/
+
+# Design system test reports
+reports/
