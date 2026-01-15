@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export function CTA() {
   return (
-    <section className="bg-[#1E1E1E] py-24 lg:py-32">
+    <section className="bg-marketing-brand-dark py-24 lg:py-32">
       <div className="max-w-4xl mx-auto px-6 text-center">
         <h2 className="text-4xl lg:text-5xl font-extrabold text-white mb-6">
           Ready to simplify your athlete management?
@@ -14,7 +14,7 @@ export function CTA() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <GetStartedButton
-            className="bg-[#142978] hover:bg-[#142978]/90 text-white px-8 rounded-md"
+            className="bg-marketing-brand-primary hover:bg-marketing-brand-primary/90 text-white px-8 rounded-md"
           >
             START FREE TRIAL
           </GetStartedButton>

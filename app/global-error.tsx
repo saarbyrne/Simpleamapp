@@ -22,49 +22,22 @@ export default function GlobalError({
   return (
     <html>
       <body>
-        <div
-          style={{
-            display: 'flex',
-            minHeight: '100vh',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '400px',
-              textAlign: 'center',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-            }}
-          >
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>
+        <div className="flex min-h-screen flex-col items-center justify-center p-4">
+          <div className="w-full max-w-md text-center flex flex-col gap-4">
+            <h2 className="text-2xl font-bold text-foreground">
               Something went wrong!
             </h2>
-            <p style={{ color: '#666' }}>
+            <p className="text-muted-foreground">
               We&apos;ve been notified and will look into it.
             </p>
             {error.message && (
-              <p style={{ fontSize: '14px', color: '#888' }}>
+              <p className="text-sm text-muted-foreground/80">
                 Error: {error.message}
               </p>
             )}
             <button
               onClick={reset}
-              style={{
-                borderRadius: '6px',
-                backgroundColor: '#000',
-                padding: '8px 16px',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#fff',
-                border: 'none',
-                cursor: 'pointer',
-              }}
+              className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background border-none cursor-pointer hover:opacity-90"
             >
               Try again
             </button>

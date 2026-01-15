@@ -31,6 +31,21 @@ module.exports = {
           foreground: 'hsl(var(--destructive-foreground))',
           hover: 'var(--destructive-hover)',
         },
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+          hover: 'var(--success-hover)',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
+          hover: 'var(--warning-hover)',
+        },
+        info: {
+          DEFAULT: 'hsl(var(--info))',
+          foreground: 'hsl(var(--info-foreground))',
+          hover: 'var(--info-hover)',
+        },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
           foreground: 'hsl(var(--muted-foreground))',
@@ -59,6 +74,10 @@ module.exports = {
         },
         'page-background': 'hsl(var(--page-background))',
         'nav-background': 'hsl(var(--nav-background))',
+        'marketing-brand-primary': 'hsl(var(--marketing-brand-primary))',
+        'marketing-brand-dark': 'hsl(var(--marketing-brand-dark))',
+        'marketing-brand-light': 'hsl(var(--marketing-brand-light))',
+        'marketing-brand-accent': 'hsl(var(--marketing-brand-accent))',
       },
       borderRadius: {
         lg: 'var(--radius)',

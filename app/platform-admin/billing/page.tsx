@@ -1,6 +1,7 @@
 import { PageHeader } from '@/components/platform-admin/page-header'
 import { StatsCard } from '@/components/platform-admin/stats-card'
 import { logPlatformAdminAction } from '@/lib/platform-admin'
+import { billingStatusColors } from '@/design-system/tokens/status-colors'
 import { PLAN_PRICING } from '@/lib/platform-admin'
 import { prisma } from '@/lib/db'
 import { Badge } from '@/components/ui/badge'
@@ -125,11 +126,11 @@ export default async function BillingPage() {
 
         {/* Expiring Soon Alert */}
         {expiringSoon.length > 0 && (
-          <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-            <h3 className="font-medium text-yellow-900">
+          <div className={`rounded-lg border p-4 ${billingStatusColors.warning}`}>
+            <h3 className="font-medium">
               {expiringSoon.length} subscription{expiringSoon.length > 1 ? 's' : ''} expiring in the next 7 days
             </h3>
-            <p className="mt-1 text-sm text-yellow-700">
+            <p className="mt-1 text-sm">
               Review these subscriptions to ensure renewal
             </p>
           </div>
@@ -163,7 +164,7 @@ export default async function BillingPage() {
                   const monthlyRevenue = PLAN_PRICING[subscription.plan as keyof typeof PLAN_PRICING] || 0
 
                   return (
-                    <TableRow key={subscription.id} className={isExpiringSoon ? 'bg-yellow-50' : ''}>
+                    <TableRow key={subscription.id} className={isExpiringSoon ? 'bg-warning/10' : ''}>
                       <TableCell>
                         <Link
                           href={`/platform-admin/organizations/${subscription.organization.id}`}
@@ -190,7 +191,7 @@ export default async function BillingPage() {
                             subscription.status === 'past_due' ? 'destructive' :
                             'secondary'
                           }
-                          className={subscription.status === 'active' ? 'bg-green-500' : ''}
+                          className={subscription.status === 'active' ? 'bg-success' : ''}
                         >
                           {subscription.status}
                         </Badge>

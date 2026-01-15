@@ -141,6 +141,21 @@ export const colors = {
     '4': 'oklch(0.553 0.195 38.402)',
     '5': 'oklch(0.47 0.157 37.304)',
   },
+
+  // Marketing Brand Colors
+  // These colors are used specifically for marketing pages
+  marketing: {
+    brand: {
+      // Deep blue brand color (#142978)
+      primary: 'oklch(0.29 0.12 274)',
+      // Dark text/background (#1E1E1E)
+      dark: 'oklch(0.18 0.002 286)',
+      // Light gray background (#F5F5F5)
+      light: 'oklch(0.97 0.001 286)',
+      // Orange accent (#FF6A1F)
+      accent: 'oklch(0.68 0.19 35)',
+    },
+  },
 } as const
 
 /**

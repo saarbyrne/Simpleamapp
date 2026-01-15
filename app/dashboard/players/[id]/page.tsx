@@ -2,6 +2,7 @@ import { differenceInYears } from 'date-fns'
 import { getPlayer } from '@/app/actions/players'
 import { getCurrentUserProfile } from '@/app/actions/profile'
 import { formatDate } from '@/lib/date'
+import { statusColors } from '@/design-system/tokens/status-colors'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -12,14 +13,6 @@ import { createServerClient } from '@/lib/supabase/server'
 import { Mail, Phone, Edit } from 'lucide-react'
 import { PlayerProfileHeader } from '@/components/dashboard/player-profile-header'
 import { PlayerProfileTabs } from '@/components/dashboard/player-profile-tabs'
-
-const statusColors: Record<string, string> = {
-  active: 'bg-green-600 text-white hover:bg-green-700',
-  available: 'bg-green-600 text-white hover:bg-green-700',
-  injured: 'bg-destructive text-white hover:bg-destructive/90',
-  suspended: 'bg-muted text-muted-foreground hover:bg-muted/80',
-  inactive: 'bg-muted text-muted-foreground hover:bg-muted/80',
-}
 
 const statusLabel = (value: string) => {
   const normalized = value?.toLowerCase()

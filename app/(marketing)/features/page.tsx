@@ -98,21 +98,21 @@ export default function FeaturesPage() {
       <section className="bg-white pt-24 pb-16 lg:pt-32 lg:pb-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-block px-4 py-2 bg-[#F5F5F5] rounded-full mb-6">
-              <p className="text-[#1E1E1E] text-sm">Everything You Need</p>
+            <div className="inline-block px-4 py-2 bg-marketing-brand-light rounded-full mb-6">
+              <p className="text-marketing-brand-dark text-sm">Everything You Need</p>
             </div>
 
-            <h1 className="text-5xl lg:text-6xl font-extrabold text-[#1E1E1E] mb-6">
+            <h1 className="text-5xl lg:text-6xl font-extrabold text-marketing-brand-dark mb-6">
               Every tool. Zero complexity.
             </h1>
 
-            <p className="text-xl text-[#1E1E1E]/70 max-w-2xl mx-auto mb-8">
+            <p className="text-xl text-marketing-brand-dark/70 max-w-2xl mx-auto mb-8">
               SAM gives you professional-grade athlete management tools without the learning curve. Simple features that deliver serious results.
             </p>
 
             <Button
               size="lg"
-              className="bg-[#142978] hover:bg-[#142978]/90 text-white px-8 rounded-md"
+              className="bg-marketing-brand-primary hover:bg-marketing-brand-primary/90 text-white px-8 rounded-md"
               asChild
             >
               <Link href="/login">
@@ -125,7 +125,7 @@ export default function FeaturesPage() {
       </section>
 
       {/* Features Grid */}
-      <section className="bg-[#F5F5F5] py-24 lg:py-32">
+      <section className="bg-marketing-brand-light py-24 lg:py-32">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => {
@@ -135,13 +135,13 @@ export default function FeaturesPage() {
                   key={index}
                   className="bg-white p-8 rounded-lg hover:shadow-xl transition-all duration-300 group"
                 >
-                  <div className="w-14 h-14 bg-[#142978]/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-[#142978] transition-colors">
-                    <Icon className="w-7 h-7 text-[#142978] group-hover:text-white transition-colors" />
+                  <div className="w-14 h-14 bg-marketing-brand-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-marketing-brand-primary transition-colors">
+                    <Icon className="w-7 h-7 text-marketing-brand-primary group-hover:text-white transition-colors" />
                   </div>
-                  <h3 className="text-xl font-extrabold text-[#1E1E1E] mb-3">
+                  <h3 className="text-xl font-extrabold text-marketing-brand-dark mb-3">
                     {feature.title}
                   </h3>
-                  <p className="text-[#1E1E1E]/70 leading-relaxed">
+                  <p className="text-marketing-brand-dark/70 leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -152,7 +152,7 @@ export default function FeaturesPage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="bg-[#142978] py-24 lg:py-32">
+      <section className="bg-marketing-brand-primary py-24 lg:py-32">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-4xl lg:text-5xl font-extrabold text-white mb-6">
             All features. One simple price.
@@ -163,7 +163,7 @@ export default function FeaturesPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              className="bg-white hover:bg-white/90 text-[#142978] px-8 rounded-md"
+              className="bg-white hover:bg-white/90 text-marketing-brand-primary px-8 rounded-md"
               asChild
             >
               <a href="/#pricing">

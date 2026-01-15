@@ -60,31 +60,31 @@ export default function AboutPage() {
       <section className="bg-white pt-24 pb-16 lg:pt-32 lg:pb-20">
         <div className="max-w-4xl mx-auto px-6">
           <div className="mb-6">
-            <span className="text-[#FF6A1F] font-extrabold">ABOUT SAM</span>
+            <span className="text-marketing-brand-accent font-extrabold">ABOUT SAM</span>
           </div>
 
-          <h1 className="text-5xl lg:text-6xl font-extrabold text-[#1E1E1E] mb-8">
+          <h1 className="text-5xl lg:text-6xl font-extrabold text-marketing-brand-dark mb-8">
             Redefining athlete management.
           </h1>
 
-          <p className="text-xl text-[#1E1E1E]/70 mb-6">
+          <p className="text-xl text-marketing-brand-dark/70 mb-6">
             Professional-grade tools shouldn&apos;t cost professional-grade money. SAM makes high-quality athlete management software affordable, simple, and powered by AI.
           </p>
 
-          <p className="text-xl text-[#1E1E1E]/70">
+          <p className="text-xl text-marketing-brand-dark/70">
             Every coach and club — from grassroots to elite — should have access to performance tools that just work.
           </p>
         </div>
       </section>
 
       {/* The Problem */}
-      <section className="bg-[#F5F5F5] py-24 lg:py-32">
+      <section className="bg-marketing-brand-light py-24 lg:py-32">
         <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-4xl font-extrabold text-[#1E1E1E] mb-8">
+          <h2 className="text-4xl font-extrabold text-marketing-brand-dark mb-8">
             The problem with sports software.
           </h2>
 
-          <div className="space-y-6 text-lg text-[#1E1E1E]/70">
+          <div className="space-y-6 text-lg text-marketing-brand-dark/70">
             <p>
               Current athlete management systems were built on legacy architectures. They&apos;re expensive, complex, and slow to adapt to new technology.
             </p>
@@ -103,17 +103,17 @@ export default function AboutPage() {
       {/* Our Approach */}
       <section className="bg-white py-24 lg:py-32">
         <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-4xl font-extrabold text-[#1E1E1E] mb-12">
+          <h2 className="text-4xl font-extrabold text-marketing-brand-dark mb-12">
             How we build SAM.
           </h2>
 
           <div className="space-y-8">
             {principles.map((principle, index) => (
-              <div key={index} className="border-l-4 border-[#142978] pl-6">
-                <h3 className="text-xl font-extrabold text-[#1E1E1E] mb-2">
+              <div key={index} className="border-l-4 border-marketing-brand-primary pl-6">
+                <h3 className="text-xl font-extrabold text-marketing-brand-dark mb-2">
                   {principle.title}
                 </h3>
-                <p className="text-[#1E1E1E]/70">
+                <p className="text-marketing-brand-dark/70">
                   {principle.description}
                 </p>
               </div>
@@ -123,9 +123,9 @@ export default function AboutPage() {
       </section>
 
       {/* Strategic Pillars */}
-      <section className="bg-[#F5F5F5] py-24 lg:py-32">
+      <section className="bg-marketing-brand-light py-24 lg:py-32">
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-4xl font-extrabold text-[#1E1E1E] mb-12 text-center">
+          <h2 className="text-4xl font-extrabold text-marketing-brand-dark mb-12 text-center">
             What drives us.
           </h2>
 
@@ -134,13 +134,13 @@ export default function AboutPage() {
               const Icon = pillar.icon;
               return (
                 <div key={index} className="bg-white p-8 rounded-lg">
-                  <div className="w-12 h-12 bg-[#142978]/10 rounded-lg flex items-center justify-center mb-4">
-                    <Icon className="w-6 h-6 text-[#142978]" />
+                  <div className="w-12 h-12 bg-marketing-brand-primary/10 rounded-lg flex items-center justify-center mb-4">
+                    <Icon className="w-6 h-6 text-marketing-brand-primary" />
                   </div>
-                  <h3 className="text-xl font-extrabold text-[#1E1E1E] mb-3">
+                  <h3 className="text-xl font-extrabold text-marketing-brand-dark mb-3">
                     {pillar.title}
                   </h3>
-                  <p className="text-[#1E1E1E]/70">
+                  <p className="text-marketing-brand-dark/70">
                     {pillar.description}
                   </p>
                 </div>
@@ -153,13 +153,13 @@ export default function AboutPage() {
       {/* Founder */}
       <section className="bg-white py-24 lg:py-32">
         <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-4xl font-extrabold text-[#1E1E1E] mb-8">
+          <h2 className="text-4xl font-extrabold text-marketing-brand-dark mb-8">
             Built by people who understand sports and software.
           </h2>
 
-          <div className="space-y-6 text-lg text-[#1E1E1E]/70">
+          <div className="space-y-6 text-lg text-marketing-brand-dark/70">
             <p>
-              SAM was founded by <a href="https://linkedin.com/in/saar-byrne-72516b20" target="_blank" rel="noopener noreferrer" className="text-[#142978] hover:underline">Saar Byrne</a>, who brings a first-principles approach to solving major problems through ambitious goals and superior products.
+              SAM was founded by <a href="https://linkedin.com/in/saar-byrne-72516b20" target="_blank" rel="noopener noreferrer" className="text-marketing-brand-primary hover:underline">Saar Byrne</a>, who brings a first-principles approach to solving major problems through ambitious goals and superior products.
             </p>
 
             <p>
@@ -174,7 +174,7 @@ export default function AboutPage() {
       </section>
 
       {/* Brand Promise */}
-      <section className="bg-[#142978] py-24 lg:py-32">
+      <section className="bg-marketing-brand-primary py-24 lg:py-32">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-4xl lg:text-5xl font-extrabold text-white mb-6">
             Our promise.
@@ -186,7 +186,7 @@ export default function AboutPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              className="bg-white hover:bg-white/90 text-[#142978] px-8 rounded-md"
+              className="bg-white hover:bg-white/90 text-marketing-brand-primary px-8 rounded-md"
               asChild
             >
               <Link href="/features">

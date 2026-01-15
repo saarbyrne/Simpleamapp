@@ -9,6 +9,18 @@ export { motion } from './motion'
 export { colors, colorVariables } from './colors'
 export { spacing, spacingPatterns } from './spacing'
 export { typography, typographyScale, typographyVariables } from './typography'
+export {
+  statusColors,
+  passwordStrengthColors,
+  featureStatusColors,
+  billingStatusColors,
+  generalStatusColors,
+  type PlayerStatus,
+  type PasswordStrength,
+  type FeatureStatus,
+  type BillingStatus,
+  type GeneralStatus
+} from './status-colors'
 
 /**
  * Usage Examples:

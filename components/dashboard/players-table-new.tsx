@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
+import { statusColors } from '@/design-system/tokens/status-colors'
 import {
   ColumnDef,
   SortingState,
@@ -73,14 +74,6 @@ export type PlayerRow = {
 type PlayersTableProps = {
   players: PlayerRow[]
   total?: number
-}
-
-const statusColors: Record<string, string> = {
-  active: 'bg-green-600 text-white hover:bg-green-700',
-  available: 'bg-green-600 text-white hover:bg-green-700',
-  injured: 'bg-destructive text-white hover:bg-destructive/90',
-  suspended: 'bg-muted text-muted-foreground hover:bg-muted/80',
-  inactive: 'bg-muted text-muted-foreground hover:bg-muted/80',
 }
 
 const statusLabel = (value: string, t: ReturnType<typeof useTranslations>) => {

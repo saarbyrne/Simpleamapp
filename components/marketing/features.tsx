@@ -35,13 +35,13 @@ const features = [
 
 export function Features() {
   return (
-    <section className="bg-[#F5F5F5] py-24 lg:py-32">
+    <section className="bg-marketing-brand-light py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl lg:text-5xl font-extrabold text-[#1E1E1E] mb-6">
+          <h2 className="text-4xl lg:text-5xl font-extrabold text-marketing-brand-dark mb-6">
             Does exactly what it says on the app.
           </h2>
-          <p className="text-xl text-[#1E1E1E]/70">
+          <p className="text-xl text-marketing-brand-dark/70">
             Everything you need to manage your team. Nothing you don&apos;t.
           </p>
         </div>
@@ -54,13 +54,13 @@ export function Features() {
                 key={index}
                 className="bg-white p-8 rounded-lg hover:shadow-lg transition-shadow"
               >
-                <div className="w-12 h-12 bg-[#142978]/10 rounded-lg flex items-center justify-center mb-6">
-                  <Icon className="w-6 h-6 text-[#142978]" />
+                <div className="w-12 h-12 bg-marketing-brand-primary/10 rounded-lg flex items-center justify-center mb-6">
+                  <Icon className="w-6 h-6 text-marketing-brand-primary" />
                 </div>
-                <h3 className="text-xl font-extrabold text-[#1E1E1E] mb-3">
+                <h3 className="text-xl font-extrabold text-marketing-brand-dark mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-[#1E1E1E]/70">
+                <p className="text-marketing-brand-dark/70">
                   {feature.description}
                 </p>
               </div>

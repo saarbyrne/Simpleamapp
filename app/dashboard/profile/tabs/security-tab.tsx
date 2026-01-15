@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { passwordStrengthColors } from "@/design-system/tokens/status-colors";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -97,11 +98,11 @@ export function SecurityTab({ user }: SecurityTabProps) {
     if (/[^a-zA-Z0-9]/.test(password)) strength++;
 
     if (strength <= 2) {
-      return { strength, label: t('profile.security.passwordStrength.weak'), color: "text-red-500" };
+      return { strength, label: t('profile.security.passwordStrength.weak'), color: passwordStrengthColors.weak.text };
     } else if (strength <= 3) {
-      return { strength, label: t('profile.security.passwordStrength.medium'), color: "text-yellow-500" };
+      return { strength, label: t('profile.security.passwordStrength.medium'), color: passwordStrengthColors.medium.text };
     } else {
-      return { strength, label: t('profile.security.passwordStrength.strong'), color: "text-green-500" };
+      return { strength, label: t('profile.security.passwordStrength.strong'), color: passwordStrengthColors.strong.text };
     }
   }
 
@@ -162,10 +163,10 @@ export function SecurityTab({ user }: SecurityTabProps) {
                               <div
                                 className={`h-full rounded-full transition-all ${
                                   passwordStrength.strength <= 2
-                                    ? "bg-red-500"
+                                    ? passwordStrengthColors.weak.bg
                                     : passwordStrength.strength <= 3
-                                    ? "bg-yellow-500"
-                                    : "bg-green-500"
+                                    ? passwordStrengthColors.medium.bg
+                                    : passwordStrengthColors.strong.bg
                                 }`}
                                 style={{
                                   width: `${(passwordStrength.strength / 5) * 100}%`,

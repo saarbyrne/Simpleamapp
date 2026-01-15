@@ -29,16 +29,16 @@ export function Footer() {
   };
 
   return (
-    <footer className="bg-[#1E1E1E] text-white py-16">
+    <footer className="bg-marketing-brand-dark text-white py-16">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid md:grid-cols-5 gap-12 mb-12">
           {/* Brand */}
           <div className="md:col-span-1">
             <Link href="/" className="flex items-center mb-4">
-              <span className="text-2xl font-extrabold text-[#142978]">
+              <span className="text-2xl font-extrabold text-marketing-brand-primary">
                 simpleam
               </span>
-              <span className="ml-1 w-2 h-2 bg-[#142978] rounded-full"></span>
+              <span className="ml-1 w-2 h-2 bg-marketing-brand-primary rounded-full"></span>
             </Link>
             <p className="text-white/70 text-sm">
               Simple tools. Serious results.
@@ -57,14 +57,14 @@ export function Footer() {
                     {link.href.startsWith('#') ? (
                       <a
                         href={link.href}
-                        className="text-white/70 hover:text-[#142978] transition-colors text-sm"
+                        className="text-white/70 hover:text-marketing-brand-primary transition-colors text-sm"
                       >
                         {link.name}
                       </a>
                     ) : (
                       <Link
                         href={link.href}
-                        className="text-white/70 hover:text-[#142978] transition-colors text-sm"
+                        className="text-white/70 hover:text-marketing-brand-primary transition-colors text-sm"
                       >
                         {link.name}
                       </Link>
@@ -82,13 +82,13 @@ export function Footer() {
             © 2025 SAM. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <a href="#twitter" className="text-white/70 hover:text-[#142978] transition-colors text-sm">
+            <a href="#twitter" className="text-white/70 hover:text-marketing-brand-primary transition-colors text-sm">
               Twitter
             </a>
-            <a href="#linkedin" className="text-white/70 hover:text-[#142978] transition-colors text-sm">
+            <a href="#linkedin" className="text-white/70 hover:text-marketing-brand-primary transition-colors text-sm">
               LinkedIn
             </a>
-            <a href="#discord" className="text-white/70 hover:text-[#142978] transition-colors text-sm">
+            <a href="#discord" className="text-white/70 hover:text-marketing-brand-primary transition-colors text-sm">
               Discord
             </a>
           </div>
