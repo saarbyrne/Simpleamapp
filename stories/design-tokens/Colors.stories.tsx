@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { colors } from '@/design-system/tokens/colors';
+import { useEffect, useState } from 'react';
 
 /**
  * Design System Colors
@@ -19,25 +20,87 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-const ColorSwatch = ({ name, cssVar, description }: { name: string; cssVar: string; description?: string }) => (
-  <div className="flex items-center gap-4 p-4 rounded-lg border border-border">
-    <div
-      className="w-16 h-16 rounded-lg shadow-sm border border-border"
-      style={{ backgroundColor: `hsl(var(--${cssVar}))` }}
-    />
-    <div className="flex-1">
-      <h4 className="font-semibold text-sm">{name}</h4>
-      <code className="text-xs text-muted-foreground">--{cssVar}</code>
-      {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
+// Hook to get current theme
+const useTheme = () => {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const observer = new MutationObserver(() => {
+      setTheme(root.classList.contains('dark') ? 'dark' : 'light');
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+
+    // Initial theme
+    setTheme(root.classList.contains('dark') ? 'dark' : 'light');
+
+    return () => observer.disconnect();
+  }, []);
+
+  return theme;
+};
+
+// Get color value for current theme
+const getColorValue = (colorKey: keyof typeof colors, subKey?: string) => {
+  const theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  const colorObj = colors[colorKey];
+
+  if (subKey && typeof colorObj === 'object' && 'light' in colorObj) {
+    return colorObj[theme]?.[subKey] || colorObj.light?.[subKey] || colorObj[subKey as keyof typeof colorObj];
+  }
+
+  if (typeof colorObj === 'object' && 'light' in colorObj) {
+    return colorObj[theme] || colorObj.light;
+  }
+
+  return colorObj;
+};
+
+const ColorSwatch = ({ name, colorKey, subKey, description }: {
+  name: string;
+  colorKey: keyof typeof colors;
+  subKey?: string;
+  description?: string;
+}) => {
+  const [currentColor, setCurrentColor] = useState('');
+
+  useEffect(() => {
+    const updateColor = () => {
+      const colorValue = getColorValue(colorKey, subKey);
+      setCurrentColor(colorValue);
+    };
+
+    updateColor();
+
+    // Listen for theme changes
+    const observer = new MutationObserver(updateColor);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    return () => observer.disconnect();
+  }, [colorKey, subKey]);
+
+  const cssVar = subKey ? `${colorKey}-${subKey}` : colorKey;
+
+  return (
+    <div className="flex items-center gap-4 p-4 rounded-lg border border-border">
+      <div
+        className="w-16 h-16 rounded-lg shadow-sm border border-border"
+        style={{ backgroundColor: currentColor }}
+      />
+      <div className="flex-1">
+        <h4 className="font-semibold text-sm">{name}</h4>
+        <code className="text-xs text-muted-foreground">--{cssVar}</code>
+        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
+      </div>
+      <button
+        onClick={() => navigator.clipboard.writeText(`var(--${cssVar})`)}
+        className="px-3 py-1 text-xs bg-secondary hover:bg-secondary-hover rounded-md"
+      >
+        Copy
+      </button>
     </div>
-    <button
-      onClick={() => navigator.clipboard.writeText(`var(--${cssVar})`)}
-      className="px-3 py-1 text-xs bg-secondary hover:bg-secondary-hover rounded-md"
-    >
-      Copy
-    </button>
-  </div>
-);
+  );
+};
 
 export const SemanticColors: Story = {
   render: () => (
@@ -52,48 +115,58 @@ export const SemanticColors: Story = {
       <div className="grid gap-4">
         <ColorSwatch
           name="Primary"
-          cssVar="primary"
+          colorKey="primary"
           description="Main brand color for primary actions and emphasis"
         />
         <ColorSwatch
           name="Primary Foreground"
-          cssVar="primary-foreground"
+          colorKey="primary"
+          subKey="foreground"
           description="Text color on primary backgrounds"
         />
         <ColorSwatch
           name="Secondary"
-          cssVar="secondary"
+          colorKey="secondary"
           description="Secondary UI elements and subtle accents"
         />
         <ColorSwatch
           name="Secondary Foreground"
-          cssVar="secondary-foreground"
+          colorKey="secondary"
+          subKey="foreground"
           description="Text color on secondary backgrounds"
         />
         <ColorSwatch
           name="Destructive"
-          cssVar="destructive"
+          colorKey="destructive"
           description="Dangerous or destructive actions (delete, remove)"
         />
         <ColorSwatch
           name="Destructive Foreground"
-          cssVar="destructive-foreground"
+          colorKey="destructive"
+          subKey="foreground"
           description="Text color on destructive backgrounds"
         />
         <ColorSwatch
-          name="Success"
-          cssVar="success"
-          description="Successful states and positive actions"
+          name="Muted"
+          colorKey="muted"
+          description="Subtle backgrounds for secondary content"
         />
         <ColorSwatch
-          name="Warning"
-          cssVar="warning"
-          description="Warning states and cautionary messages"
+          name="Muted Foreground"
+          colorKey="muted"
+          subKey="foreground"
+          description="Dimmed text for less important content"
         />
         <ColorSwatch
-          name="Info"
-          cssVar="info"
-          description="Informational states and neutral messages"
+          name="Accent"
+          colorKey="accent"
+          description="Accent colors for highlighting"
+        />
+        <ColorSwatch
+          name="Accent Foreground"
+          colorKey="accent"
+          subKey="foreground"
+          description="Text color on accent backgrounds"
         />
       </div>
     </div>
@@ -113,47 +186,49 @@ export const UIColors: Story = {
       <div className="grid gap-4">
         <ColorSwatch
           name="Background"
-          cssVar="background"
+          colorKey="background"
           description="Main page background"
         />
         <ColorSwatch
           name="Foreground"
-          cssVar="foreground"
+          colorKey="foreground"
           description="Main text color"
         />
         <ColorSwatch
           name="Card"
-          cssVar="card"
+          colorKey="card"
           description="Card and panel backgrounds"
         />
         <ColorSwatch
           name="Card Foreground"
-          cssVar="card-foreground"
+          colorKey="card"
+          subKey="foreground"
           description="Text on cards"
         />
         <ColorSwatch
-          name="Muted"
-          cssVar="muted"
-          description="Subtle backgrounds for secondary content"
+          name="Popover"
+          colorKey="popover"
+          description="Popover and dropdown backgrounds"
         />
         <ColorSwatch
-          name="Muted Foreground"
-          cssVar="muted-foreground"
-          description="Dimmed text for less important content"
+          name="Popover Foreground"
+          colorKey="popover"
+          subKey="foreground"
+          description="Text on popovers"
         />
         <ColorSwatch
           name="Border"
-          cssVar="border"
+          colorKey="border"
           description="Border and divider color"
         />
         <ColorSwatch
           name="Input"
-          cssVar="input"
+          colorKey="input"
           description="Input field borders"
         />
         <ColorSwatch
           name="Ring"
-          cssVar="ring"
+          colorKey="ring"
           description="Focus ring color"
         />
       </div>
