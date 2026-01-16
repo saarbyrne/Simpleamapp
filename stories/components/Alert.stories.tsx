@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Terminal, AlertCircle, CheckCircle2, Info, AlertTriangle } from 'lucide-react';
+import { Terminal, AlertCircle, CheckCircle2, Info as InfoIcon, AlertTriangle } from 'lucide-react';
 
 const meta: Meta<typeof Alert> = {
   title: 'Components/Alert',
@@ -60,7 +60,7 @@ export const Success: Story = {
 export const Info: Story = {
   render: () => (
     <Alert className="border-blue-500/50 text-blue-600 dark:border-blue-500 dark:text-blue-400">
-      <Info className="h-4 w-4" />
+      <InfoIcon className="h-4 w-4" />
       <AlertTitle>Information</AlertTitle>
       <AlertDescription>
         New features have been added to the dashboard. Check them out!
