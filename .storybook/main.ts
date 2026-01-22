@@ -1,5 +1,6 @@
 import type { StorybookConfig } from '@storybook/nextjs';
 import path from 'path';
+import webpack from 'webpack';
 
 const config: StorybookConfig = {
   stories: [
@@ -11,7 +12,6 @@ const config: StorybookConfig = {
     '@storybook/addon-a11y',
     '@storybook/addon-interactions',
     '@geometricpanda/storybook-addon-badges',
-    'storybook-addon-pseudo-states',
   ],
   framework: {
     name: '@storybook/nextjs',
@@ -29,12 +29,23 @@ const config: StorybookConfig = {
     disableTelemetry: true,
   },
   webpackFinal: async (config) => {
+    // Add path aliases
     if (config.resolve) {
       config.resolve.alias = {
         ...config.resolve.alias,
         '@': path.resolve(__dirname, '../'),
       };
     }
+
+    // Inject dummy environment variables for Storybook
+    config.plugins = config.plugins || [];
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        'process.env.NEXT_PUBLIC_SUPABASE_URL': JSON.stringify('https://dummy-storybook.supabase.co'),
+        'process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY': JSON.stringify('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlN0b3J5Ym9vayBEdW1teSIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'),
+      })
+    );
+
     return config;
   },
 };

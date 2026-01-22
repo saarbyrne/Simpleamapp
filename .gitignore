@@ -71,3 +71,4 @@ canvas-test-script.js
 
 # Design system test reports
 reports/
+.env.storybook

@@ -10,7 +10,7 @@ import {
 } from '@/components/data-table'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ColumnDef, useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table'
+import { ColumnDef, useReactTable, getCoreRowModel, getSortedRowModel } from '@tanstack/react-table'
 import { UserPlus, MoreHorizontal } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useState } from 'react'
@@ -98,10 +98,9 @@ const statusColors: Record<string, string> = {
 // Table component for the story
 function PlayersTable({ data }: { data: Player[] }) {
   const [sorting, setSorting] = useState<any>([])
-  const [columnFilters, setColumnFilters] = useState<any>([])
   const [columnVisibility, setColumnVisibility] = useState({})
   const [rowSelection, setRowSelection] = useState({})
-  const [globalFilter, setGlobalFilter] = useState('')
+  const [filterValues, setFilterValues] = useState<Record<string, any>>({})
 
   const columns: ColumnDef<Player>[] = [
     {
@@ -159,16 +158,16 @@ function PlayersTable({ data }: { data: Player[] }) {
 
   const filterConfig: FilterConfig[] = [
     {
-      id: 'search',
+      key: 'search',
+      label: 'Search',
       type: 'search',
       placeholder: 'Search players...',
-      column: 'name',
     },
     {
-      id: 'position',
+      key: 'position',
+      label: 'Position',
       type: 'select',
       placeholder: 'All Positions',
-      column: 'position',
       options: [
         { label: 'Forward', value: 'Forward' },
         { label: 'Midfielder', value: 'Midfielder' },
@@ -177,10 +176,10 @@ function PlayersTable({ data }: { data: Player[] }) {
       ],
     },
     {
-      id: 'status',
+      key: 'status',
+      label: 'Status',
       type: 'select',
       placeholder: 'All Statuses',
-      column: 'status',
       options: [
         { label: 'Active', value: 'active' },
         { label: 'Injured', value: 'injured' },
@@ -190,41 +189,61 @@ function PlayersTable({ data }: { data: Player[] }) {
     },
   ]
 
+  // Handle filter changes
+  const handleFilterChange = (key: string, value: any) => {
+    setFilterValues(prev => ({ ...prev, [key]: value }))
+  }
+
+  // Apply filters to data (simple client-side filtering for demo)
+  const filteredData = data.filter(player => {
+    // Search filter
+    if (filterValues.search) {
+      const searchLower = filterValues.search.toLowerCase()
+      if (!player.name.toLowerCase().includes(searchLower)) {
+        return false
+      }
+    }
+    // Position filter
+    if (filterValues.position && player.position !== filterValues.position) {
+      return false
+    }
+    // Status filter
+    if (filterValues.status && player.status !== filterValues.status) {
+      return false
+    }
+    return true
+  })
+
+  // Create table instance for column manager and export
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-      globalFilter,
-    },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
   })
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <DataTableFilters
-          table={table}
           filters={filterConfig}
-          globalFilter={globalFilter}
-          setGlobalFilter={setGlobalFilter}
+          values={filterValues}
+          onFilterChange={handleFilterChange}
         />
         <div className="flex gap-2">
           <DataTableColumnManager table={table} />
           <DataTableExport table={table} filename="players" />
         </div>
       </div>
-      <DataTable table={table} columns={columns} />
+      <DataTable
+        data={filteredData}
+        columns={columns}
+        sorting={sorting}
+        onSortingChange={setSorting}
+        columnVisibility={columnVisibility}
+        onColumnVisibilityChange={setColumnVisibility}
+        rowSelection={rowSelection}
+        onRowSelectionChange={setRowSelection}
+      />
     </div>
   )
 }

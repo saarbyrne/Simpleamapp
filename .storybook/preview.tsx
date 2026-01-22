@@ -3,6 +3,18 @@ import '../app/globals.css';
 import React from 'react';
 import { ThemeDecorator } from './decorators/ThemeDecorator';
 
+// Suppress act() warnings in Storybook - these are expected for interactive components
+const originalError = console.error;
+console.error = (...args) => {
+  if (
+    typeof args[0] === 'string' &&
+    args[0].includes('not configured to support act')
+  ) {
+    return;
+  }
+  originalError.call(console, ...args);
+};
+
 const preview: Preview = {
   parameters: {
     controls: {
