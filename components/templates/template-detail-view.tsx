@@ -309,7 +309,7 @@ export function TemplateDetailView({ template, currentUserId }: TemplateDetailPr
                         style={{ width: `${dist.percentage}%` }}
                       />
                     </div>
-                    <div className="text-sm text-muted-foreground w-12 text-right">
+                    <div className="text-sm text-muted-foreground w-12 text-end">
                       {dist.count}
                     </div>
                   </div>

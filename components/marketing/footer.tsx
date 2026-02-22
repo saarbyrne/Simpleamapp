@@ -38,7 +38,7 @@ export function Footer() {
               <span className="text-2xl font-extrabold text-[#142978]">
                 simpleam
               </span>
-              <span className="ml-1 w-2 h-2 bg-[#142978] rounded-full"></span>
+              <span className="ms-1 w-2 h-2 bg-[#142978] rounded-full"></span>
             </Link>
             <p className="text-white/70 text-sm">
               Simple tools. Serious results.

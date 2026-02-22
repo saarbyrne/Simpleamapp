@@ -68,7 +68,7 @@ export function CanvasContainer({ workspace }: CanvasContainerProps) {
               isGenerating && 'border-primary/50 bg-primary/10 text-primary'
             )}
           >
-            {isGenerating && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
+            {isGenerating && <Loader2 className="me-1 h-3 w-3 animate-spin" />}
             {t(workspace.status)}
           </Badge>
         </div>

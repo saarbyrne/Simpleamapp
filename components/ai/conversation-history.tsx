@@ -97,7 +97,7 @@ export function ConversationHistory({
                 key={conversation.id}
                 onClick={() => onSelectConversation(conversation.id)}
                 className={cn(
-                  'w-full text-left p-3 rounded-lg hover:bg-accent transition-colors group',
+                  'w-full text-start p-3 rounded-lg hover:bg-accent transition-colors group',
                   currentConversationId === conversation.id && 'bg-accent'
                 )}
               >

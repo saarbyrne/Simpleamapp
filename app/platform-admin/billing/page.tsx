@@ -147,7 +147,7 @@ export default async function BillingPage() {
                 <TableHead>MRR</TableHead>
                 <TableHead>Period End</TableHead>
                 <TableHead>Stripe</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-end">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -218,7 +218,7 @@ export default async function BillingPage() {
                           <span className="text-muted-foreground">—</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-end">
                         <Button variant="ghost" size="sm" asChild>
                           <Link href={`/platform-admin/organizations/${subscription.organization.id}`}>
                             View

@@ -47,7 +47,7 @@ export default async function UsersPage() {
                 <TableHead>Auth Provider</TableHead>
                 <TableHead>Last Login</TableHead>
                 <TableHead>Joined</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-end">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -118,7 +118,7 @@ export default async function UsersPage() {
                         {new Date(user.createdAt).toLocaleDateString()}
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       <Button variant="ghost" size="sm" asChild>
                         <Link href={`/platform-admin/users/${user.id}`}>
                           <ExternalLink className="h-4 w-4" />

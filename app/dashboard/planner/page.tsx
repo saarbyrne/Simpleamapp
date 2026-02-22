@@ -49,7 +49,7 @@ export default async function PlannerPage({ searchParams }: PlannerPageProps) {
           <CreatePlanDialog
             trigger={
               <Button>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="me-2 h-4 w-4" />
                 Create Plan
               </Button>
             }

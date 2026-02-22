@@ -48,7 +48,7 @@ function Calendar({
         ),
         month: cn("flex flex-col w-full gap-4 relative", defaultClassNames.month),
         nav: cn(
-          "flex items-center gap-1 absolute top-0 left-0 right-0 justify-between z-10",
+          "flex items-center gap-1 absolute top-0 start-0 end-0 justify-between z-10",
           defaultClassNames.nav
         ),
         button_previous: cn(

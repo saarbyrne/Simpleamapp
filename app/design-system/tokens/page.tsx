@@ -181,7 +181,7 @@ export default function TokensPage() {
                             The quick brown fox jumps over the lazy dog
                           </div>
                         </div>
-                        <div className="text-xs text-muted-foreground ml-24 font-mono">
+                        <div className="text-xs text-muted-foreground ms-24 font-mono">
                           {value}
                         </div>
                       </div>

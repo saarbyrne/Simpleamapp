@@ -92,7 +92,7 @@ export function FileUploadButton({
         )}
       </Button>
       {uploading && progress > 0 && (
-        <div className="absolute bottom-0 left-0 right-0">
+        <div className="absolute bottom-0 start-0 end-0">
           <Progress value={progress} className="h-1" />
         </div>
       )}

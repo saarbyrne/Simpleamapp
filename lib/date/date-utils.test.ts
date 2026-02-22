@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatDate, formatTime, formatDateTime, formatDateRange, type UserPreferences } from "../lib/date-utils";
+import { formatDate, formatTime, formatDateTime, formatDateRange, type UserPreferences } from "./date-utils";
 
 describe("Date Formatting Utilities", () => {
   const testDate = new Date("2024-12-25T15:30:00Z"); // Christmas 2024, 3:30 PM UTC

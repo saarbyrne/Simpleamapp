@@ -20,7 +20,7 @@ export function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="bg-[#142978] py-24 lg:py-32">
+    <section id="how-it-works" className="bg-primary py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left - Image */}
@@ -39,10 +39,10 @@ export function HowItWorks() {
           {/* Right - Steps */}
           <div className="order-1 lg:order-2 space-y-12">
             <div>
-              <h2 className="text-4xl lg:text-5xl font-extrabold text-white mb-4">
+              <h2 className="text-4xl lg:text-5xl font-extrabold text-primary-foreground mb-4">
                 Built for real teams.
               </h2>
-              <p className="text-xl text-white/70">
+              <p className="text-xl text-primary-foreground/70">
                 From grassroots to elite. SAM keeps it simple.
               </p>
             </div>
@@ -51,15 +51,15 @@ export function HowItWorks() {
               {steps.map((step) => (
                 <div key={step.number} className="flex gap-6">
                   <div className="flex-shrink-0">
-                    <div className="w-16 h-16 bg-[#FF6A1F] rounded-lg flex items-center justify-center">
-                      <span className="text-white text-xl font-bold">{step.number}</span>
+                    <div className="w-16 h-16 bg-orange-500 rounded-lg flex items-center justify-center">
+                      <span className="text-primary-foreground text-xl font-bold">{step.number}</span>
                     </div>
                   </div>
                   <div className="pt-2">
-                    <h3 className="text-xl font-extrabold text-white mb-2">
+                    <h3 className="text-xl font-extrabold text-primary-foreground mb-2">
                       {step.title}
                     </h3>
-                    <p className="text-white/70">
+                    <p className="text-primary-foreground/70">
                       {step.description}
                     </p>
                   </div>

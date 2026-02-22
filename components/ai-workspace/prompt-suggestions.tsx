@@ -66,7 +66,7 @@ export function PromptSuggestions({
       </div>
 
       {/* Tag suggestions */}
-      <div className="flex flex-wrap gap-2 pl-8">
+      <div className="flex flex-wrap gap-2 ps-8">
         {tags.map((tag) => {
           const isSelected = selectedTags.has(tag.label)
           return (
@@ -87,7 +87,7 @@ export function PromptSuggestions({
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center justify-between pl-8 pt-2">
+      <div className="flex items-center justify-between ps-8 pt-2">
         <Button
           variant="ghost"
           size="sm"

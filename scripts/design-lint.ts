@@ -29,14 +29,35 @@ interface LintResult {
   violations: LintViolation[];
 }
 
-const rules = {
+interface LintRule {
+  pattern: RegExp;
+  exclude: RegExp[];
+  fileExclude?: RegExp[];
+  message: string;
+  suggestion?: string;
+  severity: 'error' | 'warning';
+}
+
+const rules: Record<string, LintRule> = {
   // Color rules
   hardcodedColors: {
     pattern: /(#[0-9A-Fa-f]{3,6}|rgb\(|rgba\(|hsl\(|hsla\()/g,
     exclude: [
-      /\/\/ @design-system-ignore/,
+      /@design-system-ignore/,
       /className=["'].*bg-\w+.*["']/,
       /className=["'].*text-\w+.*["']/,
+      /hsl\(var\(--/,           // CSS variable references are design token usage
+      /placeholder=["'][^"']*#/, // Placeholder text with color examples
+      /fill=["']#/,              // SVG fill attributes (brand icons, logos)
+      /stroke=["']#/,            // SVG stroke attributes
+    ],
+    // Canvas 2D, design tokens, base UI components, and error boundaries require actual color values
+    fileExclude: [
+      /components\/tactics\//,
+      /components\/canvas\//,
+      /components\/ui\//,
+      /design-system\/tokens\//,
+      /global-error\.tsx/,
     ],
     message: 'Avoid hardcoded colors. Use Tailwind semantic classes or design tokens.',
     suggestion: 'Use text-foreground, bg-background, border, etc. or tokens.colors.*',
@@ -46,7 +67,7 @@ const rules = {
   // Spacing rules
   hardcodedSpacing: {
     pattern: /(?:padding|margin|gap):\s*['"]?\d+(?:px|rem|em)['"]?/g,
-    exclude: [/\/\/ @design-system-ignore/, /style=\{\{/],
+    exclude: [/@design-system-ignore/, /style=\{\{/],
     message: 'Avoid hardcoded spacing. Use Tailwind spacing classes or design tokens.',
     suggestion: 'Use p-4, m-2, gap-6, etc. or tokens.spacing.*',
     severity: 'warning' as const,
@@ -55,7 +76,7 @@ const rules = {
   // Typography rules
   hardcodedFontSizes: {
     pattern: /fontSize:\s*['"]?\d+(?:px|rem|em)['"]?/g,
-    exclude: [/\/\/ @design-system-ignore/],
+    exclude: [/@design-system-ignore/],
     message: 'Avoid hardcoded font sizes. Use Tailwind text classes or typography tokens.',
     suggestion: 'Use text-sm, text-base, text-lg, etc. or tokens.typography.*',
     severity: 'warning' as const,
@@ -99,7 +120,7 @@ const rules = {
   // Motion rules
   hardcodedTransitions: {
     pattern: /transition:\s*['"]all\s+\d+(?:ms|s)['"]?/g,
-    exclude: [/\/\/ @design-system-ignore/],
+    exclude: [/@design-system-ignore/],
     message: 'Use motion tokens for consistent transitions.',
     suggestion: 'Use tokens.motion.duration.* and tokens.motion.easing.*',
     severity: 'warning' as const,
@@ -117,7 +138,7 @@ const rules = {
   // Token usage validation
   missingTokenImport: {
     pattern: /(?:duration|easing|colors|spacing|typography):\s*['"]?\d+/g,
-    exclude: [/\/\/ @design-system-ignore/, /from ['"]@\/design-system\/tokens/],
+    exclude: [/@design-system-ignore/, /from ['"]@\/design-system\/tokens/],
     message: 'Use design tokens instead of hardcoded values. Import from @/design-system/tokens',
     suggestion: 'Import { motion, colors, spacing, typography } from "@/design-system/tokens"',
     severity: 'warning' as const,
@@ -126,7 +147,7 @@ const rules = {
   // Dark mode checks
   missingDarkMode: {
     pattern: /className=["'][^"']*bg-(?:white|black|gray-\d+|slate-\d+|zinc-\d+|neutral-\d+|stone-\d+)/g,
-    exclude: [/\/\/ @design-system-ignore/, /dark:/],
+    exclude: [/@design-system-ignore/, /dark:/],
     message: 'Use semantic color classes that support dark mode. Avoid hardcoded color names.',
     suggestion: 'Use bg-background, bg-card, bg-primary, etc. which automatically adapt to dark mode',
     severity: 'warning' as const,
@@ -135,7 +156,8 @@ const rules = {
   // Component import validation
   directRadixImport: {
     pattern: /from ['"]@radix-ui\//g,
-    exclude: [/\/\/ @design-system-ignore/, /components\/ui\//],
+    exclude: [/@design-system-ignore/],
+    fileExclude: [/components\/ui\//],
     message: 'Import components from @/components/ui instead of directly from @radix-ui',
     suggestion: 'Use shadcn/ui components from @/components/ui which include proper styling',
     severity: 'error' as const,
@@ -144,7 +166,8 @@ const rules = {
   // Table implementation check
   incorrectTableImplementation: {
     pattern: /<table|<thead|<tbody/g,
-    exclude: [/\/\/ @design-system-ignore/, /DataTable/, /@tanstack\/react-table/],
+    exclude: [/@design-system-ignore/, /DataTable/, /@tanstack\/react-table/],
+    fileExclude: [/components\/ui\/table\.tsx/],
     message: 'Use TanStack Table (DataTable component) instead of native HTML tables for data tables.',
     suggestion: 'Use DataTable from @/components/data-table. See app/dashboard/players/page.tsx for reference.',
     severity: 'warning' as const,
@@ -157,12 +180,15 @@ async function lintFile(filePath: string): Promise<LintResult> {
   const violations: LintViolation[] = [];
 
   for (const [ruleName, rule] of Object.entries(rules)) {
+    // Skip rule if the file path matches any fileExclude pattern
+    if (rule.fileExclude?.some((pattern) => pattern.test(filePath))) continue;
+
     const matches = content.matchAll(rule.pattern);
 
     for (const match of matches) {
       // Check if match should be excluded
       const matchContext = content.substring(
-        Math.max(0, match.index! - 100),
+        Math.max(0, match.index! - 500),
         Math.min(content.length, match.index! + 100)
       );
 

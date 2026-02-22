@@ -56,7 +56,7 @@ export default async function TemplatesPage({ searchParams }: TemplatesPageProps
           defaultValues={{ isTemplate: true }}
           trigger={
             <Button>
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="me-2 h-4 w-4" />
               Create Template
             </Button>
           }

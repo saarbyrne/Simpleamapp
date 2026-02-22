@@ -137,7 +137,7 @@ export function PlanDetail({ plan }: PlanDetailProps) {
             className="mb-2"
             onClick={() => router.push('/dashboard/planner')}
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="me-2 h-4 w-4" />
             Back to Plans
           </Button>
 
@@ -167,29 +167,29 @@ export function PlanDetail({ plan }: PlanDetailProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => router.push(`/dashboard/planner/${plan.id}/edit`)}>
-              <Pencil className="mr-2 h-4 w-4" />
+              <Pencil className="me-2 h-4 w-4" />
               Edit Plan
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleTogglePublish} disabled={isPublishing}>
               {plan.isPublic ? (
                 <>
-                  <EyeOff className="mr-2 h-4 w-4" />
+                  <EyeOff className="me-2 h-4 w-4" />
                   Unpublish
                 </>
               ) : (
                 <>
-                  <Eye className="mr-2 h-4 w-4" />
+                  <Eye className="me-2 h-4 w-4" />
                   Publish
                 </>
               )}
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Share2 className="mr-2 h-4 w-4" />
+              <Share2 className="me-2 h-4 w-4" />
               Share
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleDelete} disabled={isDeleting} className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Trash2 className="me-2 h-4 w-4" />
               Delete Plan
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -275,7 +275,7 @@ export function PlanDetail({ plan }: PlanDetailProps) {
             planId={plan.id}
             trigger={
               <Button>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="me-2 h-4 w-4" />
                 Add Milestone
               </Button>
             }

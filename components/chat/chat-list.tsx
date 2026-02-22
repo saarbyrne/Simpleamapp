@@ -94,7 +94,7 @@ export function ChatList({ userId, userName, orgId }: ChatListProps) {
 
           {/* Search */}
           <div className="relative flex items-center border border-input rounded-md px-3 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/50 h-10 bg-background">
-            <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
+            <Search className="h-4 w-4 text-muted-foreground me-2 flex-shrink-0" />
             <Input
               type="text"
               placeholder="Search chats..."
@@ -120,7 +120,7 @@ export function ChatList({ userId, userName, orgId }: ChatListProps) {
               </p>
               {!searchQuery && (
                 <Button onClick={() => setIsCreateModalOpen(true)}>
-                  <MessageSquarePlus className="mr-2 h-4 w-4" />
+                  <MessageSquarePlus className="me-2 h-4 w-4" />
                   New Chat
                 </Button>
               )}
@@ -188,7 +188,7 @@ function ChatListItem({ chat, userId, onClick }: ChatListItemProps) {
         <div className="flex items-center justify-between mb-1">
           <h3 className="font-semibold truncate">{displayName}</h3>
           {chat.lastMessageAt && (
-            <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+            <span className="text-xs text-muted-foreground whitespace-nowrap ms-2">
               {formatTimestamp(chat.lastMessageAt)}
             </span>
           )}
@@ -197,12 +197,12 @@ function ChatListItem({ chat, userId, onClick }: ChatListItemProps) {
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground truncate">
             {chat.lastMessage && chat.lastMessage.senderId === userId && (
-              <span className="mr-1">You:</span>
+              <span className="me-1">You:</span>
             )}
             {lastMessageText}
           </p>
           {chatUnread > 0 && (
-            <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1 text-xs">
+            <Badge variant="destructive" className="ms-2 h-5 min-w-5 px-1 text-xs">
               {chatUnread}
             </Badge>
           )}

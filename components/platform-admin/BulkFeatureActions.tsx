@@ -35,7 +35,7 @@ export function BulkFeatureActions({
         onClick={onEnableAll}
         disabled={isLoading}
       >
-        <CheckCircle2 className="mr-2 h-4 w-4" />
+        <CheckCircle2 className="me-2 h-4 w-4" />
         Enable All
       </Button>
 
@@ -46,7 +46,7 @@ export function BulkFeatureActions({
             size="sm"
             disabled={isLoading}
           >
-            <XCircle className="mr-2 h-4 w-4" />
+            <XCircle className="me-2 h-4 w-4" />
             Disable All
           </Button>
         </AlertDialogTrigger>
@@ -73,7 +73,7 @@ export function BulkFeatureActions({
         onClick={onReset}
         disabled={isLoading}
       >
-        <RotateCcw className="mr-2 h-4 w-4" />
+        <RotateCcw className="me-2 h-4 w-4" />
         Reset to Defaults
       </Button>
     </div>

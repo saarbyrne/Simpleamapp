@@ -14,16 +14,16 @@ import {
 } from '@/lib/permissions/feature-metadata'
 
 describe('Feature Metadata', () => {
-  it('should return all 12 main features', () => {
+  it('should return all 14 main features', () => {
     const features = getAllFeatures()
-    expect(features).toHaveLength(12)
+    expect(features).toHaveLength(14)
   })
 
   it('should have correct feature keys', () => {
     const expectedKeys = [
-      'ai', 'players', 'forms', 'reports', 'calendar', 
-      'messages', 'notes', 'spreadsheets', 'canvas', 
-      'files', 'planner', 'templates'
+      'aiWorkspace', 'ai', 'players', 'forms', 'reports', 'calendar',
+      'messages', 'notes', 'spreadsheets', 'canvas',
+      'files', 'planner', 'templates', 'dataManagement'
     ]
     
     const features = getAllFeatures()

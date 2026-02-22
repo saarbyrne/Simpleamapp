@@ -318,7 +318,7 @@ export function FileUploadDialog({
                       {tag}
                       <button
                         onClick={() => removeTag(tag)}
-                        className="ml-2 hover:text-destructive"
+                        className="ms-2 hover:text-destructive"
                       >
                         <X className="h-3 w-3" />
                       </button>

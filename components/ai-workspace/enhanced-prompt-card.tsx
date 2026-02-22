@@ -119,11 +119,11 @@ export function EnhancedPromptCard({
             <CardFooter className="flex justify-between pt-2">
                 <div className="flex gap-2">
                     <Button variant="ghost" size="sm" onClick={onEdit} className="text-muted-foreground hover:text-foreground">
-                        <Edit2 className="h-3.5 w-3.5 mr-1.5" />
+                        <Edit2 className="h-3.5 w-3.5 me-1.5" />
                         Edit Manually
                     </Button>
                     <Button variant="ghost" size="sm" onClick={onRegenerate} className="text-muted-foreground hover:text-foreground">
-                        <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                        <RefreshCw className="h-3.5 w-3.5 me-1.5" />
                         Try Again
                     </Button>
                 </div>

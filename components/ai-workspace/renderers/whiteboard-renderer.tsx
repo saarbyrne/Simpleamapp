@@ -58,12 +58,12 @@ export function WhiteboardRenderer({ workspace }: WhiteboardRendererProps) {
             {sportType === 'soccer' && (
               <>
                 {/* Center line */}
-                <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-white/50" />
+                <div className="absolute start-0 end-0 top-1/2 h-0.5 bg-white/50" />
                 {/* Center circle */}
-                <div className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/50" />
+                <div className="absolute start-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/50" />
                 {/* Penalty areas */}
-                <div className="absolute bottom-0 left-1/2 h-20 w-48 -translate-x-1/2 border-2 border-t-2 border-white/50" />
-                <div className="absolute left-1/2 top-0 h-20 w-48 -translate-x-1/2 border-2 border-b-2 border-white/50" />
+                <div className="absolute bottom-0 start-1/2 h-20 w-48 -translate-x-1/2 border-2 border-t-2 border-white/50" />
+                <div className="absolute start-1/2 top-0 h-20 w-48 -translate-x-1/2 border-2 border-b-2 border-white/50" />
               </>
             )}
 
@@ -149,7 +149,7 @@ export function WhiteboardRenderer({ workspace }: WhiteboardRendererProps) {
                     }}
                   >
                     {annotation.label && (
-                      <span className="absolute -top-6 left-1/2 -translate-x-1/2 rounded bg-accent px-2 py-1 text-xs font-semibold text-accent-foreground">
+                      <span className="absolute -top-6 start-1/2 -translate-x-1/2 rounded bg-accent px-2 py-1 text-xs font-semibold text-accent-foreground">
                         {annotation.label}
                       </span>
                     )}

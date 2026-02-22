@@ -87,16 +87,16 @@ async function MyTemplatesData() {
                 <div className="flex gap-2">
                   <Link href={`/dashboard/templates/${template.id}`}>
                     <Button variant="outline" size="sm">
-                      <Eye className="h-4 w-4 mr-1" />
+                      <Eye className="h-4 w-4 me-1" />
                       View
                     </Button>
                   </Link>
                   <Button variant="outline" size="sm">
-                    <Edit className="h-4 w-4 mr-1" />
+                    <Edit className="h-4 w-4 me-1" />
                     Edit
                   </Button>
                   <Button variant="outline" size="sm">
-                    <Trash2 className="h-4 w-4 mr-1" />
+                    <Trash2 className="h-4 w-4 me-1" />
                     Delete
                   </Button>
                 </div>
@@ -121,7 +121,7 @@ async function MyTemplatesData() {
                   <div className="text-lg font-semibold mt-1">
                     {template.rating ? template.rating.toFixed(1) : 'N/A'}
                     {template.reviewCount > 0 && (
-                      <span className="text-sm text-muted-foreground ml-1">
+                      <span className="text-sm text-muted-foreground ms-1">
                         ({template.reviewCount})
                       </span>
                     )}

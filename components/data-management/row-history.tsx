@@ -141,7 +141,7 @@ export function RowHistory({
         <div className="mt-2 space-y-1">
           <div className="text-sm font-medium">Created with:</div>
           {Object.entries(entry.newData || {}).map(([key, value]) => (
-            <div key={key} className="text-sm pl-4">
+            <div key={key} className="text-sm ps-4">
               <span className="font-medium">{key}:</span>{' '}
               <span className="text-green-600 dark:text-green-400">
                 {JSON.stringify(value)}
@@ -171,7 +171,7 @@ export function RowHistory({
           const oldValue = entry.previousData?.[field]
           const newValue = entry.newData?.[field]
           return (
-            <div key={field} className="text-sm pl-4">
+            <div key={field} className="text-sm ps-4">
               <span className="font-medium">{field}:</span>{' '}
               <span className="text-red-600 dark:text-red-400 line-through">
                 {JSON.stringify(oldValue)}
@@ -212,7 +212,7 @@ export function RowHistory({
             </div>
           </div>
         ) : (
-          <ScrollArea className="flex-1 pr-4">
+          <ScrollArea className="flex-1 pe-4">
             <div className="space-y-3">
               {history.map((entry, index) => {
                 const isExpanded = expandedEntry === entry.id
@@ -264,7 +264,7 @@ export function RowHistory({
                         </div>
                       </div>
 
-                      <div className="flex gap-2 ml-2">
+                      <div className="flex gap-2 ms-2">
                         {entry.changedFields.length > 0 && (
                           <Button
                             size="sm"
@@ -289,7 +289,7 @@ export function RowHistory({
                             }
                             disabled={isRestoring}
                           >
-                            <RotateCcw className="h-3 w-3 mr-1" />
+                            <RotateCcw className="h-3 w-3 me-1" />
                             Restore
                           </Button>
                         )}

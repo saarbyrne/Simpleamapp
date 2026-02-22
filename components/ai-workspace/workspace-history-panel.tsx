@@ -121,12 +121,12 @@ export function WorkspaceHistoryPanel({
                   onClick={() => handleWorkspaceClick(workspace.id)}
                 >
                   {/* Artifact Type Icon */}
-                  <div className="absolute top-3 right-3 text-muted-foreground">
+                  <div className="absolute top-3 end-3 text-muted-foreground">
                     {getArtifactIcon(workspace.artifactType)}
                   </div>
 
                   {/* Workspace Name */}
-                  <h3 className="font-medium text-sm pr-8 line-clamp-2 mb-2">
+                  <h3 className="font-medium text-sm pe-8 line-clamp-2 mb-2">
                     {workspace.name}
                   </h3>
 

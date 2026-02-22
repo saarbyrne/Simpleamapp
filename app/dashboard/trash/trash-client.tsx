@@ -149,7 +149,7 @@ export function TrashClient({ items: initialItems }: TrashClientProps) {
                         </Badge>
                         {isExpiringSoon && (
                           <Badge variant="destructive" className="text-xs">
-                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            <AlertTriangle className="h-3 w-3 me-1" />
                             {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
                           </Badge>
                         )}
@@ -182,7 +182,7 @@ export function TrashClient({ items: initialItems }: TrashClientProps) {
                         setAction('restore')
                       }}
                     >
-                      <RotateCcw className="h-4 w-4 mr-1" />
+                      <RotateCcw className="h-4 w-4 me-1" />
                       Restore
                     </Button>
                     <Button
@@ -193,7 +193,7 @@ export function TrashClient({ items: initialItems }: TrashClientProps) {
                         setAction('delete')
                       }}
                     >
-                      <Trash2 className="h-4 w-4 mr-1" />
+                      <Trash2 className="h-4 w-4 me-1" />
                       Delete Forever
                     </Button>
                   </div>

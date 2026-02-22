@@ -187,7 +187,7 @@ export function FolderSidebar({
                 e.stopPropagation()
                 toggleFolder(folder.id)
               }}
-              className="absolute left-0 top-1/2 -translate-y-1/2 p-0.5 hover:bg-accent-foreground/10 rounded z-10"
+              className="absolute start-0 top-1/2 -translate-y-1/2 p-0.5 hover:bg-accent-foreground/10 rounded z-10"
             >
               {isExpanded ? (
                 <ChevronDown className="h-3.5 w-3.5" />
@@ -258,7 +258,7 @@ export function FolderSidebar({
   return (
     <>
       <div className={cn(
-        "border-r bg-background overflow-hidden -mt-4 -mb-4 -ml-4 transition-all duration-200 flex relative",
+        "border-r bg-background overflow-hidden -mt-4 -mb-4 -ms-4 transition-all duration-200 flex relative",
         isCollapsed ? "w-8" : "w-64",
         "h-[calc(100%+2rem)]"
       )}>

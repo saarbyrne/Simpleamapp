@@ -90,9 +90,9 @@ export function PlanRenderer({ workspace }: PlanRendererProps) {
     })
 
     return (
-      <div className="relative space-y-4 pl-8">
+      <div className="relative space-y-4 ps-8">
         {/* Timeline line */}
-        <div className="absolute bottom-0 left-[15px] top-0 w-0.5 bg-border" />
+        <div className="absolute bottom-0 start-[15px] top-0 w-0.5 bg-border" />
 
         {sortedMilestones.map((milestone: any, index: number) => {
           const status = getMilestoneStatus(milestone)
@@ -101,7 +101,7 @@ export function PlanRenderer({ workspace }: PlanRendererProps) {
           return (
             <div key={milestone.id || index} className="relative">
               {/* Timeline dot */}
-              <div className={`absolute -left-8 flex h-8 w-8 items-center justify-center rounded-full border-2 ${statusColor}`}>
+              <div className={`absolute -start-8 flex h-8 w-8 items-center justify-center rounded-full border-2 ${statusColor}`}>
                 {getStatusIcon(status)}
               </div>
 

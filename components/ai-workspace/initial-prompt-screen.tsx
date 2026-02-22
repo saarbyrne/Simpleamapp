@@ -121,7 +121,7 @@ export function InitialPromptScreen({ workspaces = [] }: InitialPromptScreenProp
       </div>
 
       {/* History Toggle Button - Fixed Top Right */}
-      <div className="fixed top-20 right-6 z-50">
+      <div className="fixed top-20 end-6 z-50">
         <Button
           variant="outline"
           size="sm"
@@ -135,7 +135,7 @@ export function InitialPromptScreen({ workspaces = [] }: InitialPromptScreenProp
 
       {/* History Panel - Slide from Right */}
       {isHistoryOpen && (
-        <div className="fixed inset-y-0 right-0 w-[400px] z-40 animate-in slide-in-from-right duration-300">
+        <div className="fixed inset-y-0 end-0 w-[400px] z-40 animate-in slide-in-from-right duration-300">
           <WorkspaceHistoryPanel
             workspaces={workspaces}
             onClose={() => setIsHistoryOpen(false)}

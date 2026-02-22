@@ -236,7 +236,7 @@ export function PlansTable({ plans, total }: PlansTableProps) {
           const StatusIcon = statusConfig[status as keyof typeof statusConfig]?.icon || Circle
           return (
             <Badge variant={statusConfig[status as keyof typeof statusConfig]?.variant}>
-              <StatusIcon className="mr-1 h-3 w-3" />
+              <StatusIcon className="me-1 h-3 w-3" />
               {statusConfig[status as keyof typeof statusConfig]?.label || status}
             </Badge>
           )
@@ -262,7 +262,7 @@ export function PlansTable({ plans, total }: PlansTableProps) {
                       router.push(`/dashboard/planner/${plan.id}`)
                     }}
                   >
-                    <Eye className="mr-2 h-4 w-4" />
+                    <Eye className="me-2 h-4 w-4" />
                     View
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -271,7 +271,7 @@ export function PlansTable({ plans, total }: PlansTableProps) {
                       router.push(`/dashboard/planner/${plan.id}/edit`)
                     }}
                   >
-                    <Pencil className="mr-2 h-4 w-4" />
+                    <Pencil className="me-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -283,7 +283,7 @@ export function PlansTable({ plans, total }: PlansTableProps) {
                     disabled={deletingId === plan.id}
                     className="text-destructive"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
+                    <Trash2 className="me-2 h-4 w-4" />
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>

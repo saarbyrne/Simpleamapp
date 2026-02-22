@@ -33,10 +33,7 @@ export async function GET(request: NextRequest) {
       where: { id: orgId },
       include: {
         features: true,
-        subscriptions: {
-          take: 1,
-          orderBy: { createdAt: 'desc' },
-        },
+        subscriptions: true,
       },
     })
 
@@ -48,7 +45,7 @@ export async function GET(request: NextRequest) {
       organization: {
         id: org.id,
         name: org.name,
-        tier: org.subscriptions[0]?.plan || 'free',
+        tier: org.subscriptions?.plan || 'free',
       },
       features: org.features,
       hasFeatures: !!org.features,

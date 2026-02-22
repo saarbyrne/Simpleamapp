@@ -75,7 +75,7 @@ export function VariableChip({ variable, onChange }: VariableChipProps) {
                                     >
                                         <Check
                                             className={cn(
-                                                "mr-2 h-4 w-4",
+                                                "me-2 h-4 w-4",
                                                 variable.value === option ? "opacity-100" : "opacity-0"
                                             )}
                                         />
@@ -111,7 +111,7 @@ export function VariableChip({ variable, onChange }: VariableChipProps) {
                                         >
                                             <Check
                                                 className={cn(
-                                                    "mr-2 h-4 w-4",
+                                                    "me-2 h-4 w-4",
                                                     isSelected ? "opacity-100" : "opacity-0"
                                                 )}
                                             />

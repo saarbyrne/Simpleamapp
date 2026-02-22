@@ -47,9 +47,9 @@ export function FeatureBulkActions({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" disabled={isLoading}>
-              <Package className="mr-2 h-4 w-4" />
+              <Package className="me-2 h-4 w-4" />
               Apply Package
-              <ChevronDown className="ml-2 h-4 w-4" />
+              <ChevronDown className="ms-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -72,7 +72,7 @@ export function FeatureBulkActions({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" disabled={isLoading}>
               Enable Feature
-              <ChevronDown className="ml-2 h-4 w-4" />
+              <ChevronDown className="ms-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="max-h-96 overflow-y-auto">
@@ -94,7 +94,7 @@ export function FeatureBulkActions({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" disabled={isLoading}>
               Disable Feature
-              <ChevronDown className="ml-2 h-4 w-4" />
+              <ChevronDown className="ms-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="max-h-96 overflow-y-auto">

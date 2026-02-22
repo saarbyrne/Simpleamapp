@@ -129,10 +129,10 @@ export function AIInsights() {
           risks, and opportunities.
         </p>
         <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950 p-4 max-w-lg mx-auto mt-6">
-          <p className="text-sm text-blue-900 dark:text-blue-100 text-left">
+          <p className="text-sm text-blue-900 dark:text-blue-100 text-start">
             <strong>Coming features:</strong>
           </p>
-          <ul className="text-sm text-blue-900 dark:text-blue-100 text-left mt-2 space-y-1 list-disc list-inside">
+          <ul className="text-sm text-blue-900 dark:text-blue-100 text-start mt-2 space-y-1 list-disc list-inside">
             <li>Injury risk detection</li>
             <li>Wellness trend monitoring</li>
             <li>Training load analysis</li>

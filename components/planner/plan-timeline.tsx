@@ -125,7 +125,7 @@ export function PlanTimeline({ startDate, endDate, milestones }: PlanTimelinePro
                 className="absolute top-0 bottom-0 w-0.5 bg-blue-500 z-10"
                 style={{ left: `${todayPosition}%` }}
               >
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                <div className="absolute -top-1 start-1/2 -translate-x-1/2 whitespace-nowrap">
                   <Badge variant="default" className="text-xs">
                     Today
                   </Badge>

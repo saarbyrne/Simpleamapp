@@ -45,16 +45,19 @@ export default function GlobalError({
             <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>
               Something went wrong!
             </h2>
+            {/* @design-system-ignore - Global error boundary renders outside theme context, inline styles required */}
             <p style={{ color: '#666' }}>
               We&apos;ve been notified and will look into it.
             </p>
             {error.message && (
+              // @design-system-ignore - Global error boundary renders outside theme context
               <p style={{ fontSize: '14px', color: '#888' }}>
                 Error: {error.message}
               </p>
             )}
             <button
               onClick={reset}
+              // @design-system-ignore - Global error boundary renders outside theme context
               style={{
                 borderRadius: '6px',
                 backgroundColor: '#000',

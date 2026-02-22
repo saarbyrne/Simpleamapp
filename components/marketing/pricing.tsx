@@ -57,13 +57,13 @@ export function Pricing() {
   ];
 
   return (
-    <section id="pricing" className="bg-[#F5F5F5] py-24 lg:py-32">
+    <section id="pricing" className="bg-muted py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl lg:text-5xl font-extrabold text-[#1E1E1E] mb-6">
+          <h2 className="text-4xl lg:text-5xl font-extrabold text-foreground mb-6">
             Straightforward pricing.
           </h2>
-          <p className="text-xl text-[#1E1E1E]/70">
+          <p className="text-xl text-muted-foreground">
             No hidden fees. No surprise charges. No extra tiers.
           </p>
         </div>
@@ -72,32 +72,32 @@ export function Pricing() {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`bg-white rounded-lg p-8 ${
+              className={`bg-background rounded-lg p-8 ${
                 plan.popular
-                  ? 'ring-2 ring-[#142978] shadow-xl relative'
+                  ? 'ring-2 ring-primary shadow-xl relative'
                   : 'shadow-lg'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="bg-[#142978] text-white px-4 py-1 rounded-full text-sm">
+                <div className="absolute -top-4 start-1/2 -translate-x-1/2">
+                  <span className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm">
                     Most Popular
                   </span>
                 </div>
               )}
 
               <div className="mb-6">
-                <h3 className="text-2xl font-extrabold text-[#1E1E1E] mb-2">
+                <h3 className="text-2xl font-extrabold text-foreground mb-2">
                   {plan.name}
                 </h3>
-                <p className="text-[#1E1E1E]/70 text-sm mb-4">
+                <p className="text-muted-foreground text-sm mb-4">
                   {plan.description}
                 </p>
                 <div className="flex items-baseline">
-                  <span className="text-5xl font-extrabold text-[#1E1E1E]">
+                  <span className="text-5xl font-extrabold text-foreground">
                     {plan.price}
                   </span>
-                  <span className="text-[#1E1E1E]/70 ml-2">
+                  <span className="text-muted-foreground ms-2">
                     {plan.period}
                   </span>
                 </div>
@@ -106,8 +106,8 @@ export function Pricing() {
               <PricingButton
                 className={`w-full mb-6 rounded-md ${
                   plan.popular
-                    ? 'bg-[#142978] hover:bg-[#142978]/90 text-white'
-                    : 'bg-[#1E1E1E] hover:bg-[#1E1E1E]/90 text-white'
+                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                    : 'bg-foreground hover:bg-foreground/90 text-background'
                 }`}
                 popular={plan.popular}
               >
@@ -117,8 +117,8 @@ export function Pricing() {
               <ul className="space-y-3">
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-[#142978] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#1E1E1E]/70">
+                    <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground">
                       {feature}
                     </span>
                   </li>
@@ -129,10 +129,10 @@ export function Pricing() {
         </div>
 
         <div className="text-center mt-12 space-y-2">
-          <p className="text-[#1E1E1E]/70">
+          <p className="text-muted-foreground">
             Paid plans include 14-day free trial. No credit card required.
           </p>
-          <p className="text-sm text-[#1E1E1E]/60">
+          <p className="text-sm text-muted-foreground">
             Volume discounts available for clubs with 10+ users.
           </p>
         </div>

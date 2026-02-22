@@ -192,12 +192,12 @@ function SortableMilestone({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={onEdit}>
-                      <Pencil className="mr-2 h-4 w-4" />
+                      <Pencil className="me-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                      <Trash2 className="mr-2 h-4 w-4" />
+                      <Trash2 className="me-2 h-4 w-4" />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -206,7 +206,7 @@ function SortableMilestone({
 
               <div className="flex flex-wrap items-center gap-3 mt-3 text-sm">
                 <Badge variant={statusConfig[milestone.status as keyof typeof statusConfig]?.variant}>
-                  <StatusIcon className="mr-1 h-3 w-3" />
+                  <StatusIcon className="me-1 h-3 w-3" />
                   {statusConfig[milestone.status as keyof typeof statusConfig]?.label}
                 </Badge>
 

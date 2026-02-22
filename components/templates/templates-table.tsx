@@ -235,7 +235,7 @@ const createColumns = (
                 onNavigateToDetail(template.id)
               }}
             >
-              <Eye className="h-4 w-4 mr-1" />
+              <Eye className="h-4 w-4 me-1" />
               View
             </Button>
           </div>

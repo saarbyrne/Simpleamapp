@@ -166,7 +166,7 @@ export function BulkActionsBar({
                     variant="outline"
                     className={cn('h-10 justify-between gap-2', width)}
                   >
-                    <span className="truncate text-left">
+                    <span className="truncate text-start">
                       {displayLabel}
                     </span>
                   </Button>

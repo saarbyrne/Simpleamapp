@@ -81,8 +81,8 @@ export function WorkspaceCanvas({ workspace }: WorkspaceCanvasProps) {
           )}
           onMouseDown={handleMouseDown}
         >
-          <div className="absolute inset-y-0 -left-1 -right-1" />
-          <div className="absolute left-1/2 top-1/2 h-8 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-muted-foreground/50 transition-colors group-hover:bg-primary" />
+          <div className="absolute inset-y-0 -start-1 -end-1" />
+          <div className="absolute start-1/2 top-1/2 h-8 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-muted-foreground/50 transition-colors group-hover:bg-primary" />
         </div>
 
         {/* Right Panel - Canvas */}
@@ -101,8 +101,8 @@ export function WorkspaceCanvas({ workspace }: WorkspaceCanvasProps) {
               <div
                 className="group relative w-1 cursor-col-resize bg-border transition-colors hover:bg-primary"
               >
-                <div className="absolute inset-y-0 -left-1 -right-1" />
-                <div className="absolute left-1/2 top-1/2 h-8 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-muted-foreground/50 transition-colors group-hover:bg-primary" />
+                <div className="absolute inset-y-0 -start-1 -end-1" />
+                <div className="absolute start-1/2 top-1/2 h-8 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-muted-foreground/50 transition-colors group-hover:bg-primary" />
               </div>
 
               <div

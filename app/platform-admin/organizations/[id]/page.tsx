@@ -36,9 +36,7 @@ export default async function OrganizationDetailsPage({ params }: OrganizationDe
         },
         orderBy: { createdAt: 'asc' }
       },
-      subscriptions: {
-        orderBy: { createdAt: 'desc' }
-      },
+      subscriptions: true,
       _count: {
         select: {
           persons: true,
@@ -63,7 +61,7 @@ export default async function OrganizationDetailsPage({ params }: OrganizationDe
     organizationName: organization.name
   })
 
-  const currentSubscription = organization.subscriptions[0]
+  const currentSubscription = organization.subscriptions
   
   // Get feature counts
   const featureCounts = await getFeatureCounts(id)
@@ -76,7 +74,7 @@ export default async function OrganizationDetailsPage({ params }: OrganizationDe
       >
         <Button variant="outline" size="sm" asChild>
           <Link href="/platform-admin/organizations">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="me-2 h-4 w-4" />
             Back to Organizations
           </Link>
         </Button>
@@ -188,7 +186,7 @@ export default async function OrganizationDetailsPage({ params }: OrganizationDe
               </div>
               <Button variant="outline" size="sm" className="w-full" asChild>
                 <Link href={`/platform-admin/organizations/${id}/features`}>
-                  <Settings className="mr-2 h-4 w-4" />
+                  <Settings className="me-2 h-4 w-4" />
                   Manage Features
                 </Link>
               </Button>

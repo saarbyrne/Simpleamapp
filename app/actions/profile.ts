@@ -131,6 +131,7 @@ export async function getCurrentUserProfile() {
         dateFormat: user.dateFormat,
         timeFormat: user.timeFormat,
         theme: user.theme,
+        experimentalTheme: user.experimentalTheme,
         notificationSettings: user.notificationSettings,
         organization: user.organization,
         roles: user.roles.map((ur) => ur.role),

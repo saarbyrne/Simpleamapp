@@ -33,7 +33,7 @@ export async function GetStartedButton({
     >
       <Link href={href}>
         {children}
-        {showArrow && <ArrowRight className="ml-2 h-5 w-5" />}
+        {showArrow && <ArrowRight className="ms-2 h-5 w-5" />}
       </Link>
     </Button>
   );

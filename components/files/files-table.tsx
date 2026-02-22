@@ -262,18 +262,18 @@ const createColumns = (
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onPreview(file)}>
-                  <Eye className="h-4 w-4 mr-2" />
+                  <Eye className="h-4 w-4 me-2" />
                   {t('files.preview')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onDownload(file)}>
-                  <Download className="h-4 w-4 mr-2" />
+                  <Download className="h-4 w-4 me-2" />
                   {t('files.download')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => onDelete(file)}
                   className="text-destructive"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="h-4 w-4 me-2" />
                   {t('files.delete')}
                 </DropdownMenuItem>
               </DropdownMenuContent>

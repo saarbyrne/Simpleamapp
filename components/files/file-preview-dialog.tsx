@@ -77,7 +77,7 @@ export function FilePreviewDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 pr-8">
+          <DialogTitle className="flex items-center gap-2 pe-8">
             <File className="h-5 w-5" />
             <span className="truncate">{file.name}</span>
           </DialogTitle>
@@ -91,7 +91,7 @@ export function FilePreviewDialog({
               variant="outline"
               onClick={() => onDownload?.(file)}
             >
-              <Download className="h-4 w-4 mr-2" />
+              <Download className="h-4 w-4 me-2" />
               {t('files.download')}
             </Button>
             {file.url && (
@@ -100,7 +100,7 @@ export function FilePreviewDialog({
                 variant="outline"
                 onClick={() => window.open(file.url!, '_blank')}
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <ExternalLink className="h-4 w-4 me-2" />
                 {t('files.openInNewTab')}
               </Button>
             )}
@@ -109,7 +109,7 @@ export function FilePreviewDialog({
               variant="outline"
               onClick={() => onShare?.(file)}
             >
-              <Share2 className="h-4 w-4 mr-2" />
+              <Share2 className="h-4 w-4 me-2" />
               {t('files.share')}
             </Button>
             <Button
@@ -117,7 +117,7 @@ export function FilePreviewDialog({
               variant="outline"
               onClick={() => onEdit?.(file)}
             >
-              <Edit className="h-4 w-4 mr-2" />
+              <Edit className="h-4 w-4 me-2" />
               {t('files.edit')}
             </Button>
             <Button
@@ -126,7 +126,7 @@ export function FilePreviewDialog({
               onClick={() => onDelete?.(file)}
               className="text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="h-4 w-4 me-2" />
               {t('files.delete')}
             </Button>
           </div>
@@ -180,7 +180,7 @@ export function FilePreviewDialog({
                   {t('files.downloadToView')}
                 </p>
                 <Button onClick={() => onDownload?.(file)}>
-                  <Download className="h-4 w-4 mr-2" />
+                  <Download className="h-4 w-4 me-2" />
                   {t('files.download')}
                 </Button>
               </div>

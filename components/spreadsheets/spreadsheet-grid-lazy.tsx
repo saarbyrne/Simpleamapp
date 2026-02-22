@@ -91,7 +91,7 @@ function GridPreviewState({ schema, data }: { schema: ColumnDefinition[]; data: 
           <thead className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               {previewColumns.map((column) => (
-                <th key={column.id} className="px-3 py-2 text-left font-semibold">
+                <th key={column.id} className="px-3 py-2 text-start font-semibold">
                   {column.name}
                 </th>
               ))}
