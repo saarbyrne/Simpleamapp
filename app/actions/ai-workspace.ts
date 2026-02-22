@@ -1,9 +1,8 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { requireUser } from '@/lib/auth/cached-user'
 import { ArtifactType, WorkspaceStatus, ArtifactData, PublishDestination } from '@/lib/types/ai-workspace'
 
 // ===== TYPES =====
@@ -27,15 +26,9 @@ export interface PublishWorkspaceData {
 // ===== CREATE WORKSPACE =====
 
 export async function createAIWorkspace(data: CreateWorkspaceData) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated', success: false }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Infer artifact type from prompt if not provided
     const artifactType = data.artifactType || inferArtifactType(data.prompt)
@@ -46,8 +39,8 @@ export async function createAIWorkspace(data: CreateWorkspaceData) {
         artifactType,
         status: 'draft',
         initialPrompt: data.prompt,
-        userId: dbUser.id,
-        organizationId: dbUser.organizationId,
+        userId: user.id,
+        organizationId: user.organizationId,
       },
     })
 
@@ -76,19 +69,13 @@ export async function createAIWorkspace(data: CreateWorkspaceData) {
 // ===== GET WORKSPACES =====
 
 export async function getAIWorkspaces() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated', success: false }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const workspaces = await prisma.aIWorkspace.findMany({
       where: {
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       orderBy: {
         updatedAt: 'desc',
@@ -113,20 +100,14 @@ export async function getAIWorkspaces() {
 // ===== GET WORKSPACE BY ID =====
 
 export async function getAIWorkspace(workspaceId: string) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated', success: false }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const workspace = await prisma.aIWorkspace.findFirst({
       where: {
         id: workspaceId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       include: {
         messages: {
@@ -151,20 +132,14 @@ export async function getAIWorkspace(workspaceId: string) {
 // ===== UPDATE WORKSPACE =====
 
 export async function updateAIWorkspace(workspaceId: string, data: UpdateWorkspaceData) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated', success: false }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const workspace = await prisma.aIWorkspace.update({
       where: {
         id: workspaceId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       data: {
         ...(data.name && { name: data.name }),
@@ -192,21 +167,15 @@ export async function addAIWorkspaceMessage(
   role: 'user' | 'assistant' | 'system',
   content: string
 ) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated', success: false }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify workspace belongs to user's organization
     const workspace = await prisma.aIWorkspace.findFirst({
       where: {
         id: workspaceId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -232,21 +201,15 @@ export async function addAIWorkspaceMessage(
 // ===== PUBLISH WORKSPACE =====
 
 export async function publishAIWorkspace(workspaceId: string, data: PublishWorkspaceData) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated', success: false }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // 1. Fetch the workspace to get the artifact data
     const workspace = await prisma.aIWorkspace.findFirst({
       where: {
         id: workspaceId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -299,7 +262,7 @@ export async function publishAIWorkspace(workspaceId: string, data: PublishWorks
     const updatedWorkspace = await prisma.aIWorkspace.update({
       where: {
         id: workspaceId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       data: {
         status: 'published',
@@ -326,20 +289,14 @@ export async function publishAIWorkspace(workspaceId: string, data: PublishWorks
 // ===== DELETE WORKSPACE =====
 
 export async function deleteAIWorkspace(workspaceId: string) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated', success: false }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     await prisma.aIWorkspace.delete({
       where: {
         id: workspaceId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 

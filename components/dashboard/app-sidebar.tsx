@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useState, useEffect } from 'react'
+import { memo, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -48,9 +48,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { signOut } from '@/app/actions/profile'
 import { toast } from 'sonner'
-import { getUserEnabledFeatures } from '@/app/actions/user-features'
 import { FeatureKey, isFeatureReleased } from '@/lib/permissions/feature-metadata'
-import { Badge } from '@/components/ui/badge'
 
 type AppSidebarProps = {
   userName: string
@@ -58,6 +56,7 @@ type AppSidebarProps = {
   userAvatar?: string | null
   organizationName?: string | null
   organizationLogo?: string | null
+  enabledFeatures?: string[]
 }
 
 /**
@@ -120,56 +119,73 @@ function LogoBadge({ organizationName, organizationLogo }: { organizationName?: 
   )
 }
 
-function AppSidebarComponent({ userName, userEmail, userAvatar, organizationName, organizationLogo }: AppSidebarProps) {
+function AppSidebarComponent({ userName, userEmail, userAvatar, organizationName, organizationLogo, enabledFeatures: enabledFeaturesProp }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const t = useTranslations()
-  const [enabledFeatures, setEnabledFeatures] = useState<Set<string>>(new Set())
-  const [isLoadingFeatures, setIsLoadingFeatures] = useState(true)
 
-  // Load enabled features on mount
-  useEffect(() => {
-    async function loadFeatures() {
-      const result = await getUserEnabledFeatures()
-      console.log('getUserEnabledFeatures result:', result)
-      if (result.success && result.features) {
-        console.log('Setting enabled features:', result.features)
-        setEnabledFeatures(new Set(result.features))
-      } else {
-        console.error('Failed to load features, showing defaults:', result.error)
-        // Default to schema defaults (what new orgs get)
-        setEnabledFeatures(new Set(['players', 'calendar', 'notes', 'spreadsheets', 'files']))
-      }
-      setIsLoadingFeatures(false)
-    }
-    loadFeatures()
-  }, [])
+  // Features are fetched server-side and passed as props — no client-side fetch needed.
+  // Fall back to core features if prop is missing or empty (e.g. DB fetch failed).
+  const defaultFeatures = ['players', 'calendar', 'notes', 'forms', 'spreadsheets', 'files', 'reports']
+  const enabledFeatures = useMemo(
+    () => new Set(enabledFeaturesProp?.length ? enabledFeaturesProp : defaultFeatures),
+    [enabledFeaturesProp]
+  )
 
-  const allNavItems = [
-    { labelKey: 'nav.aiWorkspace', href: '/dashboard/ai-workspace', icon: Wand2, featureKey: 'aiWorkspace' as FeatureKey },
-    { labelKey: 'nav.ai', href: '/dashboard/ai', icon: Sparkles, featureKey: 'ai' as FeatureKey },
-    { labelKey: 'nav.players', href: '/dashboard/players', icon: Users, featureKey: 'players' as FeatureKey },
-    { labelKey: 'nav.forms', href: '/dashboard/forms', icon: FileText, featureKey: 'forms' as FeatureKey },
-    { labelKey: 'nav.reports', href: '/dashboard/reports', icon: BarChart3, featureKey: 'reports' as FeatureKey },
-    { labelKey: 'nav.calendar', href: '/dashboard/calendar', icon: Calendar, featureKey: 'calendar' as FeatureKey },
-    { labelKey: 'nav.messages', href: '/dashboard/chat', icon: MessageSquare, featureKey: 'messages' as FeatureKey },
-    { labelKey: 'nav.notes', href: '/dashboard/notes', icon: StickyNote, featureKey: 'notes' as FeatureKey },
-    { labelKey: 'nav.spreadsheets', href: '/dashboard/spreadsheets', icon: Table, featureKey: 'spreadsheets' as FeatureKey },
-    { labelKey: 'nav.canvas', href: '/dashboard/canvas', icon: PencilRuler, featureKey: 'canvas' as FeatureKey },
-    { labelKey: 'nav.files', href: '/dashboard/files', icon: Folder, featureKey: 'files' as FeatureKey },
-    { labelKey: 'nav.planner', href: '/dashboard/planner', icon: CalendarCheck, featureKey: 'planner' as FeatureKey },
-    { labelKey: 'nav.templates', href: '/dashboard/templates', icon: Layout, featureKey: 'templates' as FeatureKey },
-    { labelKey: 'settings.dataManagement', href: '/dashboard/data-management', icon: Database, featureKey: 'dataManagement' as FeatureKey },
+  type NavItem = { labelKey: string; href: string; icon: any; featureKey: FeatureKey }
+
+  // Grouped navigation items
+  const navGroups: { label: string; items: NavItem[] }[] = [
+    {
+      label: 'Team',
+      items: [
+        { labelKey: 'nav.players', href: '/dashboard/players', icon: Users, featureKey: 'players' as FeatureKey },
+      ],
+    },
+    {
+      label: 'Workflow',
+      items: [
+        { labelKey: 'nav.calendar', href: '/dashboard/calendar', icon: Calendar, featureKey: 'calendar' as FeatureKey },
+        { labelKey: 'nav.forms', href: '/dashboard/forms', icon: FileText, featureKey: 'forms' as FeatureKey },
+        { labelKey: 'nav.notes', href: '/dashboard/notes', icon: StickyNote, featureKey: 'notes' as FeatureKey },
+        { labelKey: 'nav.messages', href: '/dashboard/chat', icon: MessageSquare, featureKey: 'messages' as FeatureKey },
+      ],
+    },
+    {
+      label: 'Analysis',
+      items: [
+        { labelKey: 'nav.reports', href: '/dashboard/reports', icon: BarChart3, featureKey: 'reports' as FeatureKey },
+        { labelKey: 'nav.spreadsheets', href: '/dashboard/spreadsheets', icon: Table, featureKey: 'spreadsheets' as FeatureKey },
+        { labelKey: 'settings.dataManagement', href: '/dashboard/data-management', icon: Database, featureKey: 'dataManagement' as FeatureKey },
+      ],
+    },
+    {
+      label: 'Tools',
+      items: [
+        { labelKey: 'nav.canvas', href: '/dashboard/canvas', icon: PencilRuler, featureKey: 'canvas' as FeatureKey },
+        { labelKey: 'nav.files', href: '/dashboard/files', icon: Folder, featureKey: 'files' as FeatureKey },
+        { labelKey: 'nav.planner', href: '/dashboard/planner', icon: CalendarCheck, featureKey: 'planner' as FeatureKey },
+        { labelKey: 'nav.templates', href: '/dashboard/templates', icon: Layout, featureKey: 'templates' as FeatureKey },
+      ],
+    },
+    {
+      label: 'AI',
+      items: [
+        { labelKey: 'nav.ai', href: '/dashboard/ai', icon: Sparkles, featureKey: 'ai' as FeatureKey },
+        { labelKey: 'nav.aiWorkspace', href: '/dashboard/ai-workspace', icon: Wand2, featureKey: 'aiWorkspace' as FeatureKey },
+      ],
+    },
   ]
 
-  // Filter navigation items based on enabled features
-  const filteredNavItems = isLoadingFeatures 
-    ? allNavItems // Show all while loading
-    : allNavItems.filter(item => enabledFeatures.has(item.featureKey))
-
-  // Separate released and unreleased features
-  const releasedItems = filteredNavItems.filter(item => isFeatureReleased(item.featureKey))
-  const unreleasedItems = filteredNavItems.filter(item => !isFeatureReleased(item.featureKey))
+  // Filter each group to only show enabled & released features, drop empty groups
+  const filteredGroups = navGroups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item =>
+        enabledFeatures.has(item.featureKey) && isFeatureReleased(item.featureKey)
+      ),
+    }))
+    .filter(group => group.items.length > 0)
 
   const settingsItems = [
     { labelKey: 'settings.profile', href: '/dashboard/profile', icon: UserCircle },
@@ -193,34 +209,12 @@ function AppSidebarComponent({ userName, userEmail, userAvatar, organizationName
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {releasedItems.map((item) => {
-                const isActive = pathname?.startsWith(item.href)
-                const label = t(item.labelKey)
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
-                      <Link href={item.href} className="relative flex items-center gap-2 min-w-0">
-                        <item.icon />
-                        <span className="truncate flex-1">{label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {unreleasedItems.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Development</SidebarGroupLabel>
+        {filteredGroups.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {unreleasedItems.map((item) => {
+                {group.items.map((item) => {
                   const isActive = pathname?.startsWith(item.href)
                   const label = t(item.labelKey)
                   return (
@@ -229,12 +223,6 @@ function AppSidebarComponent({ userName, userEmail, userAvatar, organizationName
                         <Link href={item.href} className="relative flex items-center gap-2 min-w-0">
                           <item.icon />
                           <span className="truncate flex-1">{label}</span>
-                          <Badge 
-                            variant="secondary" 
-                            className="shrink-0 text-[10px] px-1.5 py-0 h-4 font-normal opacity-70 group-data-[collapsible=icon]:hidden"
-                          >
-                            Dev
-                          </Badge>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -243,7 +231,7 @@ function AppSidebarComponent({ userName, userEmail, userAvatar, organizationName
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        )}
+        ))}
 
         <SidebarGroup>
           <SidebarGroupLabel>Settings</SidebarGroupLabel>

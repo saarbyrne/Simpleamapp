@@ -41,6 +41,7 @@ import {
   deleteSpreadsheetFolder,
 } from '@/app/actions/spreadsheet-folders'
 import { toast } from 'sonner'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 
 type FolderSidebarProps = {
   folders: (SpreadsheetFolder & { _count?: { spreadsheets: number } })[]
@@ -77,6 +78,7 @@ export function FolderSidebar({
       localStorage.setItem(FOLDER_SIDEBAR_STORAGE_KEY, String(isCollapsed))
     }
   }, [isCollapsed])
+  const [ConfirmDialogEl, confirmAction] = useConfirmDialog()
   const [dialogMode, setDialogMode] = useState<FolderDialogMode>(null)
   const [editingFolder, setEditingFolder] = useState<SpreadsheetFolder | null>(null)
   const [parentId, setParentId] = useState<string | undefined>(undefined)
@@ -145,9 +147,12 @@ export function FolderSidebar({
   }
 
   const handleDelete = async (folder: SpreadsheetFolder) => {
-    if (!confirm(`Delete folder "${folder.name}"? Spreadsheets will be moved to root.`)) {
-      return
-    }
+    const ok = await confirmAction({
+      title: `Delete folder "${folder.name}"?`,
+      description: 'Spreadsheets in this folder will be moved to root.',
+      confirmLabel: 'Delete',
+    })
+    if (!ok) return
 
     try {
       const result = await deleteSpreadsheetFolder(folder.id)
@@ -257,6 +262,7 @@ export function FolderSidebar({
 
   return (
     <>
+      {ConfirmDialogEl}
       <div className={cn(
         "border-r bg-background overflow-hidden -mt-4 -mb-4 -ms-4 transition-all duration-200 flex relative",
         isCollapsed ? "w-8" : "w-64",

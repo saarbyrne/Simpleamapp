@@ -38,6 +38,7 @@ import { CreateMilestoneDialog } from './create-milestone-dialog'
 import { PlanTimeline } from './plan-timeline'
 import { deletePlan, publishPlan, unpublishPlan } from '@/app/actions/plans'
 import { toast } from 'sonner'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 
 type PlanDetailProps = {
   plan: {
@@ -80,11 +81,15 @@ export function PlanDetail({ plan }: PlanDetailProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
+  const [ConfirmDialogEl, confirmAction] = useConfirmDialog()
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete "${plan.name}"? This action cannot be undone.`)) {
-      return
-    }
+    const ok = await confirmAction({
+      title: `Delete "${plan.name}"?`,
+      description: 'This action cannot be undone.',
+      confirmLabel: 'Delete',
+    })
+    if (!ok) return
 
     setIsDeleting(true)
     try {
@@ -128,6 +133,7 @@ export function PlanDetail({ plan }: PlanDetailProps) {
 
   return (
     <PageFrame>
+      {ConfirmDialogEl}
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">

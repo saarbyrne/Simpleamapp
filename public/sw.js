@@ -1,95 +1,76 @@
-// Service Worker for caching static assets
-const CACHE_NAME = 'simpleam-v1.0'
-const STATIC_CACHE = 'simpleam-static-v1.0'
-const DYNAMIC_CACHE = 'simpleam-dynamic-v1.0'
+// Service Worker for caching static assets.
+// Important: never use cache-first for HTML documents, otherwise old pages can
+// reference deleted Next.js chunk names (ChunkLoadError).
+const STATIC_CACHE = 'simpleam-static-v1.1'
+const DYNAMIC_CACHE = 'simpleam-dynamic-v1.1'
 
-// Assets to cache immediately
-const STATIC_ASSETS = [
-  '/',
-  '/favicon.ico',
-  // Add critical CSS/JS files here when known
-]
+const STATIC_ASSETS = ['/', '/favicon.ico']
+const isLocalhost = ['localhost', '127.0.0.1'].includes(self.location.hostname)
 
-// Install event - cache static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => {
-        // Cache each asset individually to avoid failures
-        return Promise.allSettled(
-          STATIC_ASSETS.map(url => 
-            cache.add(url).catch(err => {
-              console.warn(`Failed to cache ${url}:`, err)
-              return null
-            })
-          )
-        )
-      })
-      .then(() => self.skipWaiting())
-      .catch(err => {
-        console.error('Service worker install failed:', err)
-        return self.skipWaiting()
-      })
+    (async () => {
+      if (isLocalhost) {
+        await self.skipWaiting()
+        return
+      }
+
+      const cache = await caches.open(STATIC_CACHE)
+      await Promise.allSettled(
+        STATIC_ASSETS.map((url) => cache.add(url))
+      )
+      await self.skipWaiting()
+    })()
   )
 })
 
-// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
-            return caches.delete(cacheName)
-          }
-        })
-      )
-    }).then(() => self.clients.claim())
+    (async () => {
+      const cacheNames = await caches.keys()
+      await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)))
+
+      if (isLocalhost) {
+        await self.registration.unregister()
+        return
+      }
+
+      await self.clients.claim()
+    })()
   )
 })
 
-// Fetch event - serve from cache when possible
 self.addEventListener('fetch', (event) => {
-  // Only cache GET requests
   if (event.request.method !== 'GET') return
 
-  // Skip API calls and dynamic routes
-  if (event.request.url.includes('/api/') ||
-      event.request.url.includes('/_next/static/') ||
-      event.request.url.includes('chrome-extension://')) {
+  if (
+    event.request.url.includes('/api/') ||
+    event.request.url.includes('/_next/static/') ||
+    event.request.url.includes('chrome-extension://')
+  ) {
+    return
+  }
+
+  // Always go network-first for document requests to avoid stale HTML/chunk manifests.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/offline.html'))
+    )
     return
   }
 
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version if available
-        if (response) {
-          return response
-        }
+    caches.match(event.request).then((response) => {
+      if (response) return response
 
-        // Otherwise fetch and cache
-        return fetch(event.request)
-          .then((fetchResponse) => {
-            // Don't cache non-successful responses
-            if (!fetchResponse.ok) {
-              return fetchResponse
-            }
-
-            // Clone the response for caching
-            const responseClone = fetchResponse.clone()
-
-            caches.open(DYNAMIC_CACHE)
-              .then((cache) => {
-                cache.put(event.request, responseClone)
-              })
-
-            return fetchResponse
-          })
-          .catch(() => {
-            // Return offline fallback if available
-            return caches.match('/offline.html')
-          })
+      return fetch(event.request).then((fetchResponse) => {
+        if (!fetchResponse.ok) return fetchResponse
+        const responseClone = fetchResponse.clone()
+        caches.open(DYNAMIC_CACHE).then((cache) => {
+          cache.put(event.request, responseClone)
+        })
+        return fetchResponse
       })
+    })
   )
 })

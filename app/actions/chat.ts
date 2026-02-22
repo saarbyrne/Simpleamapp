@@ -1,8 +1,7 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/db';
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user';
+import { requireUser } from '@/lib/auth/cached-user';
 import { User } from '@prisma/client';
 
 // Simple in-memory cache for participants (5 minute TTL)
@@ -23,19 +22,11 @@ export interface ChatParticipant {
  */
 export async function getChatParticipants() {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
 
-    if (!user) {
-      return { success: false, error: 'Authentication required' };
-    }
-
-    const dbUser = await ensureUserWithOrganization(user);
+    const user = await requireUser()
 
     // Check cache first
-    const cacheKey = `participants_${dbUser.organizationId}`;
+    const cacheKey = `participants_${user.organizationId}`;
     const cached = participantsCache.get(cacheKey);
     const now = Date.now();
 
@@ -51,8 +42,8 @@ export async function getChatParticipants() {
       // Get all users in the organization (staff, excluding current user)
       prisma.user.findMany({
         where: {
-          organizationId: dbUser.organizationId,
-          id: { not: dbUser.id },
+          organizationId: user.organizationId,
+          id: { not: user.id },
         },
         select: {
           id: true,
@@ -65,7 +56,7 @@ export async function getChatParticipants() {
       // Get all players in the organization (include all statuses for chat)
       prisma.personOrganization.findMany({
         where: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
           role: 'player',
         },
         include: {

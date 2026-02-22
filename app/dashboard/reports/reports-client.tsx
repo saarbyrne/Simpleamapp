@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import {
   Card,
   CardContent,
@@ -85,9 +86,15 @@ export function ReportsClient({
   const [templates, setTemplates] = useState<ReportTemplate[]>(initialTemplates)
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [ConfirmDialogEl, confirmAction] = useConfirmDialog()
 
   const handleDelete = async (id: string) => {
-    if (typeof window !== 'undefined' && !confirm(t('deleteConfirmation'))) return
+    const ok = await confirmAction({
+      title: t('deleteConfirmation'),
+      description: t('failedToDeleteReport'),
+      confirmLabel: t('delete'),
+    })
+    if (!ok) return
 
     setDeletingId(id)
     
@@ -136,6 +143,7 @@ export function ReportsClient({
 
   return (
     <>
+      {ConfirmDialogEl}
       <PageCard
         variant="table"
         title={t('title')}

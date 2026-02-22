@@ -43,11 +43,11 @@ interface TemplateSelectorDialogProps {
 }
 
 const eventTypeConfig = {
-  training: { labelKey: 'calendar.types.training', color: 'bg-blue-500', icon: Users },
-  match: { labelKey: 'calendar.types.match', color: 'bg-green-500', icon: Trophy },
-  medical: { labelKey: 'calendar.types.medical', color: 'bg-red-500', icon: Stethoscope },
+  training: { labelKey: 'calendar.types.training', color: 'bg-primary', icon: Users },
+  match: { labelKey: 'calendar.types.match', color: 'bg-emerald-500', icon: Trophy },
+  medical: { labelKey: 'calendar.types.medical', color: 'bg-destructive', icon: Stethoscope },
   meeting: { labelKey: 'calendar.types.meeting', color: 'bg-purple-500', icon: Calendar },
-  other: { labelKey: 'calendar.types.other', color: 'bg-gray-500', icon: Calendar },
+  other: { labelKey: 'calendar.types.other', color: 'bg-muted-foreground', icon: Calendar },
 }
 
 export function TemplateSelectorDialog({
@@ -150,7 +150,7 @@ export function TemplateSelectorDialog({
                     >
                       {/* Icon */}
                       <div className={cn(
-                        'flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-white',
+                        'flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-primary-foreground',
                         typeConfig.color
                       )}>
                         <Icon className="h-6 w-6" />
@@ -174,7 +174,7 @@ export function TemplateSelectorDialog({
 
                         {/* Metadata */}
                         <div className="mt-3 flex flex-wrap items-center gap-2">
-                          <Badge variant="outline" className={cn('text-white', typeConfig.color)}>
+                          <Badge variant="outline" className={cn('text-primary-foreground', typeConfig.color)}>
                             {t(typeConfig.labelKey)}
                           </Badge>
                           <Badge variant="outline" className="gap-1">

@@ -1,21 +1,18 @@
 import { NextRequest } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
 import { streamChatCompletion } from '@/lib/ai/service'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { getCachedUserWithOrganization } from '@/lib/auth/cached-user'
 import { addAIWorkspaceMessage, updateAIWorkspace, getAIWorkspace } from '@/app/actions/ai-workspace'
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getCachedUserWithOrganization()
 
   if (!user) {
     return new Response('Unauthorized', { status: 401 })
   }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
     const { workspaceId, message } = await req.json()
 
     // Get workspace to determine artifact type and context
@@ -54,8 +51,8 @@ export async function POST(req: NextRequest) {
           // Stream the AI response
           for await (const chunk of streamChatCompletion(
             conversationHistory,
-            dbUser.organizationId,
-            dbUser.id,
+            user.organizationId,
+            user.id,
             systemPrompt
           )) {
             if (chunk.type === 'content_delta' && chunk.content) {

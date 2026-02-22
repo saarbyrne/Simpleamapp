@@ -200,15 +200,15 @@ export function EventDetailDialog({
                   <div className="text-xs text-muted-foreground">{t('calendar.attendance.total')}</div>
                 </div>
                 <div className="rounded-lg border bg-card p-3">
-                  <div className="text-2xl font-bold text-green-600">{attendanceSummary.attending}</div>
+                  <div className="text-2xl font-bold text-emerald-600">{attendanceSummary.attending}</div>
                   <div className="text-xs text-muted-foreground">{t('calendar.attendance.attending')}</div>
                 </div>
                 <div className="rounded-lg border bg-card p-3">
-                  <div className="text-2xl font-bold text-red-600">{attendanceSummary.absent}</div>
+                  <div className="text-2xl font-bold text-destructive">{attendanceSummary.absent}</div>
                   <div className="text-xs text-muted-foreground">{t('calendar.attendance.absent')}</div>
                 </div>
                 <div className="rounded-lg border bg-card p-3">
-                  <div className="text-2xl font-bold text-gray-600">{attendanceSummary.invited}</div>
+                  <div className="text-2xl font-bold text-muted-foreground">{attendanceSummary.invited}</div>
                   <div className="text-xs text-muted-foreground">{t('calendar.attendance.invited')}</div>
                 </div>
               </div>

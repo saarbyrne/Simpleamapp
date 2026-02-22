@@ -1,8 +1,7 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { requireUser } from '@/lib/auth/cached-user'
 import { Prisma } from '@prisma/client'
 
 export interface SearchFilters {
@@ -74,17 +73,9 @@ export async function globalSearch(
     return { error: 'Search query must be at least 2 characters' }
   }
 
-  // Get authenticated user
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
-    const organizationId = dbUser.organizationId
+    const user = await requireUser()
+    const organizationId = user.organizationId
 
     // Prepare search query (convert to tsquery format with proper escaping)
     const searchQuery = escapeTsQuery(query.trim())
@@ -113,10 +104,10 @@ export async function globalSearch(
     const searchPromises = []
 
     if (entityTypes.includes('player')) {
-      searchPromises.push(searchPlayers(searchQuery, organizationId, dbUser.id).catch(() => []))
+      searchPromises.push(searchPlayers(searchQuery, organizationId, user.id).catch(() => []))
     }
     if (entityTypes.includes('note')) {
-      searchPromises.push(searchNotes(searchQuery, organizationId, dbUser.id).catch(() => []))
+      searchPromises.push(searchNotes(searchQuery, organizationId, user.id).catch(() => []))
     }
     if (entityTypes.includes('event')) {
       searchPromises.push(searchEvents(searchQuery, organizationId, filters?.dateRange).catch(() => []))

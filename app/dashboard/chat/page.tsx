@@ -1,31 +1,19 @@
 import { Suspense } from 'react';
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user';
+import { requireUser } from '@/lib/auth/cached-user';
 import { ChatMasterDetail } from '@/components/chat/chat-master-detail';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 
 export default async function ChatPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Get user from database
-  const dbUser = await ensureUserWithOrganization(user);
+  const user = await requireUser();
 
   return (
-    <div className="h-[calc(100vh-4rem)]">
+    <div className="h-full">
       <Suspense fallback={<ChatSkeleton />}>
         <ChatMasterDetail
-          userId={dbUser.id}
-          userName={dbUser.name}
-          orgId={dbUser.organizationId}
+          userId={user.id}
+          userName={user.name}
+          orgId={user.organizationId}
         />
       </Suspense>
     </div>

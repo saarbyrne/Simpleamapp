@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     if (!settings) {
       settings = await db.aISettings.create({
         data: {
-          orgId: dbUser.organizationId,
+          organizationId: dbUser.organizationId,
           userId: dbUser.id,
           injuryRiskAlerts: true,
           wellnessAlerts: true,
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
         monthlyTokenLimit: validatedData.monthlyTokenLimit
       },
       create: {
-        orgId: dbUser.organizationId,
+        organizationId: dbUser.organizationId,
         userId: dbUser.id,
         injuryRiskAlerts: validatedData.injuryRiskAlerts,
         wellnessAlerts: validatedData.wellnessAlerts,

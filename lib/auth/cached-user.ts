@@ -1,10 +1,15 @@
 /**
  * Cached User Session Utilities
  *
- * This module provides cached versions of user authentication and organization checks.
- * Uses React's cache() to prevent redundant database queries within the same request.
+ * This is the SINGLE source of truth for auth in server actions and components.
+ * Uses React's cache() to deduplicate auth calls within the same request.
  *
- * PERFORMANCE IMPACT: Reduces 3-5 DB queries per request to just 1 query (shared across all server actions)
+ * For read operations: use getCachedUserWithOrganization() or requireUser()
+ * For write operations that may need user creation: use ensureUserWithOrganization()
+ *
+ * IMPORTANT: lastLoginAt is NOT updated on every action call.
+ * It is only updated when ensureUserWithOrganization() is called
+ * during actual login/signup flows.
  */
 
 import { cache } from 'react'
@@ -34,7 +39,7 @@ export const getCachedSupabaseUser = cache(async (): Promise<SupabaseUser | null
 
 /**
  * Get the current user with organization (cached per request)
- * This replaces ensureUserWithOrganization for read-only operations
+ * Returns null if not authenticated or user doesn't exist in DB yet.
  */
 export const getCachedUserWithOrganization = cache(async (): Promise<UserWithOrganization | null> => {
   const supabaseUser = await getCachedSupabaseUser()
@@ -56,74 +61,8 @@ export const getCachedUserWithOrganization = cache(async (): Promise<UserWithOrg
 })
 
 /**
- * Ensure user exists with organization (creates if needed)
- * Use this for write operations or when you need to ensure the user/org exists
- * For read-only operations, prefer getCachedUserWithOrganization()
- */
-export async function ensureUserWithOrganization(supabaseUser: SupabaseUser): Promise<UserWithOrganization> {
-  // Check if user exists in database
-  let dbUser = await prisma.user.findUnique({
-    where: { id: supabaseUser.id },
-    include: { organization: true },
-  })
-
-  // Create user if doesn't exist
-  if (!dbUser) {
-    // First, create the organization (required for user creation)
-    const userEmail = supabaseUser.email!
-    const defaultOrgName = userEmail.includes('@')
-      ? `${userEmail.split('@')[0]}'s Organization`
-      : 'My Organization'
-
-    const organization = await prisma.organization.create({
-      data: {
-        name: defaultOrgName,
-        slug: slugify(defaultOrgName),
-      },
-    })
-
-    // Then create the user with the organizationId
-    const newUser = await prisma.user.create({
-      data: {
-        id: supabaseUser.id,
-        email: userEmail,
-        name: supabaseUser.user_metadata?.name || userEmail.split('@')[0] || 'User',
-        organizationId: organization.id,
-      },
-      include: { organization: true },
-    })
-    dbUser = newUser
-  }
-
-  // Ensure organization exists (shouldn't happen after above fix, but keeping for safety)
-  if (!dbUser.organization) {
-    const userEmail = dbUser.email
-    const defaultOrgName = userEmail.includes('@')
-      ? `${userEmail.split('@')[0]}'s Organization`
-      : 'My Organization'
-
-    const organization = await prisma.organization.create({
-      data: {
-        name: defaultOrgName,
-        slug: slugify(defaultOrgName),
-      },
-    })
-
-    // Update user with organizationId
-    dbUser = await prisma.user.update({
-      where: { id: dbUser.id },
-      data: {
-        organizationId: organization.id,
-      },
-      include: { organization: true },
-    }) as UserWithOrganization
-  }
-
-  return dbUser as UserWithOrganization
-}
-
-/**
- * Throw error if user is not authenticated
+ * Require authenticated user. Throws if not authenticated.
+ * Use this in server actions via the createAction() wrapper.
  */
 export async function requireUser(): Promise<UserWithOrganization> {
   const user = await getCachedUserWithOrganization()
@@ -133,4 +72,132 @@ export async function requireUser(): Promise<UserWithOrganization> {
   }
 
   return user
+}
+
+// ============================================
+// User Creation & Account Linking
+// (Only called during login/signup flows)
+// ============================================
+
+function buildDefaultName(user: SupabaseUser): string {
+  const metadata = user.user_metadata ?? {}
+  return (
+    metadata.full_name ||
+    metadata.name ||
+    metadata.preferred_username ||
+    user.email?.split('@')[0] ||
+    'New Member'
+  )
+}
+
+async function ensureOrganizationForUser(displayName: string) {
+  const baseName = `${displayName}'s Team`.trim()
+  const baseSlug = slugify(baseName) || 'team'
+
+  let slugCandidate = baseSlug
+  let suffix = 1
+
+  while (
+    await prisma.organization.findUnique({
+      where: { slug: slugCandidate },
+    })
+  ) {
+    slugCandidate = `${baseSlug}-${suffix}`
+    suffix += 1
+  }
+
+  return prisma.organization.create({
+    data: {
+      name: baseName,
+      slug: slugCandidate,
+    },
+  })
+}
+
+/**
+ * Ensure user exists with organization, creating if needed.
+ * Handles account-linking when a user signs up with a different provider
+ * but same email address.
+ *
+ * NOTE: This should only be called from login/auth callback flows,
+ * NOT from every server action. Server actions should use requireUser().
+ */
+export async function ensureUserWithOrganization(user: SupabaseUser): Promise<UserWithOrganization> {
+  // Check for existing user by Supabase ID
+  const existing = await prisma.user.findUnique({
+    where: { id: user.id },
+    include: { organization: true },
+  })
+
+  if (existing?.organization) {
+    // User exists with organization — update auth info and last login
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        lastLoginAt: new Date(),
+        authProvider: user.app_metadata?.provider ?? existing.authProvider,
+      },
+      include: { organization: true },
+    })
+    return updated as UserWithOrganization
+  }
+
+  // Check for account-linking scenario (same email, different Supabase ID)
+  const existingByEmail = await prisma.user.findUnique({
+    where: { email: user.email || '' },
+    include: { organization: true },
+  })
+
+  if (existingByEmail && existingByEmail.id !== user.id) {
+    // Account linking: update existing user with new Supabase ID
+    const updated = await prisma.user.update({
+      where: { id: existingByEmail.id },
+      data: {
+        id: user.id,
+        lastLoginAt: new Date(),
+        authProvider: user.app_metadata?.provider ?? existingByEmail.authProvider,
+      },
+      include: { organization: true },
+    })
+    return updated as UserWithOrganization
+  }
+
+  // New user — create org and user
+  const displayName = buildDefaultName(user)
+  const organization = existing?.organizationId
+    ? await prisma.organization.findUniqueOrThrow({
+        where: { id: existing.organizationId },
+      })
+    : await ensureOrganizationForUser(displayName)
+
+  if (existing) {
+    // User exists but without org — link them
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        organizationId: organization.id,
+        name: existing.name || displayName,
+        lastLoginAt: new Date(),
+      },
+      include: { organization: true },
+    })
+    return updated as UserWithOrganization
+  }
+
+  // Brand new user
+  const newUser = await prisma.user.create({
+    data: {
+      id: user.id,
+      email: user.email || `${user.id}@placeholder.local`,
+      name: displayName,
+      avatar: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+      authProvider: user.app_metadata?.provider ?? 'email',
+      authProviderId: user.user_metadata?.provider_id ?? null,
+      organizationId: organization.id,
+      lastLoginAt: new Date(),
+    },
+    include: { organization: true },
+  })
+
+  return newUser as UserWithOrganization
 }

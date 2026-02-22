@@ -48,6 +48,7 @@ import { cn } from '@/components/ui/utils'
 import { reorderMilestones, updateMilestone, deleteMilestone } from '@/app/actions/milestones'
 import { CreateMilestoneDialog } from './create-milestone-dialog'
 import { toast } from 'sonner'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 
 type Milestone = {
   id: string
@@ -82,25 +83,25 @@ const statusConfig = {
     label: 'Pending',
     icon: Circle,
     variant: 'secondary' as const,
-    color: 'text-gray-500',
+    color: 'text-muted-foreground',
   },
   in_progress: {
     label: 'In Progress',
     icon: Clock,
     variant: 'default' as const,
-    color: 'text-blue-500',
+    color: 'text-primary',
   },
   complete: {
     label: 'Complete',
     icon: CheckCircle2,
     variant: 'default' as const,
-    color: 'text-green-500',
+    color: 'text-emerald-500',
   },
   blocked: {
     label: 'Blocked',
     icon: AlertCircle,
     variant: 'destructive' as const,
-    color: 'text-red-500',
+    color: 'text-destructive',
   },
 }
 
@@ -264,6 +265,7 @@ export function MilestonesList({
   const router = useRouter()
   const [milestones, setMilestones] = useState(initialMilestones)
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null)
+  const [ConfirmDialogEl, confirmAction] = useConfirmDialog()
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -300,9 +302,12 @@ export function MilestonesList({
   }
 
   const handleDelete = async (milestone: Milestone) => {
-    if (!confirm(`Are you sure you want to delete "${milestone.title}"?`)) {
-      return
-    }
+    const ok = await confirmAction({
+      title: `Delete "${milestone.title}"?`,
+      description: 'This milestone will be permanently deleted.',
+      confirmLabel: 'Delete',
+    })
+    if (!ok) return
 
     const result = await deleteMilestone(milestone.id)
     if (result.error) {
@@ -330,6 +335,7 @@ export function MilestonesList({
 
   return (
     <>
+      {ConfirmDialogEl}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

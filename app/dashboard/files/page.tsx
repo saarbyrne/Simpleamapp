@@ -1,25 +1,16 @@
 import { Suspense } from 'react'
-import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { requireUser } from '@/lib/auth/cached-user'
 import { FilesTable } from '@/components/files/files-table'
-import { redirect } from 'next/navigation'
 import { TablePageSkeleton } from '@/components/ui/skeleton-wrappers'
 
 export default async function FilesPage() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  const dbUser = await ensureUserWithOrganization(user)
+  const user = await requireUser()
 
   // Fetch files for the organization
   const files = await prisma.file.findMany({
     where: {
-      organizationId: dbUser.organizationId,
+      organizationId: user.organizationId,
     },
     include: {
       uploadedBy: {
@@ -40,7 +31,7 @@ export default async function FilesPage() {
 
   const total = await prisma.file.count({
     where: {
-      organizationId: dbUser.organizationId,
+      organizationId: user.organizationId,
     },
   })
 

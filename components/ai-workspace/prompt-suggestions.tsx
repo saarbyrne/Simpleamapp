@@ -46,23 +46,23 @@ export function PromptSuggestions({
 
   if (isLoading) {
     return (
-      <div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <div className="space-y-3 rounded-lg border border-border bg-accent p-4">
         <div className="flex items-start gap-3">
-          <div className="mt-0.5 h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-          <p className="text-sm text-blue-900">Analyzing your prompt...</p>
+          <div className="mt-0.5 h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-foreground">Analyzing your prompt...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
+    <div className="space-y-3 rounded-lg border border-border bg-accent p-4">
       {/* Header with message */}
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600">
-          <Check className="h-3 w-3 text-white" />
+        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary">
+          <Check className="h-3 w-3 text-primary-foreground" />
         </div>
-        <p className="text-sm text-blue-900">{message}</p>
+        <p className="text-sm text-foreground">{message}</p>
       </div>
 
       {/* Tag suggestions */}
@@ -76,8 +76,8 @@ export function PromptSuggestions({
               className={cn(
                 'rounded-full border px-3 py-1 text-sm transition-all',
                 isSelected
-                  ? 'border-blue-600 bg-blue-600 text-white shadow-sm'
-                  : 'border-gray-300 bg-white text-gray-700 hover:border-blue-400 hover:bg-blue-50'
+                  ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                  : 'border-border bg-background text-foreground hover:border-primary hover:bg-accent'
               )}
             >
               {tag.label}
@@ -92,7 +92,7 @@ export function PromptSuggestions({
           variant="ghost"
           size="sm"
           onClick={onSkip}
-          className="text-xs text-gray-600 hover:text-gray-900"
+          className="text-xs text-muted-foreground hover:text-foreground"
         >
           Skip, continue anyway
         </Button>

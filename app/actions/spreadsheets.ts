@@ -1,9 +1,8 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath, unstable_cache } from 'next/cache'
-import { getCachedUserWithOrganization, ensureUserWithOrganization } from '@/lib/auth/cached-user'
+import { getCachedUserWithOrganization, requireUser } from '@/lib/auth/cached-user'
 import { Prisma } from '@prisma/client'
 import type { ColumnDefinition, SpreadsheetRow } from '@/lib/types/spreadsheet'
 
@@ -28,15 +27,9 @@ export interface UpdateSpreadsheetData {
 
 // Create a new spreadsheet
 export async function createSpreadsheet(data: CreateSpreadsheetData) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const spreadsheet = await prisma.spreadsheet.create({
       data: {
@@ -45,7 +38,7 @@ export async function createSpreadsheet(data: CreateSpreadsheetData) {
         schema: data.schema as unknown as Prisma.InputJsonValue,
         data: (data.data || []) as unknown as Prisma.InputJsonValue,
         templateId: data.templateId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         createdById: user.id,
         version: 1,
         tags: [],
@@ -80,22 +73,16 @@ export async function updateSpreadsheet(
   spreadsheetId: string,
   data: UpdateSpreadsheetData
 ) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Get current spreadsheet to check ownership
     const current = await prisma.spreadsheet.findUnique({
       where: { id: spreadsheetId },
     })
 
-    if (!current || current.organizationId !== dbUser.organizationId) {
+    if (!current || current.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found or access denied' }
     }
 
@@ -150,7 +137,7 @@ export async function updateSpreadsheet(
               spreadsheetId: spreadsheet.id,
               rowId: row.id,
               userId: user.id,
-              organizationId: dbUser.organizationId,
+              organizationId: user.organizationId,
               action: 'create',
               previousData: Prisma.JsonNull,
               newData: row as unknown as Prisma.InputJsonValue,
@@ -170,7 +157,7 @@ export async function updateSpreadsheet(
                 spreadsheetId: spreadsheet.id,
                 rowId: newRow.id,
                 userId: user.id,
-                organizationId: dbUser.organizationId,
+                organizationId: user.organizationId,
                 action: 'update',
                 previousData: oldRow as unknown as Prisma.InputJsonValue,
                 newData: newRow as unknown as Prisma.InputJsonValue,
@@ -188,7 +175,7 @@ export async function updateSpreadsheet(
               spreadsheetId: spreadsheet.id,
               rowId: oldRow.id,
               userId: user.id,
-              organizationId: dbUser.organizationId,
+              organizationId: user.organizationId,
               action: 'delete',
               previousData: oldRow as unknown as Prisma.InputJsonValue,
               newData: Prisma.JsonNull,
@@ -222,21 +209,15 @@ export async function updateSpreadsheet(
 
 // Delete a spreadsheet
 export async function deleteSpreadsheet(spreadsheetId: string) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const spreadsheet = await prisma.spreadsheet.findUnique({
       where: { id: spreadsheetId },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found or access denied' }
     }
 
@@ -261,9 +242,9 @@ export async function deleteSpreadsheet(spreadsheetId: string) {
 // Get all spreadsheets for the organization
 export async function getSpreadsheets() {
   try {
-    const dbUser = await getCachedUserWithOrganization()
+    const user = await getCachedUserWithOrganization()
 
-    if (!dbUser) {
+    if (!user) {
       return { error: 'Not authenticated' }
     }
 
@@ -284,11 +265,11 @@ export async function getSpreadsheets() {
           },
         })
       },
-      [`spreadsheets-${dbUser.organizationId}`],
-      { revalidate: 60, tags: ['spreadsheets', `org-${dbUser.organizationId}`] }
+      [`spreadsheets-${user.organizationId}`],
+      { revalidate: 60, tags: ['spreadsheets', `org-${user.organizationId}`] }
     )
 
-    const spreadsheets = await getCachedSpreadsheets(dbUser.organizationId)
+    const spreadsheets = await getCachedSpreadsheets(user.organizationId)
 
     return { success: true, spreadsheets }
   } catch (error) {
@@ -299,21 +280,15 @@ export async function getSpreadsheets() {
 
 // Toggle starred status
 export async function toggleSpreadsheetStar(spreadsheetId: string, starred: boolean) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const spreadsheet = await prisma.spreadsheet.findUnique({
       where: { id: spreadsheetId },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found or access denied' }
     }
 
@@ -333,21 +308,15 @@ export async function toggleSpreadsheetStar(spreadsheetId: string, starred: bool
 
 // Update spreadsheet tags
 export async function updateSpreadsheetTags(spreadsheetId: string, tags: string[]) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const spreadsheet = await prisma.spreadsheet.findUnique({
       where: { id: spreadsheetId },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found or access denied' }
     }
 
@@ -368,9 +337,9 @@ export async function updateSpreadsheetTags(spreadsheetId: string, tags: string[
 // Get a single spreadsheet
 export async function getSpreadsheet(spreadsheetId: string) {
   try {
-    const dbUser = await getCachedUserWithOrganization()
+    const user = await getCachedUserWithOrganization()
 
-    if (!dbUser) {
+    if (!user) {
       return { error: 'Not authenticated' }
     }
 
@@ -385,7 +354,7 @@ export async function getSpreadsheet(spreadsheetId: string) {
       },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found or access denied' }
     }
 
@@ -399,9 +368,9 @@ export async function getSpreadsheet(spreadsheetId: string) {
 // Get spreadsheet templates
 export async function getSpreadsheetTemplates() {
   try {
-    const dbUser = await getCachedUserWithOrganization()
+    const user = await getCachedUserWithOrganization()
 
-    if (!dbUser) {
+    if (!user) {
       return { error: 'Not authenticated' }
     }
 
@@ -409,7 +378,7 @@ export async function getSpreadsheetTemplates() {
       where: {
         OR: [
           { isPublic: true },
-          { organizationId: dbUser.organizationId },
+          { organizationId: user.organizationId },
         ],
       },
       orderBy: {
@@ -433,15 +402,9 @@ export async function createSpreadsheetTemplate(data: {
   sampleData?: SpreadsheetRow[]
   isPublic?: boolean
 }) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const template = await prisma.spreadsheetTemplate.create({
       data: {
@@ -451,7 +414,7 @@ export async function createSpreadsheetTemplate(data: {
         schema: data.schema as unknown as Prisma.InputJsonValue,
         sampleData: (data.sampleData || []) as unknown as Prisma.InputJsonValue,
         isPublic: data.isPublic || false,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -469,21 +432,15 @@ export async function restoreSpreadsheetVersion(
   spreadsheetId: string,
   versionId: string
 ) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const spreadsheet = await prisma.spreadsheet.findUnique({
       where: { id: spreadsheetId },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found or access denied' }
     }
 

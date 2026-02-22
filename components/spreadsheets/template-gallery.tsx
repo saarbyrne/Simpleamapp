@@ -36,13 +36,13 @@ const categoryIcons: Record<string, React.ElementType> = {
 }
 
 const categoryColors: Record<string, string> = {
-  performance: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-  wellness: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-  injury: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
-  match: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
-  attendance: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
-  gps: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300',
-  custom: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  performance: 'bg-primary/10 text-primary',
+  wellness: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
+  injury: 'bg-destructive/10 text-destructive',
+  match: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  attendance: 'bg-purple-500/10 text-purple-700 dark:text-purple-400',
+  gps: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400',
+  custom: 'bg-muted text-muted-foreground',
 }
 
 export function TemplateGallery({

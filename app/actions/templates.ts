@@ -2,8 +2,7 @@
 
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { requireUser } from '@/lib/auth/cached-user'
 
 type CreateTemplateInput = {
   type: string
@@ -175,26 +174,20 @@ export async function getTemplateById(id: string) {
 
 export async function createTemplate(data: CreateTemplateInput) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-      return { error: 'Unauthorized' }
-    }
-
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Fetch organization name
     const organization = await prisma.organization.findUnique({
-      where: { id: dbUser.organizationId },
+      where: { id: user.organizationId },
       select: { name: true },
     })
 
     const template = await prisma.communityTemplate.create({
       data: {
         ...data,
-        authorId: dbUser.id,
-        authorName: dbUser.name,
+        authorId: user.id,
+        authorName: user.name,
         orgName: organization?.name || null,
         status: 'published', // Auto-publish for now
         publishedAt: new Date(),
@@ -213,14 +206,8 @@ export async function createTemplate(data: CreateTemplateInput) {
 
 export async function updateTemplate(id: string, data: Partial<CreateTemplateInput>) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-      return { error: 'Unauthorized' }
-    }
-
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify ownership
     const existing = await prisma.communityTemplate.findUnique({
@@ -232,7 +219,7 @@ export async function updateTemplate(id: string, data: Partial<CreateTemplateInp
       return { error: 'Template not found' }
     }
 
-    if (existing.authorId !== dbUser.id) {
+    if (existing.authorId !== user.id) {
       return { error: 'Unauthorized' }
     }
 
@@ -254,14 +241,8 @@ export async function updateTemplate(id: string, data: Partial<CreateTemplateInp
 
 export async function deleteTemplate(id: string) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-      return { error: 'Unauthorized' }
-    }
-
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify ownership
     const existing = await prisma.communityTemplate.findUnique({
@@ -273,7 +254,7 @@ export async function deleteTemplate(id: string) {
       return { error: 'Template not found' }
     }
 
-    if (existing.authorId !== dbUser.id) {
+    if (existing.authorId !== user.id) {
       return { error: 'Unauthorized' }
     }
 
@@ -293,18 +274,12 @@ export async function deleteTemplate(id: string) {
 
 export async function getUserTemplates() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-      return { error: 'Unauthorized' }
-    }
-
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const templates = await prisma.communityTemplate.findMany({
       where: {
-        authorId: dbUser.id,
+        authorId: user.id,
       },
       orderBy: {
         createdAt: 'desc',
@@ -328,21 +303,15 @@ export async function getUserTemplates() {
 
 export async function createReview(templateId: string, rating: number, content: string) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-      return { error: 'Unauthorized' }
-    }
-
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Check if user has already reviewed
     const existing = await prisma.templateReview.findUnique({
       where: {
         templateId_userId: {
           templateId,
-          userId: dbUser.id,
+          userId: user.id,
         },
       },
     })
@@ -354,7 +323,7 @@ export async function createReview(templateId: string, rating: number, content: 
     const review = await prisma.templateReview.create({
       data: {
         templateId,
-        userId: dbUser.id,
+        userId: user.id,
         rating,
         content,
       },
@@ -392,19 +361,13 @@ export async function recordTemplateUsage(
   createdName?: string
 ) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-      return { error: 'Unauthorized' }
-    }
-
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     await prisma.templateUsage.create({
       data: {
         templateId,
-        userId: dbUser.id,
+        userId: user.id,
         createdType,
         createdId,
         createdName,

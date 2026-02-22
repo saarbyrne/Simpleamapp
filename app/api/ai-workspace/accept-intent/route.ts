@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { getCachedUserWithOrganization } from '@/lib/auth/cached-user'
 import { db } from '@/lib/db'
 import { ArtifactType } from '@/lib/ai-workspace/types'
 
 export async function POST(req: NextRequest) {
-    const supabase = await createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getCachedUserWithOrganization()
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const dbUser = await ensureUserWithOrganization(user)
-    if (!dbUser) {
-        return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     try {
@@ -28,8 +21,8 @@ export async function POST(req: NextRequest) {
         // We store the structured intent data in 'artifactData' initially
         const workspace = await db.aIWorkspace.create({
             data: {
-                organizationId: dbUser.organizationId,
-                userId: dbUser.id,
+                organizationId: user.organizationId,
+                userId: user.id,
                 name: prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''),
                 artifactType: artifactType as string,
                 initialPrompt: prompt,

@@ -24,7 +24,7 @@ export function AIAssistantClient() {
   }, [])
 
   return (
-    <Card className="h-[calc(100vh-8rem)] flex overflow-hidden">
+    <Card className="h-full flex overflow-hidden">
       {/* Conversation List - Left Panel */}
       <div className="w-80 border-r flex flex-col bg-background">
         {/* Header */}

@@ -1,8 +1,8 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { db } from '@/lib/db'
+import { requireUser } from '@/lib/auth/cached-user'
 
 export type NoteVisibility = 'public' | 'medical' | 'mental_health' | 'coaches' | 'private'
 
@@ -84,15 +84,37 @@ async function getUserRoles(userId: string): Promise<string[]> {
   return userRoles.map((ur) => ur.role.name)
 }
 
-async function getSupabaseUser() {
-  const supabase = await createClient()
-  const userResponse = await supabase.auth.getUser()
-  const user = userResponse?.data?.user ?? null
-  return { supabase, user }
+
+/**
+ * Build privacy-aware WHERE conditions for notes queries.
+ * Pushes privacy filtering into SQL instead of fetching all and filtering in JS.
+ */
+function buildPrivacyWhere(userId: string, userRoles: string[]): any {
+  const visiblePrivacyLevels: string[] = ['public']
+
+  if (userRoles.includes('medical') || userRoles.includes('Medical Staff')) {
+    visiblePrivacyLevels.push('medical')
+  }
+  if (userRoles.includes('mental_health') || userRoles.includes('Mental Health')) {
+    visiblePrivacyLevels.push('mental_health')
+  }
+  if (userRoles.includes('coach') || userRoles.includes('Coach')) {
+    visiblePrivacyLevels.push('coaches')
+  }
+
+  return {
+    OR: [
+      // Notes with privacy levels the user's roles grant access to
+      { privacyLevel: { in: visiblePrivacyLevels } },
+      // Private notes: only if user is the author
+      { privacyLevel: 'private', authorId: userId },
+    ],
+  }
 }
 
 /**
- * Get all notes visible to the current user with optional filters
+ * Get all notes visible to the current user with optional filters.
+ * Privacy, search, and privacy-level filters are pushed into the SQL query.
  */
 export async function getNotes(filters?: {
   search?: string
@@ -103,27 +125,17 @@ export async function getNotes(filters?: {
   tags?: string[]
 }) {
   try {
-    const { user } = await getSupabaseUser()
-
-    if (!user) {
-      return { success: false, error: 'Unauthorized' }
-    }
-
-    // Get current user details
-    const currentUser = await db.user.findUnique({
-      where: { email: user.email! },
-    })
-
-    if (!currentUser) {
-      return { success: false, error: 'User not found' }
-    }
+    const currentUser = await requireUser()
 
     // Get user roles for permission checking
     const userRoles = await getUserRoles(currentUser.id)
 
-    // Build where clause
+    // Build where clause with privacy pushed into SQL
+    const privacyWhere = buildPrivacyWhere(currentUser.id, userRoles)
+
     const where: any = {
       organizationId: currentUser.organizationId,
+      AND: [privacyWhere],
     }
 
     if (filters?.authorId) {
@@ -144,8 +156,35 @@ export async function getNotes(filters?: {
       }
     }
 
-    // Fetch notes
-    const allNotes = await db.note.findMany({
+    // Push privacy level filter into SQL
+    if (filters?.privacyLevel) {
+      if (filters.privacyLevel === 'my_private') {
+        where.AND.push({
+          privacyLevel: 'private',
+          authorId: currentUser.id,
+        })
+      } else if (filters.privacyLevel !== 'all') {
+        where.AND.push({
+          privacyLevel: filters.privacyLevel,
+        })
+      }
+    }
+
+    // Push search into SQL where possible (title, tags, author name)
+    // Content search uses ILIKE on title + tags as a pragmatic approach
+    if (filters?.search) {
+      const search = filters.search
+      where.AND.push({
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          { tags: { hasSome: [search] } },
+          { author: { name: { contains: search, mode: 'insensitive' } } },
+        ],
+      })
+    }
+
+    // Fetch notes — privacy already filtered in SQL
+    const notes = await db.note.findMany({
       where,
       include: {
         author: {
@@ -176,38 +215,9 @@ export async function getNotes(filters?: {
       },
     })
 
-    // Filter notes based on permissions
-    const visibleNotes = allNotes.filter((note) =>
-      canViewNote(note, currentUser.id, userRoles)
-    )
-
-    // Apply search filter if provided
-    let filteredNotes = visibleNotes
-    if (filters?.search) {
-      const searchLower = filters.search.toLowerCase()
-      filteredNotes = visibleNotes.filter((note: any) => {
-        const titleMatch = note.title?.toLowerCase().includes(searchLower)
-        const contentMatch = JSON.stringify(note.content).toLowerCase().includes(searchLower)
-        const tagsMatch = note.tags.some((tag: string) => tag.toLowerCase().includes(searchLower))
-        const authorMatch = note.author?.name?.toLowerCase().includes(searchLower)
-        return titleMatch || contentMatch || tagsMatch || authorMatch
-      })
-    }
-
-    // Apply privacyLevel filter if provided
-    if (filters?.privacyLevel) {
-      if (filters.privacyLevel === 'my_private') {
-        filteredNotes = filteredNotes.filter(
-          (note) => note.privacyLevel === 'private' && note.authorId === currentUser.id
-        )
-      } else if (filters.privacyLevel !== 'all') {
-        filteredNotes = filteredNotes.filter((note) => note.privacyLevel === filters.privacyLevel)
-      }
-    }
-
     return {
       success: true,
-      notes: filteredNotes as unknown as NoteWithAuthor[],
+      notes: notes as unknown as NoteWithAuthor[],
     }
   } catch (error) {
     console.error('Error fetching notes:', error)
@@ -223,19 +233,7 @@ export async function getNotes(filters?: {
  */
 export async function getNote(id: string) {
   try {
-    const { user } = await getSupabaseUser()
-
-    if (!user) {
-      return { success: false, error: 'Unauthorized' }
-    }
-
-    const currentUser = await db.user.findUnique({
-      where: { email: user.email! },
-    })
-
-    if (!currentUser) {
-      return { success: false, error: 'User not found' }
-    }
+    const currentUser = await requireUser()
 
     const note = await db.note.findUnique({
       where: { id },
@@ -302,19 +300,7 @@ export async function createNote(data: {
   linkedEventId?: string
 }) {
   try {
-    const { user } = await getSupabaseUser()
-
-    if (!user) {
-      return { success: false, error: 'Unauthorized' }
-    }
-
-    const currentUser = await db.user.findUnique({
-      where: { email: user.email! },
-    })
-
-    if (!currentUser) {
-      return { success: false, error: 'User not found' }
-    }
+    const currentUser = await requireUser()
 
     const note = await db.note.create({
       data: {
@@ -347,6 +333,7 @@ export async function createNote(data: {
     })
 
     revalidatePath('/dashboard/notes')
+    revalidateTag('notes')
     if (data.linkedPersonId) {
       revalidatePath(`/dashboard/players/${data.linkedPersonId}`)
     }
@@ -380,19 +367,7 @@ export async function updateNote(
   }
 ) {
   try {
-    const { user } = await getSupabaseUser()
-
-    if (!user) {
-      return { success: false, error: 'Unauthorized' }
-    }
-
-    const currentUser = await db.user.findUnique({
-      where: { email: user.email! },
-    })
-
-    if (!currentUser) {
-      return { success: false, error: 'User not found' }
-    }
+    const currentUser = await requireUser()
 
     // Check if note exists and user is the author
     const existingNote = await db.note.findUnique({
@@ -435,6 +410,7 @@ export async function updateNote(
     })
 
     revalidatePath('/dashboard/notes')
+    revalidateTag('notes')
     if (existingNote.linkedPersonId) {
       revalidatePath(`/dashboard/players/${existingNote.linkedPersonId}`)
     }
@@ -460,19 +436,7 @@ export async function updateNote(
  */
 export async function deleteNote(id: string) {
   try {
-    const { user } = await getSupabaseUser()
-
-    if (!user) {
-      return { success: false, error: 'Unauthorized' }
-    }
-
-    const currentUser = await db.user.findUnique({
-      where: { email: user.email! },
-    })
-
-    if (!currentUser) {
-      return { success: false, error: 'User not found' }
-    }
+    const currentUser = await requireUser()
 
     // Check if note exists and user is the author
     const existingNote = await db.note.findUnique({
@@ -492,6 +456,7 @@ export async function deleteNote(id: string) {
     })
 
     revalidatePath('/dashboard/notes')
+    revalidateTag('notes')
     if (existingNote.linkedPersonId) {
       revalidatePath(`/dashboard/players/${existingNote.linkedPersonId}`)
     }
@@ -516,19 +481,7 @@ export async function deleteNote(id: string) {
  */
 export async function getNoteTags() {
   try {
-    const { user } = await getSupabaseUser()
-
-    if (!user) {
-      return { success: false, error: 'Unauthorized' }
-    }
-
-    const currentUser = await db.user.findUnique({
-      where: { email: user.email! },
-    })
-
-    if (!currentUser) {
-      return { success: false, error: 'User not found' }
-    }
+    const currentUser = await requireUser()
 
     const notes = await db.note.findMany({
       where: {
@@ -567,19 +520,7 @@ export async function bulkUpdateNotes(
   }
 ) {
   try {
-    const { user } = await getSupabaseUser()
-
-    if (!user) {
-      return { success: false, error: 'Unauthorized' }
-    }
-
-    const currentUser = await db.user.findUnique({
-      where: { email: user.email! },
-    })
-
-    if (!currentUser) {
-      return { success: false, error: 'User not found' }
-    }
+    const currentUser = await requireUser()
 
     // Verify user has permission to update these notes (only author can update)
     const notes = await db.note.findMany({
@@ -613,6 +554,7 @@ export async function bulkUpdateNotes(
     })
 
     revalidatePath('/dashboard/notes')
+    revalidateTag('notes')
 
     return {
       success: true,
@@ -632,19 +574,7 @@ export async function bulkUpdateNotes(
  */
 export async function bulkDeleteNotes(noteIds: string[]) {
   try {
-    const { user } = await getSupabaseUser()
-
-    if (!user) {
-      return { success: false, error: 'Unauthorized' }
-    }
-
-    const currentUser = await db.user.findUnique({
-      where: { email: user.email! },
-    })
-
-    if (!currentUser) {
-      return { success: false, error: 'User not found' }
-    }
+    const currentUser = await requireUser()
 
     // Delete notes (only author can delete)
     await db.note.deleteMany({
@@ -656,6 +586,7 @@ export async function bulkDeleteNotes(noteIds: string[]) {
     })
 
     revalidatePath('/dashboard/notes')
+    revalidateTag('notes')
 
     return {
       success: true,
@@ -675,19 +606,7 @@ export async function bulkDeleteNotes(noteIds: string[]) {
  */
 export async function getPlayersForPicker() {
   try {
-    const { user } = await getSupabaseUser()
-
-    if (!user) {
-      return { success: false, error: 'Unauthorized', players: [] }
-    }
-
-    const currentUser = await db.user.findUnique({
-      where: { email: user.email! },
-    })
-
-    if (!currentUser) {
-      return { success: false, error: 'User not found', players: [] }
-    }
+    const currentUser = await requireUser()
 
     const players = await db.person.findMany({
       where: {
@@ -743,19 +662,7 @@ export async function getPlayersForPicker() {
  */
 export async function getEventsForPicker() {
   try {
-    const { user } = await getSupabaseUser()
-
-    if (!user) {
-      return { success: false, error: 'Unauthorized', events: [] }
-    }
-
-    const currentUser = await db.user.findUnique({
-      where: { email: user.email! },
-    })
-
-    if (!currentUser) {
-      return { success: false, error: 'User not found', events: [] }
-    }
+    const currentUser = await requireUser()
 
     // Get events from 30 days ago onwards
     const thirtyDaysAgo = new Date()
@@ -802,19 +709,7 @@ export async function createNoteLinks(
   links: Array<{ targetType: string; targetId: string }>
 ) {
   try {
-    const { user } = await getSupabaseUser()
-
-    if (!user) {
-      return { success: false, error: 'Unauthorized' }
-    }
-
-    const currentUser = await db.user.findUnique({
-      where: { email: user.email! },
-    })
-
-    if (!currentUser) {
-      return { success: false, error: 'User not found' }
-    }
+    const currentUser = await requireUser()
 
     // Verify user owns this note
     const note = await db.note.findFirst({
@@ -851,6 +746,7 @@ export async function createNoteLinks(
     })
 
     revalidatePath('/dashboard/notes')
+    revalidateTag('notes')
 
     return {
       success: true,

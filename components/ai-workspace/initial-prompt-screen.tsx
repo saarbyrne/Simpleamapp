@@ -80,7 +80,7 @@ export function InitialPromptScreen({ workspaces = [] }: InitialPromptScreenProp
         </div>
       )}
 
-      <div className="relative flex min-h-[calc(100vh-4rem)]">
+      <div className="relative flex min-h-full">
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-6 bg-gradient-to-b from-background to-muted/20">
         <div className="w-full max-w-3xl space-y-8">

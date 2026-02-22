@@ -2,6 +2,8 @@ import { Suspense } from 'react'
 import { ReportsList } from './_components/reports-list'
 import { CardGridSkeleton } from '@/components/ui/skeleton-wrappers'
 
+export const revalidate = 300
+
 type ReportsPageProps = {
   searchParams?: {
     template?: string

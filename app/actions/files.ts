@@ -1,10 +1,9 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
 import { createClient } from '@supabase/supabase-js'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { requireUser } from '@/lib/auth/cached-user'
 import { getTranslations } from 'next-intl/server'
 import { generateStoragePath, sanitizeFilename } from '@/lib/files'
 
@@ -51,15 +50,9 @@ export async function uploadFile(
   formData: FormData
 ): Promise<UploadFileResult> {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
     const file = formData.get('file') as File
 
     if (!file) {
@@ -76,7 +69,7 @@ export async function uploadFile(
 
     // Generate storage path
     const storagePath = generateStoragePath(
-      dbUser.organizationId,
+      user.organizationId,
       file.name,
       user.id
     )
@@ -115,7 +108,7 @@ export async function uploadFile(
         description: description || undefined,
         tags: tags,
         visibility: visibility,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         uploadedById: user.id,
         // Create links
         links: linkedEntities.length > 0 ? {
@@ -176,15 +169,9 @@ export async function getFiles(params?: {
   pageSize?: number
 }): Promise<FileListResult> {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { files: [], total: 0, error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const page = params?.page || 0
     const pageSize = params?.pageSize || 20
@@ -192,7 +179,7 @@ export async function getFiles(params?: {
 
     // Build where clause
     const where: any = {
-      organizationId: dbUser.organizationId,
+      organizationId: user.organizationId,
     }
 
     if (params?.search) {
@@ -271,21 +258,15 @@ export async function updateFile(
   }
 ) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify file belongs to organization
     const file = await prisma.file.findFirst({
       where: {
         id: fileId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -348,21 +329,15 @@ export async function updateFile(
  */
 export async function deleteFile(fileId: string) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Get file details
     const file = await prisma.file.findFirst({
       where: {
         id: fileId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -414,21 +389,15 @@ export async function deleteFile(fileId: string) {
  */
 export async function bulkDeleteFiles(fileIds: string[]) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Get all files
     const files = await prisma.file.findMany({
       where: {
         id: { in: fileIds },
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -453,7 +422,7 @@ export async function bulkDeleteFiles(fileIds: string[]) {
     await prisma.file.deleteMany({
       where: {
         id: { in: fileIds },
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -471,21 +440,15 @@ export async function bulkDeleteFiles(fileIds: string[]) {
  */
 export async function getFileDownloadUrl(fileId: string) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Get file details
     const file = await prisma.file.findFirst({
       where: {
         id: fileId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 

@@ -3,8 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { prisma } from "@/lib/db"
-import { createServerClient } from "@/lib/supabase/server"
-import { ensureUserWithOrganization } from "@/lib/auth/ensure-user"
+import { requireUser } from "@/lib/auth/cached-user"
 
 const updateBrandingSchema = z.object({
   logo: z.string().url().optional().nullable(),
@@ -14,17 +13,11 @@ const updateBrandingSchema = z.object({
 
 export async function getOrganization() {
   try {
-    const supabase = await createServerClient()
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
 
-    if (authError || !authUser) {
-      return { success: false, error: "Authentication required" }
-    }
-
-    const dbUser = await ensureUserWithOrganization(authUser)
+    const user = await requireUser()
 
     const organization = await prisma.organization.findUnique({
-      where: { id: dbUser.organizationId },
+      where: { id: user.organizationId },
       select: {
         id: true,
         name: true,
@@ -49,17 +42,10 @@ export async function updateOrganizationBranding(data: z.infer<typeof updateBran
       return { success: false, error: validation.error.issues[0].message }
     }
 
-    const supabase = await createServerClient()
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !authUser) {
-      return { success: false, error: "Authentication required" }
-    }
-
-    const dbUser = await ensureUserWithOrganization(authUser)
+    const user = await requireUser()
 
     const updatedOrg = await prisma.organization.update({
-      where: { id: dbUser.organizationId },
+      where: { id: user.organizationId },
       data: {
         logo: validation.data.logo,
         primaryColor: validation.data.primaryColor,

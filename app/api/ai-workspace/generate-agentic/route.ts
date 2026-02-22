@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { getCachedUserWithOrganization } from '@/lib/auth/cached-user'
 import { addAIWorkspaceMessage, updateAIWorkspace, getAIWorkspace } from '@/app/actions/ai-workspace'
 import { ReportAgent } from '@/lib/ai-workspace/agents/report-agent'
 
@@ -8,15 +7,13 @@ export const runtime = 'nodejs'
 export const maxDuration = 300 // 5 minutes for agentic processing
 
 export async function POST(req: NextRequest) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getCachedUserWithOrganization()
 
   if (!user) {
     return new Response('Unauthorized', { status: 401 })
   }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
     const { workspaceId, message, structuredData } = await req.json()
 
     // Get workspace to determine artifact type and context

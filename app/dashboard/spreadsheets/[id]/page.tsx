@@ -217,7 +217,7 @@ export default function SpreadsheetDetailPage() {
   }
 
   return (
-    <div className="space-y-4 h-[calc(100vh-8rem)]">
+    <div className="space-y-4 flex-1">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">

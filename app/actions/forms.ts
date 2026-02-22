@@ -1,9 +1,8 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
-import { revalidatePath } from 'next/cache'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { requireUser } from '@/lib/auth/cached-user'
 import { Prisma } from '@prisma/client'
 import { getTranslations } from 'next-intl/server'
 
@@ -73,14 +72,7 @@ export interface FormWithDetails {
 export async function getForms(page: number = 0, pageSize: number = 20) {
   try {
     const t = await getTranslations('errors')
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return { error: t('notAuthenticated'), forms: [], total: 0, page: 0, pageSize: 20 }
-    }
-
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const skip = page * pageSize
 
@@ -88,12 +80,12 @@ export async function getForms(page: number = 0, pageSize: number = 20) {
     const [total, forms] = await Promise.all([
       prisma.form.count({
         where: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         },
       }),
       prisma.form.findMany({
         where: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         },
         include: {
           _count: {
@@ -136,20 +128,14 @@ export async function getForms(page: number = 0, pageSize: number = 20) {
  */
 export async function getForm(formId: string) {
   const t = await getTranslations('errors')
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const form = await prisma.form.findFirst({
       where: {
         id: formId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       include: {
         _count: {
@@ -189,15 +175,9 @@ export async function getForm(formId: string) {
  */
 export async function createForm(data: CreateFormData) {
   const t = await getTranslations('errors')
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const form = await prisma.form.create({
       data: {
@@ -207,7 +187,7 @@ export async function createForm(data: CreateFormData) {
           fields: data.schema,
           category: data.category, // Store category in schema metadata
         } as any,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         templateId: data.templateId,
         scheduleType: data.scheduleType || 'one_time',
         scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : null,
@@ -225,6 +205,7 @@ export async function createForm(data: CreateFormData) {
     })
 
     revalidatePath('/dashboard/forms')
+    revalidateTag('forms')
     return { success: true, form }
   } catch (error) {
     console.error('Error creating form:', error)
@@ -237,21 +218,15 @@ export async function createForm(data: CreateFormData) {
  */
 export async function updateForm(formId: string, data: UpdateFormData) {
   const t = await getTranslations('errors')
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify form belongs to organization
     const existingForm = await prisma.form.findFirst({
       where: {
         id: formId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -282,6 +257,7 @@ export async function updateForm(formId: string, data: UpdateFormData) {
     })
 
     revalidatePath('/dashboard/forms')
+    revalidateTag('forms')
     revalidatePath(`/dashboard/forms/${formId}`)
     return { success: true, form }
   } catch (error) {
@@ -295,21 +271,15 @@ export async function updateForm(formId: string, data: UpdateFormData) {
  */
 export async function deleteForm(formId: string) {
   const t = await getTranslations('errors')
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify form belongs to organization
     const existingForm = await prisma.form.findFirst({
       where: {
         id: formId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -322,6 +292,7 @@ export async function deleteForm(formId: string) {
     })
 
     revalidatePath('/dashboard/forms')
+    revalidateTag('forms')
     return { success: true }
   } catch (error) {
     console.error('Error deleting form:', error)
@@ -340,21 +311,15 @@ export async function bulkUpdateForms(
   }
 ) {
   const t = await getTranslations('errors')
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify all forms belong to organization
     const forms = await prisma.form.findMany({
       where: {
         id: { in: formIds },
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -365,7 +330,7 @@ export async function bulkUpdateForms(
     await prisma.form.updateMany({
       where: {
         id: { in: formIds },
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       data: {
         isActive: updates.isActive,
@@ -375,6 +340,7 @@ export async function bulkUpdateForms(
     })
 
     revalidatePath('/dashboard/forms')
+    revalidateTag('forms')
     return { success: true }
   } catch (error) {
     console.error('Error bulk updating forms:', error)
@@ -387,21 +353,15 @@ export async function bulkUpdateForms(
  */
 export async function getFormResponses(formId: string, page: number = 0, pageSize: number = 20) {
   const t = await getTranslations('errors')
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify form belongs to organization
     const form = await prisma.form.findFirst({
       where: {
         id: formId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -461,21 +421,15 @@ export async function getFormResponses(formId: string, page: number = 0, pageSiz
 export async function duplicateForm(formId: string) {
   const tErrors = await getTranslations('errors')
   const tCommon = await getTranslations('common')
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: tErrors('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Get the original form
     const originalForm = await prisma.form.findFirst({
       where: {
         id: formId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -489,7 +443,7 @@ export async function duplicateForm(formId: string) {
         name: `${originalForm.name}${tCommon('copySuffix')}`,
         description: originalForm.description,
         schema: originalForm.schema === null ? Prisma.JsonNull : originalForm.schema,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         templateId: originalForm.templateId,
         scheduleType: originalForm.scheduleType,
         scheduledAt: originalForm.scheduledAt,
@@ -501,6 +455,7 @@ export async function duplicateForm(formId: string) {
     })
 
     revalidatePath('/dashboard/forms')
+    revalidateTag('forms')
     return { success: true, form: duplicatedForm }
   } catch (error) {
     console.error('Error duplicating form:', error)
@@ -517,21 +472,15 @@ export async function submitFormResponse(
   responses: Record<string, any>
 ) {
   const t = await getTranslations('errors')
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify form belongs to organization
     const form = await prisma.form.findFirst({
       where: {
         id: formId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 

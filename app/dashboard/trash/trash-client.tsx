@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { ConfirmationDialog } from '@/components/data-management/confirmation-dialog'
 import { Trash2, RotateCcw, FileSpreadsheet, AlertTriangle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface TrashItem {
   id: string
@@ -46,7 +47,7 @@ export function TrashClient({ items: initialItems }: TrashClientProps) {
       if (item.entityType === 'spreadsheet') {
         const result = await restoreSpreadsheet(item.entityId)
         if (result.error) {
-          alert(result.error)
+          toast.error(result.error)
         } else {
           setItems(items.filter((i) => i.id !== item.id))
           router.refresh()
@@ -64,7 +65,7 @@ export function TrashClient({ items: initialItems }: TrashClientProps) {
     try {
       const result = await permanentlyDelete(item.id)
       if (result.error) {
-        alert(result.error)
+        toast.error(result.error)
       } else {
         setItems(items.filter((i) => i.id !== item.id))
         router.refresh()

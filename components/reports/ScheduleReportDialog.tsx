@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -74,6 +75,7 @@ export function ScheduleReportDialog({
   const [recipients, setRecipients] = useState<string[]>(existingSchedule?.recipients || [])
   const [format, setFormat] = useState<'pdf' | 'link'>(existingSchedule?.format || 'pdf')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [ConfirmDialogEl, confirmAction] = useConfirmDialog()
 
   const handleAddRecipient = () => {
     const email = recipientInput.trim()
@@ -141,7 +143,12 @@ export function ScheduleReportDialog({
   const handleDelete = async () => {
     if (!existingSchedule) return
 
-    if (!confirm('Are you sure you want to delete this schedule?')) return
+    const ok = await confirmAction({
+      title: 'Delete schedule?',
+      description: 'Are you sure you want to delete this schedule? This action cannot be undone.',
+      confirmLabel: 'Delete',
+    })
+    if (!ok) return
 
     setIsSubmitting(true)
     try {
@@ -162,6 +169,8 @@ export function ScheduleReportDialog({
   }
 
   return (
+    <>
+    {ConfirmDialogEl}
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -355,5 +364,6 @@ export function ScheduleReportDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   )
 }
