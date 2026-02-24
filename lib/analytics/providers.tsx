@@ -2,6 +2,7 @@
 
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import type { PostHog } from 'posthog-js'
 import { useEffect } from 'react'
 
 /**
@@ -59,7 +60,7 @@ export function AnalyticsProviders({ children }: { children: React.ReactNode }) 
           disable_surveys: true,
 
           // Load settings
-          loaded: (posthog) => {
+          loaded: (posthog: PostHog) => {
             if (process.env.NODE_ENV === 'development') {
               console.log('PostHog initialized (deferred)')
             }
