@@ -193,3 +193,48 @@ import { Suspense } from 'react'
 - Review reference implementation: `app/dashboard/players/page.tsx`
 - Test accessibility with keyboard navigation
 - Verify dark mode support
+
+## Security Rules (MANDATORY)
+
+- **NEVER** hardcode API keys, tokens, passwords, or secrets in code or workflow files
+- **ALWAYS** load secrets from environment variables (`process.env.VARIABLE_NAME`)
+- **ALWAYS** use GitHub Actions secrets (`${{ secrets.NAME }}`) in workflow files — never inline values
+- **ALWAYS** check that `.env` is in `.gitignore` before creating it
+- **NEVER** log secrets — not even in debug mode
+- **NEVER** include secrets in error messages or API responses
+- If you discover a hardcoded secret, treat it as compromised: it must be revoked and rotated immediately
+- Never store passwords in plain text — use bcrypt or argon2
+- Return the same error for "user not found" and "wrong password"
+- Validate all user input at the API boundary
+- Use ORM queries (Prisma) — never concatenate user input into SQL
+- Sanitise user content before rendering in HTML — never use `dangerouslySetInnerHTML` with user data
+- Run `/security-review` before merging PRs that touch auth, API integrations, or environment config
+
+## Git Workflow Rules (REQUIRED)
+
+All work MUST follow: **branch → draft PR → review → merge**
+
+- **NEVER** commit directly to `main`
+- **NEVER** merge without CI passing and user approval
+- **NEVER** force push
+- **ALWAYS** create draft PRs first: `gh pr create --draft`
+- Keep PRs under 300 lines where possible
+
+Branch naming conventions:
+- `feature/` — new functionality
+- `fix/` — bug fixes
+- `chore/` — maintenance, deps, config, tooling
+- `docs/` — documentation only
+- `security/` — security fixes (prioritise for review)
+
+Commit message format: `<type>(<scope>): <description>`
+
+## Testing Rules
+
+- Every new feature must include at least one unit test covering the core logic path
+- Bug fixes must include a regression test that would have caught the bug
+- The 80% coverage threshold (configured in `vitest.config.ts`) is a floor, not a target
+- Use Vitest for unit tests: `npm run test:unit`
+- Use Playwright for E2E tests: `npm run test:e2e`
+- Before opening a PR for review, confirm `npm run test:unit` passes locally
+- Do not disable or skip tests without a comment explaining why and a linked issue to fix it
