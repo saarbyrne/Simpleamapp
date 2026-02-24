@@ -19,6 +19,7 @@ functions/node_modules
 # misc
 .DS_Store
 *.pem
+*.key
 
 # debug
 npm-debug.log*
@@ -71,3 +72,6 @@ canvas-test-script.js
 /docs/security/
 /docs/business/
 /docs/internal/
+
+# Claude Code personal settings
+.claude/settings.local.json
