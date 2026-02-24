@@ -174,7 +174,7 @@ export default function OrganizationFeaturesPage() {
         <div className="text-muted-foreground">Organization not found</div>
         <Button asChild variant="outline">
           <Link href="/platform-admin/organizations">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="me-2 h-4 w-4" />
             Back to Organizations
           </Link>
         </Button>
@@ -190,7 +190,7 @@ export default function OrganizationFeaturesPage() {
       onClick={handleApplyPackage}
       disabled={isApplyingPackage || isSaving}
     >
-      <Package className="mr-2 h-4 w-4" />
+      <Package className="me-2 h-4 w-4" />
       Apply {tierInfo.label} Package
     </Button>
   )
@@ -203,7 +203,7 @@ export default function OrganizationFeaturesPage() {
       >
         <Button asChild variant="outline" size="sm">
           <Link href="/platform-admin/organizations">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="me-2 h-4 w-4" />
             Back to Organizations
           </Link>
         </Button>
@@ -235,7 +235,7 @@ export default function OrganizationFeaturesPage() {
               onClick={handleSave}
               disabled={isSaving}
             >
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="me-2 h-4 w-4" />
               Save Changes
             </Button>
           </div>
@@ -316,7 +316,7 @@ export default function OrganizationFeaturesPage() {
               Discard Changes
             </Button>
             <Button onClick={handleSave} disabled={isSaving}>
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="me-2 h-4 w-4" />
               Save Changes
             </Button>
           </div>

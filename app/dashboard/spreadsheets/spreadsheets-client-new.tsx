@@ -25,6 +25,7 @@ import { moveSpreadsheetToFolder } from '@/app/actions/spreadsheet-folders'
 import { SpreadsheetData, SpreadsheetTemplate, ColumnDefinition, SpreadsheetFolder } from '@/lib/types/spreadsheet'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PageCard } from '@/components/ui/page-card'
 import {
   Select,
@@ -62,6 +63,7 @@ export function SpreadsheetsClientNew({
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [ConfirmDialogEl, confirmAction] = useConfirmDialog()
   const [sortBy, setSortBy] = useState<SortOption>('recent')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [showStarred, setShowStarred] = useState(false)
@@ -169,7 +171,12 @@ export function SpreadsheetsClientNew({
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('deleteConfirmation'))) return
+    const ok = await confirmAction({
+      title: t('deleteConfirmation'),
+      description: t('failedToDeleteSpreadsheet'),
+      confirmLabel: t('delete', { defaultValue: 'Delete' }),
+    })
+    if (!ok) return
 
     try {
       const result = await deleteSpreadsheet(id)
@@ -253,6 +260,7 @@ export function SpreadsheetsClientNew({
 
   return (
     <div className="flex h-full gap-4">
+      {ConfirmDialogEl}
       {/* Folder Sidebar */}
       <FolderSidebar
         folders={folders}

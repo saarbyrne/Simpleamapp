@@ -128,17 +128,17 @@ export const TIER_DISPLAY_INFO: Record<SubscriptionTier, {
   free: {
     label: 'Free',
     description: 'Basic features for small teams',
-    color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100',
+    color: 'bg-muted text-muted-foreground',
   },
   pro: {
     label: 'Pro',
     description: 'Full feature set for professional teams',
-    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
+    color: 'bg-primary/10 text-primary',
   },
   enterprise: {
     label: 'Enterprise',
     description: 'All features with advanced capabilities',
-    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100',
+    color: 'bg-purple-500/10 text-purple-700 dark:text-purple-400',
   },
 }
 

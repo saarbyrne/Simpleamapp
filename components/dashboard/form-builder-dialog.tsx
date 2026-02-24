@@ -417,7 +417,7 @@ export function FormBuilderDialog({ open, onOpenChange, onSuccess, formId }: For
                           id={`required-${index}`}
                           checked={field.required || false}
                           onChange={(e) => handleUpdateField(index, { required: e.target.checked })}
-                          className="h-4 w-4 rounded border-gray-300"
+                          className="h-4 w-4 rounded border-border"
                         />
                         <Label htmlFor={`required-${index}`} className="text-sm font-normal cursor-pointer">
                           {t('forms.builder.required')}

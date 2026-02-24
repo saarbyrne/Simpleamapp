@@ -54,10 +54,7 @@ export async function getOrganizationsWithFeatures(): Promise<{
     const orgs = await prisma.organization.findMany({
       include: {
         features: true,
-        subscriptions: {
-          take: 1,
-          orderBy: { createdAt: 'desc' },
-        },
+        subscriptions: true,
       },
       orderBy: { name: 'asc' },
     })
@@ -80,7 +77,7 @@ export async function getOrganizationsWithFeatures(): Promise<{
         return {
           id: org.id,
           name: org.name,
-          tier: (org.subscriptions[0]?.plan?.toLowerCase() || 'free') as SubscriptionTier,
+          tier: (org.subscriptions?.plan?.toLowerCase() || 'free') as SubscriptionTier,
           features,
         }
       })

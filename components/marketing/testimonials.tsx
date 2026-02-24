@@ -18,10 +18,10 @@ export function Testimonials() {
   ];
 
   return (
-    <section className="bg-white py-24 lg:py-32">
+    <section className="bg-background py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-extrabold text-[#1E1E1E] mb-6">
+          <h2 className="text-4xl lg:text-5xl font-extrabold text-foreground mb-6">
             What coaches say.
           </h2>
         </div>
@@ -30,16 +30,16 @@ export function Testimonials() {
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="bg-[#F5F5F5] p-8 rounded-lg"
+              className="bg-muted p-8 rounded-lg"
             >
-              <p className="text-lg text-[#1E1E1E] mb-6 italic">
+              <p className="text-lg text-foreground mb-6 italic">
                 &ldquo;{testimonial.quote}&rdquo;
               </p>
               <div>
-                <p className="text-[#1E1E1E] font-semibold">
+                <p className="text-foreground font-semibold">
                   {testimonial.author}
                 </p>
-                <p className="text-[#1E1E1E]/70 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {testimonial.role}
                 </p>
               </div>

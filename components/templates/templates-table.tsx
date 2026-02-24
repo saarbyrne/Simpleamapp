@@ -63,11 +63,11 @@ const typeIcons: Record<string, string> = {
 }
 
 const typeColors: Record<string, string> = {
-  form: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  report: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-  drawing: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-  plan: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
-  spreadsheet: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300',
+  form: 'bg-primary/10 text-primary',
+  report: 'bg-purple-500/10 text-purple-700 dark:text-purple-400',
+  drawing: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
+  plan: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  spreadsheet: 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-400',
 }
 
 const createColumns = (
@@ -120,7 +120,7 @@ const createColumns = (
       enableHiding: true,
       cell: ({ getValue }) => {
         const type = getValue() as string
-        const colorClass = typeColors[type] || 'bg-gray-100 text-gray-800'
+        const colorClass = typeColors[type] || 'bg-muted text-muted-foreground'
         return (
           <Badge className={colorClass}>
             {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -199,7 +199,7 @@ const createColumns = (
         }
         return (
           <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
             <span className="text-sm font-medium">{template.rating.toFixed(1)}</span>
             <span className="text-xs text-muted-foreground">({template.reviewCount})</span>
           </div>
@@ -235,7 +235,7 @@ const createColumns = (
                 onNavigateToDetail(template.id)
               }}
             >
-              <Eye className="h-4 w-4 mr-1" />
+              <Eye className="h-4 w-4 me-1" />
               View
             </Button>
           </div>

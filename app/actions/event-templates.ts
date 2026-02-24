@@ -1,9 +1,8 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { requireUser } from '@/lib/auth/cached-user'
 import type { Prisma } from '@prisma/client'
 
 export interface CreateEventTemplateData {
@@ -36,21 +35,15 @@ export interface EventTemplateWithDetails {
  * Get all templates for the current user's organization (including global templates)
  */
 export async function getEventTemplates() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Get both organization templates and global templates
     const templates = await prisma.eventTemplate.findMany({
       where: {
         OR: [
-          { organizationId: dbUser.organizationId },
+          { organizationId: user.organizationId },
           { isGlobal: true }
         ]
       },
@@ -71,21 +64,15 @@ export async function getEventTemplates() {
  * Get a single template by ID
  */
 export async function getEventTemplate(templateId: string): Promise<{ success: true, template: EventTemplateWithDetails } | { error: string }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const template = await prisma.eventTemplate.findFirst({
       where: {
         id: templateId,
         OR: [
-          { organizationId: dbUser.organizationId },
+          { organizationId: user.organizationId },
           { isGlobal: true }
         ]
       }
@@ -106,15 +93,9 @@ export async function getEventTemplate(templateId: string): Promise<{ success: t
  * Create a new event template
  */
 export async function createEventTemplate(data: CreateEventTemplateData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const template = await prisma.eventTemplate.create({
       data: {
@@ -124,7 +105,7 @@ export async function createEventTemplate(data: CreateEventTemplateData) {
         sections: data.sections || {},
         sectionConfigs: data.sectionConfigs || {},
         defaultDuration: data.defaultDuration || 120,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         createdBy: user.id,
       }
     })
@@ -142,21 +123,15 @@ export async function createEventTemplate(data: CreateEventTemplateData) {
  * Update an existing event template
  */
 export async function updateEventTemplate(templateId: string, data: UpdateEventTemplateData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify ownership (cannot edit global templates)
     const existingTemplate = await prisma.eventTemplate.findFirst({
       where: {
         id: templateId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         isGlobal: false,
       }
     })
@@ -191,21 +166,15 @@ export async function updateEventTemplate(templateId: string, data: UpdateEventT
  * Delete an event template
  */
 export async function deleteEventTemplate(templateId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify ownership (cannot delete global templates)
     const template = await prisma.eventTemplate.findFirst({
       where: {
         id: templateId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         isGlobal: false,
       }
     })
@@ -241,22 +210,16 @@ export async function createEventFromTemplate(
     description?: string
   }
 ) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Get template
     const template = await prisma.eventTemplate.findFirst({
       where: {
         id: templateId,
         OR: [
-          { organizationId: dbUser.organizationId },
+          { organizationId: user.organizationId },
           { isGlobal: true }
         ]
       }
@@ -283,7 +246,7 @@ export async function createEventFromTemplate(
         startTime: new Date(eventData.startTime),
         endTime: new Date(endTime),
         location: eventData.location,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         templateId: template.id,
       }
     })
@@ -316,15 +279,9 @@ export async function createEventFromTemplate(
  * This should be run once during initial setup
  */
 export async function seedDefaultTemplates() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const defaultTemplates = [
       {
@@ -356,7 +313,7 @@ export async function seedDefaultTemplates() {
             { name: 'Post-Match Report', trigger: 'after', delay: 30, recipients: 'coaching_staff' }
           ]
         },
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         isGlobal: false,
         createdBy: user.id,
       },
@@ -387,7 +344,7 @@ export async function seedDefaultTemplates() {
             { name: 'Wellness Check', trigger: 'after', delay: 90, recipients: 'all_players' }
           ]
         },
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         isGlobal: false,
         createdBy: user.id,
       },
@@ -415,7 +372,7 @@ export async function seedDefaultTemplates() {
             { name: 'Medical Reports', type: 'documents' }
           ]
         },
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         isGlobal: false,
         createdBy: user.id,
       },
@@ -442,7 +399,7 @@ export async function seedDefaultTemplates() {
             { name: 'Presentation Materials', type: 'documents' }
           ]
         },
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         isGlobal: false,
         createdBy: user.id,
       },
@@ -469,7 +426,7 @@ export async function seedDefaultTemplates() {
             { name: 'Recovery Feedback', trigger: 'after', delay: 0, recipients: 'all_players' }
           ]
         },
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         isGlobal: false,
         createdBy: user.id,
       }
@@ -480,7 +437,7 @@ export async function seedDefaultTemplates() {
       const existing = await prisma.eventTemplate.findFirst({
         where: {
           name: templateData.name,
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         }
       })
 

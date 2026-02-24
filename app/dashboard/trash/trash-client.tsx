@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { ConfirmationDialog } from '@/components/data-management/confirmation-dialog'
 import { Trash2, RotateCcw, FileSpreadsheet, AlertTriangle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface TrashItem {
   id: string
@@ -46,7 +47,7 @@ export function TrashClient({ items: initialItems }: TrashClientProps) {
       if (item.entityType === 'spreadsheet') {
         const result = await restoreSpreadsheet(item.entityId)
         if (result.error) {
-          alert(result.error)
+          toast.error(result.error)
         } else {
           setItems(items.filter((i) => i.id !== item.id))
           router.refresh()
@@ -64,7 +65,7 @@ export function TrashClient({ items: initialItems }: TrashClientProps) {
     try {
       const result = await permanentlyDelete(item.id)
       if (result.error) {
-        alert(result.error)
+        toast.error(result.error)
       } else {
         setItems(items.filter((i) => i.id !== item.id))
         router.refresh()
@@ -149,7 +150,7 @@ export function TrashClient({ items: initialItems }: TrashClientProps) {
                         </Badge>
                         {isExpiringSoon && (
                           <Badge variant="destructive" className="text-xs">
-                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            <AlertTriangle className="h-3 w-3 me-1" />
                             {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
                           </Badge>
                         )}
@@ -182,7 +183,7 @@ export function TrashClient({ items: initialItems }: TrashClientProps) {
                         setAction('restore')
                       }}
                     >
-                      <RotateCcw className="h-4 w-4 mr-1" />
+                      <RotateCcw className="h-4 w-4 me-1" />
                       Restore
                     </Button>
                     <Button
@@ -193,7 +194,7 @@ export function TrashClient({ items: initialItems }: TrashClientProps) {
                         setAction('delete')
                       }}
                     >
-                      <Trash2 className="h-4 w-4 mr-1" />
+                      <Trash2 className="h-4 w-4 me-1" />
                       Delete Forever
                     </Button>
                   </div>

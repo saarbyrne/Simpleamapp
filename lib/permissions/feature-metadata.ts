@@ -95,7 +95,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'aiWorkspaceEnabled',
     subFeatures: [],
     navPath: '/dashboard/ai-workspace',
-    released: false, // In development
+    released: true,
   },
   ai: {
     key: 'ai',
@@ -105,7 +105,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'aiEnabled',
     subFeatures: [],
     navPath: '/dashboard/ai',
-    released: false, // In development
+    released: true,
   },
   players: {
     key: 'players',
@@ -163,7 +163,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
       },
     ],
     navPath: '/dashboard/forms',
-    released: false, // In development
+    released: true,
   },
   reports: {
     key: 'reports',
@@ -204,7 +204,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
       },
     ],
     navPath: '/dashboard/reports',
-    released: false, // In development
+    released: true,
   },
   calendar: {
     key: 'calendar',
@@ -261,7 +261,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'messagesEnabled',
     subFeatures: [],
     navPath: '/dashboard/chat',
-    released: false, // In development
+    released: true,
   },
   notes: {
     key: 'notes',
@@ -291,7 +291,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'canvasEnabled',
     subFeatures: [],
     navPath: '/dashboard/canvas',
-    released: false, // In development (Whiteboard)
+    released: true,
   },
   files: {
     key: 'files',
@@ -311,7 +311,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'plannerEnabled',
     subFeatures: [],
     navPath: '/dashboard/planner',
-    released: false, // In development
+    released: true,
   },
   templates: {
     key: 'templates',
@@ -321,7 +321,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'templatesEnabled',
     subFeatures: [],
     navPath: '/dashboard/templates',
-    released: false, // In development
+    released: true,
   },
   dataManagement: {
     key: 'dataManagement',
@@ -331,7 +331,7 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
     fieldName: 'dataManagementEnabled',
     subFeatures: [],
     navPath: '/dashboard/data-management',
-    released: false, // In development
+    released: true,
   },
 }
 

@@ -1,9 +1,8 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { requireUser } from '@/lib/auth/cached-user'
 import { getTranslations } from 'next-intl/server'
 
 interface CreatePlanData {
@@ -30,18 +29,12 @@ export async function getPlans(page = 0, pageSize = 20, filters?: {
   linkedToType?: string
   linkedToId?: string
 }) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated', plans: [], total: 0 }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const where: any = {
-      organizationId: dbUser.organizationId,
+      organizationId: user.organizationId,
     }
 
     if (filters?.type) where.type = filters.type
@@ -91,20 +84,14 @@ export async function getPlans(page = 0, pageSize = 20, filters?: {
 }
 
 export async function getPlan(id: string) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated', plan: null }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const plan = await prisma.plan.findFirst({
       where: {
         id,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       include: {
         owner: {
@@ -166,15 +153,9 @@ export async function getPlan(id: string) {
 
 export async function createPlan(data: CreatePlanData) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const plan = await prisma.plan.create({
       data: {
@@ -186,7 +167,7 @@ export async function createPlan(data: CreatePlanData) {
         linkedToType: data.linkedToType,
         linkedToId: data.linkedToId,
         ownerId: data.ownerId || user.id,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         createdBy: user.id,
         isPublic: data.isPublic || false,
         isTemplate: data.isTemplate || false,
@@ -225,21 +206,15 @@ export async function createPlan(data: CreatePlanData) {
 
 export async function updatePlan(id: string, data: UpdatePlanData) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Check if plan exists and user has permission
     const existingPlan = await prisma.plan.findFirst({
       where: {
         id,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -284,21 +259,15 @@ export async function updatePlan(id: string, data: UpdatePlanData) {
 
 export async function deletePlan(id: string) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Check if plan exists and user has permission
     const existingPlan = await prisma.plan.findFirst({
       where: {
         id,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -320,20 +289,14 @@ export async function deletePlan(id: string) {
 
 export async function publishPlan(id: string) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const plan = await prisma.plan.findFirst({
       where: {
         id,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -360,20 +323,14 @@ export async function publishPlan(id: string) {
 
 export async function unpublishPlan(id: string) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const plan = await prisma.plan.findFirst({
       where: {
         id,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 

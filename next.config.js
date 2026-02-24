@@ -131,7 +131,7 @@ const nextConfig = {
     serverActions: {
       allowedOrigins: process.env.NODE_ENV === 'production'
         ? [process.env.NEXT_PUBLIC_APP_URL || 'simpleam.app', 'www.simpleam.app']
-        : ['localhost:3000', '127.0.0.1:3000'],
+        : ['localhost:3000', '127.0.0.1:3000', 'localhost:3001', '127.0.0.1:3001'],
       bodySizeLimit: '2mb',
     },
     instrumentationHook: true,
@@ -141,7 +141,7 @@ const nextConfig = {
 
   // Enable React strict mode for better performance warnings
   reactStrictMode: true,
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     // Suppress warnings from dependencies
     config.ignoreWarnings = [
       /Critical dependency: the request of a dependency is an expression/,
@@ -149,97 +149,115 @@ const nextConfig = {
     ]
 
     if (!isServer) {
-      // Optimize client-side bundle splitting
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          // Excalidraw chunk - only loads on canvas pages
-          excalidraw: {
-            test: /[\\/]node_modules[\\/]@excalidraw[\\/]/,
-            name: 'excalidraw',
-            priority: 30,
-            reuseExistingChunk: true,
+      if (!dev) {
+        // Optimize client-side bundle splitting (production only).
+        // Next.js dev/HMR can request stale custom chunk names when these groups
+        // are applied during local development.
+        config.optimization.splitChunks = {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Excalidraw chunk - only loads on canvas pages
+            excalidraw: {
+              test: /[\\/]node_modules[\\/]@excalidraw[\\/]/,
+              name: 'excalidraw',
+              priority: 30,
+              reuseExistingChunk: true,
+            },
+            // Firebase chunk - only loads when chat is used
+            firebase: {
+              test: /[\\/]node_modules[\\/]firebase[\\/]/,
+              name: 'firebase',
+              priority: 25,
+              reuseExistingChunk: true,
+            },
+            // TipTap chunk - only loads when rich text editing is used
+            tiptap: {
+              test: /[\\/]node_modules[\\/]@tiptap[\\/]/,
+              name: 'tiptap',
+              priority: 25,
+              reuseExistingChunk: true,
+            },
+            // Recharts chunk - only loads on reports/analytics pages
+            recharts: {
+              test: /[\\/]node_modules[\\/]recharts[\\/]/,
+              name: 'recharts',
+              priority: 25,
+              reuseExistingChunk: true,
+            },
+            // Radix UI components - split major ones
+            radix: {
+              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+              name: 'radix-ui',
+              priority: 20,
+              reuseExistingChunk: true,
+            },
+            // PDF generation libraries - only loads when needed
+            pdf: {
+              test: /[\\/]node_modules[\\/](jspdf|html2canvas)[\\/]/,
+              name: 'pdf-libs',
+              priority: 20,
+              reuseExistingChunk: true,
+            },
+            // Anthropic AI SDK - only loads for AI features
+            ai: {
+              test: /[\\/]node_modules[\\/]@anthropic-ai[\\/]/,
+              name: 'anthropic-ai',
+              priority: 20,
+              reuseExistingChunk: true,
+            },
+            // Calendar library chunk
+            calendar: {
+              test: /[\\/]node_modules[\\/]react-big-calendar[\\/]/,
+              name: 'calendar',
+              priority: 20,
+              reuseExistingChunk: true,
+            },
+            // Table library chunk
+            table: {
+              test: /[\\/]node_modules[\\/]@tanstack[\\/]react-table[\\/]/,
+              name: 'table',
+              priority: 20,
+              reuseExistingChunk: true,
+            },
+            // PostHog analytics - lazily loaded, not needed on initial page
+            posthog: {
+              test: /[\\/]node_modules[\\/]posthog-js[\\/]/,
+              name: 'posthog',
+              priority: 20,
+              reuseExistingChunk: true,
+            },
+            // Sentry error tracking
+            sentry: {
+              test: /[\\/]node_modules[\\/]@sentry[\\/]/,
+              name: 'sentry',
+              priority: 20,
+              reuseExistingChunk: true,
+            },
+            // Date utilities chunk
+            dateUtils: {
+              test: /[\\/]node_modules[\\/]date-fns[\\/]/,
+              name: 'date-utils',
+              priority: 15,
+              reuseExistingChunk: true,
+            },
+            // Common vendor chunk - everything else, with size limit
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendor',
+              priority: 10,
+              reuseExistingChunk: true,
+            },
           },
-          // Firebase chunk - only loads when chat is used
-          firebase: {
-            test: /[\\/]node_modules[\\/]firebase[\\/]/,
-            name: 'firebase',
-            priority: 25,
-            reuseExistingChunk: true,
-          },
-          // TipTap chunk - only loads when rich text editing is used
-          tiptap: {
-            test: /[\\/]node_modules[\\/]@tiptap[\\/]/,
-            name: 'tiptap',
-            priority: 25,
-            reuseExistingChunk: true,
-          },
-          // Recharts chunk - only loads on reports/analytics pages
-          recharts: {
-            test: /[\\/]node_modules[\\/]recharts[\\/]/,
-            name: 'recharts',
-            priority: 25,
-            reuseExistingChunk: true,
-          },
-          // Radix UI components - split major ones
-          radix: {
-            test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
-            name: 'radix-ui',
-            priority: 20,
-            reuseExistingChunk: true,
-          },
-          // PDF generation libraries - only loads when needed
-          pdf: {
-            test: /[\\/]node_modules[\\/](jspdf|html2canvas)[\\/]/,
-            name: 'pdf-libs',
-            priority: 20,
-            reuseExistingChunk: true,
-          },
-          // Anthropic AI SDK - only loads for AI features
-          ai: {
-            test: /[\\/]node_modules[\\/]@anthropic-ai[\\/]/,
-            name: 'anthropic-ai',
-            priority: 20,
-            reuseExistingChunk: true,
-          },
-          // Calendar library chunk
-          calendar: {
-            test: /[\\/]node_modules[\\/]react-big-calendar[\\/]/,
-            name: 'calendar',
-            priority: 20,
-            reuseExistingChunk: true,
-          },
-          // Table library chunk
-          table: {
-            test: /[\\/]node_modules[\\/]@tanstack[\\/]react-table[\\/]/,
-            name: 'table',
-            priority: 20,
-            reuseExistingChunk: true,
-          },
-          // Date utilities chunk
-          dateUtils: {
-            test: /[\\/]node_modules[\\/]date-fns[\\/]/,
-            name: 'date-utils',
-            priority: 15,
-            reuseExistingChunk: true,
-          },
-          // Common vendor chunk - everything else
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendor',
-            priority: 10,
-            reuseExistingChunk: true,
-          },
-        },
-      }
+        }
 
-      // Performance budgets - warn if bundles get too large
-      config.performance = {
-        maxAssetSize: 244000, // 244KB
-        maxEntrypointSize: 244000,
-        hints: process.env.NODE_ENV === 'production' ? 'warning' : false,
+        // Performance budgets - warn if bundles get too large
+        config.performance = {
+          maxAssetSize: 244000, // 244KB
+          maxEntrypointSize: 244000,
+          hints: 'warning',
+        }
       }
 
       // Bundle analyzer (only when ANALYZE=true)

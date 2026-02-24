@@ -22,10 +22,10 @@ type PlanTimelineProps = {
 }
 
 const statusColors = {
-  pending: 'bg-gray-400',
-  in_progress: 'bg-blue-500',
-  complete: 'bg-green-500',
-  blocked: 'bg-red-500',
+  pending: 'bg-muted-foreground',
+  in_progress: 'bg-primary',
+  complete: 'bg-emerald-500',
+  blocked: 'bg-destructive',
 }
 
 export function PlanTimeline({ startDate, endDate, milestones }: PlanTimelineProps) {
@@ -122,10 +122,10 @@ export function PlanTimeline({ startDate, endDate, milestones }: PlanTimelinePro
             {/* Today marker */}
             {todayPosition !== null && (
               <div
-                className="absolute top-0 bottom-0 w-0.5 bg-blue-500 z-10"
+                className="absolute top-0 bottom-0 w-0.5 bg-primary z-10"
                 style={{ left: `${todayPosition}%` }}
               >
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                <div className="absolute -top-1 start-1/2 -translate-x-1/2 whitespace-nowrap">
                   <Badge variant="default" className="text-xs">
                     Today
                   </Badge>
@@ -152,9 +152,9 @@ export function PlanTimeline({ startDate, endDate, milestones }: PlanTimelinePro
                 >
                   <div
                     className={cn(
-                      'absolute h-8 rounded-md flex items-center px-2 text-white text-xs font-medium shadow-sm',
+                      'absolute h-8 rounded-md flex items-center px-2 text-primary-foreground text-xs font-medium shadow-sm',
                       'hover:shadow-md transition-shadow cursor-pointer',
-                      statusColors[milestone.status as keyof typeof statusColors] || 'bg-gray-400'
+                      statusColors[milestone.status as keyof typeof statusColors] || 'bg-muted-foreground'
                     )}
                     style={{
                       left: `${position.left}%`,
@@ -173,19 +173,19 @@ export function PlanTimeline({ startDate, endDate, milestones }: PlanTimelinePro
           {/* Legend */}
           <div className="flex items-center gap-4 pt-4 border-t text-xs">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-gray-400" />
+              <div className="w-3 h-3 rounded bg-muted-foreground" />
               <span className="text-muted-foreground">Pending</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-blue-500" />
+              <div className="w-3 h-3 rounded bg-primary" />
               <span className="text-muted-foreground">In Progress</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-green-500" />
+              <div className="w-3 h-3 rounded bg-emerald-500" />
               <span className="text-muted-foreground">Complete</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-red-500" />
+              <div className="w-3 h-3 rounded bg-destructive" />
               <span className="text-muted-foreground">Blocked</span>
             </div>
           </div>

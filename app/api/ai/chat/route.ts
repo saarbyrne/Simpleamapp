@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       const title = await generateChatTitle(messages)
       conversation = await db.aIConversation.create({
         data: {
-          orgId: dbUser.organizationId,
+          organizationId: dbUser.organizationId,
           userId: dbUser.id,
           title
         }
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
               const cost = calculateCost(inputTokens, outputTokens)
               await db.aICostTracking.create({
                 data: {
-                  orgId: dbUser.organizationId,
+                  organizationId: dbUser.organizationId,
                   userId: dbUser.id,
                   conversationId: conversation.id,
                   inputTokens,

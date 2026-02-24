@@ -1,9 +1,8 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { unstable_cache } from 'next/cache'
-import { getCachedUserWithOrganization, ensureUserWithOrganization } from '@/lib/auth/cached-user'
+import { getCachedUserWithOrganization, requireUser } from '@/lib/auth/cached-user'
 import { playersSchema, playerToRow, rowToPlayer } from '@/lib/data-tables/players-schema'
 import { SpreadsheetRow, ColumnDefinition } from '@/lib/types/spreadsheet'
 
@@ -15,9 +14,9 @@ import { SpreadsheetRow, ColumnDefinition } from '@/lib/types/spreadsheet'
  */
 export async function getPlayersData(page: number = 1, limit: number = 100) {
   try {
-    const dbUser = await getCachedUserWithOrganization()
+    const user = await getCachedUserWithOrganization()
 
-    if (!dbUser) {
+    if (!user) {
       return { error: 'Not authenticated' }
     }
 
@@ -27,7 +26,7 @@ export async function getPlayersData(page: number = 1, limit: number = 100) {
     const [players, totalCount] = await Promise.all([
       prisma.personOrganization.findMany({
         where: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
           role: 'player',
         },
         include: {
@@ -43,7 +42,7 @@ export async function getPlayersData(page: number = 1, limit: number = 100) {
       }),
       prisma.personOrganization.count({
         where: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
           role: 'player',
         },
       }),
@@ -76,15 +75,15 @@ export async function getPlayersData(page: number = 1, limit: number = 100) {
  */
 export async function getStaffData() {
   try {
-    const dbUser = await getCachedUserWithOrganization()
+    const user = await getCachedUserWithOrganization()
 
-    if (!dbUser) {
+    if (!user) {
       return { error: 'Not authenticated' }
     }
 
     const staff = await prisma.personOrganization.findMany({
       where: {
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         role: { not: 'player' },
       },
       include: {
@@ -137,15 +136,15 @@ export async function getStaffData() {
  */
 export async function getEventsData() {
   try {
-    const dbUser = await getCachedUserWithOrganization()
+    const user = await getCachedUserWithOrganization()
 
-    if (!dbUser) {
+    if (!user) {
       return { error: 'Not authenticated' }
     }
 
     const events = await prisma.event.findMany({
       where: {
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       orderBy: {
         startTime: 'desc',
@@ -192,15 +191,9 @@ export async function getEventsData() {
  * Save changes to players data
  */
 export async function savePlayersData(changes: SpreadsheetRow[]) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { success: false, error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Process each changed row
     for (const row of changes) {

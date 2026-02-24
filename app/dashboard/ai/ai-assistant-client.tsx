@@ -24,7 +24,7 @@ export function AIAssistantClient() {
   }, [])
 
   return (
-    <Card className="h-[calc(100vh-8rem)] flex overflow-hidden">
+    <Card className="h-full flex overflow-hidden">
       {/* Conversation List - Left Panel */}
       <div className="w-80 border-r flex flex-col bg-background">
         {/* Header */}
@@ -65,7 +65,7 @@ export function AIAssistantClient() {
                 size="sm"
                 onClick={() => setActiveView('chat')}
               >
-                <MessageSquare className="h-4 w-4 mr-2" />
+                <MessageSquare className="h-4 w-4 me-2" />
                 Chat
               </Button>
               <Button
@@ -73,7 +73,7 @@ export function AIAssistantClient() {
                 size="sm"
                 onClick={() => setActiveView('settings')}
               >
-                <Settings className="h-4 w-4 mr-2" />
+                <Settings className="h-4 w-4 me-2" />
                 Settings
               </Button>
             </div>

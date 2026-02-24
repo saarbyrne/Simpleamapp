@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select'
 import { ArrowLeft, Mail } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { formatDate } from '@/lib/date'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { Label } from '@/components/ui/label'
@@ -111,7 +112,7 @@ export function FormResponsesTable({
               size="sm"
               onClick={() => {
                 // TODO: Implement send reminders functionality
-                alert('Send reminders functionality will be implemented with email integration (Resend)')
+                toast('Send reminders functionality will be implemented with email integration (Resend)')
               }}
             >
               <Mail className="me-2 h-4 w-4" />

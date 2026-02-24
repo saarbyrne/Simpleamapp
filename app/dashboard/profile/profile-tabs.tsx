@@ -21,6 +21,8 @@ interface User {
   timezone: string | null;
   dateFormat: string | null;
   timeFormat: string | null;
+  theme: string | null;
+  experimentalTheme: string | null;
   notificationSettings: any;
   organization: {
     id: string;

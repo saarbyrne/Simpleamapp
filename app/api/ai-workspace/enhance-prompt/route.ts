@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { getCachedUserWithOrganization } from '@/lib/auth/cached-user'
 import { knowledgeBase } from '@/lib/ai-workspace/knowledge-base'
 
 export async function POST(req: NextRequest) {
-    const supabase = await createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getCachedUserWithOrganization()
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const dbUser = await ensureUserWithOrganization(user)
-    if (!dbUser) {
-        return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     try {
@@ -32,7 +25,7 @@ export async function POST(req: NextRequest) {
         // 1. Get Org Context
         console.log('[EnhancePrompt] Fetching Org Context...')
         const { getOrgContext } = await import('@/lib/ai-workspace/context')
-        const context = await getOrgContext(dbUser.organizationId, user.id)
+        const context = await getOrgContext(user.organizationId, user.id)
         console.log('[EnhancePrompt] Org Context fetched:', {
             colleaguesCount: context.colleagues.length,
             dataSourcesCount: context.dataSources.length,

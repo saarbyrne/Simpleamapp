@@ -2,8 +2,8 @@
 
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import type { PostHog } from 'posthog-js'
 import { useEffect } from 'react'
-import posthog from 'posthog-js'
 
 /**
  * Analytics Providers Component
@@ -12,14 +12,26 @@ import posthog from 'posthog-js'
  * - Vercel Analytics (FREE - unlimited)
  * - Vercel Speed Insights (FREE - unlimited)
  * - PostHog (FREE - 1M events/month)
+ *
+ * PostHog is dynamically imported to avoid adding ~600KB to every page's
+ * initial JS bundle. It loads lazily after the page is interactive.
  */
+
+let posthogInstance: any = null
+
+async function loadPostHog() {
+  if (posthogInstance) return posthogInstance
+  const { default: posthog } = await import('posthog-js')
+  posthogInstance = posthog
+  return posthog
+}
 
 export function AnalyticsProviders({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Defer PostHog initialization until after page is interactive
     if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-      // Use requestIdleCallback to defer initialization, with 2s timeout fallback
-      const initPostHog = () => {
+      const initPostHog = async () => {
+        const posthog = await loadPostHog()
         posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
           api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
 
@@ -48,7 +60,7 @@ export function AnalyticsProviders({ children }: { children: React.ReactNode }) 
           disable_surveys: true,
 
           // Load settings
-          loaded: (posthog) => {
+          loaded: (posthog: PostHog) => {
             if (process.env.NODE_ENV === 'development') {
               console.log('PostHog initialized (deferred)')
             }
@@ -58,9 +70,9 @@ export function AnalyticsProviders({ children }: { children: React.ReactNode }) 
 
       // Use requestIdleCallback if available, otherwise setTimeout
       if ('requestIdleCallback' in window) {
-        requestIdleCallback(initPostHog, { timeout: 2000 })
+        requestIdleCallback(() => { initPostHog() }, { timeout: 2000 })
       } else {
-        setTimeout(initPostHog, 1000)
+        setTimeout(() => { initPostHog() }, 1000)
       }
     }
   }, [])
@@ -87,18 +99,18 @@ export function AnalyticsProviders({ children }: { children: React.ReactNode }) 
 export function useAnalytics() {
   return {
     track: (event: string, properties?: Record<string, any>) => {
-      if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-        posthog.capture(event, properties)
+      if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY && posthogInstance) {
+        posthogInstance.capture(event, properties)
       }
     },
     identify: (userId: string, traits?: Record<string, any>) => {
-      if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-        posthog.identify(userId, traits)
+      if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY && posthogInstance) {
+        posthogInstance.identify(userId, traits)
       }
     },
     reset: () => {
-      if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-        posthog.reset()
+      if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY && posthogInstance) {
+        posthogInstance.reset()
       }
     },
   }

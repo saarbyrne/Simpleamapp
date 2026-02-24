@@ -75,12 +75,13 @@ export function useUserPreferences() {
         const result = await getCurrentUserProfile();
         // Only update state if component is still mounted
         if (isMountedRef.current && result?.success && result.data) {
-          const newPreferences = {
+          const newPreferences: UserPreferences = {
             timezone: result.data.timezone,
             dateFormat: result.data.dateFormat,
             timeFormat: result.data.timeFormat,
             language: result.data.language,
             theme: result.data.theme,
+            experimentalTheme: result.data.experimentalTheme ?? null,
           };
 
           setPreferences(newPreferences);

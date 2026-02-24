@@ -12,6 +12,7 @@ import {
 import { FormRenderer } from '@/components/dashboard/form-renderer'
 import { getForm, type FormField } from '@/app/actions/forms'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 interface FormPreviewDialogProps {
   open: boolean
@@ -56,7 +57,7 @@ export function FormPreviewDialog({ open, onOpenChange, formId }: FormPreviewDia
     console.log('Form preview submission:', data)
     setTimeout(() => {
       setIsSubmitting(false)
-      alert(t('forms.preview.previewMessage'))
+      toast(t('forms.preview.previewMessage'))
     }, 500)
   }
 

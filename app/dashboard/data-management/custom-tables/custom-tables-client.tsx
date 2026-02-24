@@ -43,6 +43,7 @@ import { SpreadsheetData, SpreadsheetTemplate, ColumnDefinition } from '@/lib/ty
 import { format } from 'date-fns'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PageCard } from '@/components/ui/page-card'
 
 type CustomTablesClientProps = {
@@ -61,6 +62,7 @@ export function CustomTablesClient({
   const [spreadsheets, setSpreadsheets] = useState<SpreadsheetData[]>(initialSpreadsheets)
   const [templates, setTemplates] = useState<SpreadsheetTemplate[]>(initialTemplates)
   const [showTemplateDialog, setShowTemplateDialog] = useState(!!templateParam)
+  const [ConfirmDialogEl, confirmAction] = useConfirmDialog()
 
   const handleCreateBlank = async () => {
     try {
@@ -109,7 +111,12 @@ export function CustomTablesClient({
   }
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Move "${name}" to trash? You can restore it within 30 days.`)) return
+    const ok = await confirmAction({
+      title: `Move "${name}" to trash?`,
+      description: 'You can restore it within 30 days.',
+      confirmLabel: 'Move to trash',
+    })
+    if (!ok) return
 
     try {
       const result = await deleteSpreadsheet(id)
@@ -128,6 +135,7 @@ export function CustomTablesClient({
 
   return (
     <div className="container mx-auto py-8">
+      {ConfirmDialogEl}
       <PageCard
         variant="table"
         title="Custom Data Tables"

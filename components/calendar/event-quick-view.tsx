@@ -11,11 +11,10 @@ import {
 } from '@/components/ui/card'
 import {
   Dialog,
-  DialogPortal,
-  DialogOverlay,
   DialogTitle,
+  DialogContent,
+  DialogClose,
 } from '@/components/ui/dialog'
-import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { Calendar, Clock, MapPin, Users, ExternalLink, Edit, Trash2, RefreshCw, X } from 'lucide-react'
 import { type EventWithDetails } from '@/app/actions/events'
 import { useRouter } from 'next/navigation'
@@ -71,19 +70,17 @@ export function EventQuickView({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogPortal>
-        <DialogOverlay className="fixed inset-0 z-50 bg-black/80" />
-        <DialogPrimitive.Content
+        <DialogContent
           className={cn(
-            "fixed start-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg sm:rounded-lg p-0",
+            "w-full max-w-md p-0",
             "duration-0 data-[state=open]:animate-none data-[state=closed]:animate-none"
           )}
         >
           <DialogTitle className="sr-only">{event.title}</DialogTitle>
-          <DialogPrimitive.Close className="absolute end-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+          <DialogClose className="absolute end-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
             <X className="h-4 w-4" />
             <span className="sr-only">{t('common.close')}</span>
-          </DialogPrimitive.Close>
+          </DialogClose>
           <Card className="border-0 shadow-none">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-2">
@@ -184,8 +181,7 @@ export function EventQuickView({
             </Button>
           </CardFooter>
         </Card>
-      </DialogPrimitive.Content>
-    </DialogPortal>
+      </DialogContent>
     </Dialog>
   )
 }

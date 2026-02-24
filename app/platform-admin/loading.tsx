@@ -50,7 +50,7 @@ export default function PlatformAdminLoading() {
                         <Skeleton className="h-3 w-24" />
                       </div>
                     </div>
-                    <div className="text-right space-y-2">
+                    <div className="text-end space-y-2">
                       <Skeleton className="h-3 w-20" />
                       <Skeleton className="h-3 w-16" />
                     </div>

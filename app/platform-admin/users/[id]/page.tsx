@@ -63,7 +63,7 @@ export default async function UserDetailsPage({ params }: UserDetailsPageProps) 
       >
         <Button variant="outline" size="sm" asChild>
           <Link href="/platform-admin/users">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="me-2 h-4 w-4" />
             Back to Users
           </Link>
         </Button>

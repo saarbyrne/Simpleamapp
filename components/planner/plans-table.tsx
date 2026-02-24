@@ -30,6 +30,7 @@ import { Progress } from '@/components/ui/progress'
 import { DataTable } from '@/components/data-table'
 import { deletePlan } from '@/app/actions/plans'
 import { toast } from 'sonner'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 
 type PlanRow = {
   id: string
@@ -81,11 +82,11 @@ const statusConfig = {
 }
 
 const typeConfig: Record<string, { label: string; color: string }> = {
-  season: { label: 'Season Plan', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-  player_development: { label: 'Player Development', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-  rehabilitation: { label: 'Rehabilitation', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
-  event_prep: { label: 'Event Preparation', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
-  custom: { label: 'Custom', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+  season: { label: 'Season Plan', color: 'bg-primary/10 text-primary' },
+  player_development: { label: 'Player Development', color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' },
+  rehabilitation: { label: 'Rehabilitation', color: 'bg-destructive/10 text-destructive' },
+  event_prep: { label: 'Event Preparation', color: 'bg-purple-500/10 text-purple-700 dark:text-purple-400' },
+  custom: { label: 'Custom', color: 'bg-muted text-muted-foreground' },
 }
 
 const calculateProgress = (milestones: { id: string; status: string }[]) => {
@@ -98,11 +99,15 @@ export function PlansTable({ plans, total }: PlansTableProps) {
   const router = useRouter()
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
+  const [ConfirmDialogEl, confirmAction] = useConfirmDialog()
 
   const handleDelete = useCallback(async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
-      return
-    }
+    const ok = await confirmAction({
+      title: `Delete "${name}"?`,
+      description: 'This action cannot be undone.',
+      confirmLabel: 'Delete',
+    })
+    if (!ok) return
 
     setDeletingId(id)
     try {
@@ -163,7 +168,7 @@ export function PlansTable({ plans, total }: PlansTableProps) {
           return (
             <Badge
               variant="secondary"
-              className={typeConfig[type]?.color || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'}
+              className={typeConfig[type]?.color || 'bg-muted text-muted-foreground'}
             >
               {typeConfig[type]?.label || type}
             </Badge>
@@ -236,7 +241,7 @@ export function PlansTable({ plans, total }: PlansTableProps) {
           const StatusIcon = statusConfig[status as keyof typeof statusConfig]?.icon || Circle
           return (
             <Badge variant={statusConfig[status as keyof typeof statusConfig]?.variant}>
-              <StatusIcon className="mr-1 h-3 w-3" />
+              <StatusIcon className="me-1 h-3 w-3" />
               {statusConfig[status as keyof typeof statusConfig]?.label || status}
             </Badge>
           )
@@ -262,7 +267,7 @@ export function PlansTable({ plans, total }: PlansTableProps) {
                       router.push(`/dashboard/planner/${plan.id}`)
                     }}
                   >
-                    <Eye className="mr-2 h-4 w-4" />
+                    <Eye className="me-2 h-4 w-4" />
                     View
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -271,7 +276,7 @@ export function PlansTable({ plans, total }: PlansTableProps) {
                       router.push(`/dashboard/planner/${plan.id}/edit`)
                     }}
                   >
-                    <Pencil className="mr-2 h-4 w-4" />
+                    <Pencil className="me-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -283,7 +288,7 @@ export function PlansTable({ plans, total }: PlansTableProps) {
                     disabled={deletingId === plan.id}
                     className="text-destructive"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
+                    <Trash2 className="me-2 h-4 w-4" />
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -297,6 +302,8 @@ export function PlansTable({ plans, total }: PlansTableProps) {
   )
 
   return (
+    <>
+    {ConfirmDialogEl}
     <DataTable
       data={plans}
       columns={columns}
@@ -317,5 +324,6 @@ export function PlansTable({ plans, total }: PlansTableProps) {
         </div>
       }
     />
+    </>
   )
 }

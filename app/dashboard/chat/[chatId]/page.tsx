@@ -1,9 +1,8 @@
 import { Suspense } from 'react';
-import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import { getFirebaseDb } from '@/lib/firebase';
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user';
+import { requireUser } from '@/lib/auth/cached-user';
 import { ChatWindow } from '@/components/chat/chat-window';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Chat } from '@/types/chat';
@@ -20,17 +19,7 @@ interface ChatWindowPageProps {
 export default async function ChatWindowPage({ params }: ChatWindowPageProps) {
   const { chatId } = params;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Get user from database
-  const dbUser = await ensureUserWithOrganization(user);
+  const user = await requireUser();
 
   // Fetch chat details (lazy initialize Firebase only when chat is accessed)
   const db = getFirebaseDb();
@@ -44,7 +33,7 @@ export default async function ChatWindowPage({ params }: ChatWindowPageProps) {
   const chat = { id: chatSnap.id, ...chatSnap.data() } as Chat;
 
   // Verify user is a participant
-  if (!chat.participantIds.includes(dbUser.id)) {
+  if (!chat.participantIds.includes(user.id)) {
     redirect('/dashboard/chat');
   }
 
@@ -53,13 +42,13 @@ export default async function ChatWindowPage({ params }: ChatWindowPageProps) {
   const isGroupChat = chat.type === 'group';
 
   return (
-    <div className="h-[calc(100vh-4rem)]">
+    <div className="h-full">
       <Suspense fallback={<ChatWindowSkeleton />}>
         <ChatWindow
           chatId={chatId}
           chatName={chatName}
-          userId={dbUser.id}
-          userName={dbUser.name}
+          userId={user.id}
+          userName={user.name}
           isGroupChat={isGroupChat}
         />
       </Suspense>

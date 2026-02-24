@@ -1,40 +1,54 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
-import { getTranslations } from 'next-intl/server'
+import { requireUser } from '@/lib/auth/cached-user'
+import { z } from 'zod'
 
-interface CreatePlayerData {
-  firstName: string
-  lastName: string
-  dateOfBirth?: string
-  nationality?: string
-  phone?: string
-  email?: string
-  photo?: string
-  position?: string
-  jerseyNumber?: number
-  status?: 'active' | 'injured'
-  tags?: string[]
-}
+// ============================================
+// Zod Schemas
+// ============================================
 
-export async function createPlayer(data: CreatePlayerData) {
-  const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+const CreatePlayerSchema = z.object({
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().min(1).max(100),
+  dateOfBirth: z.string().optional(),
+  nationality: z.string().max(100).optional(),
+  phone: z.string().max(50).optional(),
+  email: z.string().email().max(255).optional().or(z.literal('')),
+  photo: z.string().url().max(2048).optional().or(z.literal('')),
+  position: z.string().max(100).optional(),
+  jerseyNumber: z.number().int().min(0).max(999).optional(),
+  status: z.enum(['active', 'injured']).optional(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
+})
 
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
+const UpdatePlayerSchema = CreatePlayerSchema.partial()
 
+const BulkUpdateSchema = z.object({
+  personIds: z.array(z.string().cuid()).min(1).max(500),
+  updates: z.object({
+    position: z.string().max(100).nullable().optional(),
+    status: z.enum(['active', 'injured', 'inactive']).nullable().optional(),
+    nationality: z.string().max(100).nullable().optional(),
+  }),
+})
+
+const PaginationSchema = z.object({
+  page: z.number().int().min(0).default(0),
+  pageSize: z.number().int().min(1).max(1000).default(20),
+})
+
+// ============================================
+// Actions
+// ============================================
+
+export async function createPlayer(rawData: z.input<typeof CreatePlayerSchema>) {
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
+    const data = CreatePlayerSchema.parse(rawData)
 
-    // Create person and link to organization
     const result = await prisma.$transaction(async (tx) => {
-      // Create person
       const person = await tx.person.create({
         data: {
           firstName: data.firstName,
@@ -42,16 +56,15 @@ export async function createPlayer(data: CreatePlayerData) {
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
           nationality: data.nationality,
           phone: data.phone,
-          email: data.email,
-          photo: data.photo,
+          email: data.email || undefined,
+          photo: data.photo || undefined,
         }
       })
 
-      // Link to organization
-      const personOrg = await tx.personOrganization.create({
+      await tx.personOrganization.create({
         data: {
           personId: person.id,
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
           role: 'player',
           position: data.position,
           jerseyNumber: data.jerseyNumber,
@@ -60,7 +73,6 @@ export async function createPlayer(data: CreatePlayerData) {
         }
       })
 
-      // Log activity
       await tx.activity.create({
         data: {
           type: 'player_created',
@@ -73,36 +85,33 @@ export async function createPlayer(data: CreatePlayerData) {
         }
       })
 
-      return { person, personOrg }
+      return person
     })
 
-    // Granular cache invalidation - only invalidate players list
     revalidateTag('players-list')
-
-    return { success: true, player: result.person }
+    return { success: true, player: result }
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { error: error.issues[0]?.message ?? 'Invalid input' }
+    }
+    if (error instanceof Error && error.message === 'Unauthorized: User must be authenticated') {
+      return { error: 'Not authenticated' }
+    }
     console.error('Error creating player:', error)
-    return { error: t('failedToCreatePlayer') }
+    return { error: 'Failed to create player' }
   }
 }
 
 export async function updatePlayer(
   personId: string,
-  data: Partial<CreatePlayerData>
+  rawData: z.input<typeof UpdatePlayerSchema>
 ) {
-  const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
+    const data = UpdatePlayerSchema.parse(rawData)
+    z.string().cuid().parse(personId)
 
     const result = await prisma.$transaction(async (tx) => {
-      // Update person
       const person = await tx.person.update({
         where: { id: personId },
         data: {
@@ -115,11 +124,10 @@ export async function updatePlayer(
         }
       })
 
-      // Update organization link
-      const personOrg = await tx.personOrganization.updateMany({
+      await tx.personOrganization.updateMany({
         where: {
           personId: personId,
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         },
         data: {
           position: data.position,
@@ -129,7 +137,6 @@ export async function updatePlayer(
         }
       })
 
-      // Log activity
       await tx.activity.create({
         data: {
           type: 'player_updated',
@@ -144,41 +151,35 @@ export async function updatePlayer(
       return person
     })
 
-    // Granular cache invalidation - invalidate specific player and list
     revalidateTag(`player-${personId}`)
     revalidateTag('players-list')
-
     return { success: true, player: result }
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { error: error.issues[0]?.message ?? 'Invalid input' }
+    }
+    if (error instanceof Error && error.message === 'Unauthorized: User must be authenticated') {
+      return { error: 'Not authenticated' }
+    }
     console.error('Error updating player:', error)
-    return { error: t('failedToUpdatePlayer') }
+    return { error: 'Failed to update player' }
   }
 }
 
 export async function deletePlayer(personId: string) {
-  const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
+    z.string().cuid().parse(personId)
 
-    // Get player name before deletion
     const person = await prisma.person.findUnique({
       where: { id: personId },
       select: { firstName: true, lastName: true }
     })
 
-    // Delete person (cascades to person_organizations)
     await prisma.person.delete({
       where: { id: personId }
     })
 
-    // Log activity
     if (person) {
       await prisma.activity.create({
         data: {
@@ -192,11 +193,16 @@ export async function deletePlayer(personId: string) {
     }
 
     revalidatePath('/dashboard')
-
     return { success: true }
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { error: error.issues[0]?.message ?? 'Invalid input' }
+    }
+    if (error instanceof Error && error.message === 'Unauthorized: User must be authenticated') {
+      return { error: 'Not authenticated' }
+    }
     console.error('Error deleting player:', error)
-    return { error: t('failedToDeletePlayer') }
+    return { error: 'Failed to delete player' }
   }
 }
 
@@ -208,78 +214,52 @@ export async function bulkUpdatePlayers(
     nationality?: string | null
   }
 ) {
-  const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
-  if (!personIds || personIds.length === 0) {
-    return { error: t('noPlayersSelected') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
+    const validated = BulkUpdateSchema.parse({ personIds, updates })
+
+    if (validated.updates.status === null) {
+      return { error: 'Status is required and cannot be cleared' }
+    }
 
     const result = await prisma.$transaction(async (tx) => {
       const updatedCount = { person: 0, personOrg: 0 }
 
-      // Update nationality in Person table if provided
-      if (updates.nationality !== undefined) {
+      if (validated.updates.nationality !== undefined) {
         const personUpdate = await tx.person.updateMany({
-          where: {
-            id: { in: personIds },
-          },
-          data: {
-            nationality: updates.nationality || null,
-          },
+          where: { id: { in: validated.personIds } },
+          data: { nationality: validated.updates.nationality || null },
         })
         updatedCount.person = personUpdate.count
       }
 
-      // Update position and/or status in PersonOrganization table if provided
-      const personOrgUpdates: {
-        position?: string | null
-        status?: string
-      } = {}
-
-      if (updates.position !== undefined) {
-        personOrgUpdates.position = updates.position || null
+      const personOrgUpdates: Record<string, unknown> = {}
+      if (validated.updates.position !== undefined) {
+        personOrgUpdates.position = validated.updates.position || null
       }
-
-      // Status is required in schema - validate and provide clear error if null
-      if (updates.status !== undefined) {
-        if (updates.status === null) {
-          throw new Error(t('statusRequired'))
-        }
-        // Validate status value
-        const validStatuses = ['active', 'injured', 'inactive']
-        if (!validStatuses.includes(updates.status)) {
-          throw new Error(t('invalidStatusValue', { status: updates.status, validStatuses: validStatuses.join(', ') }))
-        }
-        personOrgUpdates.status = updates.status
+      if (validated.updates.status !== undefined && validated.updates.status !== null) {
+        personOrgUpdates.status = validated.updates.status
       }
 
       if (Object.keys(personOrgUpdates).length > 0) {
         const personOrgUpdate = await tx.personOrganization.updateMany({
           where: {
-            personId: { in: personIds },
-            organizationId: dbUser.organizationId,
+            personId: { in: validated.personIds },
+            organizationId: user.organizationId,
           },
           data: personOrgUpdates,
         })
         updatedCount.personOrg = personOrgUpdate.count
       }
 
-      // Log activity for bulk update
       await tx.activity.create({
         data: {
           type: 'players_bulk_updated',
           data: {
-            count: personIds.length,
-            updates: Object.keys(updates).filter(key => updates[key as keyof typeof updates] !== undefined),
+            count: validated.personIds.length,
+            updates: Object.keys(validated.updates).filter(
+              key => validated.updates[key as keyof typeof validated.updates] !== undefined
+            ),
           },
           userId: user.id,
         }
@@ -288,42 +268,34 @@ export async function bulkUpdatePlayers(
       return updatedCount
     })
 
-    // Granular cache invalidation - invalidate affected players and list
-    personIds.forEach(id => revalidateTag(`player-${id}`))
+    validated.personIds.forEach(id => revalidateTag(`player-${id}`))
     revalidateTag('players-list')
-
     return { success: true, updatedCount: result }
   } catch (error) {
-    console.error('Error bulk updating players:', error)
-    if (error instanceof Error) {
-      return { error: error.message }
+    if (error instanceof z.ZodError) {
+      return { error: error.issues[0]?.message ?? 'Invalid input' }
     }
-    return { error: t('failedToBulkUpdatePlayers') }
+    if (error instanceof Error && error.message === 'Unauthorized: User must be authenticated') {
+      return { error: 'Not authenticated' }
+    }
+    console.error('Error bulk updating players:', error)
+    return { error: 'Failed to bulk update players' }
   }
 }
 
 export async function getPlayers(page: number = 0, pageSize: number = 20) {
   try {
-    const t = await getTranslations('errors')
-    const supabase = await createServerClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const user = await requireUser()
+    const params = PaginationSchema.parse({ page, pageSize })
 
-    if (authError || !user) {
-      console.error('Auth error:', authError)
-      return { error: t('notAuthenticated'), players: [], total: 0, page: 0, pageSize: 20 }
-    }
+    const skip = params.page * params.pageSize
 
-    const dbUser = await ensureUserWithOrganization(user)
-
-    const skip = page * pageSize
-
-    // Run count and findMany queries in parallel for ~50% faster page loads
     const [total, players] = await Promise.all([
       prisma.person.count({
         where: {
           organizations: {
             some: {
-              organizationId: dbUser.organizationId,
+              organizationId: user.organizationId,
               role: 'player',
             }
           }
@@ -333,16 +305,14 @@ export async function getPlayers(page: number = 0, pageSize: number = 20) {
         where: {
           organizations: {
             some: {
-              organizationId: dbUser.organizationId,
+              organizationId: user.organizationId,
               role: 'player',
             }
           }
         },
         include: {
           organizations: {
-            where: {
-              organizationId: dbUser.organizationId,
-            },
+            where: { organizationId: user.organizationId },
             select: {
               position: true,
               jerseyNumber: true,
@@ -352,25 +322,19 @@ export async function getPlayers(page: number = 0, pageSize: number = 20) {
             }
           }
         },
-        orderBy: {
-          lastName: 'asc',
-        },
+        orderBy: { lastName: 'asc' },
         skip,
-        take: pageSize,
+        take: params.pageSize,
       })
     ])
 
-    console.log(`Fetched ${players.length} players for org ${dbUser.organizationId}, total: ${total}`)
-
-    return { players, total, page, pageSize }
+    return { players, total, page: params.page, pageSize: params.pageSize }
   } catch (error) {
-    console.error('Error fetching players:', error)
-    if (error instanceof Error) {
-      console.error('Error details:', error.message)
-      console.error('Error stack:', error.stack)
+    if (error instanceof Error && error.message === 'Unauthorized: User must be authenticated') {
+      return { error: 'Not authenticated', players: [], total: 0, page: 0, pageSize: 20 }
     }
-    const t = await getTranslations('errors')
-    return { error: t('failedToFetchPlayers'), players: [], total: 0, page: 0, pageSize: 20 }
+    console.error('Error fetching players:', error)
+    return { error: 'Failed to fetch players', players: [], total: 0, page: 0, pageSize: 20 }
   }
 }
 
@@ -392,9 +356,7 @@ const getPlayerFromDB = (playerId: string, organizationId: string) =>
         },
         include: {
           organizations: {
-            where: {
-              organizationId,
-            },
+            where: { organizationId },
             select: {
               position: true,
               jerseyNumber: true,
@@ -409,36 +371,31 @@ const getPlayerFromDB = (playerId: string, organizationId: string) =>
     },
     ['player-data', playerId, organizationId],
     {
-      revalidate: 300, // 5 minutes
+      revalidate: 300,
       tags: [`player-${playerId}`, 'players-list']
     }
   )()
 
-/**
- * Get a single player by ID with full details
- */
 export async function getPlayer(playerId: string) {
-  const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
+    z.string().cuid().parse(playerId)
 
-    // Use cached database query
-    const player = await getPlayerFromDB(playerId, dbUser.organizationId)
+    const player = await getPlayerFromDB(playerId, user.organizationId)
 
     if (!player) {
-      return { error: t('playerNotFound') }
+      return { error: 'Player not found' }
     }
 
     return { success: true, player }
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { error: 'Invalid player ID' }
+    }
+    if (error instanceof Error && error.message === 'Unauthorized: User must be authenticated') {
+      return { error: 'Not authenticated' }
+    }
     console.error('Error fetching player:', error)
-    return { error: t('failedToFetchPlayer') }
+    return { error: 'Failed to fetch player' }
   }
 }

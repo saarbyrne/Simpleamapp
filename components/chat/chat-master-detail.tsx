@@ -132,7 +132,7 @@ export function ChatMasterDetail({ userId, userName, orgId }: ChatMasterDetailPr
               </Button>
             </div>
             <div className="relative flex items-center border border-input rounded-md px-3 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/50 h-10 bg-background">
-              <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
+              <Search className="h-4 w-4 text-muted-foreground me-2 flex-shrink-0" />
               <Input
                 type="text"
                 placeholder="Search chats..."
@@ -202,7 +202,7 @@ export function ChatMasterDetail({ userId, userName, orgId }: ChatMasterDetailPr
                   Select a chat to start messaging
                 </p>
                 <Button onClick={() => setIsCreateModalOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="me-2 h-4 w-4" />
                   New Chat
                 </Button>
               </div>
@@ -243,7 +243,7 @@ const ChatListItem = memo(function ChatListItem({
 
   return (
     <div
-      className={`w-full text-left px-4 py-3 hover:bg-accent transition-colors flex items-start gap-3 group ${
+      className={`w-full text-start px-4 py-3 hover:bg-accent transition-colors flex items-start gap-3 group ${
         isSelected ? 'bg-accent' : ''
       }`}
     >
@@ -284,7 +284,7 @@ const ChatListItem = memo(function ChatListItem({
             }}
             className="text-destructive focus:text-destructive"
           >
-            <Trash2 className="mr-2 h-4 w-4" />
+            <Trash2 className="me-2 h-4 w-4" />
             Delete Chat
           </DropdownMenuItem>
         </DropdownMenuContent>

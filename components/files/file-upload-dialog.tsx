@@ -188,13 +188,13 @@ export function FileUploadDialog({
     const iconName = getFileIcon(file.type)
     switch (iconName) {
       case 'Image':
-        return <ImageIcon className="h-8 w-8 text-blue-500" />
+        return <ImageIcon className="h-8 w-8 text-primary" />
       case 'Video':
         return <Video className="h-8 w-8 text-purple-500" />
       case 'FileText':
         return <FileText className="h-8 w-8 text-orange-500" />
       default:
-        return <File className="h-8 w-8 text-gray-500" />
+        return <File className="h-8 w-8 text-muted-foreground" />
     }
   }
 
@@ -261,7 +261,7 @@ export function FileUploadDialog({
                         <p className="text-sm text-destructive mt-1">{item.error}</p>
                       )}
                       {item.status === 'success' && (
-                        <p className="text-sm text-green-600 mt-1">✓ {t('files.uploaded')}</p>
+                        <p className="text-sm text-emerald-600 mt-1">✓ {t('files.uploaded')}</p>
                       )}
                     </div>
                     {item.status === 'pending' && (
@@ -318,7 +318,7 @@ export function FileUploadDialog({
                       {tag}
                       <button
                         onClick={() => removeTag(tag)}
-                        className="ml-2 hover:text-destructive"
+                        className="ms-2 hover:text-destructive"
                       >
                         <X className="h-3 w-3" />
                       </button>

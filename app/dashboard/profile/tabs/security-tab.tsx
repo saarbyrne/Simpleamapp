@@ -97,11 +97,11 @@ export function SecurityTab({ user }: SecurityTabProps) {
     if (/[^a-zA-Z0-9]/.test(password)) strength++;
 
     if (strength <= 2) {
-      return { strength, label: t('profile.security.passwordStrength.weak'), color: "text-red-500" };
+      return { strength, label: t('profile.security.passwordStrength.weak'), color: "text-destructive" };
     } else if (strength <= 3) {
-      return { strength, label: t('profile.security.passwordStrength.medium'), color: "text-yellow-500" };
+      return { strength, label: t('profile.security.passwordStrength.medium'), color: "text-amber-500" };
     } else {
-      return { strength, label: t('profile.security.passwordStrength.strong'), color: "text-green-500" };
+      return { strength, label: t('profile.security.passwordStrength.strong'), color: "text-emerald-500" };
     }
   }
 
@@ -162,10 +162,10 @@ export function SecurityTab({ user }: SecurityTabProps) {
                               <div
                                 className={`h-full rounded-full transition-all ${
                                   passwordStrength.strength <= 2
-                                    ? "bg-red-500"
+                                    ? "bg-destructive"
                                     : passwordStrength.strength <= 3
-                                    ? "bg-yellow-500"
-                                    : "bg-green-500"
+                                    ? "bg-amber-500"
+                                    : "bg-emerald-500"
                                 }`}
                                 style={{
                                   width: `${(passwordStrength.strength / 5) * 100}%`,

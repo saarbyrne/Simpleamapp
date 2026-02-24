@@ -29,10 +29,7 @@ export default async function OrganizationsPage() {
           events: true,
         }
       },
-      subscriptions: {
-        take: 1,
-        orderBy: { createdAt: 'desc' }
-      },
+      subscriptions: true,
       users: {
         take: 1,
         orderBy: { createdAt: 'asc' },
@@ -63,7 +60,7 @@ export default async function OrganizationsPage() {
                 <TableHead>Activity</TableHead>
                 <TableHead>Subscription</TableHead>
                 <TableHead>Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-end">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -75,7 +72,7 @@ export default async function OrganizationsPage() {
                 </TableRow>
               ) : (
                 organizations.map((org) => {
-                  const subscription = org.subscriptions[0]
+                  const subscription = org.subscriptions
                   const isActive = subscription?.status === 'active'
                   const isPaid = subscription?.plan !== 'free' && isActive
 
@@ -135,7 +132,7 @@ export default async function OrganizationsPage() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-end">
                         <Button variant="ghost" size="sm" asChild>
                           <Link href={`/platform-admin/organizations/${org.id}`}>
                             <ExternalLink className="h-4 w-4" />

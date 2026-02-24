@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { createServerClient } from "@/lib/supabase/server";
-import { ensureUserWithOrganization } from "@/lib/auth/ensure-user";
+import { requireUser } from "@/lib/auth/cached-user";
 
 // ============================================
 // VALIDATION SCHEMAS
@@ -59,15 +59,8 @@ const changePasswordSchema = z.object({
 
 export async function getCurrentUserProfile() {
   try {
-    const supabase = await createServerClient();
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !authUser) {
-      return { success: false, error: "Authentication required" };
-    }
-
     // Ensure user exists in database and has organization
-    const dbUser = await ensureUserWithOrganization(authUser);
+    const authUser = await requireUser()
 
     // Add retry logic for database queries to handle temporary connection issues
     let user;
@@ -76,7 +69,7 @@ export async function getCurrentUserProfile() {
     while (retries > 0) {
       try {
         user = await prisma.user.findUnique({
-          where: { id: dbUser.id },
+          where: { id: authUser.id },
           include: {
             organization: {
               select: {
@@ -131,6 +124,7 @@ export async function getCurrentUserProfile() {
         dateFormat: user.dateFormat,
         timeFormat: user.timeFormat,
         theme: user.theme,
+        experimentalTheme: user.experimentalTheme,
         notificationSettings: user.notificationSettings,
         organization: user.organization,
         roles: user.roles.map((ur) => ur.role),
@@ -178,17 +172,10 @@ export async function updateProfile(data: z.infer<typeof updateProfileSchema>) {
       };
     }
 
-    const supabase = await createServerClient();
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !authUser) {
-      return { success: false, error: "Authentication required" };
-    }
-
-    const dbUser = await ensureUserWithOrganization(authUser);
+    const user = await requireUser()
 
     const updatedUser = await prisma.user.update({
-      where: { id: dbUser.id },
+      where: { id: user.id },
       data: {
         name: validation.data.name,
         phone: validation.data.phone,
@@ -220,14 +207,7 @@ export async function updatePreferences(data: z.infer<typeof updatePreferencesSc
       };
     }
 
-    const supabase = await createServerClient();
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !authUser) {
-      return { success: false, error: "Authentication required" };
-    }
-
-    const dbUser = await ensureUserWithOrganization(authUser);
+    const user = await requireUser()
 
     // Only update fields that are actually provided (not undefined)
     const updateData: {
@@ -262,7 +242,7 @@ export async function updatePreferences(data: z.infer<typeof updatePreferencesSc
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: dbUser.id },
+      where: { id: user.id },
       data: updateData,
     });
 
@@ -293,18 +273,11 @@ export async function updateNotificationSettings(
       };
     }
 
-    const supabase = await createServerClient();
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !authUser) {
-      return { success: false, error: "Authentication required" };
-    }
-
-    const dbUser = await ensureUserWithOrganization(authUser);
+    const user = await requireUser()
 
     // Get current notification settings
     const currentUser = await prisma.user.findUnique({
-      where: { id: dbUser.id },
+      where: { id: user.id },
       select: { notificationSettings: true },
     });
 
@@ -317,7 +290,7 @@ export async function updateNotificationSettings(
     };
 
     const updatedUser = await prisma.user.update({
-      where: { id: dbUser.id },
+      where: { id: user.id },
       data: {
         notificationSettings: mergedSettings,
         updatedAt: new Date(),
@@ -390,17 +363,12 @@ export async function uploadAvatar(formData: FormData) {
     }
 
     const supabase = await createServerClient();
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !authUser) {
-      return { success: false, error: "Authentication required" };
-    }
 
-    const dbUser = await ensureUserWithOrganization(authUser);
+    const user = await requireUser()
 
     // Generate unique filename
     const fileExt = file.name.split(".").pop();
-    const fileName = `${dbUser.id}-${Date.now()}.${fileExt}`;
+    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
     const filePath = `avatars/${fileName}`;
 
     // Upload to Supabase Storage - use people-photos bucket which is already configured
@@ -431,7 +399,7 @@ export async function uploadAvatar(formData: FormData) {
 
     // Update user avatar in database
     const updatedUser = await prisma.user.update({
-      where: { id: dbUser.id },
+      where: { id: user.id },
       data: {
         avatar: urlData.publicUrl,
         updatedAt: new Date(),

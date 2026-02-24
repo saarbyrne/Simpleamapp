@@ -1,6 +1,7 @@
 'use client'
 
 import { memo, useState, useCallback, useMemo } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -18,11 +19,13 @@ import {
 import { BreadcrumbProvider, useBreadcrumb } from '@/lib/breadcrumb-context'
 import { PageFrame } from '@/components/dashboard/page-frame'
 import { QuickActionsToolbar } from '@/components/dashboard/quick-actions-toolbar'
-import { AddPlayerDialog } from '@/components/dashboard/add-player-dialog'
-import { EventFormDialog } from '@/components/calendar/event-form-dialog'
-import { FormBuilderDialog } from '@/components/dashboard/form-builder-dialog'
-import { NoteEditorDialog } from '@/components/notes/note-editor-dialog'
 import { GlobalSearch, SearchTrigger, useSearchShortcut } from '@/components/global-search'
+
+// Lazy-load dialog components — only loaded when their respective dialogs are opened
+const AddPlayerDialog = dynamic(() => import('@/components/dashboard/add-player-dialog').then(m => ({ default: m.AddPlayerDialog })), { ssr: false })
+const EventFormDialog = dynamic(() => import('@/components/calendar/event-form-dialog').then(m => ({ default: m.EventFormDialog })), { ssr: false })
+const FormBuilderDialog = dynamic(() => import('@/components/dashboard/form-builder-dialog').then(m => ({ default: m.FormBuilderDialog })), { ssr: false })
+const NoteEditorDialog = dynamic(() => import('@/components/notes/note-editor-dialog').then(m => ({ default: m.NoteEditorDialog })), { ssr: false })
 
 type DashboardLayoutClientProps = {
   userName: string
@@ -30,6 +33,7 @@ type DashboardLayoutClientProps = {
   userAvatar?: string | null
   organizationName?: string | null
   organizationLogo?: string | null
+  enabledFeatures?: string[]
   children: React.ReactNode
   /**
    * Set to true to disable the PageFrame wrapper (no padding/spacing).
@@ -149,6 +153,7 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
   userAvatar,
   organizationName,
   organizationLogo,
+  enabledFeatures,
   children,
   disablePageFrame = false,
 }: DashboardLayoutClientProps) {
@@ -190,6 +195,7 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
           userAvatar={userAvatar}
           organizationName={organizationName}
           organizationLogo={organizationLogo}
+          enabledFeatures={enabledFeatures}
         />
         <SidebarInset className="flex flex-col">
           <div className="sticky top-0 z-50 shrink-0 w-full overflow-x-hidden bg-nav-background">
@@ -217,29 +223,37 @@ export const DashboardLayoutClient = memo(function DashboardLayoutClient({
           )}
         </SidebarInset>
 
-        {/* Quick Action Dialogs */}
-        <AddPlayerDialog
-          open={isAddPlayerOpen}
-          onOpenChange={setIsAddPlayerOpen}
-        />
-        <EventFormDialog
-          open={isAddEventOpen}
-          onOpenChange={setIsAddEventOpen}
-          onSuccess={handleEventFormSuccess}
-        />
-        <FormBuilderDialog
-          open={isAddFormOpen}
-          onOpenChange={setIsAddFormOpen}
-          onSuccess={handleFormBuilderSuccess}
-        />
-        <NoteEditorDialog
-          open={isAddNoteOpen}
-          onOpenChange={setIsAddNoteOpen}
-          onSuccess={() => {
-            setIsAddNoteOpen(false)
-            router.refresh()
-          }}
-        />
+        {/* Quick Action Dialogs — lazy-loaded, only mounted when opened */}
+        {isAddPlayerOpen && (
+          <AddPlayerDialog
+            open={isAddPlayerOpen}
+            onOpenChange={setIsAddPlayerOpen}
+          />
+        )}
+        {isAddEventOpen && (
+          <EventFormDialog
+            open={isAddEventOpen}
+            onOpenChange={setIsAddEventOpen}
+            onSuccess={handleEventFormSuccess}
+          />
+        )}
+        {isAddFormOpen && (
+          <FormBuilderDialog
+            open={isAddFormOpen}
+            onOpenChange={setIsAddFormOpen}
+            onSuccess={handleFormBuilderSuccess}
+          />
+        )}
+        {isAddNoteOpen && (
+          <NoteEditorDialog
+            open={isAddNoteOpen}
+            onOpenChange={setIsAddNoteOpen}
+            onSuccess={() => {
+              setIsAddNoteOpen(false)
+              router.refresh()
+            }}
+          />
+        )}
         <GlobalSearch
           open={isSearchOpen}
           onOpenChange={setIsSearchOpen}

@@ -1,9 +1,8 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
-import { revalidatePath } from 'next/cache'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { requireUser } from '@/lib/auth/cached-user'
 import { Prisma } from '@prisma/client'
 import { randomBytes } from 'crypto'
 import type { ReportConfig, ReportSection } from '@/types/reports'
@@ -46,15 +45,9 @@ export interface CreateReportScheduleData {
 // ===== REPORT CRUD =====
 
 export async function createReport(data: CreateReportData) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const report = await prisma.report.create({
       data: {
@@ -64,12 +57,13 @@ export async function createReport(data: CreateReportData) {
         config: data.config as unknown as Prisma.InputJsonValue,
         sections: data.sections as unknown as Prisma.InputJsonValue,
         templateId: data.templateId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         createdBy: user.id,
       },
     })
 
     revalidatePath('/dashboard/reports')
+    revalidateTag('reports')
 
     return { success: true, report }
   } catch (error) {
@@ -79,19 +73,13 @@ export async function createReport(data: CreateReportData) {
 }
 
 export async function getReports() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const reports = await prisma.report.findMany({
       where: {
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       orderBy: {
         updatedAt: 'desc',
@@ -110,20 +98,14 @@ export async function getReports() {
 }
 
 export async function getReport(reportId: string) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const report = await prisma.report.findFirst({
       where: {
         id: reportId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       include: {
         template: true,
@@ -143,21 +125,15 @@ export async function getReport(reportId: string) {
 }
 
 export async function updateReport(reportId: string, data: UpdateReportData) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify ownership
     const existing = await prisma.report.findFirst({
       where: {
         id: reportId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -178,6 +154,7 @@ export async function updateReport(reportId: string, data: UpdateReportData) {
 
     revalidatePath('/dashboard/reports')
     revalidatePath(`/dashboard/reports/${reportId}`)
+    revalidateTag('reports')
 
     return { success: true, report }
   } catch (error) {
@@ -187,21 +164,15 @@ export async function updateReport(reportId: string, data: UpdateReportData) {
 }
 
 export async function deleteReport(reportId: string) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify ownership
     const existing = await prisma.report.findFirst({
       where: {
         id: reportId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -213,8 +184,9 @@ export async function deleteReport(reportId: string) {
       where: { id: reportId },
     })
 
-    // Don't revalidate here - client does optimistic update
-    // revalidatePath('/dashboard/reports')
+    // Don't revalidate path here - client does optimistic update
+    // But do invalidate the cache tag for next full page load
+    revalidateTag('reports')
 
     return { success: true }
   } catch (error) {
@@ -226,21 +198,15 @@ export async function deleteReport(reportId: string) {
 // ===== REPORT TEMPLATES =====
 
 export async function getReportTemplates() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const templates = await prisma.reportTemplate.findMany({
       where: {
         OR: [
           { isGlobal: true },
-          { organizationId: dbUser.organizationId },
+          { organizationId: user.organizationId },
         ],
       },
       orderBy: [
@@ -257,15 +223,9 @@ export async function getReportTemplates() {
 }
 
 export async function createReportTemplate(data: CreateReportTemplateData) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const template = await prisma.reportTemplate.create({
       data: {
@@ -275,7 +235,7 @@ export async function createReportTemplate(data: CreateReportTemplateData) {
         config: data.config as unknown as Prisma.InputJsonValue,
         sections: data.sections as unknown as Prisma.InputJsonValue,
         isGlobal: data.isGlobal || false,
-        organizationId: data.isGlobal ? null : dbUser.organizationId,
+        organizationId: data.isGlobal ? null : user.organizationId,
         createdBy: user.id,
       },
     })
@@ -295,21 +255,15 @@ export async function createReportSchedule(
   reportId: string,
   data: CreateReportScheduleData
 ) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify report ownership
     const report = await prisma.report.findFirst({
       where: {
         id: reportId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -346,15 +300,9 @@ export async function updateReportSchedule(
   scheduleId: string,
   data: Partial<CreateReportScheduleData>
 ) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify ownership through report
     const existing = await prisma.reportSchedule.findFirst({
@@ -362,7 +310,7 @@ export async function updateReportSchedule(
       include: { report: true },
     })
 
-    if (!existing || existing.report.organizationId !== dbUser.organizationId) {
+    if (!existing || existing.report.organizationId !== user.organizationId) {
       return { error: 'Schedule not found' }
     }
 
@@ -401,15 +349,9 @@ export async function updateReportSchedule(
 }
 
 export async function deleteReportSchedule(scheduleId: string) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify ownership through report
     const existing = await prisma.reportSchedule.findFirst({
@@ -417,7 +359,7 @@ export async function deleteReportSchedule(scheduleId: string) {
       include: { report: true },
     })
 
-    if (!existing || existing.report.organizationId !== dbUser.organizationId) {
+    if (!existing || existing.report.organizationId !== user.organizationId) {
       return { error: 'Schedule not found' }
     }
 
@@ -437,21 +379,15 @@ export async function deleteReportSchedule(scheduleId: string) {
 // ===== REPORT SHARING =====
 
 export async function generateShareToken(reportId: string) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify ownership
     const report = await prisma.report.findFirst({
       where: {
         id: reportId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -480,21 +416,15 @@ export async function generateShareToken(reportId: string) {
 }
 
 export async function revokeShareToken(reportId: string) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify ownership
     const report = await prisma.report.findFirst({
       where: {
         id: reportId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -592,24 +522,18 @@ function calculateNextSendTime(data: CreateReportScheduleData): Date {
 // ===== DATA SOURCE FETCHING FOR BUILDER =====
 
 export async function getAvailableDataSources() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const [forms, spreadsheets] = await Promise.all([
       prisma.form.findMany({
-        where: { organizationId: dbUser.organizationId },
+        where: { organizationId: user.organizationId },
         select: { id: true, name: true },
         orderBy: { name: 'asc' },
       }),
       prisma.spreadsheet.findMany({
-        where: { organizationId: dbUser.organizationId },
+        where: { organizationId: user.organizationId },
         select: { id: true, name: true },
         orderBy: { name: 'asc' },
       }),
@@ -627,16 +551,10 @@ export async function getAvailableDataSources() {
 }
 
 export async function getReportBuilderData() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
-    const organizationId = dbUser.organizationId
+    const user = await requireUser()
+    const organizationId = user.organizationId
 
     const [forms, spreadsheets, players] = await Promise.all([
       prisma.form.findMany({
@@ -649,7 +567,13 @@ export async function getReportBuilderData() {
       }),
       prisma.personOrganization.findMany({
         where: { organizationId },
-        include: { person: true },
+        select: {
+          personId: true,
+          position: true,
+          person: {
+            select: { firstName: true, lastName: true },
+          },
+        },
         orderBy: { person: { firstName: 'asc' } },
       }),
     ])
@@ -764,21 +688,15 @@ export async function getReportBuilderData() {
 // ===== DATA FETCHING FOR REPORTS =====
 
 export async function getReportData(reportId: string, filters?: any) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Get report configuration
     const report = await prisma.report.findFirst({
       where: {
         id: reportId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -790,7 +708,7 @@ export async function getReportData(reportId: string, filters?: any) {
 
     // Use new query builder to fetch and aggregate real data
     const { buildReportData } = await import('@/lib/reports/query-builder')
-    const reportData = await buildReportData(config, dbUser.organizationId, filters)
+    const reportData = await buildReportData(config, user.organizationId, filters)
 
     return { success: true, ...reportData, config }
   } catch (error) {

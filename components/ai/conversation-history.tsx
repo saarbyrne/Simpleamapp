@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { MessageSquare, Trash2, Plus } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { cn } from '@/components/ui/utils'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface Conversation {
   id: string
@@ -29,6 +30,7 @@ export function ConversationHistory({
 }: ConversationHistoryProps) {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [ConfirmDialogEl, confirmAction] = useConfirmDialog()
 
   useEffect(() => {
     loadConversations()
@@ -55,7 +57,12 @@ export function ConversationHistory({
   const handleDelete = async (conversationId: string, e: React.MouseEvent) => {
     e.stopPropagation()
 
-    if (!confirm('Delete this conversation?')) return
+    const ok = await confirmAction({
+      title: 'Delete conversation?',
+      description: 'This conversation will be permanently deleted.',
+      confirmLabel: 'Delete',
+    })
+    if (!ok) return
 
     try {
       const response = await fetch(`/api/ai/conversations/${conversationId}`, {
@@ -75,6 +82,7 @@ export function ConversationHistory({
 
   return (
     <div className="flex flex-col h-full">
+      {ConfirmDialogEl}
       <ScrollArea className="flex-1">
         <div className="p-2 space-y-1">
           {isLoading ? (
@@ -97,7 +105,7 @@ export function ConversationHistory({
                 key={conversation.id}
                 onClick={() => onSelectConversation(conversation.id)}
                 className={cn(
-                  'w-full text-left p-3 rounded-lg hover:bg-accent transition-colors group',
+                  'w-full text-start p-3 rounded-lg hover:bg-accent transition-colors group',
                   currentConversationId === conversation.id && 'bg-accent'
                 )}
               >

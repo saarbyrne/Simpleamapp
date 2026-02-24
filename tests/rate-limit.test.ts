@@ -1,14 +1,15 @@
+import { describe, it, expect, beforeEach } from 'vitest'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 describe('Rate Limiting', () => {
+  // Use unique user IDs per test to avoid shared state in the in-memory store
+  let testId: number
   beforeEach(() => {
-    // Clear the in-memory rate limit store before each test
-    // We need to access the internal store - this is a bit hacky for testing
-    // In production, this would be handled by the in-memory store resetting
+    testId = Date.now() + Math.random()
   })
 
   it('should allow requests within the limit', () => {
-    const userId = 'test-user'
+    const userId = `user-allow-${testId}`
     const config = RATE_LIMITS.AI_CHAT
 
     // First request should succeed
@@ -18,7 +19,7 @@ describe('Rate Limiting', () => {
   })
 
   it('should block requests over the limit', () => {
-    const userId = 'test-user'
+    const userId = `user-block-${testId}`
     const config = { maxRequests: 2, windowMs: 1000 }
 
     // Use up the limit
@@ -32,14 +33,14 @@ describe('Rate Limiting', () => {
   })
 
   it('should reset after window expires', async () => {
-    const userId = 'test-user'
+    const userId = `user-reset-${testId}`
     const config = { maxRequests: 1, windowMs: 100 }
 
     // Use up the limit
     checkRateLimit(userId, config)
 
-    // Wait for window to expire
-    await new Promise(resolve => setTimeout(resolve, 150))
+    // Wait for window to expire (generous margin for CI)
+    await new Promise(resolve => setTimeout(resolve, 300))
 
     // Should allow new request
     const result = checkRateLimit(userId, config)
@@ -47,7 +48,7 @@ describe('Rate Limiting', () => {
   })
 
   it('should handle different endpoints with different limits', () => {
-    const userId = 'test-user'
+    const userId = `user-endpoints-${testId}`
 
     // AI Chat: 20 requests/minute
     const chatResult = checkRateLimit(`${userId}-chat`, RATE_LIMITS.AI_CHAT)
@@ -62,7 +63,7 @@ describe('Rate Limiting', () => {
   })
 
   it('should provide correct rate limit headers', () => {
-    const userId = 'test-user'
+    const userId = `user-headers-${testId}`
     const config = { maxRequests: 5, windowMs: 60000 }
 
     const result = checkRateLimit(userId, config)

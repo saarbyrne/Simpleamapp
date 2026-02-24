@@ -28,23 +28,23 @@ interface NoteCardProps {
 const visibilityConfig = {
   public: {
     label: 'Public',
-    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
   },
   medical: {
     label: 'Medical',
-    color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    color: 'bg-destructive/10 text-destructive',
   },
   mental_health: {
     label: 'Mental Health',
-    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+    color: 'bg-purple-500/10 text-purple-700 dark:text-purple-400',
   },
   coaches: {
     label: 'Coaches',
-    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    color: 'bg-primary/10 text-primary',
   },
   private: {
     label: 'Private',
-    color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+    color: 'bg-muted text-muted-foreground',
   },
 }
 
@@ -58,7 +58,7 @@ export function NoteCard({
   const isAuthor = currentUserId === note.author.id
   const visibilityInfo = visibilityConfig[note.privacyLevel as keyof typeof visibilityConfig] || {
     label: note.privacyLevel,
-    color: 'bg-gray-100 text-gray-800',
+    color: 'bg-muted text-muted-foreground',
   }
 
   return (

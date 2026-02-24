@@ -31,7 +31,7 @@ const priorityConfig = {
     label: 'Medium Priority'
   },
   low: {
-    color: 'bg-blue-600 text-white hover:bg-blue-700',
+    color: 'bg-primary text-primary-foreground hover:bg-primary/90',
     icon: TrendingUp,
     label: 'Low Priority'
   }
@@ -119,8 +119,8 @@ export function AIInsights() {
   if (insights.length === 0) {
     return (
       <Card className="p-8 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-950 mb-4">
-          <Lightbulb className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+          <Lightbulb className="h-8 w-8 text-primary" />
         </div>
         <h3 className="text-xl font-semibold mb-2">Proactive Insights Coming Soon</h3>
         <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
@@ -128,11 +128,11 @@ export function AIInsights() {
           Soon, the AI will automatically analyze your data and alert you to important patterns, 
           risks, and opportunities.
         </p>
-        <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950 p-4 max-w-lg mx-auto mt-6">
-          <p className="text-sm text-blue-900 dark:text-blue-100 text-left">
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 max-w-lg mx-auto mt-6">
+          <p className="text-sm text-foreground text-start">
             <strong>Coming features:</strong>
           </p>
-          <ul className="text-sm text-blue-900 dark:text-blue-100 text-left mt-2 space-y-1 list-disc list-inside">
+          <ul className="text-sm text-foreground text-start mt-2 space-y-1 list-disc list-inside">
             <li>Injury risk detection</li>
             <li>Wellness trend monitoring</li>
             <li>Training load analysis</li>

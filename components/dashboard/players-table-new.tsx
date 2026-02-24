@@ -76,8 +76,8 @@ type PlayersTableProps = {
 }
 
 const statusColors: Record<string, string> = {
-  active: 'bg-green-600 text-white hover:bg-green-700',
-  available: 'bg-green-600 text-white hover:bg-green-700',
+  active: 'bg-primary text-primary-foreground hover:bg-primary/90',
+  available: 'bg-primary text-primary-foreground hover:bg-primary/90',
   injured: 'bg-destructive text-white hover:bg-destructive/90',
   suspended: 'bg-muted text-muted-foreground hover:bg-muted/80',
   inactive: 'bg-muted text-muted-foreground hover:bg-muted/80',
@@ -648,7 +648,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
 
   const handleAddPlayer = async () => {
     if (!newPlayer.firstName || !newPlayer.lastName) {
-      alert('First name and last name are required')
+      toast.error('First name and last name are required')
       return
     }
 
@@ -666,7 +666,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
       })
 
       if (result.error) {
-        alert(result.error)
+        toast.error(result.error)
       } else {
         setNewPlayer({
           firstName: '',
@@ -683,7 +683,7 @@ export function PlayersTable({ players, total: serverTotal }: PlayersTableProps)
       }
     } catch (error) {
       console.error('Error creating player:', error)
-      alert('Failed to create player')
+      toast.error('Failed to create player')
     } finally {
       setIsSubmitting(false)
     }

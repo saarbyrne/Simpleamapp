@@ -20,10 +20,7 @@ export default async function PlatformAdminPage() {
       _count: {
         select: { users: true }
       },
-      subscriptions: {
-        take: 1,
-        orderBy: { createdAt: 'desc' }
-      }
+      subscriptions: true
     }
   })
 
@@ -98,9 +95,9 @@ export default async function PlatformAdminPage() {
                           {org._count.users} users • {org.sport || 'Multi-sport'}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-end">
                         <p className="text-xs font-medium">
-                          {org.subscriptions[0]?.plan || 'Free'}
+                          {org.subscriptions?.plan || 'Free'}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(org.createdAt).toLocaleDateString()}
@@ -135,7 +132,7 @@ export default async function PlatformAdminPage() {
                           <p className="text-xs text-muted-foreground">{user.email}</p>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-end">
                         <p className="text-xs font-medium">{user.organization.name}</p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(user.createdAt).toLocaleDateString()}

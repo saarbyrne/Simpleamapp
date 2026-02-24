@@ -311,7 +311,7 @@ export function SubmitTemplateDialog({ open, onOpenChange }: SubmitTemplateDialo
                         {tag}
                         <button
                           onClick={() => handleRemoveTag(tag)}
-                          className="ml-1 hover:text-destructive"
+                          className="ms-1 hover:text-destructive"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -363,7 +363,7 @@ export function SubmitTemplateDialog({ open, onOpenChange }: SubmitTemplateDialo
                 {features.length > 0 && (
                   <div>
                     <div className="text-sm font-semibold mb-2">What&apos;s Included:</div>
-                    <ul className="text-sm space-y-1 ml-4">
+                    <ul className="text-sm space-y-1 ms-4">
                       {features.map((feature) => (
                         <li key={feature} className="list-disc">
                           {feature}

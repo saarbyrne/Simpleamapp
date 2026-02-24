@@ -60,7 +60,7 @@ export function DataManagementClient({ dataSummary }: DataManagementClientProps)
       icon: <Users className="h-6 w-6" />,
       count: summary.players,
       route: '/dashboard/data-management/players',
-      color: 'text-blue-600 dark:text-blue-400',
+      color: 'text-primary',
       features: ['Profiles', 'Performance', 'Medical', 'History'],
     },
     {
@@ -80,7 +80,7 @@ export function DataManagementClient({ dataSummary }: DataManagementClientProps)
       icon: <Calendar className="h-6 w-6" />,
       count: summary.events,
       route: '/dashboard/data-management/events',
-      color: 'text-green-600 dark:text-green-400',
+      color: 'text-emerald-600 dark:text-emerald-400',
       features: ['Training', 'Matches', 'Attendance'],
     },
     {

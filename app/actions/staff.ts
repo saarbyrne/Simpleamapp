@@ -1,10 +1,9 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { requireUser } from '@/lib/auth/cached-user'
 import { getTranslations } from 'next-intl/server'
 import { hasPermission, PERMISSIONS, ALL_PERMISSIONS } from '@/lib/permissions'
 
@@ -52,24 +51,18 @@ export type OrganizationRoleSummary = {
  */
 export async function getStaff() {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
-    if (!dbUser?.organizationId) {
-      console.error('User does not have an organizationId:', dbUser)
+    if (!user?.organizationId) {
+      console.error('User does not have an organizationId:', user)
       return { error: 'User organization not found' }
     }
 
     const staff = await prisma.user.findMany({
       where: {
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       select: {
         id: true,
@@ -104,7 +97,7 @@ export async function getStaff() {
 
     console.log('[getStaff] Successfully fetched:', {
       count: transformedStaff.length,
-      organizationId: dbUser.organizationId,
+      organizationId: user.organizationId,
       firstStaff: transformedStaff[0] ? {
         id: transformedStaff[0].id,
         name: transformedStaff[0].name,
@@ -128,24 +121,18 @@ export async function getStaff() {
 
 export async function getOrganizationRoles() {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
-    if (!dbUser?.organizationId) {
-      console.error('User does not have an organizationId:', dbUser)
+    if (!user?.organizationId) {
+      console.error('User does not have an organizationId:', user)
       return { error: 'User organization not found' }
     }
 
     const roles = await prisma.organizationRole.findMany({
       where: {
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       select: {
         id: true,
@@ -172,20 +159,14 @@ export async function getOrganizationRoles() {
  */
 export async function getStaffMember(staffId: string) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const staffMember = await prisma.user.findFirst({
       where: {
         id: staffId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       include: {
         person: true,
@@ -223,15 +204,9 @@ export async function getStaffMember(staffId: string) {
  */
 export async function updateStaffRoles(staffId: string, roleNames: string[]) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
     const userPermissions = await getUserPermissions(user.id)
 
     // Check if user has permission to manage staff
@@ -243,7 +218,7 @@ export async function updateStaffRoles(staffId: string, roleNames: string[]) {
     const staffMember = await prisma.user.findFirst({
       where: {
         id: staffId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -253,7 +228,7 @@ export async function updateStaffRoles(staffId: string, roleNames: string[]) {
 
     const organizationRoles = await prisma.organizationRole.findMany({
       where: {
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       select: {
         name: true,
@@ -273,7 +248,7 @@ export async function updateStaffRoles(staffId: string, roleNames: string[]) {
       // Get role IDs for the normalized role names
       const roleRecords = await tx.organizationRole.findMany({
         where: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
           name: {
             in: normalizedRoles,
           },
@@ -351,15 +326,9 @@ export async function updateStaffProfile(
   }
 ) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
     const userPermissions = await getUserPermissions(user.id)
 
     // Check if user has permission to manage staff or is updating their own profile
@@ -374,7 +343,7 @@ export async function updateStaffProfile(
     const staffMember = await prisma.user.findFirst({
       where: {
         id: staffId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -421,21 +390,15 @@ export async function updateStaffProfile(
  */
 export async function getStaffStats(staffId: string) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify staff member belongs to same organization
     const staffMember = await prisma.user.findFirst({
       where: {
         id: staffId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -447,18 +410,18 @@ export async function getStaffStats(staffId: string) {
       prisma.note.count({
         where: {
           authorId: staffId,
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         },
       }),
       prisma.form.count({
         where: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
           // TODO: Add createdBy field to Form model
         },
       }),
       prisma.event.count({
         where: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
           // TODO: Add createdBy field to Event model
         },
       }),

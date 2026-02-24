@@ -1,10 +1,9 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
-import { getCachedUserWithOrganization, ensureUserWithOrganization } from '@/lib/auth/cached-user'
+import { getCachedUserWithOrganization, requireUser } from '@/lib/auth/cached-user'
 import {
   getChangedFields,
   createBatchId,
@@ -74,9 +73,9 @@ export async function logBatchDataChanges(changes: DataChange[]) {
  */
 export async function getRowHistory(spreadsheetId: string, rowId: string) {
   try {
-    const dbUser = await getCachedUserWithOrganization()
+    const user = await getCachedUserWithOrganization()
 
-    if (!dbUser) {
+    if (!user) {
       return { error: 'Not authenticated' }
     }
 
@@ -86,7 +85,7 @@ export async function getRowHistory(spreadsheetId: string, rowId: string) {
       include: { permissions: true },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found' }
     }
 
@@ -125,9 +124,9 @@ export async function getSpreadsheetHistory(
   limit: number = 50
 ) {
   try {
-    const dbUser = await getCachedUserWithOrganization()
+    const user = await getCachedUserWithOrganization()
 
-    if (!dbUser) {
+    if (!user) {
       return { error: 'Not authenticated' }
     }
 
@@ -137,7 +136,7 @@ export async function getSpreadsheetHistory(
       include: { permissions: true },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found' }
     }
 
@@ -186,17 +185,9 @@ export async function restoreRowToVersion(
   rowId: string,
   changeLogId: string
 ) {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Get the change log entry
     const changeLog = await prisma.dataChangeLog.findUnique({
@@ -213,14 +204,14 @@ export async function restoreRowToVersion(
       include: { permissions: true },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found' }
     }
 
     // Check edit permission
-    const userRoles = dbUser.roleNames || []
-    const userPermissions = dbUser.permissions || []
-    const accessLevel = resolveAccessLevel(dbUser.id, userRoles, userPermissions, spreadsheet)
+    const userRoles = user.roleNames || []
+    const userPermissions = user.permissions || []
+    const accessLevel = resolveAccessLevel(user.id, userRoles, userPermissions, spreadsheet)
 
     if (!hasAccess(accessLevel, 'edit')) {
       return { error: 'Insufficient permissions' }
@@ -257,8 +248,8 @@ export async function restoreRowToVersion(
     await logDataChange({
       spreadsheetId,
       rowId,
-      userId: dbUser.id,
-      organizationId: dbUser.organizationId,
+      userId: user.id,
+      organizationId: user.organizationId,
       action: 'restore',
       previousData: oldData,
       newData: restoredData,
@@ -282,31 +273,23 @@ export async function restoreRowToVersion(
  * Soft delete a spreadsheet
  */
 export async function softDeleteSpreadsheet(spreadsheetId: string) {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const spreadsheet = await prisma.spreadsheet.findUnique({
       where: { id: spreadsheetId },
       include: { permissions: true },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found' }
     }
 
     // Check admin permission
-    const userRoles = dbUser.roleNames || []
-    const userPermissions = dbUser.permissions || []
-    const accessLevel = resolveAccessLevel(dbUser.id, userRoles, userPermissions, spreadsheet)
+    const userRoles = user.roleNames || []
+    const userPermissions = user.permissions || []
+    const accessLevel = resolveAccessLevel(user.id, userRoles, userPermissions, spreadsheet)
 
     if (!hasAccess(accessLevel, 'admin')) {
       return { error: 'Insufficient permissions' }
@@ -319,16 +302,16 @@ export async function softDeleteSpreadsheet(spreadsheetId: string) {
         data: {
           isDeleted: true,
           deletedAt: new Date(),
-          deletedBy: dbUser.id,
+          deletedBy: user.id,
         },
       }),
       prisma.trashItem.create({
         data: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
           entityType: 'spreadsheet',
           entityId: spreadsheetId,
           entityName: spreadsheet.name,
-          deletedBy: dbUser.id,
+          deletedBy: user.id,
           expiresAt: calculateExpiryDate(30),
         },
       }),
@@ -348,23 +331,15 @@ export async function softDeleteSpreadsheet(spreadsheetId: string) {
  * Restore a spreadsheet from trash
  */
 export async function restoreSpreadsheet(spreadsheetId: string) {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const spreadsheet = await prisma.spreadsheet.findUnique({
       where: { id: spreadsheetId },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found' }
     }
 
@@ -405,15 +380,15 @@ export async function restoreSpreadsheet(spreadsheetId: string) {
  */
 export async function getTrashItems() {
   try {
-    const dbUser = await getCachedUserWithOrganization()
+    const user = await getCachedUserWithOrganization()
 
-    if (!dbUser) {
+    if (!user) {
       return { error: 'Not authenticated' }
     }
 
     const items = await prisma.trashItem.findMany({
       where: {
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       include: {
         deletedByUser: {
@@ -439,23 +414,15 @@ export async function getTrashItems() {
  * Permanently delete a trash item
  */
 export async function permanentlyDelete(trashItemId: string) {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const trashItem = await prisma.trashItem.findUnique({
       where: { id: trashItemId },
     })
 
-    if (!trashItem || trashItem.organizationId !== dbUser.organizationId) {
+    if (!trashItem || trashItem.organizationId !== user.organizationId) {
       return { error: 'Trash item not found' }
     }
 
@@ -494,32 +461,24 @@ export async function grantSpreadsheetPermission(
   grantValue: string,
   accessLevel: AccessLevel
 ) {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const spreadsheet = await prisma.spreadsheet.findUnique({
       where: { id: spreadsheetId },
       include: { permissions: true },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found' }
     }
 
     // Check admin permission
-    const userRoles = dbUser.roleNames || []
-    const userPermissions = dbUser.permissions || []
+    const userRoles = user.roleNames || []
+    const userPermissions = user.permissions || []
     const currentAccessLevel = resolveAccessLevel(
-      dbUser.id,
+      user.id,
       userRoles,
       userPermissions,
       spreadsheet
@@ -543,11 +502,11 @@ export async function grantSpreadsheetPermission(
         grantType,
         grantValue,
         accessLevel,
-        grantedBy: dbUser.id,
+        grantedBy: user.id,
       },
       update: {
         accessLevel,
-        grantedBy: dbUser.id,
+        grantedBy: user.id,
         grantedAt: new Date(),
       },
     })
@@ -565,17 +524,9 @@ export async function grantSpreadsheetPermission(
  * Revoke permission from a user/role
  */
 export async function revokeSpreadsheetPermission(permissionId: string) {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const permission = await prisma.spreadsheetPermission.findUnique({
       where: { id: permissionId },
@@ -584,7 +535,7 @@ export async function revokeSpreadsheetPermission(permissionId: string) {
 
     if (
       !permission ||
-      permission.spreadsheet.organizationId !== dbUser.organizationId
+      permission.spreadsheet.organizationId !== user.organizationId
     ) {
       return { error: 'Permission not found' }
     }
@@ -599,10 +550,10 @@ export async function revokeSpreadsheetPermission(permissionId: string) {
       return { error: 'Spreadsheet not found' }
     }
 
-    const userRoles = dbUser.roleNames || []
-    const userPermissions = dbUser.permissions || []
+    const userRoles = user.roleNames || []
+    const userPermissions = user.permissions || []
     const accessLevel = resolveAccessLevel(
-      dbUser.id,
+      user.id,
       userRoles,
       userPermissions,
       spreadsheet
@@ -630,9 +581,9 @@ export async function revokeSpreadsheetPermission(permissionId: string) {
  */
 export async function getSpreadsheetAccessLevel(spreadsheetId: string) {
   try {
-    const dbUser = await getCachedUserWithOrganization()
+    const user = await getCachedUserWithOrganization()
 
-    if (!dbUser) {
+    if (!user) {
       return { error: 'Not authenticated' }
     }
 
@@ -641,14 +592,14 @@ export async function getSpreadsheetAccessLevel(spreadsheetId: string) {
       include: { permissions: true },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found' }
     }
 
-    const userRoles = dbUser.roleNames || []
-    const userPermissions = dbUser.permissions || []
+    const userRoles = user.roleNames || []
+    const userPermissions = user.permissions || []
     const accessLevel = resolveAccessLevel(
-      dbUser.id,
+      user.id,
       userRoles,
       userPermissions,
       spreadsheet

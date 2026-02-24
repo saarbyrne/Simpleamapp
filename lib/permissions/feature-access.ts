@@ -7,6 +7,7 @@
 
 import { prisma } from '@/lib/db'
 import { OrganizationFeatures } from '@prisma/client'
+import { unstable_cache, revalidateTag } from 'next/cache'
 import { FeatureKey, SubFeatureKey, FEATURE_METADATA } from './feature-metadata'
 import { SubscriptionTier, getPackageDefaults } from './subscription-tiers'
 
@@ -61,8 +62,40 @@ export async function getOrganizationFeatures(
 }
 
 /**
+ * Check a feature against an already-fetched OrganizationFeatures record.
+ * Pure logic, no DB call.
+ */
+function checkFeatureFromRecord(
+  feature: FeatureKey | SubFeatureKey,
+  orgFeatures: OrganizationFeatures | null
+): boolean {
+  const featureMetadata = FEATURE_METADATA[feature as FeatureKey]
+
+  // If it's a main feature
+  if (featureMetadata) {
+    if (!featureMetadata.released) return false
+    if (!orgFeatures) return false
+    return orgFeatures[featureMetadata.fieldName as keyof OrganizationFeatures] as boolean
+  }
+
+  // It's a sub-feature - find the parent
+  for (const mainFeature of Object.values(FEATURE_METADATA)) {
+    const subFeature = mainFeature.subFeatures.find(sf => sf.key === feature)
+    if (subFeature) {
+      if (!mainFeature.released) return false
+      if (!orgFeatures) return false
+      const parentEnabled = orgFeatures[mainFeature.fieldName as keyof OrganizationFeatures] as boolean
+      if (!parentEnabled) return false
+      return orgFeatures[subFeature.fieldName as keyof OrganizationFeatures] as boolean
+    }
+  }
+
+  return false
+}
+
+/**
  * Check if a specific feature is enabled for an organization
- * 
+ *
  * @param orgId - Organization ID
  * @param feature - Feature key to check
  * @param isPlatformAdmin - If true, bypasses release status check
@@ -73,57 +106,18 @@ export async function isFeatureEnabled(
   isPlatformAdmin: boolean = false
 ): Promise<boolean> {
   try {
-    // Platform admins see all features
-    if (isPlatformAdmin) {
-      return true
-    }
-    
-    const featureMetadata = FEATURE_METADATA[feature as FeatureKey]
-    
-    // If it's a main feature
-    if (featureMetadata) {
-      // Check if feature is released (unreleased = hidden from regular users)
-      if (!featureMetadata.released) {
-        return false
-      }
-      
-      // Get the feature setting from database
-      const features = await getOrganizationFeatures(orgId)
-      if (!features) return false
-      
-      return features[featureMetadata.fieldName as keyof OrganizationFeatures] as boolean
-    }
-    
-    // It's a sub-feature - find the parent
-    for (const mainFeature of Object.values(FEATURE_METADATA)) {
-      const subFeature = mainFeature.subFeatures.find(sf => sf.key === feature)
-      if (subFeature) {
-        // Check parent is released
-        if (!mainFeature.released) {
-          return false
-        }
-        
-        // Check parent is enabled
-        const features = await getOrganizationFeatures(orgId)
-        if (!features) return false
-        
-        const parentEnabled = features[mainFeature.fieldName as keyof OrganizationFeatures] as boolean
-        if (!parentEnabled) return false
-        
-        // Check sub-feature setting
-        return features[subFeature.fieldName as keyof OrganizationFeatures] as boolean
-      }
-    }
-    
-    return false // Unknown feature
+    if (isPlatformAdmin) return true
+    const orgFeatures = await getOrganizationFeatures(orgId)
+    return checkFeatureFromRecord(feature, orgFeatures)
   } catch (error) {
     console.error('Error checking feature access:', error)
-    return false // Fail closed on error
+    return false
   }
 }
 
 /**
  * Check multiple features at once
+ * Fetches organization features once and checks all requested features against it
  */
 export async function areFeaturesEnabled(
   orgId: string,
@@ -132,8 +126,19 @@ export async function areFeaturesEnabled(
 ): Promise<Record<string, boolean>> {
   const results: Record<string, boolean> = {}
 
+  // Platform admins see everything
+  if (isPlatformAdmin) {
+    for (const feature of features) {
+      results[feature] = true
+    }
+    return results
+  }
+
+  // Single DB query for all feature checks
+  const orgFeatures = await getOrganizationFeatures(orgId)
+
   for (const feature of features) {
-    results[feature] = await isFeatureEnabled(orgId, feature, isPlatformAdmin)
+    results[feature] = checkFeatureFromRecord(feature, orgFeatures)
   }
 
   return results
@@ -142,49 +147,53 @@ export async function areFeaturesEnabled(
 /**
  * Get all enabled main features for an organization
  * Used by sidebar to filter navigation items
- * 
+ *
  * @param orgId - Organization ID
  * @param isPlatformAdmin - If true, returns all features (including unreleased)
  */
 export async function getEnabledFeatures(
-  orgId: string, 
+  orgId: string,
   isPlatformAdmin: boolean = false
 ): Promise<FeatureKey[]> {
-  try {
-    const enabledFeatures: FeatureKey[] = []
-    const features = await getOrganizationFeatures(orgId)
-    
-    if (!features && !isPlatformAdmin) {
+  // Platform admins see everything — no need for DB query or cache
+  if (isPlatformAdmin) {
+    return Object.keys(FEATURE_METADATA) as FeatureKey[]
+  }
+
+  return getCachedEnabledFeatures(orgId)
+}
+
+const getCachedEnabledFeatures = unstable_cache(
+  async (orgId: string): Promise<FeatureKey[]> => {
+    try {
+      const enabledFeatures: FeatureKey[] = []
+      const features = await getOrganizationFeatures(orgId)
+
+      if (!features) {
+        return []
+      }
+
+      for (const [key, metadata] of Object.entries(FEATURE_METADATA)) {
+        const featureKey = key as FeatureKey
+
+        if (!metadata.released) {
+          continue
+        }
+
+        if (features[metadata.fieldName as keyof OrganizationFeatures]) {
+          enabledFeatures.push(featureKey)
+        }
+      }
+
+      return enabledFeatures
+    } catch (error) {
+      console.error('Error getting enabled features:', error)
       return []
     }
-    
-    for (const [key, metadata] of Object.entries(FEATURE_METADATA)) {
-      const featureKey = key as FeatureKey
-      
-      // Platform admins see all features
-      if (isPlatformAdmin) {
-        enabledFeatures.push(featureKey)
-        continue
-      }
-      
-      // Check if feature is released
-      if (!metadata.released) {
-        continue
-      }
-      
-      // Check if feature is enabled
-      if (features && features[metadata.fieldName as keyof OrganizationFeatures]) {
-        enabledFeatures.push(featureKey)
-      }
-    }
-    
-    return enabledFeatures
-  } catch (error) {
-    console.error('Error getting enabled features:', error)
-    // On error, fail closed (show nothing)
-    return []
-  }
-}
+  },
+  ['enabled-features'],
+  { revalidate: 300, tags: ['enabled-features'] }
+)
 
 /**
  * Update organization features (partial update)
@@ -201,6 +210,8 @@ export async function updateOrganizationFeatures(
       where: { organizationId: orgId },
       data: updates,
     })
+
+    revalidateTag('enabled-features')
 
     return updated
   } catch (error) {
@@ -244,7 +255,9 @@ export async function applyPackageDefaultsToOrganization(
       where: { organizationId: orgId },
       data: updates,
     })
-    
+
+    revalidateTag('enabled-features')
+
     return updated
   } catch (error) {
     console.error('Error applying package defaults:', error)
@@ -326,6 +339,8 @@ export async function setFeatureOverride(
       data: { [fieldName]: nextValue } as Partial<OrganizationFeatures>,
     })
 
+    revalidateTag('enabled-features')
+
     return true
   } catch (error) {
     console.error('Error setting feature override:', error)
@@ -380,6 +395,8 @@ export async function enableAllFeatures(orgId: string): Promise<OrganizationFeat
       },
     })
 
+    revalidateTag('enabled-features')
+
     return updated
   } catch (error) {
     console.error('Error enabling all features:', error)
@@ -433,6 +450,8 @@ export async function disableAllFeatures(orgId: string): Promise<OrganizationFea
         playersMedicalDataEnabled: false,
       },
     })
+
+    revalidateTag('enabled-features')
 
     return updated
   } catch (error) {

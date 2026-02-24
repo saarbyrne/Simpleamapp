@@ -25,6 +25,7 @@ import {
 import { getRowHistory, restoreRowToVersion } from '@/app/actions/data-management'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface RowHistoryProps {
   open: boolean
@@ -60,6 +61,7 @@ export function RowHistory({
   const [isLoading, setIsLoading] = useState(false)
   const [isRestoring, setIsRestoring] = useState(false)
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null)
+  const [ConfirmDialogEl, confirmAction] = useConfirmDialog()
 
   useEffect(() => {
     if (open) {
@@ -82,9 +84,13 @@ export function RowHistory({
   }
 
   const handleRestore = async (changeLogId: string, timestamp: Date) => {
-    if (!confirm(`Restore this row to its state at ${format(timestamp, 'PPp')}?`)) {
-      return
-    }
+    const ok = await confirmAction({
+      title: 'Restore row?',
+      description: `Restore this row to its state at ${format(timestamp, 'PPp')}?`,
+      confirmLabel: 'Restore',
+      variant: 'default',
+    })
+    if (!ok) return
 
     setIsRestoring(true)
     try {
@@ -121,13 +127,13 @@ export function RowHistory({
       case 'create':
         return 'bg-green-500/10 text-green-700 dark:text-green-400'
       case 'update':
-        return 'bg-blue-500/10 text-blue-700 dark:text-blue-400'
+        return 'bg-primary/10 text-primary'
       case 'delete':
-        return 'bg-red-500/10 text-red-700 dark:text-red-400'
+        return 'bg-destructive/10 text-destructive'
       case 'restore':
         return 'bg-purple-500/10 text-purple-700 dark:text-purple-400'
       default:
-        return 'bg-gray-500/10 text-gray-700 dark:text-gray-400'
+        return 'bg-muted text-muted-foreground'
     }
   }
 
@@ -141,7 +147,7 @@ export function RowHistory({
         <div className="mt-2 space-y-1">
           <div className="text-sm font-medium">Created with:</div>
           {Object.entries(entry.newData || {}).map(([key, value]) => (
-            <div key={key} className="text-sm pl-4">
+            <div key={key} className="text-sm ps-4">
               <span className="font-medium">{key}:</span>{' '}
               <span className="text-green-600 dark:text-green-400">
                 {JSON.stringify(value)}
@@ -171,9 +177,9 @@ export function RowHistory({
           const oldValue = entry.previousData?.[field]
           const newValue = entry.newData?.[field]
           return (
-            <div key={field} className="text-sm pl-4">
+            <div key={field} className="text-sm ps-4">
               <span className="font-medium">{field}:</span>{' '}
-              <span className="text-red-600 dark:text-red-400 line-through">
+              <span className="text-destructive line-through">
                 {JSON.stringify(oldValue)}
               </span>
               {' → '}
@@ -188,6 +194,8 @@ export function RowHistory({
   }
 
   return (
+    <>
+    {ConfirmDialogEl}
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
@@ -212,7 +220,7 @@ export function RowHistory({
             </div>
           </div>
         ) : (
-          <ScrollArea className="flex-1 pr-4">
+          <ScrollArea className="flex-1 pe-4">
             <div className="space-y-3">
               {history.map((entry, index) => {
                 const isExpanded = expandedEntry === entry.id
@@ -264,7 +272,7 @@ export function RowHistory({
                         </div>
                       </div>
 
-                      <div className="flex gap-2 ml-2">
+                      <div className="flex gap-2 ms-2">
                         {entry.changedFields.length > 0 && (
                           <Button
                             size="sm"
@@ -289,7 +297,7 @@ export function RowHistory({
                             }
                             disabled={isRestoring}
                           >
-                            <RotateCcw className="h-3 w-3 mr-1" />
+                            <RotateCcw className="h-3 w-3 me-1" />
                             Restore
                           </Button>
                         )}
@@ -303,5 +311,6 @@ export function RowHistory({
         )}
       </DialogContent>
     </Dialog>
+    </>
   )
 }

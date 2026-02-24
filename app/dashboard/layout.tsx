@@ -1,11 +1,9 @@
-import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getCurrentUserProfile } from '@/app/actions/profile'
 import { getCachedUserWithOrganization } from '@/lib/auth/cached-user'
+import { getEnabledFeatures } from '@/lib/permissions/feature-access'
 
 import { DashboardLayoutClient } from '@/components/dashboard/dashboard-layout-client'
-import { Skeleton } from '@/components/ui/skeleton'
 
 type DashboardLayoutProps = {
   children: React.ReactNode
@@ -28,63 +26,33 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     user?.email?.split('@')[0] ||
     'Team member'
 
-  // Try to get organization data (cached, fast)
+  // Fetch organization data and enabled features in parallel (both cached)
   let organizationName: string | null = null
   let organizationLogo: string | null = null
+  let enabledFeatures: string[] = []
   try {
     const dbUser = await getCachedUserWithOrganization()
     organizationName = dbUser?.organization?.name ?? null
     organizationLogo = dbUser?.organization?.logo ?? null
+
+    if (dbUser) {
+      enabledFeatures = await getEnabledFeatures(
+        dbUser.organizationId,
+        dbUser.isPlatformAdmin
+      )
+    }
   } catch (error) {
-    // Silently fail - organization data is optional
     console.error('Failed to fetch organization data:', error)
   }
 
   return (
-    <Suspense fallback={
-      <DashboardLayoutClient
-        userName={fallbackUserName}
-        userEmail={user?.email ?? null}
-        userAvatar={null}
-        organizationName={organizationName}
-        organizationLogo={organizationLogo}
-      >
-        {children}
-      </DashboardLayoutClient>
-    }>
-      <UserProfileWrapper
-        fallbackUserName={fallbackUserName}
-        userEmail={user?.email ?? null}
-        organizationName={organizationName}
-        organizationLogo={organizationLogo}
-      >
-        {children}
-      </UserProfileWrapper>
-    </Suspense>
-  )
-}
-
-async function UserProfileWrapper({
-  fallbackUserName,
-  userEmail,
-  organizationName,
-  organizationLogo,
-  children
-}: {
-  fallbackUserName: string
-  userEmail: string | null
-  organizationName?: string | null
-  organizationLogo?: string | null
-  children: React.ReactNode
-}) {
-  // Skip database call for now to avoid connectivity issues
-  return (
     <DashboardLayoutClient
       userName={fallbackUserName}
-      userEmail={userEmail}
+      userEmail={user?.email ?? null}
       userAvatar={null}
       organizationName={organizationName}
       organizationLogo={organizationLogo}
+      enabledFeatures={enabledFeatures}
     >
       {children}
     </DashboardLayoutClient>

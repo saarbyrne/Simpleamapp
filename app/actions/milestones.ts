@@ -1,9 +1,8 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { requireUser } from '@/lib/auth/cached-user'
 import { getTranslations } from 'next-intl/server'
 
 interface CreateMilestoneData {
@@ -24,21 +23,15 @@ interface UpdateMilestoneData extends Partial<CreateMilestoneData> {
 
 export async function createMilestone(data: CreateMilestoneData) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify plan exists and user has access
     const plan = await prisma.plan.findFirst({
       where: {
         id: data.planId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -88,22 +81,16 @@ export async function createMilestone(data: CreateMilestoneData) {
 
 export async function updateMilestone(id: string, data: UpdateMilestoneData) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Check if milestone exists and user has permission
     const existingMilestone = await prisma.milestone.findFirst({
       where: {
         id,
         plan: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         },
       },
       include: {
@@ -158,22 +145,16 @@ export async function updateMilestone(id: string, data: UpdateMilestoneData) {
 
 export async function deleteMilestone(id: string) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Check if milestone exists and user has permission
     const existingMilestone = await prisma.milestone.findFirst({
       where: {
         id,
         plan: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         },
       },
       include: {
@@ -200,21 +181,15 @@ export async function deleteMilestone(id: string) {
 
 export async function reorderMilestones(planId: string, milestoneIds: string[]) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify plan exists and user has access
     const plan = await prisma.plan.findFirst({
       where: {
         id: planId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
     })
 
@@ -243,22 +218,16 @@ export async function reorderMilestones(planId: string, milestoneIds: string[]) 
 
 export async function addMilestoneLink(milestoneId: string, targetType: string, targetId: string) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Check if milestone exists and user has permission
     const existingMilestone = await prisma.milestone.findFirst({
       where: {
         id: milestoneId,
         plan: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         },
       },
     })
@@ -286,15 +255,9 @@ export async function addMilestoneLink(milestoneId: string, targetType: string, 
 
 export async function removeMilestoneLink(linkId: string) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Check if link exists and user has permission
     const existingLink = await prisma.milestoneLink.findFirst({
@@ -302,7 +265,7 @@ export async function removeMilestoneLink(linkId: string) {
         id: linkId,
         milestone: {
           plan: {
-            organizationId: dbUser.organizationId,
+            organizationId: user.organizationId,
           },
         },
       },
@@ -334,22 +297,16 @@ export async function removeMilestoneLink(linkId: string) {
 
 export async function addMilestoneComment(milestoneId: string, content: string) {
   const t = await getTranslations('errors')
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Check if milestone exists and user has permission
     const existingMilestone = await prisma.milestone.findFirst({
       where: {
         id: milestoneId,
         plan: {
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         },
       },
     })

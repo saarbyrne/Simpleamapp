@@ -11,6 +11,7 @@ import { updateOrganizationBranding } from "@/app/actions/organization"
 import { toast } from "sonner"
 import { useState } from "react"
 
+// @design-system-ignore - Hex color validation is for user-provided team branding colors, not UI styling
 const brandingSchema = z.object({
   logo: z.string().url("Must be valid URL").optional().or(z.literal("")),
   primaryColor: z.string().regex(/^#[0-9A-F]{6}$/i, "Must be valid hex color").optional().or(z.literal("")),
@@ -90,6 +91,7 @@ export function BrandingSettings({ organization }: { organization: any }) {
                         {...field}
                       />
                     </FormControl>
+                    {/* @design-system-ignore - Placeholder shows example hex format for user input */}
                     <Input
                       placeholder="#C8102E"
                       className="flex-1"
@@ -97,6 +99,7 @@ export function BrandingSettings({ organization }: { organization: any }) {
                     />
                   </div>
                   <FormDescription>
+                    {/* @design-system-ignore - Description shows example hex format for user guidance */}
                     Primary team color (hex format, e.g., #C8102E)
                   </FormDescription>
                   <FormMessage />
@@ -118,6 +121,7 @@ export function BrandingSettings({ organization }: { organization: any }) {
                         {...field}
                       />
                     </FormControl>
+                    {/* @design-system-ignore - Placeholder shows example hex format for user input */}
                     <Input
                       placeholder="#F6EB61"
                       className="flex-1"
@@ -125,6 +129,7 @@ export function BrandingSettings({ organization }: { organization: any }) {
                     />
                   </div>
                   <FormDescription>
+                    {/* @design-system-ignore - Description shows example hex format for user guidance */}
                     Secondary team color (hex format, e.g., #F6EB61)
                   </FormDescription>
                   <FormMessage />

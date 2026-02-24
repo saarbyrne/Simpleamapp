@@ -205,8 +205,8 @@ export function AISettings() {
         title="Data Access"
         description="Control what data the AI can access when responding to queries"
       >
-        <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950 p-4 mb-4">
-          <p className="text-sm text-blue-900 dark:text-blue-100">
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 mb-4">
+          <p className="text-sm text-foreground">
             These settings control what data the AI Assistant can access when you ask questions in chat.
           </p>
         </div>

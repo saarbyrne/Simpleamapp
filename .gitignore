@@ -56,6 +56,9 @@ dev-server.log
 # Large files
 *.pdf
 
+# Generated reports
+/reports/
+
 # Test scripts and temporary files
 canvas-test-script.js
 .temp/

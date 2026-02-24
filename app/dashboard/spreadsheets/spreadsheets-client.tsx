@@ -42,6 +42,7 @@ import { SpreadsheetData, SpreadsheetTemplate, ColumnDefinition } from '@/lib/ty
 import { format } from 'date-fns'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PageCard } from '@/components/ui/page-card'
 
 type SpreadsheetsClientProps = {
@@ -60,6 +61,7 @@ export function SpreadsheetsClient({
   const [spreadsheets, setSpreadsheets] = useState<SpreadsheetData[]>(initialSpreadsheets)
   const [templates, setTemplates] = useState<SpreadsheetTemplate[]>(initialTemplates)
   const [showTemplateDialog, setShowTemplateDialog] = useState(!!templateParam)
+  const [ConfirmDialogEl, confirmAction] = useConfirmDialog()
 
   const handleCreateBlank = async () => {
     try {
@@ -108,7 +110,12 @@ export function SpreadsheetsClient({
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('deleteConfirmation'))) return
+    const ok = await confirmAction({
+      title: t('deleteConfirmation'),
+      description: t('failedToDeleteSpreadsheet'),
+      confirmLabel: t('delete', { defaultValue: 'Delete' }),
+    })
+    if (!ok) return
 
     try {
       const result = await deleteSpreadsheet(id)
@@ -127,6 +134,7 @@ export function SpreadsheetsClient({
 
   return (
     <div className="container mx-auto py-8">
+      {ConfirmDialogEl}
       <PageCard
         variant="table"
         title={t('title')}

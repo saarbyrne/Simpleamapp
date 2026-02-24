@@ -73,7 +73,7 @@ export function SpreadsheetFilters({
     <div className="flex items-center gap-2 flex-wrap">
       {/* Search */}
       <div className="relative w-[240px] flex items-center border border-input rounded-md px-3 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/50 h-10 bg-background">
-        <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
+        <Search className="h-4 w-4 text-muted-foreground me-2 flex-shrink-0" />
         <Input
           placeholder="Search spreadsheets..."
           value={searchQuery}

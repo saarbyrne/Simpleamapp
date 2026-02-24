@@ -17,7 +17,7 @@ export function SubFeatureToggle({
   disabled = false,
 }: SubFeatureToggleProps) {
   return (
-    <div className="ml-6 py-3 border-l-2 border-muted pl-4">
+    <div className="ms-6 py-3 border-l-2 border-muted ps-4">
       <FeatureToggleSwitch
         id={subFeature.key}
         label={subFeature.label}

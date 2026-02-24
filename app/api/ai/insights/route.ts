@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     const insights = await db.aIInsight.findMany({
       where: {
-        orgId: dbUser.organizationId,
+        organizationId: dbUser.organizationId,
         status: 'active'
       },
       orderBy: [
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     const insight = await db.aIInsight.findFirst({
       where: {
         id: insightId,
-        orgId: dbUser.organizationId // Authorization check
+        organizationId: dbUser.organizationId // Authorization check
       }
     })
 

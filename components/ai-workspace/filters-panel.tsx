@@ -60,7 +60,7 @@ export function FiltersPanel({ workspace, onClose, onApply }: FiltersPanelProps)
           disabled={!structuredInputState}
           className="w-full"
         >
-          <Send className="mr-2 h-4 w-4" />
+          <Send className="me-2 h-4 w-4" />
           Apply Filters
         </Button>
       </div>

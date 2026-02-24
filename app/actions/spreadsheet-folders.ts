@@ -1,25 +1,18 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { requireUser } from '@/lib/auth/cached-user'
 
 // Get all folders for the organization
 export async function getSpreadsheetFolders() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const folders = await prisma.spreadsheetFolder.findMany({
       where: {
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       include: {
         _count: {
@@ -59,15 +52,9 @@ export async function createSpreadsheetFolder(data: {
   color?: string
   parentId?: string
 }) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // If parentId provided, verify it exists and belongs to the org
     if (data.parentId) {
@@ -75,7 +62,7 @@ export async function createSpreadsheetFolder(data: {
         where: { id: data.parentId },
       })
 
-      if (!parent || parent.organizationId !== dbUser.organizationId) {
+      if (!parent || parent.organizationId !== user.organizationId) {
         return { error: 'Parent folder not found' }
       }
     }
@@ -87,7 +74,7 @@ export async function createSpreadsheetFolder(data: {
         icon: data.icon,
         color: data.color,
         parentId: data.parentId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         sortOrder: 0,
       },
     })
@@ -113,22 +100,16 @@ export async function updateSpreadsheetFolder(
     sortOrder?: number
   }
 ) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify folder exists and belongs to org
     const folder = await prisma.spreadsheetFolder.findUnique({
       where: { id: folderId },
     })
 
-    if (!folder || folder.organizationId !== dbUser.organizationId) {
+    if (!folder || folder.organizationId !== user.organizationId) {
       return { error: 'Folder not found or access denied' }
     }
 
@@ -143,7 +124,7 @@ export async function updateSpreadsheetFolder(
         where: { id: data.parentId },
       })
 
-      if (!parent || parent.organizationId !== dbUser.organizationId) {
+      if (!parent || parent.organizationId !== user.organizationId) {
         return { error: 'Parent folder not found' }
       }
     }
@@ -171,15 +152,9 @@ export async function updateSpreadsheetFolder(
 
 // Delete a folder
 export async function deleteSpreadsheetFolder(folderId: string, moveToFolderId?: string) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify folder exists and belongs to org
     const folder = await prisma.spreadsheetFolder.findUnique({
@@ -194,7 +169,7 @@ export async function deleteSpreadsheetFolder(folderId: string, moveToFolderId?:
       },
     })
 
-    if (!folder || folder.organizationId !== dbUser.organizationId) {
+    if (!folder || folder.organizationId !== user.organizationId) {
       return { error: 'Folder not found or access denied' }
     }
 
@@ -230,22 +205,16 @@ export async function deleteSpreadsheetFolder(folderId: string, moveToFolderId?:
 
 // Move spreadsheet to folder
 export async function moveSpreadsheetToFolder(spreadsheetId: string, folderId: string | null) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
 
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify spreadsheet exists and belongs to org
     const spreadsheet = await prisma.spreadsheet.findUnique({
       where: { id: spreadsheetId },
     })
 
-    if (!spreadsheet || spreadsheet.organizationId !== dbUser.organizationId) {
+    if (!spreadsheet || spreadsheet.organizationId !== user.organizationId) {
       return { error: 'Spreadsheet not found or access denied' }
     }
 
@@ -255,7 +224,7 @@ export async function moveSpreadsheetToFolder(spreadsheetId: string, folderId: s
         where: { id: folderId },
       })
 
-      if (!folder || folder.organizationId !== dbUser.organizationId) {
+      if (!folder || folder.organizationId !== user.organizationId) {
         return { error: 'Folder not found' }
       }
     }

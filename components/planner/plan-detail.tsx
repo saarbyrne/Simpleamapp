@@ -38,6 +38,7 @@ import { CreateMilestoneDialog } from './create-milestone-dialog'
 import { PlanTimeline } from './plan-timeline'
 import { deletePlan, publishPlan, unpublishPlan } from '@/app/actions/plans'
 import { toast } from 'sonner'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 
 type PlanDetailProps = {
   plan: {
@@ -80,11 +81,15 @@ export function PlanDetail({ plan }: PlanDetailProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
+  const [ConfirmDialogEl, confirmAction] = useConfirmDialog()
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete "${plan.name}"? This action cannot be undone.`)) {
-      return
-    }
+    const ok = await confirmAction({
+      title: `Delete "${plan.name}"?`,
+      description: 'This action cannot be undone.',
+      confirmLabel: 'Delete',
+    })
+    if (!ok) return
 
     setIsDeleting(true)
     try {
@@ -128,6 +133,7 @@ export function PlanDetail({ plan }: PlanDetailProps) {
 
   return (
     <PageFrame>
+      {ConfirmDialogEl}
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
@@ -137,7 +143,7 @@ export function PlanDetail({ plan }: PlanDetailProps) {
             className="mb-2"
             onClick={() => router.push('/dashboard/planner')}
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="me-2 h-4 w-4" />
             Back to Plans
           </Button>
 
@@ -167,29 +173,29 @@ export function PlanDetail({ plan }: PlanDetailProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => router.push(`/dashboard/planner/${plan.id}/edit`)}>
-              <Pencil className="mr-2 h-4 w-4" />
+              <Pencil className="me-2 h-4 w-4" />
               Edit Plan
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleTogglePublish} disabled={isPublishing}>
               {plan.isPublic ? (
                 <>
-                  <EyeOff className="mr-2 h-4 w-4" />
+                  <EyeOff className="me-2 h-4 w-4" />
                   Unpublish
                 </>
               ) : (
                 <>
-                  <Eye className="mr-2 h-4 w-4" />
+                  <Eye className="me-2 h-4 w-4" />
                   Publish
                 </>
               )}
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Share2 className="mr-2 h-4 w-4" />
+              <Share2 className="me-2 h-4 w-4" />
               Share
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleDelete} disabled={isDeleting} className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Trash2 className="me-2 h-4 w-4" />
               Delete Plan
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -275,7 +281,7 @@ export function PlanDetail({ plan }: PlanDetailProps) {
             planId={plan.id}
             trigger={
               <Button>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="me-2 h-4 w-4" />
                 Add Milestone
               </Button>
             }

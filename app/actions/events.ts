@@ -1,9 +1,8 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
-import { revalidatePath } from 'next/cache'
-import { ensureUserWithOrganization } from '@/lib/auth/ensure-user'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { requireUser } from '@/lib/auth/cached-user'
 import type { Prisma } from '@prisma/client'
 import { RRule, rrulestr } from 'rrule'
 import { randomUUID } from 'crypto'
@@ -61,19 +60,11 @@ export interface EventWithDetails {
  * Get all events for the current user's organization
  */
 export async function getEvents(startDate?: Date, endDate?: Date) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    const t = await getTranslations('errors')
-    return { error: t('notAuthenticated') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const whereClause: any = {
-      organizationId: dbUser.organizationId,
+      organizationId: user.organizationId,
     }
 
     // Filter by date range if provided
@@ -116,22 +107,16 @@ export async function getEvents(startDate?: Date, endDate?: Date) {
  * Get a single event by ID with full details (ultra-fast query)
  */
 export async function getEvent(eventId: string): Promise<{ success: true, event: EventWithDetails } | { error: string }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
   const t = await getTranslations('errors')
 
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Ultra-fast: Single query with minimal joins, fetch attendance separately only if needed
     const event = await prisma.event.findFirst({
       where: {
         id: eventId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       },
       select: {
         id: true,
@@ -210,16 +195,10 @@ export async function getEvent(eventId: string): Promise<{ success: true, event:
  * Create a new event (handles both single and recurring events)
  */
 export async function createEvent(data: CreateEventData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
   const t = await getTranslations('errors')
 
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Check if this is a recurring event
     const isRecurring = !!data.recurrenceRule
@@ -258,7 +237,7 @@ export async function createEvent(data: CreateEventData) {
                 location: data.location,
                 templateId: data.templateId,
                 linkedFormId: data.linkedFormId,
-                organizationId: dbUser.organizationId,
+                organizationId: user.organizationId,
                 isRecurring: true,
                 recurringRule: data.recurrenceRule,
                 seriesId: seriesId,
@@ -311,7 +290,7 @@ export async function createEvent(data: CreateEventData) {
             location: data.location,
             templateId: data.templateId,
             linkedFormId: data.linkedFormId,
-            organizationId: dbUser.organizationId,
+            organizationId: user.organizationId,
             isRecurring: false,
           }
         })
@@ -346,6 +325,7 @@ export async function createEvent(data: CreateEventData) {
     })
 
     revalidatePath('/dashboard/calendar')
+    revalidateTag('events')
 
     return { success: true, event: result }
   } catch (error) {
@@ -362,23 +342,17 @@ export async function createEvent(data: CreateEventData) {
  * Update an existing event
  */
 export async function updateEvent(eventId: string, data: UpdateEventData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
   const t = await getTranslations('errors')
 
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Verify ownership
       const existingEvent = await tx.event.findFirst({
         where: {
           id: eventId,
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         }
       })
 
@@ -437,6 +411,7 @@ export async function updateEvent(eventId: string, data: UpdateEventData) {
     })
 
     revalidatePath('/dashboard/calendar')
+    revalidateTag('events')
 
     return { success: true, event: result }
   } catch (error) {
@@ -453,23 +428,17 @@ export async function updateEvent(eventId: string, data: UpdateEventData) {
  * Delete an event
  */
 export async function deleteEvent(eventId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
   const t = await getTranslations('errors')
 
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Verify ownership
       const event = await tx.event.findFirst({
         where: {
           id: eventId,
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         }
       })
 
@@ -496,6 +465,7 @@ export async function deleteEvent(eventId: string) {
     })
 
     revalidatePath('/dashboard/calendar')
+    revalidateTag('events')
 
     return { success: true }
   } catch (error) {
@@ -512,23 +482,17 @@ export async function deleteEvent(eventId: string) {
  * Delete all events in a recurring series
  */
 export async function deleteEventSeries(eventId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
   const t = await getTranslations('errors')
 
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Get the event to find its series ID
       const event = await tx.event.findFirst({
         where: {
           id: eventId,
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         }
       })
 
@@ -544,7 +508,7 @@ export async function deleteEventSeries(eventId: string) {
       const deleted = await tx.event.deleteMany({
         where: {
           seriesId: event.seriesId,
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         }
       })
 
@@ -563,6 +527,7 @@ export async function deleteEventSeries(eventId: string) {
     })
 
     revalidatePath('/dashboard/calendar')
+    revalidateTag('events')
 
     return { success: true }
   } catch (error) {
@@ -582,23 +547,17 @@ export async function deleteEventSeries(eventId: string) {
  * Update all events in a recurring series
  */
 export async function updateEventSeries(eventId: string, data: UpdateEventData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
   const t = await getTranslations('errors')
 
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Get the event to find its series ID
       const event = await tx.event.findFirst({
         where: {
           id: eventId,
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         }
       })
 
@@ -622,7 +581,7 @@ export async function updateEventSeries(eventId: string, data: UpdateEventData) 
       const updated = await tx.event.updateMany({
         where: {
           seriesId: event.seriesId,
-          organizationId: dbUser.organizationId,
+          organizationId: user.organizationId,
         },
         data: updateData
       })
@@ -642,6 +601,7 @@ export async function updateEventSeries(eventId: string, data: UpdateEventData) 
     })
 
     revalidatePath('/dashboard/calendar')
+    revalidateTag('events')
 
     return { success: true }
   } catch (error) {
@@ -666,22 +626,16 @@ export async function updateAttendance(
   status: 'invited' | 'attending' | 'absent' | 'excused',
   notes?: string
 ) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
   const t = await getTranslations('errors')
 
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     // Verify event belongs to organization
     const event = await prisma.event.findFirst({
       where: {
         id: eventId,
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
       }
     })
 
@@ -712,6 +666,7 @@ export async function updateAttendance(
     })
 
     revalidatePath('/dashboard/calendar')
+    revalidateTag('events')
 
     return { success: true, attendance }
   } catch (error) {
@@ -729,20 +684,14 @@ export async function updateAttendance(
  * Get all players for the current organization (for attendee selection)
  */
 export async function getOrganizationPlayers() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
   const t = await getTranslations('errors')
 
-  if (!user) {
-    return { error: t('notAuthenticated') }
-  }
-
   try {
-    const dbUser = await ensureUserWithOrganization(user)
+    const user = await requireUser()
 
     const players = await prisma.personOrganization.findMany({
       where: {
-        organizationId: dbUser.organizationId,
+        organizationId: user.organizationId,
         role: 'player',
       },
       include: {
