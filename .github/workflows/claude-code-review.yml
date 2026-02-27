@@ -2,113 +2,43 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize, ready_for_review]
-    paths-ignore: ['**.md', 'docs/**', '.gitignore', 'LICENSE']
+    types: [opened, synchronize, ready_for_review, reopened]
+    # Optional: Only run on specific file changes
+    # paths:
+    #   - "src/**/*.ts"
+    #   - "src/**/*.tsx"
+    #   - "src/**/*.js"
+    #   - "src/**/*.jsx"
 
 jobs:
-  # Determine which review tier to use based on changed files
-  check-files:
-    if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
-    outputs:
-      security_sensitive: ${{ steps.check.outputs.security_sensitive }}
-    steps:
-      - name: Check for security-sensitive files
-        id: check
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { data: files } = await github.rest.pulls.listFiles({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-              per_page: 100
-            });
-            const sensitivePatterns = [
-              /\.env/,
-              /auth/i,
-              /middleware/i,
-              /\.github\/workflows\//,
-              /lib\/supabase/i,
-              /lib\/firebase/i,
-              /prisma\/schema/,
-              /api\//,
-              /server-actions/i,
-              /security/i
-            ];
-            const isSensitive = files.some(f =>
-              sensitivePatterns.some(p => p.test(f.filename))
-            );
-            core.setOutput('security_sensitive', isSensitive.toString());
-            console.log(`Security sensitive: ${isSensitive}`);
-            console.log(`Changed files: ${files.map(f => f.filename).join(', ')}`);
+  claude-review:
+    # Optional: Filter by PR author
+    # if: |
+    #   github.event.pull_request.user.login == 'external-contributor' ||
+    #   github.event.pull_request.user.login == 'new-developer' ||
+    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
 
-  # Standard review — Sonnet (fast, cost-effective)
-  standard-review:
-    needs: check-files
-    if: needs.check-files.outputs.security_sensitive == 'false'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
       issues: read
       id-token: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 50
 
-      - name: Claude Review (Sonnet)
-        uses: anthropics/claude-code-action@beta
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          model: "claude-sonnet-4-20250514"
-          use_sticky_comment: true
-          direct_prompt: |
-            Review PR #${{ github.event.pull_request.number }}.
-
-            1. Read .claude/CLAUDE.md for project conventions
-            2. Read .claude/commands/review.md for review methodology
-            3. Execute the review following that methodology exactly
-            4. Scan the diff for hardcoded secrets (API keys, tokens, passwords, connection strings)
-
-            Be constructive. Categorise findings as CRITICAL, IMPORTANT, or MINOR.
-
-  # Security-escalated review — Opus (thorough, for sensitive changes)
-  security-review:
-    needs: check-files
-    if: needs.check-files.outputs.security_sensitive == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-      issues: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 50
-
-      - name: Claude Review (Opus — security escalation)
-        uses: anthropics/claude-code-action@beta
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          model: "claude-opus-4-20250514"
-          use_sticky_comment: true
-          direct_prompt: |
-            This PR touches security-sensitive files. Perform an escalated review.
-
-            1. Read .claude/CLAUDE.md for project conventions and security rules
-            2. Read .claude/commands/review.md for review methodology
-            3. Read .claude/commands/security-review.md for security review methodology
-            4. Execute BOTH the standard review AND the security review
-            5. Pay special attention to:
-               - Hardcoded secrets anywhere in the diff
-               - Auth bypass or missing auth checks
-               - Input validation gaps
-               - IDOR vulnerabilities
-               - Environment variable exposure via NEXT_PUBLIC_ prefix
-
-            Categorise findings as CRITICAL, IMPORTANT, or MINOR.
-            Flag any CRITICAL security issues prominently at the top of your review.
+          plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
+          plugins: 'code-review@claude-code-plugins'
+          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+          # or https://code.claude.com/docs/en/cli-reference for available options
 
