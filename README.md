@@ -7,7 +7,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green)](https://supabase.com/)
 [![License](https://img.shields.io/badge/license-Proprietary-red)]()
 
-[Original Design](https://www.figma.com/design/5oEpqcdnfjW9BTPo5ch9Jw/simpleam.app) • [Documentation](./docs/)
+[Original Design](https://www.figma.com/design/5oEpqcdnfjW9BTPo5ch9Jw/simpleam.app) • [Documentation](./docs/) • [Agent Start](./docs/AGENT_START.md)
 
 ---
 
