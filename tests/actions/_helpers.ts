@@ -1,5 +1,21 @@
 // tests/actions/_helpers.ts
 import { vi } from 'vitest'
+
+// Hoisted mocks: registered here so any test file can simply
+// `import './_helpers'` (before importing the action under test) to get a
+// fully mocked `prisma` + `requireUser`, instead of re-declaring these
+// factories per test file.
+vi.mock('@/lib/db', () => ({
+  prisma: {
+    person: { update: vi.fn(), delete: vi.fn(), updateMany: vi.fn(), findFirst: vi.fn() },
+    personOrganization: { findFirst: vi.fn(), updateMany: vi.fn(), deleteMany: vi.fn() },
+    note: { findFirst: vi.fn(), findUnique: vi.fn() },
+    activity: { create: vi.fn() },
+    $transaction: vi.fn(async (fn: any) => fn((await import('@/lib/db')).prisma)),
+  },
+}))
+vi.mock('@/lib/auth/cached-user', () => ({ requireUser: vi.fn() }))
+
 import { requireUser } from '@/lib/auth/cached-user'
 import { prisma } from '@/lib/db'
 

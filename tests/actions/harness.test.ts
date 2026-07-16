@@ -1,20 +1,11 @@
 // tests/actions/harness.test.ts
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-
-vi.mock('@/lib/db', () => ({
-  prisma: {
-    person: { update: vi.fn(), delete: vi.fn(), updateMany: vi.fn(), findFirst: vi.fn() },
-    personOrganization: { findFirst: vi.fn(), updateMany: vi.fn(), deleteMany: vi.fn() },
-    note: { findFirst: vi.fn(), findUnique: vi.fn() },
-    activity: { create: vi.fn() },
-    $transaction: vi.fn(async (fn: any) => fn((await import('@/lib/db')).prisma)),
-  },
-}))
-vi.mock('@/lib/auth/cached-user', () => ({ requireUser: vi.fn() }))
-
+import { describe, it, expect, beforeEach } from 'vitest'
+// Import _helpers first: it registers the hoisted vi.mock('@/lib/db', ...) and
+// vi.mock('@/lib/auth/cached-user', ...) factories, so the direct imports of
+// `requireUser`/`prisma` below resolve to the mocked modules.
+import { mockRequireUser, mockUnauthenticated, resetActionMocks } from './_helpers'
 import { requireUser } from '@/lib/auth/cached-user'
 import { prisma } from '@/lib/db'
-import { mockRequireUser, mockUnauthenticated, resetActionMocks } from './_helpers'
 
 describe('action harness', () => {
   beforeEach(() => resetActionMocks())

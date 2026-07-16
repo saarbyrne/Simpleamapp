@@ -112,6 +112,14 @@ export async function updatePlayer(
     z.string().cuid().parse(personId)
 
     const result = await prisma.$transaction(async (tx) => {
+      const membership = await tx.personOrganization.findFirst({
+        where: { personId, organizationId: user.organizationId },
+        select: { id: true },
+      })
+      if (!membership) {
+        throw new Error('PLAYER_NOT_IN_ORG')
+      }
+
       const person = await tx.person.update({
         where: { id: personId },
         data: {
@@ -160,6 +168,9 @@ export async function updatePlayer(
     }
     if (error instanceof Error && error.message === 'Unauthorized: User must be authenticated') {
       return { error: 'Not authenticated' }
+    }
+    if (error instanceof Error && error.message === 'PLAYER_NOT_IN_ORG') {
+      return { error: 'Player not found' }
     }
     console.error('Error updating player:', error)
     return { error: 'Failed to update player' }
