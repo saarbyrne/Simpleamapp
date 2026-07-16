@@ -8,7 +8,7 @@ import { vi } from 'vitest'
 vi.mock('@/lib/db', () => ({
   prisma: {
     person: { update: vi.fn(), delete: vi.fn(), updateMany: vi.fn(), findFirst: vi.fn() },
-    personOrganization: { findFirst: vi.fn(), updateMany: vi.fn(), deleteMany: vi.fn() },
+    personOrganization: { findFirst: vi.fn(), findMany: vi.fn(), updateMany: vi.fn(), deleteMany: vi.fn() },
     note: { findFirst: vi.fn(), findUnique: vi.fn() },
     activity: { create: vi.fn() },
     $transaction: vi.fn(async (fn: any) => fn((await import('@/lib/db')).prisma)),

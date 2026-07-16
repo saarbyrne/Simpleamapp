@@ -182,26 +182,28 @@ export async function deletePlayer(personId: string) {
     const user = await requireUser()
     z.string().cuid().parse(personId)
 
-    const person = await prisma.person.findUnique({
-      where: { id: personId },
-      select: { firstName: true, lastName: true }
+    const membership = await prisma.personOrganization.findFirst({
+      where: { personId, organizationId: user.organizationId },
+      select: { id: true, person: { select: { firstName: true, lastName: true } } },
     })
-
-    await prisma.person.delete({
-      where: { id: personId }
-    })
-
-    if (person) {
-      await prisma.activity.create({
-        data: {
-          type: 'player_deleted',
-          data: {
-            playerName: `${person.firstName} ${person.lastName}`,
-          },
-          userId: user.id,
-        }
-      })
+    if (!membership) {
+      return { error: 'Player not found' }
     }
+
+    // Remove only THIS org's membership; do not delete the shared Person globally.
+    await prisma.personOrganization.deleteMany({
+      where: { personId, organizationId: user.organizationId },
+    })
+
+    await prisma.activity.create({
+      data: {
+        type: 'player_deleted',
+        data: {
+          playerName: `${membership.person.firstName} ${membership.person.lastName}`,
+        },
+        userId: user.id,
+      }
+    })
 
     revalidatePath('/dashboard')
     return { success: true }
@@ -236,9 +238,15 @@ export async function bulkUpdatePlayers(
     const result = await prisma.$transaction(async (tx) => {
       const updatedCount = { person: 0, personOrg: 0 }
 
+      const owned = await tx.personOrganization.findMany({
+        where: { personId: { in: validated.personIds }, organizationId: user.organizationId },
+        select: { personId: true },
+      })
+      const ownedIds = owned.map((o) => o.personId)
+
       if (validated.updates.nationality !== undefined) {
         const personUpdate = await tx.person.updateMany({
-          where: { id: { in: validated.personIds } },
+          where: { id: { in: ownedIds } },
           data: { nationality: validated.updates.nationality || null },
         })
         updatedCount.person = personUpdate.count
