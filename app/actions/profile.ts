@@ -321,6 +321,22 @@ export async function changePassword(data: z.infer<typeof changePasswordSchema>)
 
     const supabase = await createServerClient();
 
+    // Re-authenticate with the current password before allowing the change.
+    // Without this, anyone with a live session (e.g. a hijacked session
+    // token) could silently change the account password.
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) {
+      return { success: false, error: "Not authenticated" };
+    }
+
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: validation.data.currentPassword,
+    });
+    if (reauthError) {
+      return { success: false, error: "Current password is incorrect" };
+    }
+
     // Update password through Supabase Auth
     const { error } = await supabase.auth.updateUser({
       password: validation.data.newPassword,
