@@ -76,8 +76,7 @@ export async function POST(req: NextRequest) {
             console.error('[EnhancePrompt] Stack:', error.stack)
         }
         return NextResponse.json({
-            error: 'Internal Server Error',
-            details: error instanceof Error ? error.message : String(error)
+            error: 'Internal Server Error'
         }, { status: 500 })
     }
 }
