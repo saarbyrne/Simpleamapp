@@ -23,7 +23,11 @@ export function mockUnauthenticated() {
 }
 
 export function resetActionMocks() {
-  vi.clearAllMocks()
+  vi.resetAllMocks()
+  // vi.resetAllMocks() wipes mock implementations, including the $transaction
+  // implementation set up in the hoisted `vi.mock('@/lib/db', ...)` factory. Re-establish
+  // it so `prisma.$transaction(cb)` continues to invoke the callback with `prisma`.
+  ;(prisma.$transaction as any).mockImplementation(async (fn: any) => fn(prisma))
   // default: authenticated coach in org_1 unless a test overrides
   mockRequireUser()
   ;(prisma.activity.create as any).mockResolvedValue({})
