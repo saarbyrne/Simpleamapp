@@ -342,10 +342,20 @@ export async function getUserTemplates() {
   }
 }
 
+const ReviewRatingSchema = z.number().int().min(1).max(5)
+
 export async function createReview(templateId: string, rating: number, content: string) {
   try {
 
     const user = await requireUser()
+
+    // Clamp rating to 1-5 so a caller can't forge a template's marketplace
+    // rating (e.g. createReview(id, 5000, ...)) via mass assignment.
+    const ratingResult = ReviewRatingSchema.safeParse(rating)
+    if (!ratingResult.success) {
+      return { error: 'Rating must be a whole number between 1 and 5' }
+    }
+    const validatedRating = ratingResult.data
 
     // Check if user has already reviewed
     const existing = await prisma.templateReview.findUnique({
@@ -365,7 +375,7 @@ export async function createReview(templateId: string, rating: number, content: 
       data: {
         templateId,
         userId: user.id,
-        rating,
+        rating: validatedRating,
         content,
       },
     })

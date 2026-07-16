@@ -25,6 +25,7 @@ vi.mock('@/lib/db', () => {
     user: { findUnique: vi.fn(), findFirst: vi.fn() },
     organization: { findUnique: vi.fn() },
     communityTemplate: { create: vi.fn(), update: vi.fn(), findUnique: vi.fn() },
+    templateReview: { create: vi.fn(), findUnique: vi.fn(), findMany: vi.fn() },
     reportTemplate: { create: vi.fn() },
     drawingTemplate: { create: vi.fn(), update: vi.fn(), updateMany: vi.fn(), findFirst: vi.fn() },
     dataChangeLog: { create: vi.fn(), createMany: vi.fn() },

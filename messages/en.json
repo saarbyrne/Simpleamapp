@@ -1038,9 +1038,10 @@
     "files": "files"
   },
   "errors": {
+    "failedToCreate": "Failed to create item. Please try again.",
     "notFound": "Page not found",
     "unauthorized": "You are not authorized to access this page",
-    "serverError": "A server error occurred",
+    "serverError": "A server error occurred. Please try again.",
     "networkError": "Network error. Please check your connection.",
     "unexpectedError": "We encountered an unexpected error. Please try again.",
     "notified": "We've been notified and will look into it.",
@@ -1081,10 +1082,6 @@
     "staffMemberNotFound": "Staff member not found",
     "insufficientPermissions": "You do not have sufficient permissions to perform this action",
     "failedToUpdateStaff": "Failed to update staff member"
-  },
-  "errors": {
-    "failedToCreate": "Failed to create item. Please try again.",
-    "serverError": "A server error occurred. Please try again."
   },
   "aiWorkspace": {
     "title": "AI Workspace",

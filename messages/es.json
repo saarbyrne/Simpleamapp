@@ -720,6 +720,7 @@
     "failedToFetchFormResponses": "Error al obtener respuestas del formulario",
     "failedToDuplicateForm": "Error al duplicar formulario",
     "failedToSubmitFormResponse": "Error al enviar respuesta del formulario",
+    "personNotInOrganization": "Esta persona no pertenece a tu organización",
     "failedToCreatePlayer": "Error al crear jugador",
     "failedToUpdatePlayer": "Error al actualizar jugador",
     "failedToDeletePlayer": "Error al eliminar jugador",
@@ -737,6 +738,7 @@
     "failedToUpdateEvent": "Error al actualizar evento",
     "failedToUpdateEventSeries": "Error al actualizar serie de eventos",
     "eventNotPartOfSeries": "El evento no es parte de una serie recurrente",
+    "invalidAttendees": "Uno o más asistentes no pertenecen a esta organización",
     "noOccurrencesGenerated": "No se generaron ocurrencias a partir de la regla de recurrencia"
   }
 }
