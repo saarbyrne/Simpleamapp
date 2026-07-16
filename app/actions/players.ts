@@ -275,7 +275,7 @@ export async function bulkUpdatePlayers(
         data: {
           type: 'players_bulk_updated',
           data: {
-            count: validated.personIds.length,
+            count: ownedIds.length,
             updates: Object.keys(validated.updates).filter(
               key => validated.updates[key as keyof typeof validated.updates] !== undefined
             ),

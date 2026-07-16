@@ -23,6 +23,12 @@ describe('reorderMilestones tenant isolation', () => {
 
     const res = await reorderMilestones('plan_1', ['m1', 'm2'])
 
+    // Pin the real tenant barrier: reorderMilestones authorizes access via
+    // plan.findFirst scoped to the caller's organizationId. Without this
+    // assertion, a regression that drops organizationId from the where
+    // clause would go undetected even though the rest of the test passes.
+    expect((prisma.plan.findFirst as any).mock.calls[0][0].where.organizationId).toBe('org_1')
+
     expect(prisma.milestone.updateMany).toHaveBeenCalledTimes(2)
     for (const call of (prisma.milestone.updateMany as any).mock.calls) {
       const [{ where }] = call

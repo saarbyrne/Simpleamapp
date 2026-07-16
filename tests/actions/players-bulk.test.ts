@@ -23,5 +23,11 @@ describe('bulkUpdatePlayers tenant isolation', () => {
 
     const call = (prisma.person.updateMany as any).mock.calls[0][0]
     expect(call.where.id.in).toEqual(['ckmineid000000000000000000'])
+
+    // The audit log must record the actual owned/updated count, not the
+    // raw requested count — otherwise it would over-report cross-tenant
+    // ids that were silently dropped by the ownership filter.
+    const activityCall = (prisma.activity.create as any).mock.calls[0][0]
+    expect(activityCall.data.data.count).toBe(1)
   })
 })

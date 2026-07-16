@@ -350,6 +350,19 @@ export async function changePassword(data: z.infer<typeof changePasswordSchema>)
       };
     }
 
+    // Invalidate every other active session so a hijacked/stolen session
+    // token can't keep using the account after the victim rotates their
+    // password. The password update already succeeded, so a failure here
+    // must not fail the whole operation — just log and continue.
+    try {
+      const { error: signOutError } = await supabase.auth.signOut({ scope: "others" });
+      if (signOutError) {
+        console.error("Error revoking other sessions after password change:", signOutError);
+      }
+    } catch (signOutError) {
+      console.error("Error revoking other sessions after password change:", signOutError);
+    }
+
     return {
       success: true,
       message: "Password updated successfully",

@@ -3,9 +3,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 const getUser = vi.fn()
 const signInWithPassword = vi.fn()
 const updateUser = vi.fn()
+const signOut = vi.fn().mockResolvedValue({ error: null })
 vi.mock('@/lib/supabase/server', () => ({
   createServerClient: vi.fn(async () => ({
-    auth: { getUser, signInWithPassword, updateUser },
+    auth: { getUser, signInWithPassword, updateUser, signOut },
   })),
   createClient: vi.fn(),
 }))
@@ -51,6 +52,7 @@ describe('changePassword current-password verification', () => {
       password: 'correct-Password1',
     })
     expect(updateUser).toHaveBeenCalledWith({ password: 'NewPassword123!' })
+    expect(signOut).toHaveBeenCalledWith({ scope: 'others' })
     expect(res.success).toBe(true)
   })
 })
