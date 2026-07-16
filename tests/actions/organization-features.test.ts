@@ -19,8 +19,8 @@ vi.mock('@/lib/permissions/feature-access', () => ({
 }))
 
 import { isPlatformAdmin } from '@/lib/platform-admin'
-import { updateOrganizationFeatures } from '@/lib/permissions/feature-access'
-import { updateOrganizationFeaturesAction } from '@/app/actions/organization-features'
+import { updateOrganizationFeatures, getEnabledFeatures } from '@/lib/permissions/feature-access'
+import { updateOrganizationFeaturesAction, getEnabledFeaturesAction } from '@/app/actions/organization-features'
 
 describe('updateOrganizationFeaturesAction authorization', () => {
   beforeEach(() => vi.clearAllMocks())
@@ -37,5 +37,24 @@ describe('updateOrganizationFeaturesAction authorization', () => {
     const res = await updateOrganizationFeaturesAction('org_1', { trainingModule: true } as any)
     expect(res.success).toBe(true)
     expect(updateOrganizationFeatures).toHaveBeenCalledWith('org_1', { trainingModule: true })
+  })
+})
+
+describe('getEnabledFeaturesAction authorization', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('rejects a non-admin and does NOT read features', async () => {
+    ;(isPlatformAdmin as any).mockResolvedValue(false)
+    const res = await getEnabledFeaturesAction('org_victim')
+    expect(res.success).toBe(false)
+    expect(getEnabledFeatures).not.toHaveBeenCalled()
+  })
+
+  it('allows a platform admin', async () => {
+    ;(isPlatformAdmin as any).mockResolvedValue(true)
+    ;(getEnabledFeatures as any).mockResolvedValue(['featureA'])
+    const res = await getEnabledFeaturesAction('org_1')
+    expect(res.success).toBe(true)
+    expect(getEnabledFeatures).toHaveBeenCalledWith('org_1')
   })
 })

@@ -227,6 +227,11 @@ export async function getEnabledFeaturesAction(orgId: string): Promise<{
   error?: string
 }> {
   try {
+    const authCheck = await verifyPlatformAdmin()
+    if (!authCheck.success) {
+      return { success: false, error: authCheck.error }
+    }
+
     const features = await getEnabledFeatures(orgId)
 
     return { success: true, features }
