@@ -24,12 +24,17 @@ import {
  */
 export async function logDataChange(change: DataChange) {
   try {
+    // Require an authenticated caller and derive userId/organizationId from
+    // the session rather than trusting client-supplied values — otherwise
+    // any caller could forge/pollute another org's audit trail.
+    const user = await requireUser()
+
     await prisma.dataChangeLog.create({
       data: {
         spreadsheetId: change.spreadsheetId,
         rowId: change.rowId,
-        userId: change.userId,
-        organizationId: change.organizationId,
+        userId: user.id,
+        organizationId: user.organizationId,
         action: change.action,
         previousData: change.previousData || Prisma.JsonNull,
         newData: change.newData || Prisma.JsonNull,
@@ -50,12 +55,16 @@ export async function logBatchDataChanges(changes: DataChange[]) {
   const batchId = createBatchId()
 
   try {
+    // Same authorization requirement as logDataChange: derive userId/
+    // organizationId from the authenticated session for every item.
+    const user = await requireUser()
+
     await prisma.dataChangeLog.createMany({
       data: changes.map((change) => ({
         spreadsheetId: change.spreadsheetId,
         rowId: change.rowId,
-        userId: change.userId,
-        organizationId: change.organizationId,
+        userId: user.id,
+        organizationId: user.organizationId,
         action: change.action,
         previousData: change.previousData || Prisma.JsonNull,
         newData: change.newData || Prisma.JsonNull,

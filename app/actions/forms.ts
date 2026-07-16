@@ -488,6 +488,19 @@ export async function submitFormResponse(
       return { error: t('formNotFound') }
     }
 
+    // Verify the personOrg belongs to the caller's org before writing/reading a response.
+    // Without this, a caller could submit a response tagged with another tenant's
+    // personOrgId, polluting that org's data and leaking the respondent's identity
+    // back through getFormResponses().
+    const membership = await prisma.personOrganization.findFirst({
+      where: { id: personOrgId, organizationId: user.organizationId },
+      select: { id: true },
+    })
+
+    if (!membership) {
+      return { error: t('personNotInOrganization') }
+    }
+
     // Check if response already exists
     const existingResponse = await prisma.formResponse.findFirst({
       where: {

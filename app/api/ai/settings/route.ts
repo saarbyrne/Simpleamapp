@@ -116,8 +116,15 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     // Handle validation errors
     if (error instanceof Error && error.name === 'ZodError') {
+      const zodError = error as import('zod').ZodError
       return NextResponse.json(
-        { error: 'Invalid request data', details: error },
+        {
+          error: 'Invalid request data',
+          details: zodError.issues.map((issue) => ({
+            path: issue.path,
+            message: issue.message
+          }))
+        },
         { status: 400 }
       )
     }

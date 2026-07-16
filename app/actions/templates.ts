@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { requireUser } from '@/lib/auth/cached-user'
+import { z } from 'zod'
 
 type CreateTemplateInput = {
   type: string
@@ -19,6 +20,36 @@ type CreateTemplateInput = {
   isPublic?: boolean
   allowModifications?: boolean
 }
+
+// Whitelist of fields a caller may set. Trust/marketplace fields
+// (isOfficial, isFeatured, downloads, rating, status, authorId, ...) are
+// deliberately excluded so they can never be set via mass assignment from
+// client-supplied data - zod strips any unrecognized keys by default.
+const CreateTemplateSchema = z.object({
+  type: z.string(),
+  name: z.string().min(1),
+  description: z.string().min(1),
+  longDescription: z.string().optional(),
+  category: z.string(),
+  sport: z.string(),
+  tags: z.array(z.string()).default([]),
+  features: z.array(z.string()).default([]),
+  config: z.any(),
+  previewImage: z.string().optional(),
+  thumbnailUrl: z.string().optional(),
+  isPublic: z.boolean().optional(),
+  allowModifications: z.boolean().optional(),
+})
+
+// Built from CreateTemplateSchema.partial() but with tags/features
+// re-declared as plain optional arrays (no `.default([])`). `.partial()`
+// only makes a key optional - it does NOT strip a field's `.default()`, so
+// omitting `tags`/`features` from a partial update would otherwise still
+// parse to `[]` and clobber the existing values when spread into Prisma.
+const UpdateTemplateSchema = CreateTemplateSchema.partial().extend({
+  tags: z.array(z.string()).optional(),
+  features: z.array(z.string()).optional(),
+})
 
 export async function getTemplates(params?: {
   type?: string
@@ -177,6 +208,11 @@ export async function createTemplate(data: CreateTemplateInput) {
 
     const user = await requireUser()
 
+    // Whitelist the fields a caller is allowed to set - never spread raw
+    // client data into Prisma, since that would let a caller forge trust
+    // fields like isOfficial/isFeatured/downloads/rating/status.
+    const safeData = CreateTemplateSchema.parse(data)
+
     // Fetch organization name
     const organization = await prisma.organization.findUnique({
       where: { id: user.organizationId },
@@ -185,7 +221,7 @@ export async function createTemplate(data: CreateTemplateInput) {
 
     const template = await prisma.communityTemplate.create({
       data: {
-        ...data,
+        ...safeData,
         authorId: user.id,
         authorName: user.name,
         orgName: organization?.name || null,
@@ -223,9 +259,14 @@ export async function updateTemplate(id: string, data: Partial<CreateTemplateInp
       return { error: 'Unauthorized' }
     }
 
+    // Whitelist the fields a caller is allowed to update - never pass raw
+    // client data into Prisma, since that would let the owner forge trust
+    // fields like isOfficial/isFeatured/downloads/rating/status.
+    const safeData = UpdateTemplateSchema.parse(data)
+
     const template = await prisma.communityTemplate.update({
       where: { id },
-      data,
+      data: safeData,
     })
 
     revalidatePath('/dashboard/templates')
@@ -301,10 +342,20 @@ export async function getUserTemplates() {
   }
 }
 
+const ReviewRatingSchema = z.number().int().min(1).max(5)
+
 export async function createReview(templateId: string, rating: number, content: string) {
   try {
 
     const user = await requireUser()
+
+    // Clamp rating to 1-5 so a caller can't forge a template's marketplace
+    // rating (e.g. createReview(id, 5000, ...)) via mass assignment.
+    const ratingResult = ReviewRatingSchema.safeParse(rating)
+    if (!ratingResult.success) {
+      return { error: 'Rating must be a whole number between 1 and 5' }
+    }
+    const validatedRating = ratingResult.data
 
     // Check if user has already reviewed
     const existing = await prisma.templateReview.findUnique({
@@ -324,7 +375,7 @@ export async function createReview(templateId: string, rating: number, content: 
       data: {
         templateId,
         userId: user.id,
-        rating,
+        rating: validatedRating,
         content,
       },
     })

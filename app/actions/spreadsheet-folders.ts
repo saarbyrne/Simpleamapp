@@ -173,6 +173,17 @@ export async function deleteSpreadsheetFolder(folderId: string, moveToFolderId?:
       return { error: 'Folder not found or access denied' }
     }
 
+    // If moving contents elsewhere, verify the target folder belongs to the org
+    if (moveToFolderId) {
+      const targetFolder = await prisma.spreadsheetFolder.findUnique({
+        where: { id: moveToFolderId },
+      })
+
+      if (!targetFolder || targetFolder.organizationId !== user.organizationId) {
+        return { error: 'Target folder not found' }
+      }
+    }
+
     // If there are spreadsheets, move them
     if (folder._count.spreadsheets > 0) {
       await prisma.spreadsheet.updateMany({

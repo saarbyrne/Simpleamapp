@@ -157,6 +157,17 @@ export async function createPlan(data: CreatePlanData) {
   try {
     const user = await requireUser()
 
+    // If an ownerId is supplied, verify it belongs to a user in the caller's org
+    if (data.ownerId) {
+      const owner = await prisma.user.findFirst({
+        where: { id: data.ownerId, organizationId: user.organizationId },
+      })
+
+      if (!owner) {
+        return { error: 'Owner not found' }
+      }
+    }
+
     const plan = await prisma.plan.create({
       data: {
         name: data.name,
@@ -220,6 +231,17 @@ export async function updatePlan(id: string, data: UpdatePlanData) {
 
     if (!existingPlan) {
       return { error: 'Plan not found' }
+    }
+
+    // If reassigning ownerId, verify it belongs to a user in the caller's org
+    if (data.ownerId !== undefined) {
+      const owner = await prisma.user.findFirst({
+        where: { id: data.ownerId, organizationId: user.organizationId },
+      })
+
+      if (!owner) {
+        return { error: 'Owner not found' }
+      }
     }
 
     const updateData: any = {}

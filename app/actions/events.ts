@@ -23,6 +23,29 @@ export interface CreateEventData {
 
 export interface UpdateEventData extends Partial<CreateEventData> {}
 
+/**
+ * Verify that every given PersonOrganization id belongs to the caller's
+ * organization before it is written to an event/attendance record. Without
+ * this check a caller could supply another tenant's personOrgId and both
+ * pollute that event's attendance and read the victim's name/photo back via
+ * getEvent().
+ */
+async function assertAttendeesInOrg(
+  tx: Prisma.TransactionClient,
+  attendeeIds: string[],
+  organizationId: string,
+  invalidAttendeesMessage: string
+) {
+  if (attendeeIds.length === 0) return
+  const owned = await tx.personOrganization.findMany({
+    where: { id: { in: attendeeIds }, organizationId },
+    select: { id: true },
+  })
+  if (owned.length !== attendeeIds.length) {
+    throw new Error(invalidAttendeesMessage)
+  }
+}
+
 export interface EventWithDetails {
   id: string
   title: string
@@ -204,6 +227,11 @@ export async function createEvent(data: CreateEventData) {
     const isRecurring = !!data.recurrenceRule
 
     const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // Verify attendees belong to the caller's org before creating any event rows
+      if (data.attendeeIds && data.attendeeIds.length > 0) {
+        await assertAttendeesInOrg(tx, data.attendeeIds, user.organizationId, t('invalidAttendees'))
+      }
+
       if (isRecurring && data.recurrenceRule) {
         // Generate series ID for recurring events
         const seriesId = randomUUID()
@@ -334,6 +362,9 @@ export async function createEvent(data: CreateEventData) {
     if (error instanceof Error && error.message === t('noOccurrencesGenerated')) {
       return { error: error.message }
     }
+    if (error instanceof Error && error.message === t('invalidAttendees')) {
+      return { error: error.message }
+    }
     return { error: t('failedToCreateEvent') }
   }
 }
@@ -377,6 +408,9 @@ export async function updateEvent(eventId: string, data: UpdateEventData) {
 
       // Update attendees if provided
       if (data.attendeeIds !== undefined) {
+        // Verify attendees belong to the caller's org before touching existing attendance
+        await assertAttendeesInOrg(tx, data.attendeeIds, user.organizationId, t('invalidAttendees'))
+
         // Remove existing attendees
         await tx.eventAttendance.deleteMany({
           where: { eventId }
@@ -418,6 +452,9 @@ export async function updateEvent(eventId: string, data: UpdateEventData) {
     console.error('Error updating event:', error)
     const t = await getTranslations('errors')
     if (error instanceof Error && error.message === t('eventNotFound')) {
+      return { error: error.message }
+    }
+    if (error instanceof Error && error.message === t('invalidAttendees')) {
       return { error: error.message }
     }
     return { error: t('failedToUpdateEvent') }
@@ -641,6 +678,16 @@ export async function updateAttendance(
 
     if (!event) {
       return { error: t('eventNotFound') }
+    }
+
+    // Verify the personOrg belongs to the caller's org before writing/reading attendance
+    const membership = await prisma.personOrganization.findFirst({
+      where: { id: personOrgId, organizationId: user.organizationId },
+      select: { id: true },
+    })
+
+    if (!membership) {
+      return { error: t('invalidAttendees') }
     }
 
     // Upsert attendance

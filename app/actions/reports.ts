@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/db'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { requireUser } from '@/lib/auth/cached-user'
+import { isPlatformAdmin } from '@/lib/platform-admin'
 import { Prisma } from '@prisma/client'
 import { randomBytes } from 'crypto'
 import type { ReportConfig, ReportSection } from '@/types/reports'
@@ -227,6 +228,12 @@ export async function createReportTemplate(data: CreateReportTemplateData) {
   try {
     const user = await requireUser()
 
+    // Only platform admins may publish a template globally (organizationId:
+    // null, visible to every org). A regular caller's isGlobal request is
+    // silently downgraded to an org-scoped template instead of trusting
+    // client-supplied input.
+    const isGlobal = data.isGlobal === true && (await isPlatformAdmin())
+
     const template = await prisma.reportTemplate.create({
       data: {
         name: data.name,
@@ -234,8 +241,8 @@ export async function createReportTemplate(data: CreateReportTemplateData) {
         category: data.category,
         config: data.config as unknown as Prisma.InputJsonValue,
         sections: data.sections as unknown as Prisma.InputJsonValue,
-        isGlobal: data.isGlobal || false,
-        organizationId: data.isGlobal ? null : user.organizationId,
+        isGlobal,
+        organizationId: isGlobal ? null : user.organizationId,
         createdBy: user.id,
       },
     })

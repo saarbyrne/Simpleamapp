@@ -39,6 +39,17 @@ export async function createMilestone(data: CreateMilestoneData) {
       return { error: 'Plan not found' }
     }
 
+    // If assignedTo is supplied, verify it belongs to a user in the caller's org
+    if (data.assignedTo) {
+      const assignee = await prisma.user.findFirst({
+        where: { id: data.assignedTo, organizationId: user.organizationId },
+      })
+
+      if (!assignee) {
+        return { error: 'Assignee not found' }
+      }
+    }
+
     // Get the max order for this plan
     const maxOrder = await prisma.milestone.findFirst({
       where: { planId: data.planId },
@@ -100,6 +111,17 @@ export async function updateMilestone(id: string, data: UpdateMilestoneData) {
 
     if (!existingMilestone) {
       return { error: 'Milestone not found' }
+    }
+
+    // If reassigning assignedTo, verify it belongs to a user in the caller's org
+    if (data.assignedTo !== undefined && data.assignedTo !== null) {
+      const assignee = await prisma.user.findFirst({
+        where: { id: data.assignedTo, organizationId: user.organizationId },
+      })
+
+      if (!assignee) {
+        return { error: 'Assignee not found' }
+      }
     }
 
     const updateData: any = {}
