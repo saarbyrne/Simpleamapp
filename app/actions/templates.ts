@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { requireUser } from '@/lib/auth/cached-user'
+import { z } from 'zod'
 
 type CreateTemplateInput = {
   type: string
@@ -19,6 +20,28 @@ type CreateTemplateInput = {
   isPublic?: boolean
   allowModifications?: boolean
 }
+
+// Whitelist of fields a caller may set. Trust/marketplace fields
+// (isOfficial, isFeatured, downloads, rating, status, authorId, ...) are
+// deliberately excluded so they can never be set via mass assignment from
+// client-supplied data - zod strips any unrecognized keys by default.
+const CreateTemplateSchema = z.object({
+  type: z.string(),
+  name: z.string().min(1),
+  description: z.string().min(1),
+  longDescription: z.string().optional(),
+  category: z.string(),
+  sport: z.string(),
+  tags: z.array(z.string()).default([]),
+  features: z.array(z.string()).default([]),
+  config: z.any(),
+  previewImage: z.string().optional(),
+  thumbnailUrl: z.string().optional(),
+  isPublic: z.boolean().optional(),
+  allowModifications: z.boolean().optional(),
+})
+
+const UpdateTemplateSchema = CreateTemplateSchema.partial()
 
 export async function getTemplates(params?: {
   type?: string
@@ -177,6 +200,11 @@ export async function createTemplate(data: CreateTemplateInput) {
 
     const user = await requireUser()
 
+    // Whitelist the fields a caller is allowed to set - never spread raw
+    // client data into Prisma, since that would let a caller forge trust
+    // fields like isOfficial/isFeatured/downloads/rating/status.
+    const safeData = CreateTemplateSchema.parse(data)
+
     // Fetch organization name
     const organization = await prisma.organization.findUnique({
       where: { id: user.organizationId },
@@ -185,7 +213,7 @@ export async function createTemplate(data: CreateTemplateInput) {
 
     const template = await prisma.communityTemplate.create({
       data: {
-        ...data,
+        ...safeData,
         authorId: user.id,
         authorName: user.name,
         orgName: organization?.name || null,
@@ -223,9 +251,14 @@ export async function updateTemplate(id: string, data: Partial<CreateTemplateInp
       return { error: 'Unauthorized' }
     }
 
+    // Whitelist the fields a caller is allowed to update - never pass raw
+    // client data into Prisma, since that would let the owner forge trust
+    // fields like isOfficial/isFeatured/downloads/rating/status.
+    const safeData = UpdateTemplateSchema.parse(data)
+
     const template = await prisma.communityTemplate.update({
       where: { id },
-      data,
+      data: safeData,
     })
 
     revalidatePath('/dashboard/templates')

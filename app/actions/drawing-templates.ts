@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
+import { isPlatformAdmin } from '@/lib/platform-admin'
 
 export type DrawingTemplateData = {
   name: string
@@ -32,6 +33,12 @@ export async function createDrawingTemplate(templateData: DrawingTemplateData) {
   }
 
   try {
+    // Only platform admins may publish a drawing template globally
+    // (organizationId: null, visible to every org). A regular caller's
+    // isGlobal request is silently downgraded to an org-scoped template
+    // instead of trusting client-supplied input.
+    const isGlobal = templateData.isGlobal === true && (await isPlatformAdmin())
+
     const template = await prisma.drawingTemplate.create({
       data: {
         name: templateData.name,
@@ -40,8 +47,8 @@ export async function createDrawingTemplate(templateData: DrawingTemplateData) {
         sport: templateData.sport || 'football',
         data: templateData.data,
         thumbnailUrl: templateData.thumbnailUrl,
-        isGlobal: templateData.isGlobal || false,
-        organizationId: templateData.isGlobal ? null : dbUser.organizationId,
+        isGlobal,
+        organizationId: isGlobal ? null : dbUser.organizationId,
         createdBy: dbUser.id,
       },
     })
