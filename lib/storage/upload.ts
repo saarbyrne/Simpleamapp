@@ -67,6 +67,13 @@ export async function deletePlayerPhoto(path: string) {
     return { error: 'Not authenticated' }
   }
 
+  // Uploads are namespaced under `${user.id}/...` (see uploadPlayerPhoto
+  // above). Enforce the same namespace on delete so a caller cannot remove
+  // another tenant's file by passing an arbitrary path.
+  if (!path.startsWith(`${user.id}/`)) {
+    return { error: 'Not authorized to delete this file' }
+  }
+
   try {
     const { error } = await supabase.storage
       .from('people-photos')

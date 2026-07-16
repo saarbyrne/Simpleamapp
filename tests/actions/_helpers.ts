@@ -24,7 +24,8 @@ vi.mock('@/lib/db', () => {
     organization: { findUnique: vi.fn() },
     communityTemplate: { create: vi.fn(), update: vi.fn(), findUnique: vi.fn() },
     reportTemplate: { create: vi.fn() },
-    drawingTemplate: { create: vi.fn() },
+    drawingTemplate: { create: vi.fn(), update: vi.fn(), updateMany: vi.fn(), findFirst: vi.fn() },
+    dataChangeLog: { create: vi.fn(), createMany: vi.fn() },
   }
   mockPrisma.$transaction = vi.fn(async (arg: any) =>
     Array.isArray(arg) ? Promise.all(arg) : arg(mockPrisma)

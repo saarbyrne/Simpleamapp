@@ -168,14 +168,36 @@ export async function incrementTemplateDownloads(id: string) {
   }
 
   try {
-    await prisma.drawingTemplate.update({
-      where: { id },
+    const dbUser = await prisma.user.findUnique({
+      where: { email: user.email! },
+      select: { organizationId: true }
+    })
+
+    if (!dbUser) {
+      return { error: 'User not found' }
+    }
+
+    // Scope the update: only global templates or templates belonging to the
+    // caller's own org may be incremented. An unscoped `update({ where: { id } })`
+    // would let any authenticated user mutate any other org's private template.
+    const result = await prisma.drawingTemplate.updateMany({
+      where: {
+        id,
+        OR: [
+          { isGlobal: true },
+          { organizationId: dbUser.organizationId },
+        ],
+      },
       data: {
         downloads: {
           increment: 1,
         },
       },
     })
+
+    if (result.count === 0) {
+      return { error: 'Template not found' }
+    }
 
     revalidatePath('/dashboard/canvas')
     return { success: true }
