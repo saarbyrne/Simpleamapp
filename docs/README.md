@@ -1,74 +1,47 @@
 # Documentation Index
 
-Welcome to the Simpleam.app documentation. This directory contains all project documentation organized by category.
+This directory is organized for **agent-first retrieval**: concise, current, and low-noise.
+
+## Start Here
+
+- **Agent contributors:** `docs/AGENT_START.md`
+- **Documentation policy:** `docs/DOCUMENTATION_STRATEGY.md`
 
 ## 📁 Directory Structure
 
+### `/architecture`
+Canonical architecture docs and design decisions.
+
 ### `/setup`
-Initial setup and configuration documentation:
-- Firebase setup guides (free tier and general setup)
-- Database setup and configuration
-- Development environment setup
-- Setup status and checklist
+Environment and local setup guides.
 
 ### `/features`
-Feature-specific documentation and implementation guides:
-- **AI System** - AI integration and tools documentation
-- **Chat System** - Firebase chat integration and setup
-- **Notes Feature** - Notes migration and implementation
-- **Planner Module** - Planner functionality
-- **Platform Admin** - Admin features, quickstart, and security
-- **Reports** - Reporting system implementation
-- **Templates Marketplace** - Template system documentation
-- **Analytics** - Analytics integration
-- **Navigation & Sidebar** - UI component integration
+Current feature behavior/specs (avoid dated "fix summary" style docs here).
 
 ### `/deployment`
-Deployment guides and production documentation:
-- Platform admin deployment procedures
-- Production deployment guide
-- Release readiness reports
-- Firebase index status and optimization
+Operational runbooks for deployment and production troubleshooting.
 
 ### `/testing`
-Testing documentation and reports:
-- Canvas testing plans
-- Test execution reports
-- Testing summaries and coverage
+Testing playbooks, reports, and checklists.
 
-### `/architecture`
-System architecture and design documentation:
-- Project architecture overview (see ARCHITECTURE.md)
-- Module structure and dependencies
-- Data flow diagrams
-- Component hierarchy
+### `/archive/history`
+Historical snapshots retained for reference only (handover notes, one-off assessments, PR artifacts).
 
-### `/archive`
-Historical documentation and assessments:
-- Past issue assessments
-- Completed implementation plans
-- Fixed bugs and issues documentation
-- Old PR descriptions
+## Doc Classes
 
-## 🚀 Quick Start
+- `canonical` — current implementation truth
+- `runbook` — operational procedures
+- `adr` — architecture decisions and tradeoffs
+- `historical` — dated narratives/snapshots
 
-1. **New to the project?** Start with `/setup` documentation
-2. **Working on a feature?** Check `/features` for specific guides
-3. **Deploying?** Review `/deployment` guides
-4. **Testing?** See `/testing` for test plans
+See `docs/DOCUMENTATION_STRATEGY.md` for classification and retention policy.
 
-## 📝 Documentation Standards
+## Contribution Standards
 
-When creating new documentation:
-- Use clear, descriptive titles
-- Include table of contents for long documents
-- Add code examples where applicable
-- Keep documentation up-to-date with code changes
-- Use Markdown formatting consistently
+When creating/updating documentation:
 
-## 🔗 Related Documentation
-
-- Main README: See `/README.md` in project root
-- API Documentation: See `/lib` directory READMEs
-- Component Documentation: See `/components/README.md`
-- Database Schema: See `/prisma/README.md`
+1. Start with a TL;DR section.
+2. Keep scope explicit and narrow.
+3. Link to source files instead of pasting long code.
+4. Move time-bound reports to `docs/archive/history` or wiki.
+5. Update at least one canonical doc when behavior changes.
