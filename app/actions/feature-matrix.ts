@@ -9,8 +9,7 @@
 import { prisma } from '@/lib/db'
 import { FeatureKey, FEATURE_METADATA } from '@/lib/permissions/feature-metadata'
 import { SubscriptionTier, getPackageDefaults } from '@/lib/permissions/subscription-tiers'
-import { logPlatformAdminAction } from '@/lib/platform-admin'
-import { createClient } from '@/lib/supabase/server'
+import { isPlatformAdmin, logPlatformAdminAction } from '@/lib/platform-admin'
 import { OrganizationFeatures } from '@prisma/client'
 
 /**
@@ -18,13 +17,10 @@ import { OrganizationFeatures } from '@prisma/client'
  */
 async function verifyPlatformAdmin(): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return { success: false, error: 'Not authenticated' }
+    const ok = await isPlatformAdmin()
+    if (!ok) {
+      return { success: false, error: 'Platform admin access required' }
     }
-
     return { success: true }
   } catch (error) {
     console.error('Error verifying platform admin:', error)

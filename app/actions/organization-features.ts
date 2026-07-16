@@ -22,24 +22,17 @@ import {
 } from '@/lib/permissions/feature-access'
 import { FeatureKey } from '@/lib/permissions/feature-metadata'
 import { SubscriptionTier } from '@/lib/permissions/subscription-tiers'
-import { logPlatformAdminAction } from '@/lib/platform-admin'
-import { createClient } from '@/lib/supabase/server'
+import { isPlatformAdmin, logPlatformAdminAction } from '@/lib/platform-admin'
 
 /**
  * Check if the current user is a platform admin
  */
 async function verifyPlatformAdmin(): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return { success: false, error: 'Not authenticated' }
+    const ok = await isPlatformAdmin()
+    if (!ok) {
+      return { success: false, error: 'Platform admin access required' }
     }
-
-    // Check if user is platform admin
-    // This would need to be implemented based on your auth system
-    // For now, we'll assume the check is done elsewhere
     return { success: true }
   } catch (error) {
     console.error('Error verifying platform admin:', error)
@@ -234,6 +227,11 @@ export async function getEnabledFeaturesAction(orgId: string): Promise<{
   error?: string
 }> {
   try {
+    const authCheck = await verifyPlatformAdmin()
+    if (!authCheck.success) {
+      return { success: false, error: authCheck.error }
+    }
+
     const features = await getEnabledFeatures(orgId)
 
     return { success: true, features }

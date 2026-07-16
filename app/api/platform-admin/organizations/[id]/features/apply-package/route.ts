@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { applyPackageDefaultsToOrganization } from '@/lib/permissions/feature-access'
-import { logPlatformAdminAction } from '@/lib/platform-admin'
+import { requirePlatformAdmin, logPlatformAdminAction } from '@/lib/platform-admin'
 
 /**
  * POST /api/platform-admin/organizations/[id]/features/apply-package
@@ -13,10 +12,10 @@ export async function POST(
 ) {
   try {
     // Verify platform admin
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    try {
+      await requirePlatformAdmin()
+    } catch {
+      return NextResponse.json({ error: 'Platform admin access required' }, { status: 403 })
     }
 
     const orgId = params.id

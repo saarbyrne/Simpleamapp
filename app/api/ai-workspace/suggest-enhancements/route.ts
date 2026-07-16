@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { getCachedUserWithOrganization } from '@/lib/auth/cached-user'
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -12,6 +14,16 @@ interface SuggestionTag {
 }
 
 export async function POST(req: NextRequest) {
+  const user = await getCachedUserWithOrganization()
+  if (!user) {
+    return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const limit = checkRateLimit(`suggest-${user.id}`, RATE_LIMITS.AI_CHAT)
+  if (!limit.success) {
+    return Response.json({ success: false, error: 'Rate limit exceeded' }, { status: 429 })
+  }
+
   try {
     const { prompt, artifactType } = await req.json()
 

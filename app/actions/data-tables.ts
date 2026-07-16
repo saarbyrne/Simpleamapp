@@ -204,10 +204,10 @@ export async function savePlayersData(changes: SpreadsheetRow[]) {
       // Get the PersonOrganization record to find personId
       const personOrg = await prisma.personOrganization.findUnique({
         where: { id: row.id as string },
-        select: { personId: true },
+        select: { personId: true, organizationId: true },
       })
 
-      if (!personOrg) continue
+      if (!personOrg || personOrg.organizationId !== user.organizationId) continue
 
       // Update Person data
       await prisma.person.update({

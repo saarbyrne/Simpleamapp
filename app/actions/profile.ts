@@ -321,6 +321,22 @@ export async function changePassword(data: z.infer<typeof changePasswordSchema>)
 
     const supabase = await createServerClient();
 
+    // Re-authenticate with the current password before allowing the change.
+    // Without this, anyone with a live session (e.g. a hijacked session
+    // token) could silently change the account password.
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) {
+      return { success: false, error: "Not authenticated" };
+    }
+
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: validation.data.currentPassword,
+    });
+    if (reauthError) {
+      return { success: false, error: "Current password is incorrect" };
+    }
+
     // Update password through Supabase Auth
     const { error } = await supabase.auth.updateUser({
       password: validation.data.newPassword,
@@ -332,6 +348,19 @@ export async function changePassword(data: z.infer<typeof changePasswordSchema>)
         success: false,
         error: "Failed to update password. Please try again.",
       };
+    }
+
+    // Invalidate every other active session so a hijacked/stolen session
+    // token can't keep using the account after the victim rotates their
+    // password. The password update already succeeded, so a failure here
+    // must not fail the whole operation — just log and continue.
+    try {
+      const { error: signOutError } = await supabase.auth.signOut({ scope: "others" });
+      if (signOutError) {
+        console.error("Error revoking other sessions after password change:", signOutError);
+      }
+    } catch (signOutError) {
+      console.error("Error revoking other sessions after password change:", signOutError);
     }
 
     return {

@@ -235,8 +235,8 @@ export async function getNote(id: string) {
   try {
     const currentUser = await requireUser()
 
-    const note = await db.note.findUnique({
-      where: { id },
+    const note = await db.note.findFirst({
+      where: { id, organizationId: currentUser.organizationId },
       include: {
         author: {
           select: {

@@ -200,8 +200,8 @@ export async function reorderMilestones(planId: string, milestoneIds: string[]) 
     // Update order for each milestone
     await prisma.$transaction(
       milestoneIds.map((milestoneId, index) =>
-        prisma.milestone.update({
-          where: { id: milestoneId },
+        prisma.milestone.updateMany({
+          where: { id: milestoneId, planId },
           data: { order: index },
         })
       )
