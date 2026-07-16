@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { createClient } from '@/lib/supabase/server'
+import { requirePlatformAdmin } from '@/lib/platform-admin'
 import { getOrganizationFeatures, updateOrganizationFeatures, getOrganizationTier } from '@/lib/permissions/feature-access'
 
 /**
@@ -13,10 +13,10 @@ export async function GET(
 ) {
   try {
     // Verify platform admin
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    try {
+      await requirePlatformAdmin()
+    } catch {
+      return NextResponse.json({ error: 'Platform admin access required' }, { status: 403 })
     }
 
     const orgId = params.id
@@ -65,10 +65,10 @@ export async function PATCH(
 ) {
   try {
     // Verify platform admin
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    try {
+      await requirePlatformAdmin()
+    } catch {
+      return NextResponse.json({ error: 'Platform admin access required' }, { status: 403 })
     }
 
     const orgId = params.id
