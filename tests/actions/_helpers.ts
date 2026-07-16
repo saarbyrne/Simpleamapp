@@ -5,15 +5,29 @@ import { vi } from 'vitest'
 // `import './_helpers'` (before importing the action under test) to get a
 // fully mocked `prisma` + `requireUser`, instead of re-declaring these
 // factories per test file.
-vi.mock('@/lib/db', () => ({
-  prisma: {
+vi.mock('@/lib/db', () => {
+  const mockPrisma: any = {
     person: { update: vi.fn(), delete: vi.fn(), updateMany: vi.fn(), findFirst: vi.fn() },
-    personOrganization: { findFirst: vi.fn(), findMany: vi.fn(), updateMany: vi.fn(), deleteMany: vi.fn() },
+    personOrganization: {
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+      deleteMany: vi.fn(),
+    },
     note: { findFirst: vi.fn(), findUnique: vi.fn() },
+    plan: { findFirst: vi.fn() },
+    milestone: { update: vi.fn(), updateMany: vi.fn() },
     activity: { create: vi.fn() },
-    $transaction: vi.fn(async (fn: any) => fn((await import('@/lib/db')).prisma)),
-  },
-}))
+  }
+  mockPrisma.$transaction = vi.fn(async (arg: any) =>
+    Array.isArray(arg) ? Promise.all(arg) : arg(mockPrisma)
+  )
+  // Real @/lib/db exports `db` as an alias for `prisma` (`export const db = prisma`);
+  // mirror that here so actions importing either name share the same mocked instance.
+  return { prisma: mockPrisma, db: mockPrisma }
+})
 vi.mock('@/lib/auth/cached-user', () => ({ requireUser: vi.fn() }))
 
 import { requireUser } from '@/lib/auth/cached-user'
@@ -43,7 +57,9 @@ export function resetActionMocks() {
   // vi.resetAllMocks() wipes mock implementations, including the $transaction
   // implementation set up in the hoisted `vi.mock('@/lib/db', ...)` factory. Re-establish
   // it so `prisma.$transaction(cb)` continues to invoke the callback with `prisma`.
-  ;(prisma.$transaction as any).mockImplementation(async (fn: any) => fn(prisma))
+  ;(prisma.$transaction as any).mockImplementation(async (arg: any) =>
+    Array.isArray(arg) ? Promise.all(arg) : arg(prisma)
+  )
   // default: authenticated coach in org_1 unless a test overrides
   mockRequireUser()
   ;(prisma.activity.create as any).mockResolvedValue({})
