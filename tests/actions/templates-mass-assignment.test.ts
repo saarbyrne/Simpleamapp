@@ -63,4 +63,20 @@ describe('updateTemplate mass-assignment protection', () => {
     expect(callArg.data.isOfficial).not.toBe(true)
     expect(callArg.data.isFeatured).not.toBe(true)
   })
+
+  it('does not wipe existing tags/features when they are omitted from a partial update', async () => {
+    mockRequireUser({ id: 'user_1', organizationId: 'org_1' })
+    ;(prisma.communityTemplate.findUnique as any).mockResolvedValue({ authorId: 'user_1' })
+    ;(prisma.communityTemplate.update as any).mockResolvedValue({ id: 'cljk3x9z00000qzrmn831p6t9' })
+
+    await updateTemplate('cljk3x9z00000qzrmn831p6t9', { name: 'New name' })
+
+    expect(prisma.communityTemplate.update).toHaveBeenCalled()
+    const callArg = (prisma.communityTemplate.update as any).mock.calls[0][0]
+    expect(callArg.data.name).toBe('New name')
+    expect(callArg.data.tags).toBeUndefined()
+    expect(callArg.data.features).toBeUndefined()
+    expect('tags' in callArg.data).toBe(false)
+    expect('features' in callArg.data).toBe(false)
+  })
 })

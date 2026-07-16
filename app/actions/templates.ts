@@ -41,7 +41,15 @@ const CreateTemplateSchema = z.object({
   allowModifications: z.boolean().optional(),
 })
 
-const UpdateTemplateSchema = CreateTemplateSchema.partial()
+// Built from CreateTemplateSchema.partial() but with tags/features
+// re-declared as plain optional arrays (no `.default([])`). `.partial()`
+// only makes a key optional - it does NOT strip a field's `.default()`, so
+// omitting `tags`/`features` from a partial update would otherwise still
+// parse to `[]` and clobber the existing values when spread into Prisma.
+const UpdateTemplateSchema = CreateTemplateSchema.partial().extend({
+  tags: z.array(z.string()).optional(),
+  features: z.array(z.string()).optional(),
+})
 
 export async function getTemplates(params?: {
   type?: string
