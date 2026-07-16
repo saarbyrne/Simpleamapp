@@ -26,6 +26,39 @@ vi.mock('@/lib/db', () => {
     reportTemplate: { create: vi.fn() },
     drawingTemplate: { create: vi.fn(), update: vi.fn(), updateMany: vi.fn(), findFirst: vi.fn() },
     dataChangeLog: { create: vi.fn(), createMany: vi.fn() },
+    event: {
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
+      count: vi.fn(),
+    },
+    eventAttendance: {
+      findMany: vi.fn(),
+      createMany: vi.fn(),
+      deleteMany: vi.fn(),
+      upsert: vi.fn(),
+      count: vi.fn(),
+    },
+    form: {
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+      delete: vi.fn(),
+      count: vi.fn(),
+    },
+    formResponse: {
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      count: vi.fn(),
+    },
   }
   mockPrisma.$transaction = vi.fn(async (arg: any) =>
     Array.isArray(arg) ? Promise.all(arg) : arg(mockPrisma)
