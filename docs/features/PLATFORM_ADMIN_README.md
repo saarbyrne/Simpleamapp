@@ -142,7 +142,15 @@ SELECT * FROM activities WHERE type LIKE 'platform_admin_%' ORDER BY "createdAt"
 
 ## Server Actions
 
-Available in `/app/actions/platform-admin.ts`:
+> **Status: not implemented.** The platform admin console is currently **read-only**. Two competing
+> draft implementations (`app/actions/platform-admin.ts` and `app/actions/platform-admin-enhanced.ts`)
+> existed but were never imported by any page in the repo's entire history, and were removed in #164.
+> Recover either for reference with:
+> `git show 98ccde49:app/actions/platform-admin-enhanced.ts`
+> (`-enhanced` is the better draft — Zod validation, Prisma error mapping, production error redaction.)
+
+The write capabilities below are **planned, not available**. Nothing in `app/platform-admin/**`
+can currently change a plan, suspend an organisation, export data, or grant admin access:
 
 - `updateOrganizationPlan()` - Change subscription plan
 - `suspendOrganization()` - Suspend/cancel organization
@@ -151,6 +159,10 @@ Available in `/app/actions/platform-admin.ts`:
 - `getPlatformActivityLogs()` - Get audit trail
 - `grantPlatformAdminAccess()` - Grant admin access (use with caution!)
 - `revokePlatformAdminAccess()` - Revoke admin access
+
+What **does** exist and is live: `lib/platform-admin/` provides `requirePlatformAdmin()`,
+`logPlatformAdminAction()`, `getPlatformStats()`, `PLAN_PRICING`, and ready-made Zod input schemas
+in `platform-admin-validation.ts` for all seven actions above.
 
 ## Stripe Integration
 
@@ -186,10 +198,15 @@ The platform admin area has its own sidebar with minimal navigation:
 
 ### Adding New Actions
 
-1. Add to `/app/actions/platform-admin.ts`
+No platform-admin action file currently exists — see the Server Actions status note above before
+creating one. When you do:
+
+1. Create the action via `createAction` from `lib/actions/safe-action.ts` (see #181/#182) rather
+   than reintroducing a bespoke `app/actions/platform-admin.ts`
 2. Always call `requirePlatformAdmin()` first
-3. Log the action with `logPlatformAdminAction()`
-4. Revalidate affected paths
+3. Validate input with the existing schemas in `lib/platform-admin/platform-admin-validation.ts`
+4. Log the action with `logPlatformAdminAction()`
+5. Revalidate affected paths
 
 ## Best Practices
 
