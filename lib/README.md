@@ -6,7 +6,6 @@ Shared utilities, helpers, and business logic.
 
 ```
 /lib
-├── animations/          # Animation utilities (Framer Motion)
 ├── chat/                # Chat utilities and operations
 ├── date/                # Date formatting and parsing
 ├── platform-admin/      # Platform admin utilities
@@ -19,15 +18,6 @@ Shared utilities, helpers, and business logic.
 ```
 
 ## Module Organization
-
-### Animations `/animations`
-Framer Motion animation variants and utilities:
-- Core animations (fadeIn, slideIn, etc.)
-- Loading animations (spinners, skeletons)
-- Feedback animations (success, error)
-- Page transitions
-
-**Import:** `import { fadeIn, spinner } from '@/lib/animations'`
 
 ### Chat `/chat`
 Firebase chat functionality:
@@ -174,7 +164,6 @@ test('formats date correctly', () => {
 
 ## Related Documentation
 
-- Animation utilities: `/lib/animations/README.md`
 - Chat utilities: `/lib/chat/README.md`
 - Date utilities: `/lib/date/README.md`
 - Platform admin: `/lib/platform-admin/README.md`

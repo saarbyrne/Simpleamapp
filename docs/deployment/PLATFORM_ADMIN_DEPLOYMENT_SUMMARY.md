@@ -304,7 +304,12 @@ GROUP BY plan, status;
 3. `app/platform-admin/billing/page.tsx` - Uses centralized pricing config
 
 ### Files Enhanced (But Not Replaced)
-The existing `app/actions/platform-admin.ts` still works. The new `platform-admin-enhanced.ts` is provided as a drop-in replacement with better error handling. **You can switch to it when ready**.
+> **Superseded — both files were deleted in #164.** Neither `app/actions/platform-admin.ts` nor
+> `platform-admin-enhanced.ts` was ever imported by any page, so the "switch when ready" migration
+> below was never performed and is no longer the plan. Recover for reference with
+> `git show 98ccde49:app/actions/platform-admin-enhanced.ts`.
+
+*Historical:* the existing `app/actions/platform-admin.ts` still works. The new `platform-admin-enhanced.ts` is provided as a drop-in replacement with better error handling. **You can switch to it when ready**.
 
 ---
 
@@ -325,10 +330,9 @@ The existing `app/actions/platform-admin.ts` still works. The new `platform-admi
 ## 💡 Recommended Next Steps (Optional)
 
 ### Short Term (1-2 weeks)
-1. **Switch to Enhanced Server Actions**
-   - Replace imports in pages to use `platform-admin-enhanced.ts`
-   - Test thoroughly
-   - Remove old `platform-admin.ts` file
+1. ~~**Switch to Enhanced Server Actions**~~ — *no longer applicable; both action files were removed
+   in #164 as never-imported. Build the write layer on `createAction` (#181/#182) instead, reusing
+   the Zod schemas already in `lib/platform-admin/platform-admin-validation.ts`.*
 
 2. **Add Rate Limiting**
    - Use Vercel Edge middleware

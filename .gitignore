@@ -75,3 +75,7 @@ canvas-test-script.js
 
 # Claude Code personal settings
 .claude/settings.local.json
+
+# Conductor machine-local settings
+.conductor/*.local.toml
+.worktrees/

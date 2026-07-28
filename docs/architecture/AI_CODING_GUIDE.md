@@ -304,9 +304,6 @@ export function FileUploadForm() {
 ### Organized by Feature
 
 ```typescript
-// Animations
-import { fadeIn, slideIn, spinner } from '@/lib/animations';
-
 // Chat
 import { sendMessage, formatTimestamp } from '@/lib/chat';
 import { useChats, useMessages } from '@/hooks/useChats';
