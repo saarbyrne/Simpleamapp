@@ -64,7 +64,7 @@ const nextConfig = {
               style-src 'self' 'unsafe-inline';
               img-src 'self' data: https: blob:;
               font-src 'self' data:;
-              connect-src 'self' https://*.supabase.co https://api.anthropic.com https://*.firebase.com https://*.firebaseio.com https://*.googleapis.com https://*.posthog.com https://*.sentry.io https://vercel.live https://va.vercel-scripts.com wss://*;
+              connect-src 'self' ${process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:54321 http://localhost:54321' : ''} https://*.supabase.co https://api.anthropic.com https://*.firebase.com https://*.firebaseio.com https://*.googleapis.com https://*.posthog.com https://*.sentry.io https://vercel.live https://va.vercel-scripts.com wss://*;
               frame-ancestors 'self';
               base-uri 'self';
               form-action 'self';
