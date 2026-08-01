@@ -68,7 +68,7 @@ Deleting is the highest value-per-risk work available and it will never be cheap
 
 | Issue | | Notes |
 |---|---|---|
-| #199 | Stop the Storybook-dependent jobs failing | In review (#206). **Three** jobs, not four — see the corrections above. |
+| #199 | Stop the Storybook-dependent jobs failing | In review (#206). **Three** jobs, not four — see the corrections above. #206 grew well past this scope — see "The QA pipeline was the cost" below. |
 | #164 | ✅ Delete ~5,700 unreferenced lines | **Done** (#202) — 5,721 lines. All six zero-importer claims independently verified. |
 | #165 | Remove Firebase/Firestore | Leaves a `/dashboard/chat` stub — see #197. |
 | #166 | Cut locales to `en` + `es` | Archive, don't delete. |
@@ -84,13 +84,31 @@ The load-bearing phase. It is what lets everything else proceed without a freeze
 | Issue | | Notes |
 |---|---|---|
 | #155 | Ratchet job + baselines | Baseline **after** Phase 0. ~15 counters. |
-| #156 | Dedicated build job | Today `npm run build` runs only inside the Lighthouse job. |
-| #157 | Enforce coverage, honest thresholds | Lower 80% → the real ~8%, then ratchet up. |
+| #156 | ✅ Dedicated build job | **Done in #206.** The build now runs as its own step with a credential-free dummy `DATABASE_URL`. It was failing — `Failed to collect page data for /api/ai-workspace/accept-intent`, because Prisma parses `DATABASE_URL` at module load and Next evaluates route modules during `next build`. Nothing had ever proved the app compiles. |
+| #157 | Enforce coverage, honest thresholds | Partly addressed in #206: the four unevaluated 80% thresholds are **removed** from `vitest.config.ts` so they stop reading as a guarantee. Setting a real floor and passing `--coverage` is still open. |
 | #158 | gitleaks on every PR | Blocks the *next* leak, independent of #129. |
-| #160 | jsx-a11y with `--max-warnings` | Must be `warn` — `next lint` runs inside `npm run build`. |
-| #161 | Give translation-audit teeth | Enforceable only once #166 lands. |
-| #162 | Visual regression baseline | **Must land before #175.** |
-| #163 | Rename the "Placeholder" jobs | Stop the green ticks lying. |
+| #160 | jsx-a11y with `--max-warnings` | `next lint` no longer runs inside `npm run build` (#206 removed that), so this need not be `warn`-only. |
+| #161 | Give translation-audit teeth | **Premise changed.** #206 deleted both translation workflows — they were permanently red (3,449 missing keys across 8 locales), i.e. zero signal. This is now "add parity checking back to `qa.yml`", still gated on #166. |
+| #162 | Visual regression baseline | **Must land before #175.** #206 deleted `design-system-visual.spec.ts` — 6 tests, all `test.skip()`, every `goto` commented out. There is no baseline to preserve; start clean. |
+| #163 | ✅ Rename the "Placeholder" jobs | **Done in #206** — by deleting them. Both ran zero real tests. |
+
+#### The QA pipeline was the cost
+
+The audit blamed a permanently-red CI for hiding everything. The measurement that closed the loop:
+QA billed **~52 minutes of runner time per run** (E2E 21m25s, accessibility 18m12s, Lighthouse
+4m28s, visual 3m46s, lint 2m03s, unit 2m09s) and fired on every push, every PR **and** a daily
+cron. The free allowance is 2,000 min/month — about 38 runs. **The pipeline exhausted the account's
+Actions budget, which is what turned CI dark on 2026-07-24.**
+
+Almost none of it measured anything. `test:visual` and `test:a11y` were `--grep` subsets of
+`test:e2e`, so two jobs re-ran 292 tests E2E Smoke had already run, each paying its own `npm ci` and
+four-browser Playwright install. E2E Smoke ran 336 tests whose one real assertion hit an endpoint
+returning a hardcoded literal. Every `@visual` test was skipped. `design-system-accessibility.spec.ts`
+had 7 tests, 7 `page.setContent` and 0 `page.goto` — one named *"Icon-only buttons should have
+aria-labels"*, passing on its own fixture while the app carries 51 unlabelled icon buttons (#186).
+
+#206 replaces all six jobs with a single `Verify` job — lint, typecheck, unit, build — at ~5
+minutes. **Add checks back only with tests that fail when the code is wrong.**
 
 ### Phase 2 — Foundations *(~1–2 weeks, strictly serial)*
 
