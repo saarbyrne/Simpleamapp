@@ -9,7 +9,9 @@ export default defineConfig({
   expect: {
     timeout: 10 * 1000,
   },
-  fullyParallel: false,
+  // Was false, which ran every test serially across four browsers — 336 tests
+  // taking 21 minutes. Nothing here shares state between tests.
+  fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
@@ -18,24 +20,17 @@ export default defineConfig({
     video: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-    {
-      name: 'mobile-chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-  ],
+  // Chromium only by default. Running all four browsers quadrupled the cost of
+  // a suite whose assertions are browser-agnostic. Set PLAYWRIGHT_ALL_BROWSERS=1
+  // for a cross-browser pass when that is actually the question being asked.
+  projects: process.env.PLAYWRIGHT_ALL_BROWSERS
+    ? [
+        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+        { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+        { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+        { name: 'mobile-chrome', use: { ...devices['Pixel 5'] } },
+      ]
+    : [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: webCommand,
     url: baseURL,

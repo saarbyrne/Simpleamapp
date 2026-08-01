@@ -341,10 +341,6 @@ npm run design:lint      # Design system validation
 
 # Analysis
 npm run analyze          # Bundle size analysis
-
-# Storybook
-npm run storybook        # Start Storybook
-npm run build-storybook  # Build Storybook
 ```
 
 ### Tech Stack
@@ -533,12 +529,11 @@ SimpleAM uses a comprehensive design system built on shadcn/ui and Radix primiti
 - **Dark/Light Mode** - Full theme support
 - **Responsive Design** - Mobile-first approach
 - **Design Tokens** - Centralized design values
-- **Storybook** - Component documentation and testing
 
-Run Storybook:
-```bash
-npm run storybook
-```
+> **Storybook is not set up yet.** It is being built properly in
+> [#120](https://github.com/saarbyrne/Simpleamapp/issues/120). Until then there is no `.storybook/`
+> config and no stories, and the e2e specs that drive components through Storybook skip themselves
+> automatically — see [#199](https://github.com/saarbyrne/Simpleamapp/issues/199).
 
 ---
 

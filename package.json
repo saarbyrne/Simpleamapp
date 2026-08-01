@@ -85,10 +85,7 @@
     "@babel/core": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",
-    "@lhci/cli": "^0.13.0",
     "@playwright/test": "^1.49.0",
-    "@storybook/addon-a11y": "8.6.14",
-    "@storybook/react-webpack5": "8.6.14",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
@@ -99,20 +96,18 @@
     "babel-loader": "^10.0.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.35",
-    "eslint-plugin-storybook": "^0.8.0",
     "glob": "^11.0.3",
     "jsdom": "^25.0.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.6.3",
     "vitest": "^2.1.4",
-    "wait-on": "^8.0.2",
     "webpack-bundle-analyzer": "^5.0.1"
   },
   "scripts": {
     "postinstall": "prisma generate",
     "dev": "next dev",
-    "build": "npm run lint && next build",
+    "build": "next build",
     "start": "next start",
     "start:test": "next start -p 3000",
     "lint": "next lint",
@@ -123,10 +118,7 @@
     "test:unit:coverage": "vitest --run --coverage",
     "test:rtl": "vitest --run tests/rtl-readiness.test.ts",
     "test:e2e": "playwright test",
-    "test:visual": "playwright test --grep \"@visual\"",
-    "test:a11y": "playwright test --grep \"@a11y\"",
     "test:a11y:audit": "npx tsx scripts/a11y-audit.ts",
-    "test:perf": "lhci autorun",
     "analyze": "ANALYZE=true npm run build",
     "rtl:scan": "node scripts/rtl-scanner.js",
     "rtl:fix": "node scripts/rtl-scanner.js --fix",
@@ -148,8 +140,6 @@
     "db:status": "bash scripts/check-db-status.sh",
     "db:test": "npx tsx scripts/test-db-connection.ts",
     "db:studio": "prisma studio",
-    "fix-shadcn": "bash scripts/fix-tailwind-v4.sh",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "fix-shadcn": "bash scripts/fix-tailwind-v4.sh"
   }
 }

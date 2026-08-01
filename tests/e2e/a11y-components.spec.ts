@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { storybookConfigured, STORYBOOK_SKIP_REASON } from './storybook-gate';
 
 /**
  * Accessibility Tests for Design System Components
@@ -7,8 +8,14 @@ import AxeBuilder from '@axe-core/playwright';
  * These tests use @axe-core/playwright to scan all component stories
  * for WCAG 2.1 Level AA accessibility violations.
  *
+ * Every test here loads a Storybook story from localhost:6006, so the whole
+ * file is gated on Storybook existing. Non-Storybook a11y coverage lives in
+ * design-system-accessibility.spec.ts and still runs.
+ *
  * Run with: npm run test:a11y
  */
+
+test.skip(!storybookConfigured, STORYBOOK_SKIP_REASON);
 
 test.describe('Component Accessibility @a11y', () => {
   test.beforeEach(async ({ page }) => {
