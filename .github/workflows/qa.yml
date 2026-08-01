@@ -1,112 +1,79 @@
 name: QA
 
+# One job, one `npm ci`. Every check that currently produces a real signal runs
+# here in sequence.
+#
+# This replaced six jobs (lint-typecheck, unit, e2e, visual, accessibility,
+# performance) plus two separate translation workflows, which together billed
+# ~52 minutes of runner time per run and exhausted the account's monthly Actions
+# allowance — which is why CI went dark from 2026-07-24 and the audit findings
+# went unnoticed. Most of that time was duplicated work:
+#
+#   * `test:visual` and `test:a11y` were `--grep` subsets of `test:e2e`, so the
+#     visual and accessibility jobs re-ran 292 tests E2E Smoke had already run,
+#     each paying its own `npm ci` and full 4-browser Playwright install.
+#   * E2E Smoke ran 336 tests to assert one endpoint that returns a hardcoded
+#     literal.
+#   * Every `@visual` test was `test.skip()`.
+#   * Lighthouse never ran at all — `npm run build` failed first, and because
+#     build only ran inside that job, a broken build reported as a perf problem.
+#
+# Before adding a job here, check it produces a signal the steps below don't.
+# Real e2e journeys are #195; visual regression is #162; coverage gating is #157.
+
 on:
   push:
     branches: [main]
   pull_request:
-  schedule:
-    - cron: '0 7 * * *'
-
-env:
-  NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: test-anon-key
-  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
 concurrency:
-  group: qa-${{ github.workflow }}-${{ github.ref }}
+  group: qa-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Prisma parses these at module load, and Next evaluates route modules during
+  # `next build`. Nothing connects, and no credentials are involved — a
+  # syntactically valid URL is all that is needed to get through the build.
+  DATABASE_URL: postgresql://localhost:5432/simpleam_ci
+  DIRECT_URL: postgresql://localhost:5432/simpleam_ci
+  NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: test-anon-key
+
 jobs:
-  lint-typecheck:
-    name: Lint & Typecheck
+  verify:
+    name: Verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Must match local dev. npm resolves the optional `@swc/helpers` peer
+          # differently across major versions, so a lockfile generated on one
+          # Node line is rejected by `npm ci` on another.
+          node-version: 24
           cache: npm
+
       - run: npm ci
+
       - run: npm run lint
       - run: npm run typecheck
-
-  unit:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    needs: lint-typecheck
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
       - run: npm run test:unit
 
-  e2e:
-    name: E2E Smoke
-    runs-on: ubuntu-latest
-    needs: unit
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps
-      - run: npm run test:e2e
-        env:
-          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
-          PLAYWRIGHT_WEB_COMMAND: npm run dev -- --hostname 0.0.0.0 --port 3000
-
-  visual:
-    name: Visual Placeholders
-    runs-on: ubuntu-latest
-    needs: unit
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps
-      - run: npm run test:visual
-        env:
-          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
-          PLAYWRIGHT_WEB_COMMAND: npm run dev -- --hostname 0.0.0.0 --port 3000
-
-  accessibility:
-    name: Accessibility Placeholders
-    runs-on: ubuntu-latest
-    needs: unit
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps
-      - run: npm run test:a11y
-        env:
-          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
-          PLAYWRIGHT_WEB_COMMAND: npm run dev -- --hostname 0.0.0.0 --port 3000
-
-  performance:
-    name: Lighthouse Budgets
-    runs-on: ubuntu-latest
-    needs: unit
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
+      # Nothing else proves the app compiles. This is the check the old pipeline
+      # was missing entirely.
       - run: npm run build
-      - run: npm run start:test -- --hostname 0.0.0.0 --port 3000 &
-      - run: npx wait-on http://127.0.0.1:3000
-      - run: npm run test:perf
-      - run: pkill -f "next start" || true
+
+# Deliberately absent, with the issue that restores each:
+#
+#   Translation parity (`npm run i18n:sync:check`) — currently 3,449 missing keys
+#   across 8 locales, so it can only ever be red. Two workflows enforced it and
+#   both failed on every commit. #166 cuts the set to en + es, at which point it
+#   becomes a check that can pass; #161 wires it back in. A gate that cannot go
+#   green teaches everyone to ignore CI, which is how this repo got here.
+#
+#   E2E / visual / accessibility — the specs are all Storybook-gated (#199) and
+#   run zero tests today. #195 adds real journeys, #162 a visual baseline, #194
+#   accessibility coverage against real routes. Add the job back with the tests.
+#
+#   Coverage gating — #157.
+#   Lighthouse — deleted with its config; revisit when there are users.
