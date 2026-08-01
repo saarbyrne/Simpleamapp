@@ -1,4 +1,13 @@
 import { test, expect, type Page } from '@playwright/test';
+import { storybookConfigured, STORYBOOK_SKIP_REASON } from './storybook-gate';
+
+/**
+ * Every test here targets the Storybook story for input-otp rather than a page
+ * in the app, so the whole file is gated on Storybook existing. Once #120 lands
+ * these should arguably point at a real route instead — see the note in
+ * `renders without SSR hydration errors`.
+ */
+test.skip(!storybookConfigured, STORYBOOK_SKIP_REASON);
 
 const registerConsoleErrorListener = (page: Page) => {
   const errors: string[] = [];
