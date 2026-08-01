@@ -14,7 +14,13 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
+      # A branch or commit reference like "199" may resolve to an issue OR a
+      # pull request, and issues.addLabels on a PR is governed by the
+      # pull-requests scope, not issues. Granting only `issues: write` failed
+      # with "Resource not accessible by integration" whenever the number was a
+      # PR; the API response header asks for `issues=write; pull_requests=write`.
       issues: write
+      pull-requests: write
     steps:
       - name: Identify referenced issue
         id: extract
@@ -90,7 +96,13 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
+      # A branch or commit reference like "199" may resolve to an issue OR a
+      # pull request, and issues.addLabels on a PR is governed by the
+      # pull-requests scope, not issues. Granting only `issues: write` failed
+      # with "Resource not accessible by integration" whenever the number was a
+      # PR; the API response header asks for `issues=write; pull_requests=write`.
       issues: write
+      pull-requests: write
     steps:
       - name: Identify referenced issue
         id: extract
