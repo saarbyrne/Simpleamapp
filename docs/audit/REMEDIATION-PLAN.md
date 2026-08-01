@@ -2,7 +2,25 @@
 
 **Companion to:** [`2026-07-AUDIT.md`](2026-07-AUDIT.md) — the evidence. This document is the **plan**.
 **Tracking issue:** #200 — the live version, with checkboxes.
-**Created:** 2026-07-28 · **Status:** not started
+**Created:** 2026-07-28 · **Status:** Phase 0 in progress · **Last updated:** 2026-08-01
+
+> **Progress:** #164 ✅ (#202) · #149 ✅ (#205) · #199 in review (#206). Everything else below is
+> still open.
+>
+> **Two corrections learned since this was written:**
+>
+> 1. **CI had two stacked causes.** Every QA run from 2026-07-24 failed in ~3 seconds with zero
+>    steps recorded — the **GitHub Actions spending limit**, not code. The monthly allowance reset
+>    on 2026-08-01 and jobs dispatch again. Diagnosing this from the run page is impossible; the
+>    reason only appears via
+>    `gh api repos/:owner/:repo/check-runs/<job_id>/annotations`. Expect it to recur near the end of
+>    each billing month.
+> 2. **#199 affects three jobs, not four.** Lighthouse Budgets is not Storybook-dependent — the
+>    `performance` job builds the app and runs `lhci autorun`, and its failure is a genuine
+>    bundle-size breach (`app/error`, 6.03 MiB) that needs its own issue. Note also that the
+>    Storybook coupling lives in the **specs** (`tests/e2e/a11y-components.spec.ts`,
+>    `tests/e2e/input-otp.spec.ts` hard-code `localhost:6006`), not in the workflow YAML — grepping
+>    `.github/workflows/` for "storybook" returns nothing and makes #199 look obsolete when it is not.
 
 ---
 
@@ -50,8 +68,8 @@ Deleting is the highest value-per-risk work available and it will never be cheap
 
 | Issue | | Notes |
 |---|---|---|
-| #199 | Stop the 4 Storybook jobs failing | **Do first.** ~1hr. Makes `main` green for the first time in weeks. |
-| #164 | Delete ~5,700 unreferenced lines | All six zero-importer claims independently verified. |
+| #199 | Stop the Storybook-dependent jobs failing | In review (#206). **Three** jobs, not four — see the corrections above. |
+| #164 | ✅ Delete ~5,700 unreferenced lines | **Done** (#202) — 5,721 lines. All six zero-importer claims independently verified. |
 | #165 | Remove Firebase/Firestore | Leaves a `/dashboard/chat` stub — see #197. |
 | #166 | Cut locales to `en` + `es` | Archive, don't delete. |
 | #129 | Purge committed secrets, rotate credentials | Ops task; needs history rewrite. |
@@ -93,7 +111,7 @@ Two independent tracks; each gates a large amount of downstream work.
 
 | Issue | | |
 |---|---|---|
-| #149 | Fix the token format | **Gates all UI work.** Live bug — ~154 elements render colourless. |
+| #149 | ✅ Fix the token format | **Done** (#205). Fixed via `color-mix()` rather than the bare-channel approach the issue proposed — ~200 rules in `globals.css` consume the tokens directly as `var(--x)` and need a complete colour. Also declared `--destructive-foreground`, which was referenced but defined nowhere. |
 | #175 | Delete the pasted v4 stylesheet | Needs #162 first. |
 | #176 | Single source of truth for tokens | |
 | #177 | Correct `DESIGN_SYSTEM.md` + AI prompt | |
