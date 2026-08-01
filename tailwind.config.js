@@ -1,4 +1,24 @@
 /** @type {import('tailwindcss').Config} */
+
+/**
+ * The design tokens in `app/globals.css` are complete oklch colours, e.g.
+ * `--primary: oklch(0.646 0.222 41.116)`. They are consumed two ways:
+ *
+ *   1. directly, as `var(--primary)`, by ~200 rules in globals.css
+ *   2. here, to generate the semantic Tailwind utilities
+ *
+ * `color-mix` satisfies both. Wrapping the token in `hsl()` (as this file used
+ * to) produced `hsl(oklch(...))` — invalid CSS, silently dropped — which is why
+ * `border-primary`, `bg-primary/*`, `bg-destructive/*` and `ring-primary`
+ * rendered no colour at all. Substituting Tailwind's `<alpha-value>` into the
+ * mix percentage keeps the opacity modifiers (`bg-primary/50`) working; with no
+ * modifier Tailwind substitutes `1`, yielding the unmodified colour.
+ *
+ * Do not reintroduce a colour-space wrapper here. The tokens already carry one.
+ */
+const token = (name) =>
+  `color-mix(in oklab, var(--${name}) calc(<alpha-value> * 100%), transparent)`
+
 module.exports = {
   darkMode: ['class'],
   content: [
@@ -11,54 +31,54 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+        border: token('border'),
+        input: token('input'),
+        ring: token('ring'),
+        background: token('background'),
+        foreground: token('foreground'),
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: token('primary'),
+          foreground: token('primary-foreground'),
           hover: 'var(--primary-hover)',
         },
         secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
+          DEFAULT: token('secondary'),
+          foreground: token('secondary-foreground'),
           hover: 'var(--secondary-hover)',
         },
         destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
+          DEFAULT: token('destructive'),
+          foreground: token('destructive-foreground'),
           hover: 'var(--destructive-hover)',
         },
         muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
+          DEFAULT: token('muted'),
+          foreground: token('muted-foreground'),
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
+          DEFAULT: token('accent'),
+          foreground: token('accent-foreground'),
         },
         popover: {
-          DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
+          DEFAULT: token('popover'),
+          foreground: token('popover-foreground'),
         },
         card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
+          DEFAULT: token('card'),
+          foreground: token('card-foreground'),
         },
         sidebar: {
-          DEFAULT: 'hsl(var(--sidebar))',
-          foreground: 'hsl(var(--sidebar-foreground))',
-          primary: 'hsl(var(--sidebar-primary))',
-          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-          accent: 'hsl(var(--sidebar-accent))',
-          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-          border: 'hsl(var(--sidebar-border))',
-          ring: 'hsl(var(--sidebar-ring))',
+          DEFAULT: token('sidebar'),
+          foreground: token('sidebar-foreground'),
+          primary: token('sidebar-primary'),
+          'primary-foreground': token('sidebar-primary-foreground'),
+          accent: token('sidebar-accent'),
+          'accent-foreground': token('sidebar-accent-foreground'),
+          border: token('sidebar-border'),
+          ring: token('sidebar-ring'),
         },
-        'page-background': 'hsl(var(--page-background))',
-        'nav-background': 'hsl(var(--nav-background))',
+        'page-background': token('page-background'),
+        'nav-background': token('nav-background'),
       },
       borderRadius: {
         lg: 'var(--radius)',
