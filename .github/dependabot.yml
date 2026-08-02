@@ -1,0 +1,66 @@
+# Dependency update automation.
+#
+# This file did not exist until 2026-08-02. Alert *scanning* was on, but version
+# updates were never configured, so nothing ever opened a PR and the backlog
+# reached 226 open alerts — 71% of which turned out to be transitive advisories
+# that a plain lockfile refresh cleared.
+#
+# Two constraints shape the settings below:
+#
+#   1. Every PR costs CI. The Verify job runs ~5 minutes and the free monthly
+#      allowance is 2,000 minutes, which this account has exhausted before
+#      (see docs/audit/REMEDIATION-PLAN.md). Ungrouped daily updates would be a
+#      real cost, not a theoretical one — hence weekly, grouped, and capped.
+#   2. Grouped minor/patch PRs are reviewable in aggregate; majors are not.
+#      Majors are deliberately left ungrouped so each arrives on its own and
+#      gets read on its own.
+#
+# There is no entry for `functions/` — that codebase was deleted, and with it a
+# second manifest that accounted for 68 alerts while deploying nothing.
+
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Madrid
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(deps)
+      prefix-development: chore(deps-dev)
+      include: scope
+    labels:
+      - dependencies
+      - "area: platform"
+    groups:
+      # One PR per week for each, rather than one per package.
+      production-dependencies:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      development-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+
+  # Workflow actions drift silently and are a supply-chain surface. Monthly is
+  # enough — they change far less often than npm packages.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: chore(ci)
+    labels:
+      - dependencies
+    groups:
+      github-actions:
+        patterns:
+          - "*"

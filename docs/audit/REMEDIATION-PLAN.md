@@ -2,10 +2,10 @@
 
 **Companion to:** [`2026-07-AUDIT.md`](2026-07-AUDIT.md) — the evidence. This document is the **plan**.
 **Tracking issue:** #200 — the live version, with checkboxes.
-**Created:** 2026-07-28 · **Status:** Phase 0 in progress · **Last updated:** 2026-08-01
+**Created:** 2026-07-28 · **Status:** Phase 0 in progress · **Last updated:** 2026-08-02
 
-> **Progress:** #164 ✅ (#202) · #149 ✅ (#205) · #199 in review (#206). Everything else below is
-> still open.
+> **Progress:** #164 ✅ (#202) · #149 ✅ (#205) · #199 in review (#206) · #169 partly done
+> (#210, #211) · #165 partly done (#211). Everything else below is still open.
 >
 > **Two corrections learned since this was written:**
 >
@@ -40,6 +40,7 @@ Four items genuinely gate large amounts of downstream work. Doing them out of or
 | **Token fix** (#149) | all UI work (#190, #186, #187) | A codemod replacing `bg-orange-500` with `bg-primary` while `hsl(oklch())` is broken swaps a colour that *renders* for one that *doesn't*. It would make the product worse. |
 | **Migration history** (#170) | all schema work (#171–#174) | RLS policies cannot be expressed in `schema.prisma`; they must ship as migration SQL. This is why issue #132 read as actionable and wasn't. |
 | **Action wrapper** (#181, #182) | #180, #183, #153 | Uniform returns, Zod validation, error scrubbing, Sentry and canonical auth are all *properties of the wrapper*. Adopting it delivers five workstreams at once instead of five passes over the same 30 files. |
+| **Next 15** (#212) | #169, and all of Phase 4 | #169 cannot pass its own acceptance criterion on Next 14 — `postcss` is vendored *inside* `node_modules/next/`, so no override or lockfile refresh reaches it. And the Phase 4 sweeps touch accessibility and i18n on essentially every page; running them against Next 14 and then upgrading means re-touching all of it. |
 
 And one hard interlock: **#148 must fix signup and account-linking in a single PR.** The fix for the signup dead-end is to call `ensureUserWithOrganization()` — the exact function containing an account-takeover bug. Fixing signup alone converts a dormant vulnerability into a live one.
 
@@ -52,6 +53,7 @@ One sequencing rule for the surface sweeps: **accessibility before i18n, per dir
 | Decision | Choice | Why |
 |---|---|---|
 | **Tailwind** | Stay on **v3**; fix the token format, delete the pasted v4 stylesheet | Preserves the exact palette and keeps 64 `bg-primary/*` opacity modifiers working. v4 revisited once visual regression tests exist to prove a migration succeeded. |
+| **Next.js** | **Upgrade to 15** (#212), in Phase 2 | The mirror image of the Tailwind decision, and worth stating explicitly because the reasoning inverts. Tailwind v3 is a supported version to *stay on*; Next 14 is not. `14.2.35` is the last 14.2.x release that will ever ship, so all 21 open advisories against `next` — including SSRF in Server Actions and XSS in the App Router — have no patch path. Not Phase 0: a framework major before the signals are honest is precisely what this plan exists to prevent. |
 | **Locales** | Cut to **`en` + `es`**, archive six | Only `es` is genuinely translated (1% English vs 66–84% for the rest). Two locales makes "CI fails on any missing key" enforceable for the first time. |
 | **Firebase** | **Remove entirely** | Chat carries a second, independent authorization model that no test exercises and that must be hand-synchronised forever. No users means no data to migrate. |
 | **Chat** | **Deferred past release** (#197); #165 leaves a stub | Not needed for launch, but the requirement is captured so it survives the Firebase removal. |
@@ -70,12 +72,12 @@ Deleting is the highest value-per-risk work available and it will never be cheap
 |---|---|---|
 | #199 | Stop the Storybook-dependent jobs failing | In review (#206). **Three** jobs, not four — see the corrections above. #206 grew well past this scope — see "The QA pipeline was the cost" below. |
 | #164 | ✅ Delete ~5,700 unreferenced lines | **Done** (#202) — 5,721 lines. All six zero-importer claims independently verified. |
-| #165 | Remove Firebase/Firestore | Leaves a `/dashboard/chat` stub — see #197. |
+| #165 | Remove Firebase/Firestore | Leaves a `/dashboard/chat` stub — see #197. The `functions/` slice is **done** (#211) — it was 32 lines with zero exports carrying a 355 KB lockfile and 68 alerts, so it came out early. The rest is unchanged in size. |
 | #166 | Cut locales to `en` + `es` | Archive, don't delete. |
 | #129 | Purge committed secrets, rotate credentials | Ops task; needs history rewrite. |
 | #168 | Archive stale docs | 17 dated reports + a 486KB dump. |
 | #159 | Pin `clsx` / `tailwind-merge` | Currently `"*"` — unpinned majors behind `cn()`. |
-| #169 | Resolve npm advisories | 6 critical / 36 high. |
+| #169 | Resolve npm advisories | **Premise changed.** The real figure was **226 open Dependabot alerts**, not 85 — `npm audit` collapses many advisories per package into one node, so it undercounts by ~2.4×. 173 are now cleared: a lockfile refresh took 95 (#210), deleting `functions/` took 68 (#211), and `jspdf` v3→v4 took 10. **Its acceptance criterion is blocked on #212** — `npm audit --omit=dev --audit-level=high` cannot exit 0 while Next 14 vendors a vulnerable `postcss`. Root cause of the backlog was that `.github/dependabot.yml` never existed; it does now. Supersedes #130. |
 
 ### Phase 1 — Make the signals honest *(~3 days)*
 
@@ -112,7 +114,7 @@ minutes. **Add checks back only with tests that fail when the code is wrong.**
 
 ### Phase 2 — Foundations *(~1–2 weeks, strictly serial)*
 
-Two independent tracks; each gates a large amount of downstream work.
+Three independent tracks; each gates a large amount of downstream work.
 
 **Database** — being pre-release, this is one clean baseline migration rather than six risky incremental ones.
 
@@ -133,6 +135,12 @@ Two independent tracks; each gates a large amount of downstream work.
 | #175 | Delete the pasted v4 stylesheet | Needs #162 first. |
 | #176 | Single source of truth for tokens | |
 | #177 | Correct `DESIGN_SYSTEM.md` + AI prompt | |
+
+**Framework** — the one upgrade that cannot be deferred to Post-release, because the version in use no longer receives security patches at all.
+
+| Issue | | |
+|---|---|---|
+| #212 | Upgrade Next 14 → 15 | Needs #162 first, to prove rendering is unchanged. **Unblocks #169; gates all of Phase 4.** Async `cookies()`/`headers()`/`params` is the bulk of the work; caching defaults invert. Decide the React 19 question in the same PR. |
 
 ### Phase 3 — Spines *(~3–4 weeks)*
 
