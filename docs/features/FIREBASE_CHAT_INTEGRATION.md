@@ -293,16 +293,9 @@ const dbUser = await ensureUserWithOrganization(user);
 
 #### Phase 2: Push Notifications
 
-Deploy Cloud Functions to send notifications:
-
-```bash
-cd functions
-npm install
-npm run build
-firebase deploy --only functions
-```
-
-See `functions/src/index.ts` for notification logic.
+> **The `functions/` codebase was deleted.** It contained no notification logic — `functions/src/index.ts` was 32 lines of generated scaffolding with every function commented out, so it exported nothing and deployed nothing. It was removed along with the `functions` block in `firebase.json`, because carrying a second npm manifest for zero deployed code accounted for 68 open Dependabot alerts.
+>
+> Push notifications remain unimplemented. Note also that Firebase is being removed entirely (#165) and chat is being rebuilt on Postgres + Supabase Realtime (#197), so any notification work belongs there rather than in Cloud Functions.
 
 #### Phase 3: Custom Token Auth
 
