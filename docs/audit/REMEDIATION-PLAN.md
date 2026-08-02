@@ -4,9 +4,11 @@
 **Tracking issue:** #200 — the live version, with checkboxes.
 **Created:** 2026-07-28 · **Status:** Phase 0 in progress · **Last updated:** 2026-08-02
 
-> **Progress:** #164 ✅ (#202) · #149 ✅ (#205) · #199 in review (#206) · #169 partly done
-> (#210, #211, #213 — Dependabot alerts 226 → 42) · #165 partly done (#211). Everything else
-> below is still open.
+> **Progress:** #164 ✅ (#202) · #149 ✅ (#205) · #199 ✅ (#206) · #129 ✅ (#223) · #158 ✅ (#223) ·
+> #169 mostly done (#210, #211, #213 — Dependabot alerts **226 → 42**) · #165 partly done (#211).
+>
+> **Phase 0 remaining: #159, #166, #168**, plus the non-`functions/` half of #165. #169 cannot
+> fully close until #212 does.
 >
 > **Two corrections learned since this was written:**
 >
@@ -75,7 +77,7 @@ Deleting is the highest value-per-risk work available and it will never be cheap
 | #164 | ✅ Delete ~5,700 unreferenced lines | **Done** (#202) — 5,721 lines. All six zero-importer claims independently verified. |
 | #165 | Remove Firebase/Firestore | Leaves a `/dashboard/chat` stub — see #197. The `functions/` slice is **done** (#211) — it was 32 lines with zero exports carrying a 355 KB lockfile and 68 alerts, so it came out early. The rest is unchanged in size. |
 | #166 | Cut locales to `en` + `es` | Archive, don't delete. |
-| #129 | Purge committed secrets, rotate credentials | Ops task; needs history rewrite. |
+| #129 | ✅ Purge committed secrets, rotate credentials | **Done** (#223), with the history rewrite **deliberately declined**. The Supabase password was rotated and Vercel updated, which is what actually neutralised this — the copy in history is now a string that opens nothing. `backups/backup.sql` (29 real emails, one bcrypt hash) was untracked, `backups/`/`*.sql.gz`/`*.dump` gitignored, and the live DSN in `docs/setup/DATABASE_SETUP.md:295` replaced with placeholders. **Accepted risk, not an oversight:** the dump remains in history. Private repo, zero forks, no production user ever, credential dead, and a rewrite means force-pushing over 95 commits. **Condition: if this repo is ever made public, revisit before doing so** — publishing would expose those 29 addresses. |
 | #168 | Archive stale docs | 17 dated reports + a 486KB dump. |
 | #159 | Pin `clsx` / `tailwind-merge` | Currently `"*"` — unpinned majors behind `cn()`. |
 | #169 | Resolve npm advisories | **Premise changed.** The real figure was **226 open Dependabot alerts**, not 85 — `npm audit` collapses many advisories per package into one node, so it undercounts by ~2.4×. **Measured after merge: 226 → 42.** A lockfile refresh (#210), deleting `functions/` (#211) and `jspdf` v3→v4 (#213) cleared 184 between them. **Its acceptance criterion is blocked on #212** — `npm audit --omit=dev --audit-level=high` cannot exit 0 while Next 14 vendors a vulnerable `postcss`; 24 of the 42 survivors are `next` + that vendored `postcss`. Root cause of the backlog was that `.github/dependabot.yml` never existed; it does now. Supersedes #130. |
@@ -89,7 +91,7 @@ The load-bearing phase. It is what lets everything else proceed without a freeze
 | #155 | Ratchet job + baselines | Baseline **after** Phase 0. ~15 counters. |
 | #156 | ✅ Dedicated build job | **Done in #206.** The build now runs as its own step with a credential-free dummy `DATABASE_URL`. It was failing — `Failed to collect page data for /api/ai-workspace/accept-intent`, because Prisma parses `DATABASE_URL` at module load and Next evaluates route modules during `next build`. Nothing had ever proved the app compiles. |
 | #157 | Enforce coverage, honest thresholds | Partly addressed in #206: the four unevaluated 80% thresholds are **removed** from `vitest.config.ts` so they stop reading as a guarantee. Setting a real floor and passing `--coverage` is still open. |
-| #158 | gitleaks on every PR | Blocks the *next* leak, independent of #129. |
+| #158 | ✅ gitleaks on every PR | **Done in #223.** Scans the **working tree, not history** — history holds the (now rotated) password and the dump, so a history config would be red on every run forever and be switched off within a week. A check that always fails is worth less than no check. Runs *before* `npm ci`, so it scans ~5 MB not ~1.5 GB of `node_modules`. A pinned binary rather than `gitleaks-action@v2`, because that action scans history. Config and rationale in `.gitleaks.toml`. |
 | #160 | jsx-a11y with `--max-warnings` | `next lint` no longer runs inside `npm run build` (#206 removed that), so this need not be `warn`-only. |
 | #161 | Give translation-audit teeth | **Premise changed.** #206 deleted both translation workflows — they were permanently red (3,449 missing keys across 8 locales), i.e. zero signal. This is now "add parity checking back to `qa.yml`", still gated on #166. |
 | #162 | Visual regression baseline | **Must land before #175.** #206 deleted `design-system-visual.spec.ts` — 6 tests, all `test.skip()`, every `goto` commented out. There is no baseline to preserve; start clean. |
