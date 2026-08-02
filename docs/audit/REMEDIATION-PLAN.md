@@ -5,7 +5,8 @@
 **Created:** 2026-07-28 · **Status:** Phase 0 in progress · **Last updated:** 2026-08-02
 
 > **Progress:** #164 ✅ (#202) · #149 ✅ (#205) · #199 in review (#206) · #169 partly done
-> (#210, #211) · #165 partly done (#211). Everything else below is still open.
+> (#210, #211, #213 — Dependabot alerts 226 → 42) · #165 partly done (#211). Everything else
+> below is still open.
 >
 > **Two corrections learned since this was written:**
 >
@@ -77,7 +78,7 @@ Deleting is the highest value-per-risk work available and it will never be cheap
 | #129 | Purge committed secrets, rotate credentials | Ops task; needs history rewrite. |
 | #168 | Archive stale docs | 17 dated reports + a 486KB dump. |
 | #159 | Pin `clsx` / `tailwind-merge` | Currently `"*"` — unpinned majors behind `cn()`. |
-| #169 | Resolve npm advisories | **Premise changed.** The real figure was **226 open Dependabot alerts**, not 85 — `npm audit` collapses many advisories per package into one node, so it undercounts by ~2.4×. 173 are now cleared: a lockfile refresh took 95 (#210), deleting `functions/` took 68 (#211), and `jspdf` v3→v4 took 10. **Its acceptance criterion is blocked on #212** — `npm audit --omit=dev --audit-level=high` cannot exit 0 while Next 14 vendors a vulnerable `postcss`. Root cause of the backlog was that `.github/dependabot.yml` never existed; it does now. Supersedes #130. |
+| #169 | Resolve npm advisories | **Premise changed.** The real figure was **226 open Dependabot alerts**, not 85 — `npm audit` collapses many advisories per package into one node, so it undercounts by ~2.4×. **Measured after merge: 226 → 42.** A lockfile refresh (#210), deleting `functions/` (#211) and `jspdf` v3→v4 (#213) cleared 184 between them. **Its acceptance criterion is blocked on #212** — `npm audit --omit=dev --audit-level=high` cannot exit 0 while Next 14 vendors a vulnerable `postcss`; 24 of the 42 survivors are `next` + that vendored `postcss`. Root cause of the backlog was that `.github/dependabot.yml` never existed; it does now. Supersedes #130. |
 
 ### Phase 1 — Make the signals honest *(~3 days)*
 
