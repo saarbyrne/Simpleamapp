@@ -1,0 +1,93 @@
+# Dependency update automation.
+#
+# This file did not exist until 2026-08-02. Alert *scanning* was on, but version
+# updates were never configured, so nothing ever opened a PR and the backlog
+# reached 226 open alerts — 71% of which turned out to be transitive advisories
+# that a plain lockfile refresh cleared.
+#
+# Two constraints shape the settings below:
+#
+#   1. Every PR costs CI. The Verify job runs ~5 minutes and the free monthly
+#      allowance is 2,000 minutes, which this account has exhausted before
+#      (see docs/audit/REMEDIATION-PLAN.md). Ungrouped daily updates would be a
+#      real cost, not a theoretical one — hence weekly, grouped, and capped.
+#   2. Grouped minor/patch PRs are reviewable in aggregate; majors are not.
+#      Majors are deliberately left ungrouped so each arrives on its own and
+#      gets read on its own.
+#
+# There is no entry for `functions/` — that codebase was deleted, and with it a
+# second manifest that accounted for 68 alerts while deploying nothing.
+
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Madrid
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(deps)
+      prefix-development: chore(deps-dev)
+      include: scope
+    labels:
+      - dependencies
+      - "area: platform"
+    ignore:
+      # Next majors are handled by hand in #212, not by a bot. Every bump from
+      # 14 is a major, and Dependabot's attempt (#209) went straight to 16 and
+      # failed CI at the first step: `next lint` was removed in 16, so
+      # `npm run lint` parses as "build a directory called lint". Re-opening
+      # that PR weekly would burn ~5 min of CI to fail the same way each time.
+      #
+      # This suppresses the *pull request*, not the alert — the 21 `next`
+      # advisories stay visible in the Security tab, which is where #212
+      # tracks them. Once the app is on 15.x, minor and patch updates flow
+      # normally again; only major bumps stay manual.
+      - dependency-name: next
+        update-types:
+          - version-update:semver-major
+
+    groups:
+      # `groups` defaults to version updates only. Security-update PRs are
+      # grouped separately by Dependabot's own defaults, which is how #209
+      # arrived as "19 updates across 2 directories" — one PR mixing three
+      # majors with sixteen patches, reviewable as neither. The
+      # `applies-to: security-updates` entries below take that back.
+      production-dependencies:
+        applies-to: version-updates
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      development-dependencies:
+        applies-to: version-updates
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+      security-production:
+        applies-to: security-updates
+        dependency-type: production
+      security-development:
+        applies-to: security-updates
+        dependency-type: development
+
+  # Workflow actions drift silently and are a supply-chain surface. Monthly is
+  # enough — they change far less often than npm packages.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: chore(ci)
+    labels:
+      - dependencies
+    groups:
+      github-actions:
+        patterns:
+          - "*"
