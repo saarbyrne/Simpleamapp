@@ -57,7 +57,7 @@
     "input-otp": "^1.4.2",
     "jspdf": "^3.0.3",
     "lucide-react": "^0.487.0",
-    "next": "14.2.35",
+    "next": "16.2.12",
     "next-intl": "^4.5.0",
     "next-themes": "^0.4.6",
     "papaparse": "^5.5.3",
@@ -82,7 +82,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.8.1",
-    "@babel/core": "^7.28.5",
+    "@babel/core": "^8.0.1",
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",
     "@playwright/test": "^1.49.0",
@@ -94,15 +94,15 @@
     "@types/react-big-calendar": "^1.16.3",
     "autoprefixer": "^10.4.21",
     "babel-loader": "^10.0.0",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "^14.2.35",
+    "eslint": "^10.8.0",
+    "eslint-config-next": "^16.2.12",
     "glob": "^11.0.3",
     "jsdom": "^25.0.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.6.3",
-    "vitest": "^2.1.4",
-    "webpack-bundle-analyzer": "^5.0.1"
+    "vitest": "^3.2.6",
+    "webpack-bundle-analyzer": "^5.3.1"
   },
   "scripts": {
     "postinstall": "prisma generate",
