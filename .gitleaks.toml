@@ -1,0 +1,48 @@
+# Secret scanning config. Added by #129.
+#
+# Scope: the WORKING TREE only, never git history.
+#
+# That is deliberate. The repository's history contains a Supabase database
+# password and a `backups/backup.sql` dump across 95 commits. The password has
+# been rotated, so the copy in history is now inert, and the decision was taken
+# not to rewrite history for a pre-release product with no users. A
+# history-scanning configuration would therefore fail on every run forever and
+# be switched off within a week — a check that always fails is worth less than
+# no check at all.
+#
+# What this does buy: any *new* secret added from now on fails the PR.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Paths with no first-party source, plus documented placeholders"
+
+paths = [
+  # Third-party code. npm packages ship test fixtures full of dummy keys that
+  # are real-looking by design; scanning them produces hundreds of findings and
+  # zero signal. CI runs this step before `npm ci`, so this mainly matters for
+  # local runs.
+  '''node_modules/''',
+  '''\.next/''',
+  '''coverage/''',
+  '''playwright-report/''',
+  '''test-results/''',
+  '''package-lock\.json''',
+
+  # Generated and binary assets.
+  '''\.(png|jpe?g|gif|webp|svg|ico|woff2?|ttf|eot|pdf)$''',
+]
+
+regexes = [
+  # Documented placeholders. These stay matchable, so a real value pasted over
+  # one of them is NOT allowlisted.
+  '''\[YOUR-[A-Z-]+\]''',
+  '''your_[a-z_]*(key|secret|token|password)''',
+  '''YOUR_[A-Z_]*(KEY|SECRET|TOKEN|PASSWORD)''',
+
+  # The credential-free dummy Postgres DSN used by CI and local tooling.
+  # Nothing connects to it; a syntactically valid URL is all `next build`
+  # needs, because Prisma parses it at module load.
+  '''postgres(ql)?://[^@\s]*localhost''',
+]

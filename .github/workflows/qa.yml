@@ -45,6 +45,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Runs before `npm ci` on purpose: with no node_modules on disk there is
+      # nothing to exclude, the scan covers ~5 MB instead of ~1.5 GB, and a
+      # leaked secret fails the run in seconds rather than after a full build.
+      #
+      # Deliberately NOT gitleaks-action@v2 — that scans git *history*, which
+      # this repository's history would fail on forever (#129: a rotated DB
+      # password and a data dump across 95 commits, kept rather than rewritten).
+      # `gitleaks dir` scans the working tree, so it blocks the next leak
+      # without failing on the last one. See .gitleaks.toml.
+      - name: Scan for secrets
+        env:
+          GITLEAKS_VERSION: 8.30.1
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar -xz -C /usr/local/bin gitleaks
+          gitleaks dir . --config .gitleaks.toml --no-banner --redact
+
       - uses: actions/setup-node@v4
         with:
           # Must match local dev. npm resolves the optional `@swc/helpers` peer

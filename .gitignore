@@ -33,6 +33,13 @@ yarn-error.log*
 .env.local.backup
 firebase-secrets.txt
 
+# database dumps — these carry real user data and must never be committed.
+# backups/backup.sql was tracked for 95 commits with 29 real emails and a
+# password hash in it (#129).
+backups/
+*.sql.gz
+*.dump
+
 # vercel
 .vercel
 

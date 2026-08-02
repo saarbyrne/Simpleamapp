@@ -292,7 +292,7 @@ If you prefer to use Prisma, you need to use the DIRECT connection (not pooler):
 
 ```bash
 # Create a temporary env override
-export DATABASE_URL="postgresql://postgres:%2BG%2Ba.8PbaUjBrry@db.hjzcimtmdxafilgrfeye.supabase.co:5432/postgres"
+export DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres"
 
 # Push schema
 npx prisma db push --accept-data-loss
