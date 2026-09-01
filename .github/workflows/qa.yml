@@ -44,7 +44,7 @@ jobs:
     name: Verify
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Runs before `npm ci` on purpose: with no node_modules on disk there is
       # nothing to exclude, the scan covers ~5 MB instead of ~1.5 GB, and a
@@ -63,7 +63,7 @@ jobs:
             | tar -xz -C /usr/local/bin gitleaks
           gitleaks dir . --config .gitleaks.toml --no-banner --redact
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           # Must match local dev. npm resolves the optional `@swc/helpers` peer
           # differently across major versions, so a lockfile generated on one
