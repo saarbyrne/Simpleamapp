@@ -54,6 +54,7 @@ export default async function RootLayout({
     >
       <head>
         {/* Performance: Preconnect to external API origins */}
+        <link rel="preconnect" href="https://hjzcimtmdxafilgrfeye.supabase.co" />
         <link rel="dns-prefetch" href="https://api.anthropic.com" />
         <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
         <link rel="dns-prefetch" href="https://app.posthog.com" />
