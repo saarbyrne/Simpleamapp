@@ -27,7 +27,7 @@ fi
 echo ""
 echo "📝 Next Steps:"
 echo "1. Copy ALL contents from prisma/migration.sql"
-echo "2. Go to: https://supabase.com/dashboard/project/hjzcimtmdxafilgrfeye"
+echo "2. Go to: https://supabase.com/dashboard/project/your-project-ref"
 echo "3. Click: SQL Editor → New Query"
 echo "4. Paste the SQL"
 echo "5. Click: Run"
