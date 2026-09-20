@@ -1,6 +1,6 @@
 -- Complete Prisma Schema Migration for Supabase
 -- This migration is idempotent and can be run multiple times safely
--- Run this in Supabase SQL Editor: https://supabase.com/dashboard/project/hjzcimtmdxafilgrfeye
+-- Run this in Supabase SQL Editor: https://supabase.com/dashboard/project/your-project-ref
 
 -- ============================================
 -- CREATE TABLES (IF NOT EXISTS)

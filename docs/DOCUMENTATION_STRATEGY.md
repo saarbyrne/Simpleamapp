@@ -58,16 +58,12 @@ Dated fix summaries, handovers, PR descriptions, one-off assessments.
 - `docs/setup/QUICK_SETUP.md`
 - `docs/testing/ai-testing-playbook.md`
 
-### Move to historical (or wiki)
+### Moved to historical (or wiki) — done September 2026
 
-- `docs/HANDOVER.md` (branch-bound status snapshot)
-- `docs/REPORTS_LOADING_FIX.md` (dated fix narrative)
-- `docs/REPORTS_LOADING_UX_FIX.md` (dated fix narrative)
-- `docs/archive/PR_DESCRIPTION.md` (PR artifact)
+The dated reports that sat in `docs/` root and in the root of the repository now live in `docs/archive/history/`: `HANDOVER.md`, `REPORTS_LOADING_FIX.md`, `REPORTS_LOADING_UX_FIX.md`, `PERFORMANCE_AUDIT_REPORT.md`, `PERFORMANCE_IMPROVEMENTS_IMPLEMENTED.md`, the `REPORTS_*` reports, `TRANSLATION_ISSUES_FOUND.md`, `CHAMPIONSHIP_DATA_SEEDED.md`, `QUICK_START_TESTING_REPORTS.md`, and the root `QUICK_START.md`.
 
-### Review for consolidation
+### Still to review for consolidation
 
-- Root `QUICK_START.md` vs `docs/setup/QUICK_SETUP.md` (overlapping quickstart intent)
 - Feature quickstarts named `*QUICKSTART*.md` should be merged into durable feature docs when possible
 
 ## Authoring Standards

@@ -83,6 +83,11 @@ canvas-test-script.js
 /docs/business/
 /docs/internal/
 
+# Local-only working folders (never repo content)
+/Designs/
+/Claude outputs/
+/.playwright-mcp/
+
 # Claude Code personal settings
 .claude/settings.local.json
 

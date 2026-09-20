@@ -15,7 +15,7 @@ This report documents the testing execution for the tactical whiteboard/canvas f
 ### Testing Environment Status
 - ✅ Development server started successfully on port 3001
 - ✅ Chrome browser launched with remote debugging
-- ✅ User authenticated (byrne.saar@gmail.com)
+- ✅ User authenticated (test-user@example.com)
 - ✅ Navigation to canvas page successful
 - ⚠️ Large volume of console logs detected (potential performance issue)
 
@@ -40,7 +40,7 @@ This report documents the testing execution for the tactical whiteboard/canvas f
 **TC-ENV-003: User Authentication**
 - Status: ✅ PASS
 - Method: Manual login (user provided credentials)
-- Email: byrne.saar@gmail.com
+- Email: test-user@example.com
 - Redirect: Successful to /dashboard/players
 - Session: Active
 
@@ -315,7 +315,7 @@ describe('Canvas Tests', () => {
 ## Appendix A: Test Data
 
 ### Test User
-- Email: byrne.saar@gmail.com
+- Email: test-user@example.com
 - Organization: Active
 - Permissions: Verified (can access canvas)
 

@@ -19,7 +19,7 @@ fi
 echo "📋 Next Steps:"
 echo ""
 echo "1. Open Supabase Dashboard:"
-echo "   https://supabase.com/dashboard/project/hjzcimtmdxafilgrfeye"
+echo "   https://supabase.com/dashboard/project/your-project-ref"
 echo ""
 echo "2. Go to SQL Editor → New Query"
 echo ""

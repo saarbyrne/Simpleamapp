@@ -103,7 +103,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'hjzcimtmdxafilgrfeye.supabase.co',
+        hostname: 'your-project-ref.supabase.co',
         pathname: '/**',
       },
       {

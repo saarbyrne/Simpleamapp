@@ -1,5 +1,7 @@
 # Simpleam.app Architecture
 
+> **Archived.** This document was corrected in September 2026 to match the code it describes. The project is not maintained. Where this document and the code disagree, the code is right — and the audit in [`docs/audit/2026-07-AUDIT.md`](../audit/2026-07-AUDIT.md) records the disagreements that existed before this pass.
+
 Comprehensive architecture overview for AI coding models and developers.
 
 ## Table of Contents
@@ -44,7 +46,6 @@ Simpleam.app is a team management platform built for sports organizations. It pr
 - **Styling:** Tailwind CSS
 - **UI Components:** shadcn/ui
 - **State Management:** React Context + Server Actions
-- **Animations:** Framer Motion
 - **Forms:** React Hook Form + Zod
 - **Rich Text:** Tiptap
 
@@ -53,8 +54,8 @@ Simpleam.app is a team management platform built for sports organizations. It pr
 - **Runtime:** Node.js (Next.js Server Components/Actions)
 - **Database:** PostgreSQL
 - **ORM:** Prisma
-- **Real-time:** Firebase (chat)
-- **Authentication:** NextAuth.js
+- **Real-time:** Firebase Firestore (chat)
+- **Authentication:** Supabase Auth
 - **File Storage:** Supabase Storage
 - **Search:** PostgreSQL full-text search
 
@@ -63,7 +64,7 @@ Simpleam.app is a team management platform built for sports organizations. It pr
 - **Hosting:** Vercel (recommended)
 - **Database:** Supabase PostgreSQL
 - **Storage:** Supabase Storage
-- **Real-time:** Firebase Realtime Database
+- **Real-time:** Firebase Firestore
 - **CDN:** Vercel Edge Network
 
 ## Directory Structure
@@ -107,7 +108,7 @@ Simpleam.app is a team management platform built for sports organizations. It pr
 │
 ├── prisma/                # Database
 │   ├── schema.prisma     # Database schema
-│   ├── migrations/       # Migration history
+│   ├── migrations/       # Gitignored; holds one force-added folder, not a full history
 │   └── scripts/          # SQL scripts
 │
 ├── docs/                  # Documentation
@@ -196,7 +197,7 @@ Client Component
     ↓
 Firebase SDK
     ↓
-Firebase Realtime Database
+Firestore
     ↓
 All connected clients receive update
     ↓
@@ -210,9 +211,9 @@ Component re-renders with new message
 ### Authentication Flow
 
 1. **Login** - User enters credentials
-2. **NextAuth** - Validates credentials against database
-3. **Session** - Creates encrypted session cookie
-4. **Middleware** - Protects routes, validates session
+2. **Supabase Auth** - Validates credentials and issues a session
+3. **Session** - Session cookies managed by `@supabase/ssr`
+4. **Middleware** - Refreshes the session on each request. It does **not** enforce authorization; route protection is expected in the page or action ([audit §2](../audit/2026-07-AUDIT.md))
 5. **Access** - User accesses protected pages
 
 ### Authorization Levels
@@ -392,47 +393,55 @@ export async function updateResource(id: string, data: Data) {
 
 ### Firebase Chat
 
-Chat uses Firebase Realtime Database for real-time messaging:
+Chat uses Firebase Firestore for real-time messaging:
 
 ```typescript
 // Write message
-import { ref, push } from 'firebase/database';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-const messagesRef = ref(database, `chats/${chatId}/messages`);
-await push(messagesRef, {
+await addDoc(collection(db, 'chats', chatId, 'messages'), {
   senderId: user.id,
   content: 'Hello!',
-  createdAt: Date.now(),
+  createdAt: serverTimestamp(),
 });
 
 // Subscribe to messages
-import { onValue } from 'firebase/database';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 
-const messagesRef = ref(database, `chats/${chatId}/messages`);
-onValue(messagesRef, (snapshot) => {
-  const messages = Object.values(snapshot.val() || {});
-  setMessages(messages);
+const q = query(
+  collection(db, 'chats', chatId, 'messages'),
+  orderBy('createdAt', 'asc'),
+  limit(50)
+);
+onSnapshot(q, (snapshot) => {
+  setMessages(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
 });
 ```
 
 ### Custom Hook Pattern
 
+The real hook is `hooks/useMessages.ts`:
+
 ```typescript
-export function useMessages(chatId: string) {
+export function useMessages(chatId: string, initialLimit = 50) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const messagesRef = ref(database, `chats/${chatId}/messages`);
+    if (!chatId) return;
 
-    const unsubscribe = onValue(messagesRef, (snapshot) => {
-      const data = snapshot.val();
-      setMessages(Object.values(data || {}));
+    const db = getFirebaseDb();
+    const q = query(
+      collection(db, 'chats', chatId, 'messages'),
+      orderBy('createdAt', 'asc'),
+      limit(initialLimit)
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      setMessages(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
       setLoading(false);
     });
-
-    return unsubscribe; // Cleanup
-  }, [chatId]);
+  }, [chatId, initialLimit]);
 
   return { messages, loading };
 }

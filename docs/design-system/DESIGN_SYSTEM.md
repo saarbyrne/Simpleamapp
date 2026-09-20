@@ -1,12 +1,14 @@
 # SimpleAM Design System
 
+> **Archived, and corrected in September 2026.** The project is not maintained. The previous version of this document claimed Tailwind v4 (the project is on 3.4) and said all components met WCAG 2.1 AA, which the [audit](../audit/2026-07-AUDIT.md) contradicts: the majority of icon-only buttons had no accessible name and roughly two thirds of form controls had no label (§6.3). Those claims are corrected below. Where this document and the code disagree, the code is right.
+
 ## Introduction & Philosophy
 
 The SimpleAM design system provides a comprehensive set of design tokens, components, and patterns to ensure consistency, accessibility, and maintainability across the platform. Built on top of [shadcn/ui](https://ui.shadcn.com) and [Radix UI](https://www.radix-ui.com) primitives, it follows a mobile-first, accessibility-first approach.
 
 ### Core Principles
 
-1. **Accessibility First**: All components meet WCAG 2.1 AA standards
+1. **Accessibility as a goal, not a claim**: the components are built on accessible primitives, but the app as a whole was not audited to WCAG 2.1 AA. See §6.3 of the audit for what was missing.
 2. **Consistency**: Design tokens ensure visual and functional consistency
 3. **Composability**: Components are built to be combined and extended
 4. **Performance**: Optimized for fast rendering and minimal bundle size
@@ -14,9 +16,9 @@ The SimpleAM design system provides a comprehensive set of design tokens, compon
 
 ### Technology Stack
 
-- **UI Framework**: shadcn/ui (64+ components)
+- **UI Framework**: shadcn/ui (65 components)
 - **Primitives**: Radix UI (accessible, unstyled components)
-- **Styling**: Tailwind CSS v4 (utility-first CSS)
+- **Styling**: Tailwind CSS 3.4 (utility-first CSS)
 - **Theme System**: CSS custom properties (CSS variables)
 - **Tables**: TanStack Table (React Table v8)
 
@@ -427,7 +429,7 @@ const { theme, setTheme } = useTheme()
 
 ### Accessibility
 
-All components follow WCAG 2.1 AA standards:
+The components follow WCAG 2.1 AA where the primitives make it automatic, but the application as a whole did not meet it. The audit found around 51 unlabelled icon-only buttons, 129 unlabelled form controls, and mouse-only table rows (§6.3). The intent below is the standard the design system aims at, not a statement of what shipped:
 
 1. **Keyboard Navigation**: All interactive elements are keyboard accessible
 2. **Focus Management**: Visible focus indicators using `--ring` color

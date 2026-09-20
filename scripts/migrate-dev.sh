@@ -18,7 +18,7 @@ if [ ! -d "prisma/migrations" ]; then
     
     # Try with direct connection first (port 5432)
     DIRECT_URL="${DATABASE_URL//:6543/:5432}"
-    DIRECT_URL="${DIRECT_URL//pooler.supabase.com/db.hjzcimtmdxafilgrfeye.supabase.co}"
+    DIRECT_URL="${DIRECT_URL//pooler.supabase.com/db.your-project-ref.supabase.co}"
     DIRECT_URL="${DIRECT_URL//pgbouncer=true&connect_timeout=15&pool_timeout=15/}"
     
     echo "Attempting direct connection (port 5432)..."
@@ -39,7 +39,7 @@ if [ ! -d "prisma/migrations" ]; then
         echo "you need to apply migrations manually:"
         echo ""
         echo "1. Open Supabase Dashboard:"
-        echo "   https://supabase.com/dashboard/project/hjzcimtmdxafilgrfeye"
+        echo "   https://supabase.com/dashboard/project/your-project-ref"
         echo ""
         echo "2. Go to SQL Editor → New Query"
         echo ""
@@ -61,7 +61,7 @@ else
     
     # Try to run migrations with direct connection
     DIRECT_URL="${DATABASE_URL//:6543/:5432}"
-    DIRECT_URL="${DIRECT_URL//pooler.supabase.com/db.hjzcimtmdxafilgrfeye.supabase.co}"
+    DIRECT_URL="${DIRECT_URL//pooler.supabase.com/db.your-project-ref.supabase.co}"
     DIRECT_URL="${DIRECT_URL//pgbouncer=true&connect_timeout=15&pool_timeout=15/}"
     
     if DATABASE_URL="$DIRECT_URL" npx prisma migrate dev 2>/dev/null; then
