@@ -6,7 +6,7 @@ An archived, pre-release sports management platform. Built from November 2025 to
 
 ## Status
 
-- **Archived and unsupported.** No maintenance, no support, no guarantees.
+- **Archived and unsupported.** No issues, no pull requests, no maintenance, no support, no guarantees.
 - **Pre-release.** Never had a user, a customer, or a production deployment.
 - **Does not run.** The services it needed — Supabase, Vercel, Firebase, Sentry, PostHog — are deleted. The code is here to be read, not started.
 - **Signup was broken at the point of archiving.** The auth callback created a Supabase session but never wrote the matching database rows, so every dashboard page then threw `Unauthorized`. See audit §1.1. It was never fixed.
@@ -65,7 +65,7 @@ The audit is the honest record, and the git history is the raw one. Numbers from
 - 87,025 lines across 524 TypeScript files.
 - 48 Prisma models, 59 routes, 190 server actions.
 - Roughly 8% test coverage against a claimed 80%.
-- 425 commits on `main`.
+- Over 400 commits on `main`.
 
 The agent workflow is still visible: `.claude/` holds commands, hooks and skills, and `.cursor/` holds rules. They are kept because they are evidence of how the thing was built.
 
